@@ -52,9 +52,7 @@ sap.ui.define([
             smartFilter: {},
             smartTable: {}
         });
-        var oCacheModel = new JSONModel({});
         var oMasterDataModel = new JSONModel({});
-        var oEnvModel = new JSONModel({});
         var aAdded = [];
         var aRemoved = [];
         var fnOriginalAdd = window.addEventListener;
@@ -78,15 +76,10 @@ sap.ui.define([
             component: oComponent,
             stateModel: oStateModel,
             shellModel: oShellModel,
-            cacheModel: oCacheModel,
             masterDataModel: oMasterDataModel,
-            envModel: oEnvModel,
             statePaths: {
                 WORKFLOW_DETAIL_EDIT_MODE: "/workflow/detail/editMode",
                 WORKFLOW_DETAIL_LOCK_STATE: "/workflow/detail/lockState"
-            },
-            componentRuntimeSupport: {
-                syncShellRuntimeState: function () {}
             },
             searchConfig: SearchUiConfig.getLayoutSeed()
         });

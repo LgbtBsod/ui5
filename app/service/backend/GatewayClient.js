@@ -50,10 +50,6 @@ sap.ui.define([
         return GatewayClientRequestRuntime.withReadRequest(ensureModel(), sPath, mParams, mHeaders);
     }
 
-    function withDirectPostRequest(sPath, oPayload, mHeaders) {
-        return GatewayClientRequestRuntime.withDirectPostRequest(ensureModel(), sPath, oPayload, mHeaders);
-    }
-
     function withDirectDeleteRequest(sPath, mHeaders) {
         return GatewayClientRequestRuntime.withDirectDeleteRequest(ensureModel(), sPath, mHeaders);
     }
@@ -194,7 +190,6 @@ sap.ui.define([
                 }
             });
         },
-        /* postToPath removed — DIRECT_POST_ALLOWLIST is empty, no callers. */
         deletePath: function (path, mOptions) {
             var sPath = GatewayClientSupport.assertAllowedPath(
                 GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(path)),

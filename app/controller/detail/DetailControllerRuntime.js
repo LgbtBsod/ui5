@@ -54,9 +54,9 @@ sap.ui.define([
                 return DetailValidationSummaryRuntime.focusFirstInvalidField(this, STATE_PATHS);
             },
 
-            _onSelectedChecklistChanged: function (oEvent) {
+            _onDetailModelChanged: function (oEvent) {
                 DetailAttachmentViewState.sync(this);
-                DetailValidationSummaryRuntime.onSelectedChecklistChanged(this, oEvent, STATE_PATHS);
+                DetailValidationSummaryRuntime.onDetailModelChanged(this, oEvent, STATE_PATHS);
             }
         },
         {
@@ -96,7 +96,7 @@ sap.ui.define([
                 var oSource = oEvent && oEvent.getSource && oEvent.getSource();
                 var oViewContext = oSource && oSource.getBindingContext && oSource.getBindingContext("view");
                 var oSpec = oViewContext && oViewContext.getObject && oViewContext.getObject();
-                DetailRowBindingRuntime.bindSelectedCollectionContext(oSource, oSpec);
+                DetailRowBindingRuntime.bindDetailCollectionContext(oSource, oSpec);
             },
             isBarriersRatioVisible: function (sLpcKey, aRows) {
                 return !!sLpcKey && hasRows(aRows);

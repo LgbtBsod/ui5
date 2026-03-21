@@ -110,8 +110,9 @@
 
     function onAfterRendering(oController) {
         var oStateModel = oController.getModel && oController.getModel(STATE_MODEL);
+        var oShellModel = oController.getModel && oController.getModel(ModelContracts.MODELS.SHELL);
         var sCurrentRouteName = String(oStateModel && oStateModel.getProperty("/currentRouteName") || "").trim();
-        var sLayout = String(oStateModel && oStateModel.getProperty("/layout") || "").trim();
+        var sLayout = String(oShellModel && oShellModel.getProperty(ModelContracts.MODEL_PATHS.SHELL_LAYOUT) || "").trim();
         syncSemanticRegions(oController);
         StatusChipClassRuntime.syncView(oController);
         if (!oController._bSearchInitialRouteHandled && sCurrentRouteName === NavigationContracts.ROUTES.SEARCH) {

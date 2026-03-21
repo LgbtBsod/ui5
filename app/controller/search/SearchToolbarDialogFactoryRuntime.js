@@ -5,9 +5,10 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchMessageKeyConstants",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem"
-], function (JsRuntime, SearchToolbarContracts, ModelStateRuntime, ModelContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, ViewSettingsDialog, ViewSettingsItem) {
+], function (JsRuntime, SearchToolbarContracts, ModelStateRuntime, ModelContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, SearchMessageKeyConstants, ViewSettingsDialog, ViewSettingsItem) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -50,8 +51,8 @@
             oGroupDialog.close();
         }
         oDialog = ensureDialog(oController, "sort", {
-            titleKey: "searchSortDialogTitle",
-            titleFallback: "Sort",
+            titleKey: SearchMessageKeyConstants.SORT_DIALOG_TITLE,
+            titleFallback: "",
             items: SearchToolbarContracts.SORT_ITEMS,
             addItemMethod: "addSortItem",
             onConfirm: oController.onSearchSortDialogConfirm
@@ -71,8 +72,8 @@
             oSortDialog.close();
         }
         oDialog = ensureDialog(oController, "group", {
-            titleKey: "searchGroupDialogTitle",
-            titleFallback: "Group",
+            titleKey: SearchMessageKeyConstants.GROUP_DIALOG_TITLE,
+            titleFallback: "",
             items: SearchToolbarContracts.GROUP_ITEMS,
             addItemMethod: "addGroupItem",
             onConfirm: oController.onSearchGroupDialogConfirm

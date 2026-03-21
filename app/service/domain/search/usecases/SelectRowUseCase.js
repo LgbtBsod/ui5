@@ -7,13 +7,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
-], function (Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DetailPostOpenRuntime, NavigationContracts, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DetailPostOpenRuntime, NavigationContracts, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var ACCESS_OPERATIONS = DetailUseCaseConstants.ACCESS_OPERATIONS;
 
     function readSessionGuid(mCtx) {

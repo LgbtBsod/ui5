@@ -32,13 +32,13 @@ sap.ui.define([
             var bHasPendingAttachments = DetailAttachmentDeltaRuntime.hasPendingStagedAttachments(aCurrentAttachments);
             var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });
             var aEffects = [
-                Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
-                Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ATTACHMENTS, aSyncedAttachments),
+                Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
+                Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ATTACHMENTS, aSyncedAttachments),
                 Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSyncedAttachments)
             ];
 
             if (!bHasPendingAttachments) {
-                aEffects.push(Effects.modelPatch(MODELS.SNAPSHOT, DETAIL_MODEL_PATHS.ROOT, Object.assign({}, oSavedSnapshot, {
+                aEffects.push(Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.BASE, Object.assign({}, oSavedSnapshot, {
                     attachments: aSyncedAttachments
                 })));
             }

@@ -7,14 +7,15 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiAssetPaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
-], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, WorkflowContracts, UiAssetPaths, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, WorkflowContracts, UiAssetPaths, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
     "use strict";
 
     var OPERATIONS = DetailUseCaseConstants.ACCESS_OPERATIONS;
     var ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
     var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
     var MODELS = ModelContracts.MODELS;
 
@@ -136,8 +137,8 @@
             Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
             Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
             Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DIRTY, false),
-            Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ROOT, {}),
-            Effects.modelPatch(MODELS.SNAPSHOT, DETAIL_MODEL_PATHS.ROOT, {}),
+            Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ROOT, {}),
+            Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.BASE, {}),
             Effects.modelPatch(MODELS.VIEW, ViewPathContracts.DETAIL_SKELETON_BUSY, false),
             Effects.modelPatch(MODELS.VIEW, ViewPathContracts.ACCESS_STATE, buildAccessState(oResolved, true)),
             Effects.toast(DETAIL_MESSAGE_KEYS.DETAIL_VIEW_PERMISSION_DENIED, "warning")

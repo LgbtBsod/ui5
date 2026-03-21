@@ -11,12 +11,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
-], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelContracts, DetailMessageKeyConstants) {
     "use strict";
 
-    var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var MODELS = ModelContracts.MODELS;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
+    var STATE_MODEL = MODELS.STATE;
+    var SHELL_MODEL = MODELS.SHELL;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
 
     function CloseDetailUseCase() {
         return {
@@ -94,7 +97,7 @@ function execute(mInput, mCtx) {
                 Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_HAS_VALID_LOCK, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false),
                 Effects.modelPatch(STATE_MODEL, ModelPathContracts.LOCK_OPERATION_PENDING, false),
-                Effects.modelPatch(STATE_MODEL, ModelPathContracts.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
+                Effects.modelPatch(SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
                 Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, ""),
                 Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, ""),
                 Effects.modelPatch(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, ""),

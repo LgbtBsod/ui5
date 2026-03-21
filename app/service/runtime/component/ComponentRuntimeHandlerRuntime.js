@@ -1,13 +1,13 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime"
-], function (EditSessionRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
+], function (EditSessionRuntime, ShellStateRuntime) {
     "use strict";
 
     function createForceReadOnlyHandler(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
         var oShellModel = mOptions.shellModel;
-        var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
         var TelemetryRuntime = mOptions.telemetryRuntime;
         var fnApplyFacadeResult = mOptions.applyFacadeResult;
         var fnEmitTelemetry = mOptions.emitTelemetry;
@@ -24,7 +24,7 @@ sap.ui.define([
                     fnClearPendingNavigationIntent();
                 }
                 fnApplyFacadeResult(oResult);
-                ComponentRuntimeSupport.syncShellRuntimeState(oStateModel, oShellModel);
+                ShellStateRuntime.syncRuntimeShellState(oStateModel, oShellModel);
                 fnEmitTelemetry("lock.lost.detected", TelemetryRuntime.lockLost(
                     mForceInput && mForceInput.reason,
                     mForceInput && mForceInput.source

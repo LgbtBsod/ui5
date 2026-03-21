@@ -2,8 +2,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, ShellStateRuntime) {
     "use strict";
 
     var PATHS = ComponentListenerContracts.PATHS;
@@ -14,17 +15,18 @@
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
         var oShellModel = mOptions.shellModel;
-        var oSelectedModel = mOptions.selectedModel;
         var StatePaths = mOptions.statePaths || {};
         var fnEmitTelemetry = mOptions.emitTelemetry;
         var fnPublishTabSignal = mOptions.publishTabSignal;
 
         oComponent._oStateLifecycleModel = oStateModel;
-        oComponent._oSelectedLifecycleModel = oSelectedModel;
         oComponent._fnStateModelPropertyChange = function (oEvent) {
+            var sCurrentRootId;
+            var sCurrentMode;
+            var sCurrentLockState;
             var sPath = oEvent.getParameter("path") || "";
             if ([PATHS.IS_LOADING, PATHS.ACTIVE_OBJECT_ID, StatePaths.SESSION_ID, StatePaths.UI_BUSY_DETAIL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE].indexOf(sPath) >= 0) {
-                mOptions.componentRuntimeSupport.syncShellRuntimeState(oStateModel, oShellModel);
+                ShellStateRuntime.syncRuntimeShellState(oStateModel, oShellModel);
             }
             if ([PATHS.ACTIVE_OBJECT_ID, StatePaths.READINESS_DETAIL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, StatePaths.WORKFLOW_DIRTY, StatePaths.VALIDATION_SUMMARY].indexOf(sPath) >= 0) {
                 ComponentDetailMetaSyncRuntime.syncDetailMeta(oStateModel, StatePaths);
@@ -42,9 +44,9 @@
                 mOptions.resumePendingNavigationIntent();
             }
             if ([StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, PATHS.ACTIVE_OBJECT_ID].indexOf(sPath) >= 0) {
-                var sCurrentRootId = String(ModelStateRuntime.readOnModel(oStateModel, PATHS.ACTIVE_OBJECT_ID, "") || "").trim();
-                var sCurrentMode = mOptions.layoutStateRuntime.readMode(oStateModel, "");
-                var sCurrentLockState = mOptions.layoutStateRuntime.readLockState(oStateModel, "");
+                sCurrentRootId = String(ModelStateRuntime.readOnModel(oStateModel, PATHS.ACTIVE_OBJECT_ID, "") || "").trim();
+                sCurrentMode = mOptions.layoutStateRuntime.readMode(oStateModel, "");
+                sCurrentLockState = mOptions.layoutStateRuntime.readLockState(oStateModel, "");
                 if (sCurrentRootId && sCurrentMode === WorkflowContracts.EDIT_MODES.EDIT && sCurrentLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                     ModelStateRuntime.writeOnModel(oStateModel, StatePaths.TAB_CONFLICT_STATE, { active: false, source: "", at: "" });
                     fnPublishTabSignal(VALUES.LOCK_OWNED, { rootId: sCurrentRootId });
@@ -53,15 +55,10 @@
                 }
             }
         };
-        oComponent._fnSelectedModelPropertyChange = function () { return; };
         oStateModel.attachPropertyChange(oComponent._fnStateModelPropertyChange, oComponent);
-        oSelectedModel.attachPropertyChange(oComponent._fnSelectedModelPropertyChange, oComponent);
         oComponent._detachInitRuntimeListeners = function () {
             if (oComponent._oStateLifecycleModel && oComponent._fnStateModelPropertyChange) {
                 oComponent._oStateLifecycleModel.detachPropertyChange(oComponent._fnStateModelPropertyChange, oComponent);
-            }
-            if (oComponent._oSelectedLifecycleModel && oComponent._fnSelectedModelPropertyChange) {
-                oComponent._oSelectedLifecycleModel.detachPropertyChange(oComponent._fnSelectedModelPropertyChange, oComponent);
             }
             if (oComponent._fnBeforeUnload) {
                 window.removeEventListener("beforeunload", oComponent._fnBeforeUnload);

@@ -49,10 +49,10 @@ sap.ui.define([
             },
             uiState: {
                 get: function (sModelName, sPath) {
-                    if (sModelName === "selected" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/current") {
                         return oCurrentChecklist;
                     }
-                    if (sModelName === "snapshot" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/base") {
                         return {
                             root: { id: "__CREATE", status: "DRAFT" },
                             basic: {},

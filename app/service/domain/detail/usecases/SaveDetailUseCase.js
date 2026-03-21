@@ -19,16 +19,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailUseCaseConstants, NavigationContracts) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants, NavigationContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
     var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
     var DETAIL_REASONS = DetailUseCaseConstants.REASONS;
 
@@ -40,7 +40,7 @@ sap.ui.define([
 
     function readSelectedChecklist(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && typeof oUiState.get === "function" && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT)) || null;
+        return (oUiState && typeof oUiState.get === "function" && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT)) || null;
     }
 
     function readCurrentChecklist(mCtx) {
@@ -183,7 +183,7 @@ sap.ui.define([
                             Effects.toast(DETAIL_MESSAGE_KEYS.OBJECT_SAVED, "success"),
                             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, false),
                             Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
-                            Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, CloneUtil.clone(oSavedSnapshot, {}))
+                            Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, CloneUtil.clone(oSavedSnapshot, {}))
                         ];
                         aEffects = aEffects.concat(oAttachmentSync.effects);
                         aEffects = aEffects.concat(DetailPersistenceRuntime.successEffects("manual", sNow, {
@@ -203,7 +203,7 @@ sap.ui.define([
                                     oSavedSnapshot
                                 )
                             ));
-                            aEffects.push(Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT_ID, sServerRootId));
+                            aEffects.push(Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT_ID, sServerRootId));
                             if (bCreate) {
                                 var bLockAcquired = !!(oLockResult && oLockResult.ok);
                                 if (bLockAcquired) {

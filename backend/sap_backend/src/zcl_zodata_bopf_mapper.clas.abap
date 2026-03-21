@@ -1,5 +1,5 @@
 "! <p class="shorttext synchronized">BOPF Mapper – Production Control Checklist</p>
-"! Converts OData deep payloads (SaveChanges / AutoSave) into
+"! Converts normalized aggregate write payloads into
 "! /bobf/t_frw_modification tables for BOPF Service Manager modify().
 "!
 "! Design:

@@ -9,10 +9,10 @@ sap.ui.define([], function () {
             PROF_KEY: "PROF_KEY"
         }),
         TEXT_PATHS: Object.freeze({
-            BARRIERS_NUMBER: "/basic/BARRIERS_NUMBER_TEXT",
-            CHECKS_NUMBER: "/basic/CHECKS_NUMBER_TEXT",
-            LPC: "/basic/LPC_TEXT",
-            PROFESSION: "/basic/PROF_TEXT"
+            BARRIERS_NUMBER: "/current/basic/BARRIERS_NUMBER_TEXT",
+            CHECKS_NUMBER: "/current/basic/CHECKS_NUMBER_TEXT",
+            LPC: "/current/basic/LPC_TEXT",
+            PROFESSION: "/current/basic/PROF_TEXT"
         }),
         VALUE_HELP_DIALOGS: Object.freeze({
             BARRIERS_NUMBER: "barriersNumberValueHelp",

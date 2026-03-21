@@ -4,13 +4,17 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (CloneUtil, StatePaths, WorkflowContracts, WorkflowRuntimeConstants, ModelPathContracts, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (CloneUtil, StatePaths, WorkflowContracts, WorkflowRuntimeConstants, ModelPathContracts, JsRuntime, DetailMessageKeyConstants, ModelContracts) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var TYPE_UNDEFINED = JsRuntime.TYPEOF.UNDEFINED;
     var METHODS = JsRuntime.METHODS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
+    var MODELS = ModelContracts.MODELS;
 
     function model(oController, sModelName) {
         return oController && typeof oController[METHODS.GET_MODEL] === TYPE_FUNCTION ? oController[METHODS.GET_MODEL](sModelName) : null;
@@ -87,7 +91,7 @@
     }
 
     function resetDetailWorkflowState(oController, mPatch) {
-        return setMany(oController, "state", Object.assign({
+        return setMany(oController, MODELS.STATE, Object.assign({
             [StatePaths.WORKFLOW_DETAIL_EDIT_MODE]: WorkflowContracts.EDIT_MODES.READ,
             [StatePaths.WORKFLOW_DETAIL_LOCK_STATE]: WorkflowContracts.LOCK_STATES.IDLE,
             "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.IDLE,
@@ -98,7 +102,7 @@
             [ModelPathContracts.SELECTED_ID]: "",
             "/persistence": {
                 state: WorkflowRuntimeConstants.PERSISTENCE_STATES.IDLE,
-                messageKey: "persistenceIdle",
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE,
                 lastSavedAt: null,
                 lastSaveError: null,
                 taxonomy: "",
@@ -114,8 +118,10 @@
     }
 
     function resetDetailRuntimeData(oController) {
-        replaceData(oController, "selected", {});
-        replaceData(oController, "snapshot", {});
+        replaceData(oController, MODELS.DETAIL, {
+            current: {},
+            base: {}
+        });
     }
 
     function withFlag(oController, sModelName, sPath, fnWork, vStart, vEnd) {

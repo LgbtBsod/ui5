@@ -32,7 +32,9 @@
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var STATE_MODEL = MODELS.STATE;
+    var SHELL_MODEL = MODELS.SHELL;
     var VIEW_MODEL = MODELS.VIEW;
     var DETAIL_SOURCES = OperationSourceContracts.DETAIL;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -68,10 +70,10 @@
                 }
                 if (sDecision === "DISCARD") {
                     ModelStateRuntime.resetDetailWorkflowState(oController, {
-                        "/layout": NavigationContracts.LAYOUTS.ONE_COLUMN,
                         [ModelPathContracts.SELECTED_ID]: "",
                         [ModelPathContracts.ACTIVE_OBJECT_ID]: ""
                     });
+                    ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN);
                     ModelStateRuntime.resetDetailRuntimeData(oController);
                     NavigationIntentService.navigateToSearch(oController);
                     return true;
@@ -147,12 +149,13 @@
         },
         toggleFullscreen: function (oController, mHooks) {
             var oState = ControllerModelRuntime.state(oController);
+            var oShell = ControllerModelRuntime.shell(oController);
             var sLayout;
             var sNextLayout;
-            if (!oState || typeof oState[METHODS.GET_PROPERTY] !== TYPE_FUNCTION || typeof oState[METHODS.SET_PROPERTY] !== TYPE_FUNCTION) {
+            if (!oState || !oShell || typeof oState[METHODS.GET_PROPERTY] !== TYPE_FUNCTION || typeof oState[METHODS.SET_PROPERTY] !== TYPE_FUNCTION) {
                 return;
             }
-            sLayout = LayoutStateRuntime.readLayout(oState, NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED);
+            sLayout = LayoutStateRuntime.readLayout(oShell, NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED);
             sNextLayout = sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN
                 ? NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED
                 : NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;

@@ -83,8 +83,8 @@
                 || "";
         },
 
-        _applySelectedFieldChange: function (oEvent, mOptions) {
-            return DetailSelectedFieldRuntime.applySelectedFieldChange(this, oEvent, mOptions, {
+        _applyDetailFieldChange: function (oEvent, mOptions) {
+            return DetailSelectedFieldRuntime.applyDetailFieldChange(this, oEvent, mOptions, {
                 isDirtyTrackMode: function () {
                     return isDirtyTrackMode(this);
                 }.bind(this)

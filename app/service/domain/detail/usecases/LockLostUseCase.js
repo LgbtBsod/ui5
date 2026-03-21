@@ -1,9 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/ForceReadOnlyUseCase",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
-], function (Result, ForceReadOnlyUseCase, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Result, ForceReadOnlyUseCase, WorkflowContracts, DetailMessageKeyConstants) {
     "use strict";
+
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
 
     function LockLostUseCase() {
         var oForceReadOnly = ForceReadOnlyUseCase();
@@ -27,12 +30,12 @@ sap.ui.define([
     function resolveMessageKey(sReason) {
         var sNormalized = String(sReason || WorkflowContracts.REASONS.KILLED).toUpperCase();
         if (sNormalized === WorkflowContracts.REASONS.KILLED) {
-            return "lockKilledMessage";
+            return DETAIL_MESSAGE_KEYS.LOCK_KILLED;
         }
         if (sNormalized === WorkflowContracts.REASONS.EXPIRED || sNormalized === WorkflowContracts.REASONS.LOCK_EXPIRED) {
-            return "lockExpiredMessage";
+            return DETAIL_MESSAGE_KEYS.LOCK_EXPIRED;
         }
-        return "lockLostMessage";
+        return DETAIL_MESSAGE_KEYS.LOCK_LOST;
     }
 
     return LockLostUseCase;

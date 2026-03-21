@@ -9,16 +9,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
-], function (Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-    var SELECTED_MODEL = MODELS.SELECTED;
-    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
+    var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
-    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
 
     function ForceReadOnlyUseCase() {
@@ -74,8 +74,8 @@ sap.ui.define([
         var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
         var oStateModel = mCtx && mCtx.stateModel;
-        var oSelectedState = (oUiState && typeof oUiState.get === "function" && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
-        var oSnapshotState = (oUiState && typeof oUiState.get === "function" && oUiState.get(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
+        var oSelectedState = (oUiState && typeof oUiState.get === "function" && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
+        var oSnapshotState = (oUiState && typeof oUiState.get === "function" && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE)) || {};
         var sTransitionState = isIdleTimeoutReason(sReason)
             ? WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE
             : (isLockLostReason(sReason) ? WorkflowContracts.LOCK_STATES.LOCK_LOST : WorkflowContracts.LOCK_STATES.FORCED_READ_ONLY);
@@ -128,9 +128,9 @@ sap.ui.define([
             }).effects);
 
             if (bRestoreSnapshotState) {
-                aEffects.push(Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, oSnapshotState));
+                aEffects.push(Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, oSnapshotState));
             } else if (bPreserveDirty) {
-                aEffects.push(Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, oSelectedState));
+                aEffects.push(Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, oSelectedState));
             }
 
             if (sMessageKey) {

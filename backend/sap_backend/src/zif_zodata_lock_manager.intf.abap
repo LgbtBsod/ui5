@@ -16,7 +16,7 @@ INTERFACE zif_zodata_lock_manager PUBLIC.
       !is_key          TYPE ty_key
       !is_owner        TYPE ty_owner
     CHANGING
-      !cs_result       TYPE any
+      !cs_result       TYPE zstr_pcct_lock_acquire_rs
     RAISING
       zcx_zodata_error.
 
@@ -25,7 +25,7 @@ INTERFACE zif_zodata_lock_manager PUBLIC.
       !is_key          TYPE ty_key
       !iv_session_guid TYPE string
     CHANGING
-      !cs_result       TYPE any
+      !cs_result       TYPE zstr_pcct_lock_heartbeat_rs
     RAISING
       zcx_zodata_error.
 
@@ -33,8 +33,6 @@ INTERFACE zif_zodata_lock_manager PUBLIC.
     IMPORTING
       !is_key          TYPE ty_key
       !iv_session_guid TYPE string OPTIONAL
-    CHANGING
-      !cs_result       TYPE any
     RAISING
       zcx_zodata_error.
 
@@ -42,8 +40,6 @@ INTERFACE zif_zodata_lock_manager PUBLIC.
     IMPORTING
       !is_key          TYPE ty_key
       !iv_session_guid TYPE string OPTIONAL
-    CHANGING
-      !cs_result       TYPE any
     RAISING
       zcx_zodata_error.
 

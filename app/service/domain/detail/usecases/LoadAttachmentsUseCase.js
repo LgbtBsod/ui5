@@ -1,12 +1,15 @@
 sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (Result, AttachmentEffectRuntime, UseCaseValue, CreateSentinel, DetailStateAccess, ViewPathContracts) {
+], function (ModelContracts, Result, AttachmentEffectRuntime, UseCaseValue, CreateSentinel, DetailStateAccess, ViewPathContracts) {
     "use strict";
+
+    var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
     function LoadAttachmentsUseCase() {
         return {
@@ -24,7 +27,7 @@ function execute(mInput, mCtx) {
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
             aCurrentAttachments = DetailStateAccess.readCurrentAttachments(mCtx);
-            aSessionAttachments = (oUiState && oUiState.get("view", ViewPathContracts.SESSION_ATTACHMENTS)) || [];
+            aSessionAttachments = (oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS)) || [];
             aWorkingAttachments = aSessionAttachments.length ? aSessionAttachments : aCurrentAttachments;
             return Promise.resolve(Result.ok({
                 attachments: aWorkingAttachments

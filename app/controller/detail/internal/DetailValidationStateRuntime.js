@@ -8,19 +8,19 @@
     var MODELS = ModelContracts.MODELS;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
 
     function compute(oController) {
-        var oSelectedModel = ModelStateRuntime.model(oController, SELECTED_MODEL);
+        var oDetailModel = ModelStateRuntime.model(oController, DETAIL_MODEL);
         var aRequired = ModelStateRuntime.read(oController, STATE_MODEL, "/requiredFields", []) || [];
         var mMissing = {};
         var aMissingPaths = [];
         var aMissingKeys = [];
 
         (Array.isArray(aRequired) ? aRequired : []).forEach(function (sRequiredPath) {
-            var sPath = "/" + String(sRequiredPath || "").replace(/^\//, "");
+            var sPath = DetailValidationHelperRuntime.normalizeRequiredPath(sRequiredPath);
             var sKey = DetailValidationHelperRuntime.toValidationKey(sPath);
-            var vCurrent = oSelectedModel ? ModelStateRuntime.read(oController, SELECTED_MODEL, sPath, undefined) : undefined;
+            var vCurrent = oDetailModel ? ModelStateRuntime.read(oController, DETAIL_MODEL, DetailValidationHelperRuntime.toDetailModelPath(sPath), undefined) : undefined;
             var bMissing = !DetailValidationHelperRuntime.isFilledValidationValue(vCurrent);
             mMissing[sKey] = bMissing;
             if (bMissing) {

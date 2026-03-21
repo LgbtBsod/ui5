@@ -2,9 +2,12 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
-], function (ModelStateRuntime, StatePaths, NavigationContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (ModelStateRuntime, StatePaths, NavigationContracts, WorkflowContracts, ModelContracts) {
     "use strict";
+
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
 
     function normalizeLayout(vLayout) {
         var sLayout = String(vLayout || "").trim();
@@ -36,9 +39,9 @@
         return String(vValue || sFallback || "").toUpperCase();
     }
 
-    function readLayout(oStateModel, sFallback) {
+    function readLayout(oLayoutModel, sFallback) {
         return normalizeLayout(
-            ModelStateRuntime.readOnModel(oStateModel, "/layout", sFallback || NavigationContracts.LAYOUTS.ONE_COLUMN)
+            ModelStateRuntime.readOnModel(oLayoutModel, MODEL_PATHS.SHELL_LAYOUT, sFallback || NavigationContracts.LAYOUTS.ONE_COLUMN)
         );
     }
 

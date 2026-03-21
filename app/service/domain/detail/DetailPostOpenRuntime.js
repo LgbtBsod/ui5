@@ -21,8 +21,8 @@ sap.ui.define([
         var bAutosaveEnabled = oSettings.autosaveEnabled !== false;
 
         return [
-            Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
-            Effects.modelPatch(MODELS.SNAPSHOT, DETAIL_MODEL_PATHS.ROOT, oBaseSnapshot),
+            Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
+            Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.BASE, oBaseSnapshot),
             Effects.modelPatch(MODELS.STATE, ModelPathContracts.ACTIVE_OBJECT_ID, sResolvedRootId),
             Effects.modelPatch(MODELS.STATE, ModelPathContracts.SELECTED_ID, sResolvedRootId),
             Effects.modelPatch(MODELS.STATE, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sResolvedRootId),

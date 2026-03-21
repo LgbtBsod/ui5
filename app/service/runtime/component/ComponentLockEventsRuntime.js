@@ -4,11 +4,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
-], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
+], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts, DetailUseCaseConstants, DetailMessageKeyConstants, ShellStateRuntime) {
     "use strict";
 
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
+    var DETAIL_CODES = DetailUseCaseConstants.CODES;
 
     function readCurrentLockScope(oStateModel, oStatePaths) {
         return {
@@ -45,7 +50,7 @@ sap.ui.define([
         var oMainServiceModel = mOptions.mainServiceModel;
         var oStateModel = mOptions.stateModel;
         var oShellModel = mOptions.shellModel;
-        var oCacheModel = mOptions.cacheModel;
+        var oCacheState = mOptions.cacheState;
         var oStatePaths = mOptions.statePaths || {};
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
         var TimeConfigService = mOptions.timeConfigService;
@@ -63,19 +68,19 @@ sap.ui.define([
                 fnSetGlobalBanner(FeedbackBannerRuntime.createBannerInput({
                     scope: "global",
                     severity: "warning",
-                    textKey: "lockLostMessage",
+                    textKey: DETAIL_MESSAGE_KEYS.LOCK_LOST,
                     details: fnBundleText("tabConflictCopyHint")
                 }));
             }
             return oComponent._detailFacade.onLockLost({
                 rootId: ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, ""),
-                reason: (oPayload && (oPayload.code || oPayload.reason_code)) || "KILLED",
+                reason: (oPayload && (oPayload.code || oPayload.reason_code)) || DETAIL_CODES.KILLED,
                 preserveDirty: false
             }, oComponent._ctx).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
-                ComponentRuntimeSupport.syncShellRuntimeState(oStateModel, oShellModel);
+                ShellStateRuntime.syncRuntimeShellState(oStateModel, oShellModel);
                 fnEmitTelemetry("lock.lost.detected", mOptions.telemetryRuntime.lockLost(
-                    (oPayload && (oPayload.code || oPayload.reason_code)) || "KILLED",
+                    (oPayload && (oPayload.code || oPayload.reason_code)) || DETAIL_CODES.KILLED,
                     "lock_probe"
                 ));
                 return oResult;
@@ -119,11 +124,13 @@ sap.ui.define([
             DebugLogger.info("Component", "lock heartbeat", oPayload);
             onLockProbePayload(oPayload, false);
             var sCheckedAt = ComponentRuntimeSupport.formatHumanDateTime(new Date());
-            ModelStateRuntime.writeOnModel(oCacheModel, "/lastServerState", {
-                lastChangeSet: oPayload.last_change_set || null,
-                serverChangedOn: oPayload.server_changed_on || null,
-                checkedAt: sCheckedAt
-            });
+            if (oCacheState) {
+                oCacheState.lastServerState = {
+                    lastChangeSet: oPayload.last_change_set || null,
+                    serverChangedOn: oPayload.server_changed_on || null,
+                    checkedAt: sCheckedAt
+                };
+            }
             ModelStateRuntime.writeOnModel(oStateModel, "/cacheValidationAt", sCheckedAt);
         });
         oComponent._oHeartbeat.attachEvent("heartbeatError", function (oEvent) {

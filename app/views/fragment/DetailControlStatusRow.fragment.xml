@@ -3,8 +3,8 @@
         <ObjectStatus
             id="detailLifecycleStatusChip"
             icon="sap-icon://status-in-process"
-            text="{path:'selected>/root/status', formatter:'.formatLifecycleStatusText'}"
-            state="{path:'selected>/root/status', formatter:'.formatLifecycleStatusState'}"
+        text="{path:'detail>/current/root/status', formatter:'.formatLifecycleStatusText'}"
+        state="{path:'detail>/current/root/status', formatter:'.formatLifecycleStatusState'}"
             class="detailRailStatusChip statusChipSemantic"
             tooltip="{i18n>objectStatusLabel}"/>
 

@@ -7,7 +7,7 @@
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
 
     function normalizeEventValue(oEvent, sParameterName, sPropertyName, oSource) {
         var vValue = oEvent && oEvent.getParameter && oEvent.getParameter(sParameterName);
@@ -20,11 +20,11 @@
         return undefined;
     }
 
-    function applySelectedFieldChange(oController, oEvent, mOptions, mHooks) {
+    function applyDetailFieldChange(oController, oEvent, mOptions, mHooks) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
         var sProperty = String((mOptions && mOptions.property) || "value").trim() || "value";
         var sParameter = String((mOptions && mOptions.parameter) || sProperty).trim() || sProperty;
-        var sPath = DetailRowBindingRuntime.resolveSelectedBindingPath(oSource, sProperty);
+        var sPath = DetailRowBindingRuntime.resolveDetailBindingPath(oSource, sProperty);
         var vValue;
         if (!oSource || !sPath || !mHooks.isDirtyTrackMode()) {
             return false;
@@ -33,18 +33,18 @@
         if (typeof vValue === "undefined") {
             return false;
         }
-        ModelStateRuntime.write(oController, SELECTED_MODEL, sPath, vValue);
+        ModelStateRuntime.write(oController, DETAIL_MODEL, sPath, vValue);
         DetailDirtyStateRuntime.markDirty(oController);
         return true;
     }
 
     function resolveRowInput(oEvent) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-        return DetailRowBindingRuntime.resolveSelectedRowContext(oSource);
+        return DetailRowBindingRuntime.resolveDetailRowContext(oSource);
     }
 
     return {
-        applySelectedFieldChange: applySelectedFieldChange,
+        applyDetailFieldChange: applyDetailFieldChange,
         resolveRowInput: resolveRowInput
     };
 });

@@ -51,9 +51,9 @@
         return String(oRouter[METHODS.GET_URL](sRouteName, oRouteArgs || {}) || "");
     }
 
-    function buildAnalyticsReturnSnapshot(oStateModel, oRouter) {
+    function buildAnalyticsReturnSnapshot(oStateModel, oShellModel, oRouter) {
         var oHashChanger = readHashChanger();
-        var oIntent = buildCurrentIntent(oStateModel);
+        var oIntent = buildCurrentIntent(oStateModel, oShellModel);
         var sHash = oHashChanger && typeof oHashChanger[HASH_CHANGER.GET_HASH] === TYPEOF.FUNCTION
             ? String(oHashChanger[HASH_CHANGER.GET_HASH]() || "")
             : "";
@@ -71,10 +71,10 @@
         };
     }
 
-    function buildCurrentIntent(oStateModel) {
+    function buildCurrentIntent(oStateModel, oShellModel) {
         var sRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         var sActiveId = RootIdRuntime.resolveActiveFromStateModel(oStateModel);
-        var sLayout = LayoutStateRuntime.readLayout(oStateModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
+        var sLayout = LayoutStateRuntime.readLayout(oShellModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
 
         if ((sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT
             || (sRouteName === NavigationContracts.ROUTES.ANALYTICS && sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN))
@@ -98,8 +98,9 @@
 
     function setAnalyticsReturnIntent(oController) {
         var oStateModel = readStateModel(oController);
+        var oShellModel = ControllerModelRuntime.shell(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
-        var oSnapshot = buildAnalyticsReturnSnapshot(oStateModel, oRouter);
+        var oSnapshot = buildAnalyticsReturnSnapshot(oStateModel, oShellModel, oRouter);
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
         var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
         var bRestoreEdit = !!(oSnapshot.rootId && WorkflowContracts.isEditLocked(sMode, sLockState));

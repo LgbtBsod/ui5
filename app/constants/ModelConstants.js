@@ -3,15 +3,11 @@ sap.ui.define([], function () {
 
     return Object.freeze({
         MODELS: Object.freeze({
-            CACHE: "cache",
+            DETAIL: "detail",
             DEVICE: "device",
-            ENV: "env",
             I18N: "i18n",
-            LOCATION_TREE: "locationtree",
             MASTER_DATA: "masterData",
-            SELECTED: "selected",
             SHELL: "shell",
-            SNAPSHOT: "snapshot",
             STATE: "state",
             VIEW: "view"
         }),
@@ -25,6 +21,7 @@ sap.ui.define([], function () {
             SHELL_INVERTED_BLOCK_SCHEME: "/invertedBlockScheme",
             SHELL_IS_PHONE_VIEWPORT: "/isPhoneViewport",
             SHELL_IS_TABLET_VIEWPORT: "/isTabletViewport",
+            SHELL_LAYOUT: "/layout",
             SHELL_LOCK: "/lock",
             SHELL_PERSONALIZATION_INFO_CARD_LAYOUT: "/personalization/infoCardLayout",
             SHELL_PERSONALIZATION_SHOW_HINTS: "/personalization/showHints",

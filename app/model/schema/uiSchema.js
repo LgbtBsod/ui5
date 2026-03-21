@@ -1,7 +1,8 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
-], function (WorkflowContracts, WorkflowRuntimeConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (WorkflowContracts, WorkflowRuntimeConstants, DetailMessageKeyConstants) {
     "use strict";
 
     return {
@@ -27,7 +28,7 @@
         autosaveEnabled: false,
         persistence: {
             state: WorkflowRuntimeConstants.PERSISTENCE_STATES.IDLE,
-            messageKey: "persistenceIdle",
+            messageKey: DetailMessageKeyConstants.PERSISTENCE_IDLE,
             lastSavedAt: null,
             lastSaveError: null,
             taxonomy: "",

@@ -5,7 +5,7 @@
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
 
     function resolveConfig(vEntityOrSpec) {
         if (vEntityOrSpec && typeof vEntityOrSpec === "object" && vEntityOrSpec.rowsPath) {
@@ -29,13 +29,13 @@
         return null;
     }
 
-    function resolveSelectedBindingPath(oSource, sProperty) {
+    function resolveDetailBindingPath(oSource, sProperty) {
         var oBinding = oSource && oSource.getBinding && oSource.getBinding(sProperty);
-        var oContext = resolveBindingContext(oSource, SELECTED_MODEL);
+        var oContext = resolveBindingContext(oSource, DETAIL_MODEL);
         var sContextPath = String((oContext && oContext.getPath && oContext.getPath()) || "").trim();
         var sBindingPath = String((oBinding && oBinding.getPath && oBinding.getPath()) || "").trim();
         var sModelName = String((oBinding && oBinding.getModel && oBinding.getModel() && oBinding.getModel().sName) || "").trim();
-        if (!sBindingPath || (sModelName && sModelName !== SELECTED_MODEL)) {
+        if (!sBindingPath || (sModelName && sModelName !== DETAIL_MODEL)) {
             return "";
         }
         if (sBindingPath.charAt(0) === "/") {
@@ -44,8 +44,8 @@
         return (sContextPath ? sContextPath + "/" : "/") + sBindingPath;
     }
 
-    function resolveSelectedRowContext(oSource) {
-        var oContext = resolveBindingContext(oSource, SELECTED_MODEL);
+    function resolveDetailRowContext(oSource) {
+        var oContext = resolveBindingContext(oSource, DETAIL_MODEL);
         var sPath = String((oContext && oContext.getPath && oContext.getPath()) || "").trim();
         var oRow = oContext && oContext.getObject && oContext.getObject();
         return {
@@ -54,17 +54,17 @@
         };
     }
 
-    function bindSelectedCollectionContext(oControl, vEntityOrSpec) {
+    function bindDetailCollectionContext(oControl, vEntityOrSpec) {
         var oConfig = resolveConfig(vEntityOrSpec);
         var sRowsPath = String((oConfig && oConfig.rowsPath) || "").trim();
-        var oCurrentContext = oControl && oControl.getBindingContext && oControl.getBindingContext(SELECTED_MODEL);
+        var oCurrentContext = oControl && oControl.getBindingContext && oControl.getBindingContext(DETAIL_MODEL);
         var sCurrentPath = String((oCurrentContext && oCurrentContext.getPath && oCurrentContext.getPath()) || "").trim();
         if (!oControl || typeof oControl.bindElement !== "function" || !sRowsPath || sCurrentPath === sRowsPath) {
             return false;
         }
         oControl.bindElement({
             path: sRowsPath,
-            model: SELECTED_MODEL
+            model: DETAIL_MODEL
         });
         return true;
     }
@@ -77,14 +77,14 @@
     }
 
     return {
-        bindSelectedCollectionContext: bindSelectedCollectionContext,
+        bindDetailCollectionContext: bindDetailCollectionContext,
         formatRowNumber: formatRowNumber,
         getConfig: resolveConfig,
         resolveRowsPath: function (vEntityOrSpec) {
             return resolveConfig(vEntityOrSpec).rowsPath;
         },
-        resolveSelectedBindingPath: resolveSelectedBindingPath,
-        resolveSelectedBindingContext: resolveBindingContext,
-        resolveSelectedRowContext: resolveSelectedRowContext
+        resolveDetailBindingPath: resolveDetailBindingPath,
+        resolveDetailBindingContext: resolveBindingContext,
+        resolveDetailRowContext: resolveDetailRowContext
     };
 });

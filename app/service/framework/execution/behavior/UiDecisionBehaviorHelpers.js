@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorHelpers"
-], function (DialogOrchestrator, FeedbackBehaviorHelpers) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorHelpers",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (DialogOrchestrator, FeedbackBehaviorHelpers, DetailMessageKeyConstants) {
     "use strict";
 
     function showToast(oController, sTextKey, aArgs) {
@@ -18,7 +19,7 @@ sap.ui.define([
 
     function confirmDelete(oController, sTextKey) {
         return DialogOrchestrator.promptWarning(
-            FeedbackBehaviorHelpers.resolveText(oController, sTextKey || "deleteChecklistConfirmText", [], sTextKey || "deleteChecklistConfirmText"),
+            FeedbackBehaviorHelpers.resolveText(oController, sTextKey || DetailMessageKeyConstants.DELETE_CHECKLIST_CONFIRM, [], sTextKey || DetailMessageKeyConstants.DELETE_CHECKLIST_CONFIRM),
             [DialogOrchestrator.actions.DELETE, DialogOrchestrator.actions.CANCEL],
             DialogOrchestrator.actions.CANCEL
         );

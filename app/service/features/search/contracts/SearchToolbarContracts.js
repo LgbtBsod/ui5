@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (ModelContracts, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchMessageKeyConstants"
+], function (ModelContracts, StatePaths, SearchMessageKeyConstants) {
     "use strict";
 
     return Object.freeze({
@@ -22,19 +23,19 @@ sap.ui.define([
             GROUP_KEY: ModelContracts.TOKENS.GROUP_NONE
         }),
         SORT_ITEMS: Object.freeze([
-            Object.freeze({ key: "DateCheck", textKey: "searchSortDateCheck", fallback: "Date" }),
-            Object.freeze({ key: "Id", textKey: "searchSortId", fallback: "ID" }),
-            Object.freeze({ key: "Status", textKey: "searchSortStatus", fallback: "Status" }),
-            Object.freeze({ key: "LpcText", textKey: "searchSortLpc", fallback: "LPC" }),
-            Object.freeze({ key: "ProfessionText", textKey: "searchSortProfession", fallback: "Profession" }),
-            Object.freeze({ key: "ChangedOn", textKey: "searchSortChangedOn", fallback: "Changed on" })
+            Object.freeze({ key: "DateCheck", textKey: SearchMessageKeyConstants.SORT_DATE_CHECK }),
+            Object.freeze({ key: "Id", textKey: SearchMessageKeyConstants.SORT_ID }),
+            Object.freeze({ key: "Status", textKey: SearchMessageKeyConstants.SORT_STATUS }),
+            Object.freeze({ key: "LpcText", textKey: SearchMessageKeyConstants.SORT_LPC }),
+            Object.freeze({ key: "ProfessionText", textKey: SearchMessageKeyConstants.SORT_PROFESSION }),
+            Object.freeze({ key: "ChangedOn", textKey: SearchMessageKeyConstants.SORT_CHANGED_ON })
         ]),
         GROUP_ITEMS: Object.freeze([
-            Object.freeze({ key: ModelContracts.TOKENS.GROUP_NONE, textKey: "searchGroupNone", fallback: "No grouping" }),
-            Object.freeze({ key: "Status", textKey: "searchGroupStatus", fallback: "Status" }),
-            Object.freeze({ key: "LpcText", textKey: "searchGroupLpc", fallback: "LPC" }),
-            Object.freeze({ key: "ProfessionText", textKey: "searchGroupProfession", fallback: "Profession" }),
-            Object.freeze({ key: "DateCheck", textKey: "searchGroupDateCheck", fallback: "Date" })
+            Object.freeze({ key: ModelContracts.TOKENS.GROUP_NONE, textKey: SearchMessageKeyConstants.GROUP_NONE }),
+            Object.freeze({ key: "Status", textKey: SearchMessageKeyConstants.GROUP_STATUS }),
+            Object.freeze({ key: "LpcText", textKey: SearchMessageKeyConstants.GROUP_LPC }),
+            Object.freeze({ key: "ProfessionText", textKey: SearchMessageKeyConstants.GROUP_PROFESSION }),
+            Object.freeze({ key: "DateCheck", textKey: SearchMessageKeyConstants.GROUP_DATE_CHECK })
         ])
     });
 });

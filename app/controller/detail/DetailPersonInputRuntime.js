@@ -8,35 +8,41 @@
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
     var INPUT_PATHS = DetailPersonContracts.INPUT_PATHS;
     var MODEL_PATHS = DetailPersonContracts.MODEL_PATHS;
     var TARGETS = DetailPersonContracts.TARGETS;
+    var CURRENT_BASIC_PATH = "/current/basic";
 
-    function syncDrafts(oController, oSelectedModel, sModelPath) {
+    function normalizeDetailModelPath(sModelPath) {
+        return "/" + String(sModelPath || "").replace(/^\//, "");
+    }
+
+    function syncDrafts(oController, oDetailModel, sModelPath) {
         var oBasic;
-        if (!oController || !ControllerModelRuntime.viewState(oController) || !oSelectedModel || !oSelectedModel.getProperty) {
+        var sNormalizedPath = normalizeDetailModelPath(sModelPath);
+        if (!oController || !ControllerModelRuntime.viewState(oController) || !oDetailModel || !oDetailModel.getProperty) {
             return;
         }
-        if (sModelPath === "/") {
-            oBasic = ModelStateRuntime.read(oController, SELECTED_MODEL, "/basic", {}) || {};
+        if (sNormalizedPath === "/current" || sNormalizedPath === "/") {
+            oBasic = ModelStateRuntime.read(oController, DETAIL_MODEL, CURRENT_BASIC_PATH, {}) || {};
             ControllerViewStateRuntime.set(oController, INPUT_PATHS.OBSERVER, String(oBasic.OBSERVER_FULLNAME || ""));
             ControllerViewStateRuntime.set(oController, INPUT_PATHS.OBSERVED, String(oBasic.OBSERVED_FULLNAME || ""));
             return;
         }
-        if (sModelPath === MODEL_PATHS.OBSERVER_FULLNAME) {
+        if (sNormalizedPath === MODEL_PATHS.OBSERVER_FULLNAME) {
             ControllerViewStateRuntime.set(
                 oController,
                 INPUT_PATHS.OBSERVER,
-                String(ModelStateRuntime.read(oController, SELECTED_MODEL, MODEL_PATHS.OBSERVER_FULLNAME, "") || "")
+                String(ModelStateRuntime.read(oController, DETAIL_MODEL, MODEL_PATHS.OBSERVER_FULLNAME, "") || "")
             );
             return;
         }
-        if (sModelPath === MODEL_PATHS.OBSERVED_FULLNAME) {
+        if (sNormalizedPath === MODEL_PATHS.OBSERVED_FULLNAME) {
             ControllerViewStateRuntime.set(
                 oController,
                 INPUT_PATHS.OBSERVED,
-                String(ModelStateRuntime.read(oController, SELECTED_MODEL, MODEL_PATHS.OBSERVED_FULLNAME, "") || "")
+                String(ModelStateRuntime.read(oController, DETAIL_MODEL, MODEL_PATHS.OBSERVED_FULLNAME, "") || "")
             );
         }
     }

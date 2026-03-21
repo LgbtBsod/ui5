@@ -12,18 +12,20 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
-], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, SearchReturnRediscoveryRuntime, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, SearchReturnRediscoveryRuntime, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var SELECTED_MODEL = MODELS.SELECTED;
-    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
+    var DETAIL_MODEL = MODELS.DETAIL;
+    var SHELL_MODEL = MODELS.SHELL;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
     var DETAIL_ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
     var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
     var DETAIL_REASONS = DetailUseCaseConstants.REASONS;
 
@@ -60,8 +62,8 @@ sap.ui.define([
             }
             return Promise.resolve(oRepo.deleteChecklist({ rootId: sRootId })).then(function () {
                 return Result.ok({ deleted: true, rootId: sRootId }, [
-                    Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
-                    Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
+                    Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
+                    Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, {}),
                     Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                         status: WorkflowRuntimeConstants.READINESS_STATUS.IDLE,
                         ready: false,
@@ -88,7 +90,7 @@ sap.ui.define([
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
                     Effects.modelPatch(STATE_MODEL, ModelPathContracts.LOCK_OPERATION_PENDING, false),
                     Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
-                    Effects.modelPatch(STATE_MODEL, ModelPathContracts.LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
+                    Effects.modelPatch(SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
                     Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, null),
                     Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, null),
                     Effects.modelPatch(STATE_MODEL, ModelPathContracts.SEARCH_RETURN_CONTEXT, SearchReturnRediscoveryRuntime.buildContext({

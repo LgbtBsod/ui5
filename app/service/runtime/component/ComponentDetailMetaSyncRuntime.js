@@ -3,8 +3,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaContracts, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaContracts, ModelPathContracts, ModelContracts) {
     "use strict";
 
     var READINESS_STATUS = ComponentDetailMetaContracts.READINESS_STATUS;
@@ -50,9 +51,9 @@
     function resetDetailNavigationState(oComponent) {
         ModelStateRuntime.resetDetailWorkflowState(oComponent, {
             [ModelPathContracts.SELECTED_ID]: "",
-            [ModelPathContracts.ACTIVE_OBJECT_ID]: "",
-            "/layout": VALUES.ONE_COLUMN
+            [ModelPathContracts.ACTIVE_OBJECT_ID]: ""
         });
+        ModelStateRuntime.write(oComponent, ComponentListenerContracts.MODEL_NAMES.SHELL, ModelContracts.MODEL_PATHS.SHELL_LAYOUT, VALUES.ONE_COLUMN);
         ModelStateRuntime.resetDetailRuntimeData(oComponent);
     }
 

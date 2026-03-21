@@ -5,6 +5,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/Ui5BackgroundRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/Ui5RuntimeFacade.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/AppShellHeader.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ShellLayoutRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/StatusChipClassRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailRowBindingRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailRowEntityConfig.qunit",

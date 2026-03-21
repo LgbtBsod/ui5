@@ -15,19 +15,19 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
-], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
     var DETAIL_ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
     var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
 
     function cloneSnapshot(oSnapshot) {
@@ -55,7 +55,7 @@ sap.ui.define([
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
             Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE, {
                 state: DetailPersistenceConstants.STATES.IDLE,
-                messageKey: "persistenceIdle",
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE,
                 lastSavedAt: null,
                 lastSaveError: null,
                 taxonomy: "",
@@ -81,9 +81,9 @@ sap.ui.define([
     }
 
     function resolveLoadedAttachments(oUiState, sRootId) {
-        var sSelectedRootId = String((oUiState && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT_ID)) || "").trim();
+        var sSelectedRootId = String((oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT_ID)) || "").trim();
         var bAttachmentsLoaded = !!(oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.ATTACHMENTS_LOADED));
-        var aAttachments = (oUiState && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS)) || [];
+        var aAttachments = (oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS)) || [];
         if (!sRootId || sSelectedRootId !== sRootId || !bAttachmentsLoaded || !Array.isArray(aAttachments)) {
             return [];
         }
@@ -105,8 +105,8 @@ sap.ui.define([
         };
     }
 
-    function resolveSameRootSnapshot(oUiState, sRootId, sModelName) {
-        var oSnapshot = (oUiState && oUiState.get(sModelName, DETAIL_MODEL_PATHS.ROOT)) || null;
+    function resolveSameRootSnapshot(oUiState, sRootId, sPath) {
+        var oSnapshot = (oUiState && oUiState.get(DETAIL_MODEL, sPath)) || null;
         var sSnapshotRootId = String((oSnapshot && oSnapshot.root && oSnapshot.root.id) || "").trim();
         if (!sRootId || !sSnapshotRootId || sSnapshotRootId !== sRootId) {
             return null;
@@ -127,7 +127,7 @@ sap.ui.define([
         var sReadyAt = new Date().toISOString();
 
         if (CreateSentinel.isCreateId(sRootId)) {
-            var oDraft = (oUiState && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
+            var oDraft = (oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
             var oDraftSnapshot = cloneSnapshot(oDraft);
             var oDraftSelected = cloneSnapshot(oDraft);
             return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, "", {
@@ -146,8 +146,8 @@ sap.ui.define([
                             lockKnown: true
                         }),
                         Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
-                        Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
-                        Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
+                        Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
+                        Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, {}),
                         Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false),
                         Effects.navigate(NavigationContracts.ROUTES.SEARCH, {}, true)
                     ]));
@@ -179,9 +179,9 @@ sap.ui.define([
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.CREATE),
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.IDLE),
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                    Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, oDraftSnapshot),
-                    Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, oDraftSelected),
-                    Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, (oDraftSelected && oDraftSelected.attachments) || []),
+                    Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, oDraftSnapshot),
+                    Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, oDraftSelected),
+                    Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, (oDraftSelected && oDraftSelected.attachments) || []),
                     Effects.modelPatch(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS, (oDraftSelected && oDraftSelected.attachments) || []),
                     Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false)
                 ]));
@@ -253,8 +253,8 @@ sap.ui.define([
             var oSnapshot = oResolved && oResolved.snapshot;
             var oPermission = oResolved && oResolved.permission;
             var sCanonicalRootId = String((oResolved && oResolved.rootId) || sRootId).trim() || sRootId;
-            var oCurrentSelected = resolveSameRootSnapshot(oUiState, sCanonicalRootId, SELECTED_MODEL);
-            var oCurrentSnapshot = resolveSameRootSnapshot(oUiState, sCanonicalRootId, SNAPSHOT_MODEL);
+            var oCurrentSelected = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.ROOT);
+            var oCurrentSnapshot = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.BASE);
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
             var aSnapshotAttachments = Array.isArray(oSnapshot && oSnapshot.attachments) ? oSnapshot.attachments : [];
             var aEffectiveAttachments = aLoadedAttachments.length ? aLoadedAttachments : aSnapshotAttachments;
@@ -282,9 +282,9 @@ sap.ui.define([
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, oEditState.editMode),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, oEditState.lockState),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, oEditState.autosaveEnabled),
-                Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, oBaseSnapshot),
-                Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
-                Effects.modelPatch(SELECTED_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, aEffectiveAttachments),
+                Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, oBaseSnapshot),
+                Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
+                Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, aEffectiveAttachments),
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS, aEffectiveAttachments),
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));

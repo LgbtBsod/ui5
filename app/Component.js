@@ -40,12 +40,12 @@ sap.ui.define([
         _syncLockScopedManagers: function (oStateModel) {
             return ComponentAppRuntime.syncLockScopedManagers(this, oStateModel);
         },
-        _applyFrontendRuntimeConfig: function (oFrontendConfig, oStateModel, oEnvModel, oMasterDataModel) {
+        _applyFrontendRuntimeConfig: function (oFrontendConfig, oStateModel, oEnvState, oMasterDataModel) {
             return ComponentAppRuntime.applyFrontendRuntimeConfig(
                 this,
                 oFrontendConfig,
                 oStateModel,
-                oEnvModel,
+                oEnvState,
                 oMasterDataModel,
                 ApplyRuntimeSettingsUseCase
             );

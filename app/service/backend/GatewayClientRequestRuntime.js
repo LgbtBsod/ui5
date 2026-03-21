@@ -45,17 +45,6 @@ sap.ui.define([
         });
     }
 
-    function withDirectPostRequest(oModel, sPath, oPayload, mHeaders) {
-        var sNormalizedPath = GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(sPath));
-        return toRequestHandle(function (resolve, reject) {
-            return oModel.create(sNormalizedPath, oPayload || {}, {
-                headers: mHeaders || {},
-                success: function (oData) { resolve(oData || {}); },
-                error: function (e) { reject(e); }
-            });
-        });
-    }
-
     function withDirectDeleteRequest(oModel, sPath, mHeaders) {
         var sNormalizedPath = GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(sPath));
         return toRequestHandle(function (resolve, reject) {
@@ -116,7 +105,6 @@ sap.ui.define([
         withDirectDeleteRequest: withDirectDeleteRequest,
         withDirectFunctionImportRequest: withDirectFunctionImportRequest,
         withDirectGetFunctionImportRequest: withDirectGetFunctionImportRequest,
-        withDirectPostRequest: withDirectPostRequest,
         withReadRequest: withReadRequest
     };
 });

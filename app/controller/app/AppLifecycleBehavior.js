@@ -132,14 +132,15 @@
             oRouter.attachBeforeRouteMatched(this._fnShellPaneRouteGuard, this);
         },
         _bindLayoutSync: function () {
+            var oShell = this._getShellModel();
             var oState = this._getStateModel();
-            if (!oState || this._oLayoutBinding) {
+            if (!oShell || !oState || this._oLayoutBinding) {
                 return;
             }
             if (!this._fnLayoutSync) {
                 this._fnLayoutSync = this._syncLayoutState.bind(this);
             }
-            this._oLayoutBinding = oState.bindProperty(ModelPathContracts.LAYOUT);
+            this._oLayoutBinding = oShell.bindProperty(ModelContracts.MODEL_PATHS.SHELL_LAYOUT);
             this._oLayoutBinding.attachChange(this._fnLayoutSync);
             this._oRouteNameBinding = oState.bindProperty(ModelPathContracts.CURRENT_ROUTE_NAME);
             this._oRouteNameBinding.attachChange(this._fnLayoutSync);

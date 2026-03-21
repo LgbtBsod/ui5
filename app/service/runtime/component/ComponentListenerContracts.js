@@ -11,9 +11,7 @@ sap.ui.define([
         MODEL_NAMES: Object.freeze({
             I18N: ModelContracts.MODELS.I18N,
             SHELL: ModelContracts.MODELS.SHELL,
-            CACHE: ModelContracts.MODELS.CACHE,
-            MASTER_DATA: ModelContracts.MODELS.MASTER_DATA,
-            ENV: ModelContracts.MODELS.ENV
+            MASTER_DATA: ModelContracts.MODELS.MASTER_DATA
         }),
         PATHS: Object.freeze({
             ACTIVE_OBJECT_ID: ModelPathContracts.ACTIVE_OBJECT_ID,

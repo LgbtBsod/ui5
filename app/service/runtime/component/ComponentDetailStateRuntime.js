@@ -8,8 +8,6 @@ sap.ui.define([
 ], function (StatePaths, CreateSentinel, ModelStateRuntime, WorkflowContracts, ModelPathContracts, ModelContracts) {
     "use strict";
 
-    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-
     function resolveBootDetailId(sHash) {
         var s = String(sHash || "").trim();
         var oMatch = /^#\/?checklist\/([^\/?#]+)(?:\/[^?#]+)?$/i.exec(s);
@@ -34,35 +32,15 @@ sap.ui.define([
         };
     }
 
-    function syncShellRuntimeState(oStateModel, oShellModel) {
-        ModelStateRuntime.setManyOnModel(oShellModel, {
-            [MODEL_PATHS.SHELL_BUSY]: !!(
-                ModelStateRuntime.readOnModel(oStateModel, StatePaths.UI_BUSY_DETAIL, false)
-                || ModelStateRuntime.readOnModel(oStateModel, StatePaths.IS_LOADING, false)
-            ),
-            [MODEL_PATHS.SHELL_CURRENT_ROOT_KEY]: ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "",
-            [MODEL_PATHS.SHELL_SESSION_GUID]: ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || ""
-        });
-    }
-
-    function syncDetailCurrentFromSelected() {
-        return;
-    }
-
-    function resolveDetailCurrent(oSelectedModel) {
-        var oSelected = oSelectedModel.getData() || {};
-        if (oSelected && oSelected.root) {
-            return ModelStateRuntime.clone(oSelected, {});
-        }
-        return ModelStateRuntime.clone(oSelected, {});
+    function resolveDetailCurrent(oDetailModel) {
+        var oCurrent = ModelStateRuntime.readOnModel(oDetailModel, "/current", {}) || {};
+        return ModelStateRuntime.clone(oCurrent, {});
     }
 
     return {
         resolveBootDetailId: resolveBootDetailId,
         isCreateBootHash: isCreateBootHash,
         applyLockProbeState: applyLockProbeState,
-        syncShellRuntimeState: syncShellRuntimeState,
-        syncDetailCurrentFromSelected: syncDetailCurrentFromSelected,
         resolveDetailCurrent: resolveDetailCurrent
     };
 });

@@ -9,12 +9,12 @@
 
     var MODELS = ModelContracts.MODELS;
     var VIEW_MODEL = MODELS.VIEW;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
     var VIEW_PATHS = DetailFieldContracts.VIEW_PATHS;
 
     function resolveAttachmentContext(oEvent) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-        return (oSource && oSource.getBindingContext && (oSource.getBindingContext(SELECTED_MODEL) || oSource.getBindingContext(VIEW_MODEL))) || null;
+        return (oSource && oSource.getBindingContext && (oSource.getBindingContext(DETAIL_MODEL) || oSource.getBindingContext(VIEW_MODEL))) || null;
     }
 
     function deleteAttachment(oController, oEvent, mHooks) {

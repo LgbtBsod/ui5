@@ -49,12 +49,12 @@
 
     function readCurrentChecklist(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && oUiState.get(MODELS.SELECTED, DETAIL_MODEL_PATHS.ROOT)) || {};
+        return (oUiState && oUiState.get(MODELS.DETAIL, DETAIL_MODEL_PATHS.ROOT)) || {};
     }
 
     function readBaseSnapshot(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && oUiState.get(MODELS.SNAPSHOT, DETAIL_MODEL_PATHS.ROOT)) || {};
+        return (oUiState && oUiState.get(MODELS.DETAIL, DETAIL_MODEL_PATHS.BASE)) || {};
     }
 
     function resolveVersionNumber(oCurrent, oSnapshot) {

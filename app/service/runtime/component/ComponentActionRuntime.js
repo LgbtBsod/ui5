@@ -59,9 +59,6 @@ sap.ui.define([
         var component = mOptions.component;
         var effectApplier = mOptions.effectApplier;
         var actionDispatcher = mOptions.actionDispatcher;
-        var selectedModel = mOptions.selectedModel;
-        var shellModel = mOptions.shellModel;
-        var componentRuntimeSupport = mOptions.componentRuntimeSupport;
         var resolveBundleText = createBundleText(component);
 
         return function (oResult) {
@@ -71,7 +68,6 @@ sap.ui.define([
                 },
                 actionDispatcher: actionDispatcher
             });
-            componentRuntimeSupport.syncDetailCurrentFromSelected(selectedModel, shellModel);
         };
     }
 

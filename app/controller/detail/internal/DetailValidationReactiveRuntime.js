@@ -13,10 +13,10 @@
     var MODELS = ModelContracts.MODELS;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
 
-    function onSelectedChecklistChanged(oController, oEvent, mStatePaths) {
-        var oSelectedModel = ModelStateRuntime.model(oController, SELECTED_MODEL);
+    function onDetailModelChanged(oController, oEvent, mStatePaths) {
+        var oDetailModel = ModelStateRuntime.model(oController, DETAIL_MODEL);
         var sPath = oEvent && oEvent.getParameter && oEvent.getParameter("path");
         var aRequired = ModelStateRuntime.read(oController, STATE_MODEL, "/requiredFields", []) || [];
         var sValidationKey;
@@ -25,7 +25,7 @@
         var sMode;
         var vCurrent;
 
-        if (!ModelStateRuntime.model(oController, VIEW_MODEL) || !oSelectedModel || !sPath) {
+        if (!ModelStateRuntime.model(oController, VIEW_MODEL) || !oDetailModel || !sPath) {
             return;
         }
 
@@ -33,10 +33,10 @@
         if (sPath === "/") {
             ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
         }
-        DetailPersonInputRuntime.syncDrafts(oController, oSelectedModel, sModelPath);
+        DetailPersonInputRuntime.syncDrafts(oController, oDetailModel, sModelPath);
 
         sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, ""), "");
-        sRequiredPath = sModelPath;
+        sRequiredPath = DetailValidationHelperRuntime.normalizeRequiredPath(sModelPath);
         if (DetailValidationHelperRuntime.shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE") && aRequired.indexOf(sRequiredPath) < 0) {
             DetailValidationStateRuntime.recompute(oController, "selectedSync", false, mStatePaths);
             return;
@@ -47,12 +47,12 @@
         }
 
         sValidationKey = DetailValidationHelperRuntime.toValidationKey(sRequiredPath);
-        vCurrent = ModelStateRuntime.read(oController, SELECTED_MODEL, sRequiredPath, undefined);
+        vCurrent = ModelStateRuntime.read(oController, DETAIL_MODEL, DetailValidationHelperRuntime.toDetailModelPath(sRequiredPath), undefined);
         DetailValidationHelperRuntime.setValidationMissingKey(oController, sValidationKey, !DetailValidationHelperRuntime.isFilledValidationValue(vCurrent));
         DetailValidationStateRuntime.recompute(oController, "fieldChange", false, mStatePaths);
     }
 
     return {
-        onSelectedChecklistChanged: onSelectedChecklistChanged
+        onDetailModelChanged: onDetailModelChanged
     };
 });

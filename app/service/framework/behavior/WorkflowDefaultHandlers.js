@@ -9,8 +9,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
-], function (LockAdapter, DialogOrchestrator, StatePaths, RootIdRuntime, ModelStateRuntime, WorkflowBehaviorHelpers, BehaviorRegistry, CreateSentinel, WorkflowContracts, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (LockAdapter, DialogOrchestrator, StatePaths, RootIdRuntime, ModelStateRuntime, WorkflowBehaviorHelpers, BehaviorRegistry, CreateSentinel, WorkflowContracts, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
     "use strict";
 
     var WORKFLOW_SCOPE = "workflow";
@@ -20,6 +21,7 @@
     var RESULT_CANCEL = "CANCEL";
     var RESULT_NO_CHANGES = DetailUseCaseConstants.CODES.NO_CHANGES;
     var RESULT_SAVE_FAILED = "SAVE_FAILED";
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var HTTP_CONFLICT = 409;
     var HTTP_GONE = 410;
     var bDefaultsRegistered = false;
@@ -146,11 +148,11 @@
         var oController = mContext && mContext.controller;
         return WorkflowBehaviorHelpers.promptWarning(
             oController,
-            "lockKilledMessage",
+            DETAIL_MESSAGE_KEYS.LOCK_KILLED,
             [WorkflowBehaviorHelpers.resolveText(oController, "okButton", [], "okButton")],
             undefined,
             [],
-            "lockKilledMessage"
+            DETAIL_MESSAGE_KEYS.LOCK_KILLED
         );
     }
 

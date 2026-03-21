@@ -84,8 +84,8 @@
             uiState: oUiState
         }).then(function (oResult) {
             assert.ok(oResult.ok, "confirm succeeds");
-            assert.strictEqual(findPatch(oResult.effects, "selected", "/basic/LOCATION_NAME").value, "", "stale hidden selection is not applied");
-            assert.strictEqual(findPatch(oResult.effects, "selected", "/basic/LOCATION_KEY").value, "", "stale key is not applied");
+            assert.strictEqual(findPatch(oResult.effects, "detail", "/current/basic/LOCATION_NAME").value, "", "stale hidden selection is not applied");
+            assert.strictEqual(findPatch(oResult.effects, "detail", "/current/basic/LOCATION_KEY").value, "", "stale key is not applied");
             assert.strictEqual(findPatch(oResult.effects, "state", "/isDirty").value, false, "dirty flag stays clean without valid selection");
             assert.strictEqual(findPatch(oResult.effects, "view", "/locationVhSelection").value, null, "selection is cleared after invalid confirm");
             done();

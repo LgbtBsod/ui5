@@ -5,9 +5,8 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
-], function (JSONModel, StateSchema, AttachmentUploadPolicy, CloneUtil, LayoutPersonalizationRuntime, ThemeContracts, WorkflowContracts, WorkflowRuntimeConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+], function (JSONModel, StateSchema, AttachmentUploadPolicy, CloneUtil, LayoutPersonalizationRuntime, ThemeContracts, WorkflowContracts) {
     "use strict";
 
     function clone(v) {
@@ -60,6 +59,7 @@
             compactDensity: false,
             invertedBlockScheme: false,
             themeMode: ThemeContracts.MODES.MORNING,
+            layout: WorkflowContracts.LAYOUTS ? WorkflowContracts.LAYOUTS.ONE_COLUMN : "OneColumn",
             isPhoneViewport: false,
             isTabletViewport: false,
             viewportWidth: 0,
@@ -122,20 +122,15 @@
             });
         },
 
-        createSnapshotModel: function () {
-            return createModel({});
-        },
-
-        createCacheModel: function () {
-            return createModel({ byRootKey: {}, pristineSnapshot: null, keyMapping: {}, lastServerState: null });
+        createDetailModel: function () {
+            return createModel({
+                current: {},
+                base: {}
+            });
         },
 
         createMasterDataModel: function () {
             return createModel(createMasterDataDefaults());
-        },
-
-        createHierarchyModel: function () {
-            return createModel({ byDate: {} });
         },
 
         createStateModel: function () {
@@ -144,14 +139,6 @@
 
         createShellModel: function () {
             return createModel(createShellDefaults());
-        },
-
-        createLocationTreeModel: function () {
-            return createModel({ locations: [] });
-        },
-
-        createEnvModel: function () {
-            return createModel({ source: WorkflowRuntimeConstants.SOURCES.GATEWAY, loadedAt: "", variables: {}, timers: createTimers() });
         }
     };
 });

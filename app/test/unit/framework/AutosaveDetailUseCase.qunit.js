@@ -44,10 +44,10 @@
                     if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DIRTY) {
                         return true;
                     }
-                    if (sModelName === "selected" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/current") {
                         return oCurrent;
                     }
-                    if (sModelName === "snapshot" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/base") {
                         return {
                             root: { id: "CHK-1", version_number: 7 },
                             basic: {},
@@ -113,7 +113,7 @@
                     if (sModelName === "state" && sPath === StatePaths.SESSION_ID) {
                         return "SESSION-2";
                     }
-                    if (sModelName === "selected" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/current") {
                         return {
                             root: { id: "CHK-2" },
                             basic: { equipment: "Edited equipment" },
@@ -122,7 +122,7 @@
                             attachments: []
                         };
                     }
-                    if (sModelName === "snapshot" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/base") {
                         return {
                             root: { id: "CHK-2" },
                             basic: { equipment: "Original equipment" },
@@ -139,7 +139,7 @@
         oUseCase.execute({ rootId: "CHK-2" }, oCtx).then(function (oResult) {
             var aEffects = oResult.effects || [];
             var oSnapshotPatch = aEffects.filter(function (oEffect) {
-                return oEffect.type === "modelPatch" && oEffect.modelName === "snapshot" && oEffect.path === "/";
+                return oEffect.type === "modelPatch" && oEffect.modelName === "detail" && oEffect.path === "/base";
             }).pop();
             var oRefreshPatch = aEffects.filter(function (oEffect) {
                 return oEffect.type === "modelPatch" && oEffect.modelName === "state" && oEffect.path === StatePaths.SEARCH_RETURN_CONTEXT;

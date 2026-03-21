@@ -7,8 +7,8 @@ sap.ui.define([], function () {
             OBSERVER: "/observerInputValue"
         }),
         MODEL_PATHS: Object.freeze({
-            OBSERVED_FULLNAME: "/basic/OBSERVED_FULLNAME",
-            OBSERVER_FULLNAME: "/basic/OBSERVER_FULLNAME"
+            OBSERVED_FULLNAME: "/current/basic/OBSERVED_FULLNAME",
+            OBSERVER_FULLNAME: "/current/basic/OBSERVER_FULLNAME"
         }),
         TARGETS: Object.freeze({
             OBSERVED: "observed",

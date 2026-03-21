@@ -5,7 +5,7 @@ sap.ui.define([], function () {
         check: Object.freeze({
             key: "check",
             kind: "check",
-            rowsPath: "/checks",
+            rowsPath: "/current/checks",
             numberField: "ChecksNum",
             rowBusyPath: "/checksBusy",
             dialogBusyPath: "/checksExpandedBusy",
@@ -34,7 +34,7 @@ sap.ui.define([], function () {
         barrier: Object.freeze({
             key: "barrier",
             kind: "barrier",
-            rowsPath: "/barriers",
+            rowsPath: "/current/barriers",
             numberField: "BarriersNum",
             rowBusyPath: "/barriersBusy",
             dialogBusyPath: "/barriersExpandedBusy",

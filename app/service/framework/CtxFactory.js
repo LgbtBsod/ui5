@@ -57,12 +57,9 @@
             default: ControllerModelRuntime.defaultModel(oController),
             view: ControllerModelRuntime.viewState(oController),
             state: ControllerModelRuntime.state(oController),
+            detail: ControllerModelRuntime.detail(oController),
             shell: ControllerModelRuntime.shell(oController),
-            selected: ControllerModelRuntime.selected(oController),
-            snapshot: ControllerModelRuntime.snapshot(oController),
-            masterData: ControllerModelRuntime.masterData(oController),
-            search: ControllerModelRuntime.named(oController, "search", true),
-            env: ControllerModelRuntime.env(oController)
+            masterData: ControllerModelRuntime.masterData(oController)
         };
     }
 
@@ -71,9 +68,9 @@
         var oUiStateAdapter;
 
         // Historical name only: `uiState` in the context is a facade adapter over
-        // normalized named models (`state`, `selected`, `snapshot`, `view`, etc.).
-        // It is not a business-data owner and must stay tolerant to missing legacy
-        // `uiState` JSONModel instances.
+        // normalized named models (`state`, `detail`, `view`, etc.).
+        // It is not a business-data owner and must stay tolerant to missing
+        // component-local models.
         oUiStateAdapter = safeBuild(Ui5StateAdapter, mModels);
 
         return {
@@ -87,8 +84,7 @@
             }),
             dict: safeBuild(DictAdapter, {
                 masterDataModel: mModels.masterData,
-                stateModel: mModels.state,
-                envModel: mModels.env
+                stateModel: mModels.state
             }),
             analytics: safeBuild(WorkflowAnalyticsAdapter),
             personSuggest: safeBuild(PersonSuggestAdapter),

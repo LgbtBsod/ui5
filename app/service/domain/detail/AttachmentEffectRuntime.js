@@ -16,7 +16,7 @@ sap.ui.define([
     function buildAttachmentLoadEffects(aAttachments, sToastKey, sToastLevel) {
         var aSafeAttachments = Array.isArray(aAttachments) ? aAttachments : [];
         var aEffects = [
-            Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ATTACHMENTS, aSafeAttachments),
+            Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ATTACHMENTS, aSafeAttachments),
             Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSafeAttachments),
             Effects.modelPatch(MODELS.VIEW, ViewPathContracts.ATTACHMENTS_LOADED, true)
         ].concat(buildAttachmentBusyResetEffects());

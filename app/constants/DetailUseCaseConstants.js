@@ -17,7 +17,12 @@ sap.ui.define([], function () {
             AUTOSAVE_UNAVAILABLE: "AUTOSAVE_UNAVAILABLE",
             CREATE_HANDLER_MISSING: "CREATE_HANDLER_MISSING",
             DELETE_UNAVAILABLE: "DELETE_UNAVAILABLE",
+            EXPIRED: "EXPIRED",
             INVALID_INPUT: "INVALID_INPUT",
+            LOCK_ACQUIRE_FAILED: "LOCK_ACQUIRE_FAILED",
+            LOCKED: "LOCKED",
+            LOCKED_OWN_SESSION: "LOCKED_OWN_SESSION",
+            KILLED: "KILLED",
             LOCK_REQUIRED: "LOCK_REQUIRED",
             MISSING_CLIENT_VERSION: "MISSING_CLIENT_VERSION",
             NO_CHANGES: "NO_CHANGES",
@@ -26,31 +31,19 @@ sap.ui.define([], function () {
             NO_DELETE_PERMISSION: "NO_DELETE_PERMISSION",
             NO_EDIT_PERMISSION: "NO_EDIT_PERMISSION",
             NO_VIEW_PERMISSION: "NO_VIEW_PERMISSION",
+            OK: "OK",
             PERMISSION_CHECK_FAILED: "PERMISSION_CHECK_FAILED",
             PERMISSION_CHECK_UNAVAILABLE: "PERMISSION_CHECK_UNAVAILABLE",
-            SAVE_HANDLER_MISSING: "SAVE_HANDLER_MISSING"
-        }),
-        MESSAGE_KEYS: Object.freeze({
-            ATTACHMENT_DELETED: "attachmentDeleted",
-            ATTACHMENT_UPLOADED: "attachmentUploaded",
-            CHECKLIST_DELETED: "checklistDeleted",
-            DETAIL_CREATE_PERMISSION_DENIED: "detailCreatePermissionDenied",
-            DETAIL_DELETE_PERMISSION_DENIED: "detailDeletePermissionDenied",
-            DETAIL_VIEW_PERMISSION_DENIED: "detailViewPermissionDenied",
-            LOCK_RELEASE_FAILED: "lockReleaseFailed",
-            NOTHING_TO_DELETE: "nothingToDelete",
-            OBJECT_SAVED: "objectSaved",
-            PERSISTENCE_AUTOSAVE_PENDING_ATTACHMENTS: "persistenceAutosavePendingAttachments",
-            PERSISTENCE_AUTOSAVE_SAVED: "persistenceAutosaveSaved",
-            PERSISTENCE_FORCED_READ_ONLY: "persistenceForcedReadOnly",
-            PERSISTENCE_IDLE_TIMEOUT_GRACE: "persistenceIdleTimeoutGrace",
-            PERSISTENCE_LOCK_LOST: "persistenceLockLost",
-            PERSISTENCE_NO_CHANGES: "persistenceNoChanges"
+            SAVE_HANDLER_MISSING: "SAVE_HANDLER_MISSING",
+            TECHNICAL_ERROR: "ERROR"
         }),
         MODEL_PATHS: Object.freeze({
-            ATTACHMENTS: "/attachments",
-            ROOT: "/",
-            ROOT_ID: "/root/id"
+            ATTACHMENTS: "/current/attachments",
+            BASE: "/base",
+            BASE_ATTACHMENTS: "/base/attachments",
+            BASE_ROOT_ID: "/base/root/id",
+            ROOT: "/current",
+            ROOT_ID: "/current/root/id"
         }),
         REASONS: Object.freeze({
             AUTOSAVE_GUARD: "autosaveGuard",

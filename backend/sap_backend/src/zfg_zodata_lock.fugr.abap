@@ -57,7 +57,7 @@ FUNCTION zodata_lock_control.
              last_touch_by   = sy-uname
              lock_expires_at = cl_abap_tstmp=>add(
                                  tstmp = lv_now
-                                 secs  = zcl_zodata_contract_constants=>c_lock_ttl_seconds )
+                                 secs  = zif_zodata_contract_constants=>c_lock_ttl_seconds )
        WHERE bo_key          = iv_bo_key
          AND object_id       = iv_object_id.
 
@@ -109,7 +109,7 @@ FUNCTION zodata_lock_control.
              last_touch_by = sy-uname
              lock_expires_at = cl_abap_tstmp=>add(
                                  tstmp = lv_now
-                                 secs  = zcl_zodata_contract_constants=>c_lock_ttl_seconds )
+                                 secs  = zif_zodata_contract_constants=>c_lock_ttl_seconds )
        WHERE bo_key        = iv_bo_key
          AND object_id     = iv_object_id
          AND ( lock_session = iv_session_guid OR iv_mode = 'T' ).

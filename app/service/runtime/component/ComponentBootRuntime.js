@@ -4,8 +4,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts"
-], function (ComponentBootContracts, ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants, EffectFeedbackContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
+], function (ComponentBootContracts, ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants, EffectFeedbackContracts, ShellStateRuntime) {
     "use strict";
 
     var PATHS = ComponentBootContracts.PATHS;
@@ -28,7 +29,7 @@
         });
     }
 
-    function seedFrontendState(oStateModel, oEnvModel) {
+    function seedFrontendState(oStateModel, oEnvState) {
         ModelStateRuntime.writeOnModel(oStateModel, PATHS.CURRENT_USER, {
             fullName: "",
             permissions: [],
@@ -44,26 +45,28 @@
             "/frontendVariables": Object.assign({}, FrontendConfigConstants.FALLBACKS.FRONTEND_VARIABLES),
             "/frontendConfigSource": CONFIG_SOURCE.GATEWAY
         });
-        ModelStateRuntime.writeOnModel(oEnvModel, "/variables", Object.assign({}, FrontendConfigConstants.FALLBACKS.FRONTEND_VARIABLES));
+        if (oEnvState) {
+            oEnvState.variables = Object.assign({}, FrontendConfigConstants.FALLBACKS.FRONTEND_VARIABLES);
+        }
     }
 
     function finalizeBootSuccess(mOptions) {
         var oStateModel = mOptions.stateModel;
-        var oCacheModel = mOptions.cacheModel;
+        var oCacheState = mOptions.cacheState;
         var sCacheAt = mOptions.cacheAt;
         var sReadyAt = mOptions.readyAt;
         var sTabSessionId = mOptions.tabSessionId;
         var oServerState = mOptions.serverState;
         var aCheckLists = mOptions.checkLists || [];
 
-        ModelStateRuntime.writeOnModel(oCacheModel, "/pristineSnapshot", CloneUtil.clone(aCheckLists, []));
-        ModelStateRuntime.setManyOnModel(oCacheModel, {
-            "/lastServerState": oServerState || {
+        if (oCacheState) {
+            oCacheState.pristineSnapshot = CloneUtil.clone(aCheckLists, []);
+            oCacheState.lastServerState = oServerState || {
                 fetchedAt: sCacheAt,
                 count: aCheckLists.length
-            },
-            "/keyMapping": {}
-        });
+            };
+            oCacheState.keyMapping = {};
+        }
         ModelStateRuntime.writeOnModel(oStateModel, PATHS.CACHE_VALIDATION_AT, sCacheAt);
         ModelStateRuntime.writeOnModel(oStateModel, PATHS.READINESS_APP, {
             status: READINESS_STATUS.READY,
@@ -167,8 +170,8 @@
     function runBootSequence(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
-        var oEnvModel = mOptions.envModel;
-        var oCacheModel = mOptions.cacheModel;
+        var oEnvState = mOptions.envState;
+        var oCacheState = mOptions.cacheState;
         var InitializeAppUseCase = mOptions.initializeAppUseCase;
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
         var bBootCompleted = false;
@@ -183,7 +186,7 @@
                 }
                 ComponentRuntimeSupport.ensureSessionId(oStateModel);
                 sTabSessionId = ComponentRuntimeSupport.ensureTabSessionId(oStateModel);
-                seedFrontendState(oStateModel, oEnvModel);
+                seedFrontendState(oStateModel, oEnvState);
                 return cleanupCacheSessions(mOptions.cacheAdapter, oStateModel, sTabSessionId);
             })
             .then(function () {
@@ -200,7 +203,7 @@
 
                 finalizeBootSuccess({
                     stateModel: oStateModel,
-                    cacheModel: oCacheModel,
+                    cacheState: oCacheState,
                     cacheAt: sCacheAt,
                     readyAt: sReadyAt,
                     tabSessionId: sTabSessionId,
@@ -219,7 +222,7 @@
                     oComponent._startCoreManagers();
                     oComponent._syncLockScopedManagers(oStateModel);
                 }
-                mOptions.componentRuntimeSupport && mOptions.componentRuntimeSupport.syncShellRuntimeState && mOptions.componentRuntimeSupport.syncShellRuntimeState(oStateModel, mOptions.shellModel || null);
+                ShellStateRuntime.syncRuntimeShellState(oStateModel, mOptions.shellModel || null);
                 oStateModel.setProperty(PATHS.IS_LOADING, false);
             });
     }

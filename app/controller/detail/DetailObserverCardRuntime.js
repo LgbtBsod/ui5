@@ -87,7 +87,7 @@
             var sInputPath = sTarget === "observer" ? "view>/observerInputValue" : "view>/observedInputValue";
             var sSuggestionsPath = sTarget === "observer" ? "view>/observerSuggestions" : "view>/observedSuggestions";
             var oBox = withStyleClasses(new VBox({ renderType: "Bare" }), "detailSemanticMetaBlock");
-            var oReadText = createReadInfoText("{selected>/basic/" + sUpper + "_FULLNAME}");
+        var oReadText = createReadInfoText("{detail>/current/basic/" + sUpper + "_FULLNAME}");
             var oInput = new Input({
                 value: "{" + sInputPath + "}",
                 showSuggestion: "{= ${state>/workflow/detail/editMode} === 'EDIT' }",
@@ -116,9 +116,9 @@
             oBox.addItem(oReadText);
             oBox.addItem(mHooks.wrapEditableField(oController, oInput, "basic." + sUpper + "_FULLNAME"));
             oBox.addItem(oHint);
-            oBox.addItem(createPrefixedStatus(oController, "personPernerLabel", "selected>/basic/" + sUpper + "_PERNER"));
-            oBox.addItem(createPrefixedStatus(oController, "personPositionLabel", "selected>/basic/" + sUpper + "_POSITION"));
-            oBox.addItem(createPrefixedStatus(oController, "personOrgUnitLabel", "selected>/basic/" + sUpper + "_ORGUNIT"));
+        oBox.addItem(createPrefixedStatus(oController, "personPernerLabel", "detail>/current/basic/" + sUpper + "_PERNER"));
+        oBox.addItem(createPrefixedStatus(oController, "personPositionLabel", "detail>/current/basic/" + sUpper + "_POSITION"));
+        oBox.addItem(createPrefixedStatus(oController, "personOrgUnitLabel", "detail>/current/basic/" + sUpper + "_ORGUNIT"));
             return oBox;
         }
     };

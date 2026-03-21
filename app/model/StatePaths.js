@@ -46,10 +46,6 @@ sap.ui.define([], function () {
         WORKFLOW_DETAIL_EDIT_MODE: "/workflow/detail/editMode",
         WORKFLOW_DETAIL_LOCK_STATE: "/workflow/detail/lock/state",
         WORKFLOW_DIRTY: "/isDirty",
-        WORKFLOW_LOCK_LOST_REASON: "/lockLostReason",
-        WORKFLOW_SEARCH_MODE: "/workflow/search/mode",
-        WORKFLOW_SEARCH_SEGMENTS: "/workflow/search/segments",
-        WORKFLOW_SEARCH_SEGMENTS_BARRIERS: "/workflow/search/segments/barriers",
-        WORKFLOW_SEARCH_SEGMENTS_CHECKS: "/workflow/search/segments/checks"
+        WORKFLOW_LOCK_LOST_REASON: "/lockLostReason"
     };
 });

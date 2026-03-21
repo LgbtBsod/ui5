@@ -64,6 +64,8 @@ def test_legacy_modules_are_removed_from_active_repo_surface():
         REPO_ROOT / "app" / "service" / "shared" / "delta" / "DeltaChildChanges.js",
         REPO_ROOT / "app" / "service" / "runtime" / "ManagerFacade.js",
         REPO_ROOT / "app" / "service" / "framework" / "FacadeCommandRuntime.js",
+        REPO_ROOT / "app" / "infra" / "navigation" / "RouteSync.js",
+        REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_lock_manager.clas.abap",
     ]
 
     for path in removed_paths:
@@ -152,12 +154,16 @@ def test_manifest_and_model_constants_expose_only_current_global_model_surface()
     manifest = _read(APP_ROOT / "manifest.json")
     model_constants = _read(APP_ROOT / "constants" / "ModelConstants.js")
     model_bootstrap = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentModelInitRuntime.js")
+    model_factory = _read(APP_ROOT / "model" / "ModelFactory.js")
+    app_view = _read(APP_ROOT / "views" / "App.view.xml")
 
     assert '"shell": {' in manifest
-    assert '"locationtree": {' in manifest
+    assert '"detail": {' in manifest
     assert '"state": {' in manifest
     assert '"masterData": {' in manifest
-    assert '"cache": {' in manifest
+    assert '"cache": {' not in manifest
+    assert '"selected": {' not in manifest
+    assert '"locationtree": {' not in manifest
     assert '"data": {' not in manifest
     assert '"uiState": {' not in manifest
     assert '"layout": {' not in manifest
@@ -165,11 +171,26 @@ def test_manifest_and_model_constants_expose_only_current_global_model_surface()
     assert '"appView": {' not in manifest
 
     assert 'DATA: "data"' not in model_constants
-    assert 'LOCATION_TREE: "locationtree"' in model_constants
+    assert 'CACHE: "cache"' not in model_constants
+    assert 'ENV: "env"' not in model_constants
+    assert 'LOCATION_TREE: "locationtree"' not in model_constants
+    assert 'DETAIL: "detail"' in model_constants
     assert 'SHELL: "shell"' in model_constants
+    assert 'SHELL_LAYOUT: "/layout"' in model_constants
 
     assert 'MODELS.DATA' not in model_bootstrap
     assert 'createDataModel' not in model_bootstrap
+    assert 'MODELS.LOCATION_TREE' not in model_bootstrap
+    assert 'setModel(mModels.cacheModel' not in model_bootstrap
+    assert 'setModel(mModels.envModel' not in model_bootstrap
+    assert '_internalRuntimeModels' not in model_bootstrap
+    assert 'createInternalCacheState' not in model_bootstrap
+    assert 'createInternalEnvState' not in model_bootstrap
+    assert '_runtimeModels' not in model_bootstrap
+    assert 'createCacheModel' not in model_factory
+    assert 'createEnvModel' not in model_factory
+    assert 'createHierarchyModel' not in model_factory
+    assert 'layout="{= ${shell>/layout} || \'OneColumn\' }"' in app_view
 
 
 def test_boot_and_runtime_source_lock_strict_success_path():
@@ -261,6 +282,133 @@ def test_component_runtime_uses_canonical_model_paths_and_backend_mode_contracts
     assert "ModelPathContracts.BACKEND_MODE" in shell_state_runtime
     assert "BackendModeContracts.MODES.REAL" in diagnostics_usecase
     assert "BackendModeContracts.CAPABILITY.READY" in startup_capability_usecase
+
+
+def test_route_runtime_is_manifest_first_without_route_sync_shadow_layer():
+    route_mode = _read(APP_ROOT / "infra" / "navigation" / "RouteModeCoordinator.js")
+    shell_layout_runtime = _read(APP_ROOT / "service" / "features" / "shell" / "runtime" / "ShellLayoutRuntime.js")
+    state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
+    model_paths = _read(APP_ROOT / "service" / "domain" / "shared" / "ModelPathContracts.js")
+    component_app_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentAppRuntime.js")
+    core_runtime_bootstrap = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreRuntimeBootstrap.js")
+    apply_runtime_settings = _read(APP_ROOT / "service" / "domain" / "shared" / "usecases" / "ApplyRuntimeSettingsUseCase.js")
+
+    assert "RouteSync" not in route_mode
+    assert "oRouteSync" not in route_mode
+    assert "shellModel" not in route_mode
+    assert "ModelPathContracts.LAYOUT" not in route_mode
+    assert "resolveDesiredLayout" in shell_layout_runtime
+    assert "MODEL_PATHS.SHELL_LAYOUT" in shell_layout_runtime
+    assert "WORKFLOW_SEARCH_MODE" not in state_paths
+    assert "WORKFLOW_SEARCH_SEGMENTS" not in state_paths
+    assert "WORKFLOW_SEARCH_MODE" not in model_paths
+    assert "WORKFLOW_SEARCH_SEGMENTS" not in model_paths
+    assert "envState:" in component_app_runtime
+    assert "envModel:" not in component_app_runtime
+    assert "syncShellRuntimeState:" not in component_app_runtime
+    assert "navigation:" not in core_runtime_bootstrap
+    assert "ctx.envState" in apply_runtime_settings
+    assert "ctx.envModel" not in apply_runtime_settings
+
+
+def test_controller_model_access_is_explicit_without_generic_named_fallback_surface():
+    model_access_mixin = _read(APP_ROOT / "controller" / "base" / "ModelAccessMixin.js")
+    controller_model_runtime = _read(APP_ROOT / "service" / "framework" / "ControllerModelRuntime.js")
+
+    assert "resolveNamedModel" in model_access_mixin
+    assert "case MODELS.STATE:" in model_access_mixin
+    assert "case MODELS.SHELL:" in model_access_mixin
+    assert "case MODELS.DETAIL:" in model_access_mixin
+    assert "case MODELS.MASTER_DATA:" in model_access_mixin
+    assert "case MODELS.VIEW:" in model_access_mixin
+    assert "return null;" in model_access_mixin
+    assert "named:" not in controller_model_runtime
+    assert "read:" not in controller_model_runtime
+    assert "write:" not in controller_model_runtime
+    assert "setMany:" not in controller_model_runtime
+
+
+def test_lock_and_persistence_message_keys_are_centralized_in_constants():
+    detail_persistence = _read(APP_ROOT / "service" / "domain" / "detail" / "DetailPersistenceRuntime.js")
+    lock_adapter = _read(APP_ROOT / "infra" / "adapters" / "LockAdapter.js")
+    component_lock_events = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentLockEventsRuntime.js")
+    default_handlers = _read(APP_ROOT / "service" / "framework" / "behavior" / "WorkflowDefaultHandlers.js")
+    detail_constants = _read(APP_ROOT / "constants" / "DetailUseCaseConstants.js")
+    detail_message_keys = _read(APP_ROOT / "constants" / "DetailMessageKeyConstants.js")
+
+    assert 'messageKey: "persistence' not in detail_persistence
+    assert 'messageKey: "lock' not in lock_adapter
+    assert 'Effects.warn("lockAcquireFailed")' not in APP_ROOT.joinpath("service", "domain", "detail", "usecases", "EnterEditUseCase.js").read_text(encoding="utf-8")
+    assert '"lockLostMessage"' not in component_lock_events
+    assert '"lockKilledMessage"' not in default_handlers
+    assert "MESSAGE_KEYS:" not in detail_constants
+    assert 'LOCK_LOST: "lockLostMessage"' in detail_message_keys
+    assert 'PERSISTENCE_IDLE: "persistenceIdle"' in detail_message_keys
+
+
+def test_backend_contract_service_is_typed_for_non_lock_responses():
+    contract_service = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_contract_service.clas.abap")
+    contract_constants = REPO_ROOT / "backend" / "sap_backend" / "src" / "zif_zodata_contract_constants.intf.abap"
+    legacy_constants_class = REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_contract_constants.clas.abap"
+    dpc_ext = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_dpc_ext.clas.abap")
+    lock_manager = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_lock_manager.clas.abap")
+    frontend_context_service = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_frontend_context_svc.clas.abap")
+    mpl_service = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_mpl_service.clas.abap")
+    lock_interface = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zif_zodata_lock_manager.intf.abap")
+
+    assert "cs_result              TYPE zstr_pcct_lock_acquire_rs." in contract_service
+    assert "cs_result              TYPE zstr_pcct_lock_heartbeat_rs." in contract_service
+    assert "cs_result              TYPE zstr_pcct_lock_release_rs." in contract_service
+    assert "cs_result         TYPE zstr_pcct_savechanges_rs." in contract_service
+    assert "cs_result      TYPE zstr_pcct_permission_rs." in contract_service
+    assert "cs_result           TYPE zstr_pcct_current_user_rs." in contract_service
+    assert "cs_result      TYPE zstr_pcct_runtime_settings_rs." in contract_service
+    assert "TYPE any" not in contract_service
+    assert "TYPE any" not in lock_interface
+    assert "TYPE any" not in lock_manager
+    assert contract_constants.exists()
+    assert not legacy_constants_class.exists()
+    assert "zcl_zodata_contract_constants=>" not in contract_service
+    assert "zcl_zodata_contract_constants=>" not in dpc_ext
+    assert "zcl_zodata_contract_constants=>" not in lock_manager
+    assert "zif_zodata_contract_constants=>" in contract_service
+    assert "zif_zodata_contract_constants=>" in dpc_ext
+    assert "zif_zodata_contract_constants=>" in lock_manager
+    assert "build_permission_result" in frontend_context_service
+    assert "build_current_user_result" in frontend_context_service
+    assert "build_runtime_settings_result" in frontend_context_service
+    assert "mo_frontend_context->build_permission_result" in dpc_ext
+    assert "mo_frontend_context->build_current_user_result" in dpc_ext
+    assert "mo_frontend_context->build_runtime_settings_result" in dpc_ext
+    assert "mo_mpl_service->read_tree" in dpc_ext
+    assert "CALL FUNCTION 'Z_PCCT_MPL_TREE_GET'" in mpl_service
+    assert "CALL FUNCTION 'Z_PCCT_MPL_TREE_GET'" not in dpc_ext
+
+
+def test_detail_search_and_shell_message_keys_live_only_in_dedicated_constant_modules():
+    detail_formatters = _read(APP_ROOT / "service" / "features" / "detail" / "runtime" / "DetailFormatters.js")
+    search_formatter = _read(APP_ROOT / "controller" / "search" / "SearchFormatterBehavior.js")
+    search_dialogs = _read(APP_ROOT / "controller" / "search" / "SearchToolbarDialogFactoryRuntime.js")
+    search_view_state = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewStateRuntime.js")
+    shell_state = _read(APP_ROOT / "service" / "features" / "shell" / "runtime" / "ShellStateRuntime.js")
+    ui_decision_defaults = _read(APP_ROOT / "service" / "framework" / "behavior" / "UiDecisionDefaultHandlers.js")
+    search_toolbar_contracts = _read(APP_ROOT / "service" / "features" / "search" / "contracts" / "SearchToolbarContracts.js")
+
+    assert '"statusRegistered"' not in detail_formatters
+    assert '"requiredFieldHint"' not in detail_formatters
+    assert '"autosaveWaiting"' not in detail_formatters
+    assert '"searchModeLabel"' not in search_formatter
+    assert '"resultsLabel"' not in search_formatter
+    assert '"searchSortDialogTitle"' not in search_dialogs
+    assert '"searchGroupDialogTitle"' not in search_dialogs
+    assert '"workflowStageAnalyze"' not in search_view_state
+    assert '"searchSortDateCheck"' not in search_toolbar_contracts
+    assert '"searchGroupNone"' not in search_toolbar_contracts
+    assert '"shellPermissionCreate"' not in shell_state
+    assert '"shellContextDetail"' not in shell_state
+    assert '"shellUserTooltipStandalone"' not in shell_state
+    assert '"searchOpenUsesFirstHint"' not in ui_decision_defaults
+    assert '"shellContextRefreshed"' not in ui_decision_defaults
 
 
 def test_productive_runtime_has_no_raw_active_or_selected_id_paths_outside_canonical_contracts():
@@ -407,6 +555,32 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     assert "barriers[].edit_mode is required." in abap_dpc
     assert "participants[].edit_mode is required." in abap_dpc
     assert "attachments[].edit_mode is required." in abap_dpc
+
+
+def test_active_frontend_mutations_use_hybrid_aggregate_function_import_contract():
+    mutation_runtime = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistMutationRuntime.js")
+    gateway_client = _read(APP_ROOT / "service" / "backend" / "GatewayClient.js")
+    gateway_odata_client = _read(APP_ROOT / "infra" / "odata" / "GatewayODataClient.js")
+    gateway_contracts = _read(APP_ROOT / "service" / "backend" / "GatewayClientContracts.js")
+    canonical_api = _read(BACKEND_ROOT / "api" / "gateway_canonical_api.py")
+
+    assert "FUNCTION_IMPORTS.SAVE_CHANGES" in mutation_runtime
+    assert "FUNCTION_IMPORTS.AUTO_SAVE" in mutation_runtime
+    assert "FUNCTION_IMPORTS.CREATE_CHECKLIST" in mutation_runtime
+    assert "FUNCTION_IMPORTS.COPY_CHECKLIST" in mutation_runtime
+    assert "normalizeSavePayload" in mutation_runtime
+    assert "GatewayODataClient.post(" not in mutation_runtime
+    assert "GatewayODataClient.patch(" not in mutation_runtime
+    assert "createPath: function" not in gateway_client
+    assert "updatePath: function" not in gateway_client
+    assert "patch: patch," not in gateway_odata_client
+    assert "post: post," not in gateway_odata_client
+    assert 'entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK' in gateway_contracts
+    assert 'entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER' in gateway_contracts
+    assert '@router.post(f"{SERVICE_ROOT}/SaveChanges")' in canonical_api
+    assert '@router.post(f"{SERVICE_ROOT}/AutoSave")' in canonical_api
+    assert '@router.post(f"{SERVICE_ROOT}/CreateChecklist")' in canonical_api
+    assert '@router.post(f"{SERVICE_ROOT}/CopyChecklist")' in canonical_api
 
 
 def test_start_local_env_supports_python_fallback_and_external_gateway_mode():

@@ -106,7 +106,7 @@
                 <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
                 <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
                 <Text
-                    text="{path:'selected>/root/id', formatter:'.formatAttachmentsEmptyStateText'}"
+                text="{path:'detail>/current/root/id', formatter:'.formatAttachmentsEmptyStateText'}"
                     class="detailEmptyStateText workflowEmptyStateText"/>
             </HBox>
             <Table

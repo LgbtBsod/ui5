@@ -15,16 +15,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var SELECTED_MODEL = MODELS.SELECTED;
-    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
+    var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
     var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
     var DETAIL_REASONS = DetailUseCaseConstants.REASONS;
 
@@ -51,7 +51,7 @@ function mapFieldDelta(mInput, oCurrent) {
 
     function readSelectedChecklist(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        return (oUiState && typeof oUiState.get === "function" && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT)) || null;
+        return (oUiState && typeof oUiState.get === "function" && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT)) || null;
     }
 
     function readCurrentChecklist(mCtx) {
@@ -163,7 +163,7 @@ function execute(mInput, mCtx) {
                 return writeDetailCache(oCacheWrite, sRootId, oAttachmentSync.snapshot, mCtx).then(function () {
                     return Result.ok({ autosavedAt: sAt }, [
                         Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, oAttachmentSync.hasPendingAttachments),
-                        Effects.modelPatch(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT, CloneUtil.clone(oAttachmentSync.snapshot, {}))
+                        Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, CloneUtil.clone(oAttachmentSync.snapshot, {}))
                     ].concat(oAttachmentSync.effects, DetailPersistenceRuntime.successEffects("auto", sAt, {
                         state: oAttachmentSync.hasPendingAttachments ? DetailPersistenceRuntime.STATES.DIRTY : DetailPersistenceRuntime.STATES.SAVED,
                         messageKey: oAttachmentSync.hasPendingAttachments ? DETAIL_MESSAGE_KEYS.PERSISTENCE_AUTOSAVE_PENDING_ATTACHMENTS : DETAIL_MESSAGE_KEYS.PERSISTENCE_AUTOSAVE_SAVED,

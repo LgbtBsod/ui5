@@ -6,13 +6,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
-], function (Effects, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, ViewPathContracts, StatePaths, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Effects, AttachmentIdentity, AttachmentEffectRuntime, DetailStateAccess, ViewPathContracts, StatePaths, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
-    var DETAIL_MESSAGE_KEYS = DetailUseCaseConstants.MESSAGE_KEYS;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
 
     function readSessionAttachments(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
@@ -29,7 +30,7 @@ sap.ui.define([
     function syncEffects(mCtx, aAttachments, sToastKey, sSeverity, bDirty) {
         var aPersisted = Array.isArray(aAttachments) ? aAttachments.slice() : [];
         return AttachmentEffectRuntime.buildAttachmentSyncEffects(aPersisted, sToastKey || "", sSeverity || "info").concat([
-            Effects.modelPatch(MODELS.SELECTED, DETAIL_MODEL_PATHS.ATTACHMENTS, aPersisted),
+            Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ATTACHMENTS, aPersisted),
             Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aPersisted),
             Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DIRTY, !!bDirty)
         ]);

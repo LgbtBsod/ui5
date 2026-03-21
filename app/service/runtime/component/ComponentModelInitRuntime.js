@@ -1,6 +1,7 @@
-﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ModelContracts) {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentInternalRuntimeState"
+], function (ModelContracts, ComponentInternalRuntimeState) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -21,32 +22,31 @@
         var ModelFactory = mDeps.ModelFactory;
         var JSONModel = mDeps.JSONModel;
         var Device = mDeps.Device;
+        var oInternalRuntimeState = oComponent._internalRuntimeState || {};
+        var oExistingDetail = oComponent.getModel(MODELS.DETAIL);
+        var oDetailModel = reuseJsonModel(oExistingDetail, ModelFactory.createDetailModel);
 
         return {
-            locationTreeModel: reuseJsonModel(oComponent.getModel(MODELS.LOCATION_TREE), ModelFactory.createLocationTreeModel),
             stateModel: reuseJsonModel(oComponent.getModel(MODELS.STATE), ModelFactory.createStateModel),
             shellModel: reuseJsonModel(oComponent.getModel(MODELS.SHELL), ModelFactory.createShellModel),
-            viewModel: reuseJsonModel(oComponent.getModel(MODELS.VIEW), ModelFactory.createViewModel),
-            selectedModel: reuseJsonModel(oComponent.getModel(MODELS.SELECTED), function () { return new JSONModel({}); }),
-            snapshotModel: reuseJsonModel(oComponent.getModel(MODELS.SNAPSHOT), ModelFactory.createSnapshotModel),
+            detailModel: oDetailModel,
             masterDataModel: reuseJsonModel(oComponent.getModel(MODELS.MASTER_DATA), ModelFactory.createMasterDataModel),
-            cacheModel: reuseJsonModel(oComponent.getModel(MODELS.CACHE), ModelFactory.createCacheModel),
-            envModel: ModelFactory.createEnvModel(),
+            cacheState: ComponentInternalRuntimeState.reuseState(oInternalRuntimeState.cache, ComponentInternalRuntimeState.createCacheState),
+            envState: ComponentInternalRuntimeState.reuseState(oInternalRuntimeState.env, ComponentInternalRuntimeState.createEnvState),
             deviceModel: new JSONModel(Device)
         };
     }
 
     function registerModels(oComponent, mModels) {
         var oDeviceModel = mModels.deviceModel;
-        oComponent.setModel(mModels.locationTreeModel, MODELS.LOCATION_TREE);
-        oComponent.setModel(mModels.selectedModel, MODELS.SELECTED);
-        oComponent.setModel(mModels.snapshotModel, MODELS.SNAPSHOT);
+        oComponent._internalRuntimeState = {
+            cache: mModels.cacheState,
+            env: mModels.envState
+        };
+        oComponent.setModel(mModels.detailModel, MODELS.DETAIL);
         oComponent.setModel(mModels.stateModel, MODELS.STATE);
         oComponent.setModel(mModels.shellModel, MODELS.SHELL);
-        oComponent.setModel(mModels.viewModel, MODELS.VIEW);
         oComponent.setModel(mModels.masterDataModel, MODELS.MASTER_DATA);
-        oComponent.setModel(mModels.cacheModel, MODELS.CACHE);
-        oComponent.setModel(mModels.envModel, MODELS.ENV);
         oDeviceModel.setDefaultBindingMode("OneWay");
         oComponent.setModel(oDeviceModel, MODELS.DEVICE);
     }

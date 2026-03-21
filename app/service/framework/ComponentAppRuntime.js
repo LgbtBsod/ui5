@@ -22,8 +22,6 @@
             formatHumanDateTime: ComponentFormattingRuntime.formatHumanDateTime,
             eventPayload: ComponentFormattingRuntime.eventPayload,
             applyLockProbeState: ComponentDetailStateRuntime.applyLockProbeState,
-            syncShellRuntimeState: ComponentDetailStateRuntime.syncShellRuntimeState,
-            syncDetailCurrentFromSelected: ComponentDetailStateRuntime.syncDetailCurrentFromSelected,
             resolveDetailCurrent: ComponentDetailStateRuntime.resolveDetailCurrent
         };
     }
@@ -72,12 +70,12 @@
         }
     }
 
-    function applyFrontendRuntimeConfig(oComponent, oFrontendConfig, oStateModel, oEnvModel, oMasterDataModel, ApplyRuntimeSettingsUseCase) {
+    function applyFrontendRuntimeConfig(oComponent, oFrontendConfig, oStateModel, oEnvState, oMasterDataModel, ApplyRuntimeSettingsUseCase) {
         RuntimeTimerSanitizer.sanitizeTimers((oFrontendConfig && oFrontendConfig.runtimeSettingsPayload) || {}, oStateModel.getProperty("/timers") || {});
         oStateModel.setProperty("/timers", TimeConfigService.normalize((oFrontendConfig && oFrontendConfig.runtimeSettingsPayload) || {}, oStateModel.getProperty("/timers") || {}));
         return ApplyRuntimeSettingsUseCase.execute({ frontendConfig: oFrontendConfig || {} }, {
             stateModel: oStateModel,
-            envModel: oEnvModel,
+            envState: oEnvState,
             masterDataModel: oMasterDataModel
         }).then(function () {
             applyManagersTimerConfig(oComponent, oStateModel.getProperty("/timers") || {});
@@ -210,9 +208,7 @@
         oComponent._fnDirtyStateBindingChange = null;
         oComponent._aLockScopedStateBindings = null;
         oComponent._oStateLifecycleModel = null;
-        oComponent._oSelectedLifecycleModel = null;
         oComponent._fnStateModelPropertyChange = null;
-        oComponent._fnSelectedModelPropertyChange = null;
         oComponent._detachInitRuntimeListeners = null;
         oComponent._fnUnsubscribeRuntimeSettings = null;
     }

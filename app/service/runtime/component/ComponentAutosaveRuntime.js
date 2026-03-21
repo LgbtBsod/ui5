@@ -7,8 +7,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, WorkflowRuntimeConstants, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, WorkflowRuntimeConstants, ModelPathContracts, DetailMessageKeyConstants) {
     "use strict";
 
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
@@ -17,7 +18,7 @@
     function createAutoSaveManager(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
-        var oSnapshotModel = mOptions.snapshotModel;
+        var oDetailModel = mOptions.detailModel;
         var mTimerDefaults = mOptions.timerDefaults;
         var StatePaths = mOptions.statePaths;
         var DeltaPayloadBuilder = mOptions.deltaPayloadBuilder;
@@ -70,7 +71,7 @@
             buildPayload: function () {
                 var sId = ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "");
                 var oCurrent = fnResolveDetailCurrent();
-                var oBase = ModelStateRuntime.readOnModel(oSnapshotModel, "/", {}) || {};
+                var oBase = ModelStateRuntime.readOnModel(oDetailModel, "/base", {}) || {};
                 if (!sId || CreateSentinel.isCreateId(sId) || !oCurrent || !oCurrent.root || oCurrent.root.id !== sId) {
                     return null;
                 }
@@ -127,7 +128,7 @@
             if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.PERSISTENCE_STATE, "") !== DetailPersistenceRuntime.STATES.LOCK_LOST) {
                 fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput(BANNER_LEVEL.ERROR, BANNER_TEXT_KEY.OBJECT_SAVE_FAILED, {
                     scope: "global",
-                    textArgs: [fnBundleText("autosaveError")],
+                    textArgs: [fnBundleText(DetailMessageKeyConstants.AUTOSAVE_ERROR)],
                     retryAction: ActionContract.RETRY_ACTIONS.SAVE,
                     retryTextKey: BANNER_TEXT_KEY.RETRY_NOW
                 }));

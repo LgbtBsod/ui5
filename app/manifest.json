@@ -134,19 +134,13 @@
       "state": {
         "type": "sap.ui.model.json.JSONModel"
       },
-      "cache": {
+      "detail": {
         "type": "sap.ui.model.json.JSONModel"
       },
       "masterData": {
         "type": "sap.ui.model.json.JSONModel"
       },
       "shell": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
-      "selected": {
-        "type": "sap.ui.model.json.JSONModel"
-      },
-      "locationtree": {
         "type": "sap.ui.model.json.JSONModel"
       }
     },

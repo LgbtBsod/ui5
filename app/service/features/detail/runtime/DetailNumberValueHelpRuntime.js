@@ -12,7 +12,7 @@
 
     var MODELS = ModelContracts.MODELS;
     var MASTER_DATA_MODEL = MODELS.MASTER_DATA;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
     var AUTOSAVE_FIELDS = DetailFieldContracts.AUTOSAVE_FIELDS;
     var TEXT_PATHS = DetailFieldContracts.TEXT_PATHS;
     var VALUE_HELP_DIALOGS = DetailFieldContracts.VALUE_HELP_DIALOGS;
@@ -33,7 +33,7 @@
 
     function autosaveSelectChange(oController, oEvent, sTextPath, sFieldKey, mHooks) {
         var sValue = resolveSelectChangeValue(oEvent);
-        ModelStateRuntime.write(oController, SELECTED_MODEL, sTextPath, resolveSelectChangeText(oEvent));
+        ModelStateRuntime.write(oController, DETAIL_MODEL, sTextPath, resolveSelectChangeText(oEvent));
         return mHooks.autosave({
             field: sFieldKey,
             value: sValue
@@ -45,7 +45,7 @@
             return {
                 autosaveField: AUTOSAVE_FIELDS.BARRIERS_NUMBER,
                 dialogKey: VALUE_HELP_DIALOGS.BARRIERS_NUMBER,
-                inputPath: "/basic/BARRIERS_NUMBER",
+                inputPath: "/current/basic/BARRIERS_NUMBER",
                 itemsPath: "/barriersNumbers",
                 textPath: TEXT_PATHS.BARRIERS_NUMBER
             };
@@ -53,7 +53,7 @@
         return {
             autosaveField: AUTOSAVE_FIELDS.CHECKS_NUMBER,
             dialogKey: VALUE_HELP_DIALOGS.CHECKS_NUMBER,
-            inputPath: "/basic/CHECKS_NUMBER",
+            inputPath: "/current/basic/CHECKS_NUMBER",
             itemsPath: "/checksNumbers",
             textPath: TEXT_PATHS.CHECKS_NUMBER
         };
@@ -75,8 +75,8 @@
         var oData = oContext && oContext.getObject ? oContext.getObject() : {};
         var sValue = String(oData && oData.key || "").trim();
         var sText = String(oData && oData.text || oSelectedItem && oSelectedItem.getTitle && oSelectedItem.getTitle() || "").trim();
-        ModelStateRuntime.write(oController, SELECTED_MODEL, mConfig.inputPath, sValue);
-        ModelStateRuntime.write(oController, SELECTED_MODEL, mConfig.textPath, sText);
+        ModelStateRuntime.write(oController, DETAIL_MODEL, mConfig.inputPath, sValue);
+        ModelStateRuntime.write(oController, DETAIL_MODEL, mConfig.textPath, sText);
         return mHooks.autosave({
             field: mConfig.autosaveField,
             value: sValue
@@ -148,8 +148,8 @@
         mHooks.rememberDialogReturnFocus(mConfig.dialogKey, oSource);
         return ensureNumberValueHelp(oController, sKind, mHooks).then(function (oDialog) {
             oDialog.setRememberSelections(false);
-            oDialog[METHODS.OPEN](String(ModelStateRuntime.read(oController, SELECTED_MODEL, mConfig.textPath, "")
-                || ModelStateRuntime.read(oController, SELECTED_MODEL, mConfig.inputPath, "")));
+            oDialog[METHODS.OPEN](String(ModelStateRuntime.read(oController, DETAIL_MODEL, mConfig.textPath, "")
+                || ModelStateRuntime.read(oController, DETAIL_MODEL, mConfig.inputPath, "")));
         });
     }
 

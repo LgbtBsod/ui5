@@ -5,56 +5,57 @@ sap.ui.define([
 ], function (GatewayODataClient, ODataChecklistPayloadMapper, GatewayContractConstants) {
     "use strict";
 
-    function withSessionGuid(oRequest, sSessionGuid) {
+    var FUNCTION_IMPORTS = GatewayContractConstants.FUNCTION_IMPORTS;
+
+    function withSessionGuid(oPayload, sSessionGuid) {
         var sGuid = String(sSessionGuid || "").trim();
         if (!sGuid) {
-            return oRequest;
+            return oPayload || {};
         }
-        return Object.assign({}, oRequest, {
-            SessionGuid: sGuid,
-            session_guid: sGuid
+        return Object.assign({}, oPayload || {}, {
+            SessionGuid: sGuid
+        });
+    }
+
+    function normalizeAggregatePayload(mArgs, mDeps) {
+        var sRootId = mDeps.rootId(mArgs);
+        var oDelta = (mArgs && mArgs.delta) || {};
+        var aAttachments = (mArgs && mArgs.attachments) || [];
+        return withSessionGuid(
+            ODataChecklistPayloadMapper.normalizeSavePayload(sRootId, oDelta, aAttachments),
+            mArgs && mArgs.sessionGuid
+        );
+    }
+
+    function enrichSnapshot(oServerPayload, sFallbackRootId, mDeps) {
+        return mDeps.enrichServerSnapshot(oServerPayload, sFallbackRootId).then(function (oServerSnapshot) {
+            return {
+                lastChangeSet: {},
+                serverResponse: oServerPayload || {},
+                serverSnapshot: oServerSnapshot || {}
+            };
+        });
+    }
+
+    function executeAggregateWrite(sFunctionImport, mArgs, mDeps) {
+        var sRootId = mDeps.rootId(mArgs);
+        return GatewayODataClient.postFunction(sFunctionImport, normalizeAggregatePayload(mArgs, mDeps)).then(function (oServerPayload) {
+            return enrichSnapshot(oServerPayload, sRootId, mDeps);
         });
     }
 
     function saveChecklist(mArgs, mDeps) {
-        var sRootId = mDeps.rootId(mArgs);
-        var oDelta = (mArgs && mArgs.delta) || {};
-        var oRequest = withSessionGuid(
-            ODataChecklistPayloadMapper.normalizeSavePayload(sRootId, oDelta, mArgs && mArgs.attachments),
-            mArgs && mArgs.sessionGuid
-        );
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES, oRequest).then(function (oServerPayload) {
-            return mDeps.enrichServerSnapshot(oServerPayload, sRootId).then(function (oServerSnapshot) {
-                return {
-                    lastChangeSet: {},
-                    serverResponse: oServerPayload || {},
-                    serverSnapshot: oServerSnapshot || {}
-                };
-            });
-        });
+        return executeAggregateWrite(FUNCTION_IMPORTS.SAVE_CHANGES, mArgs, mDeps);
     }
 
     function createChecklist(mArgs, mDeps) {
-        var oCurrent = (mArgs && mArgs.delta) || {};
-        var oRequest = withSessionGuid(
-            ODataChecklistPayloadMapper.normalizeSavePayload("", oCurrent, mArgs && mArgs.attachments),
-            mArgs && mArgs.sessionGuid
-        );
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.CREATE_CHECKLIST, oRequest).then(function (oServerPayload) {
-            return mDeps.enrichServerSnapshot(oServerPayload, "").then(function (oServerSnapshot) {
-                return {
-                    lastChangeSet: {},
-                    serverResponse: oServerPayload || {},
-                    serverSnapshot: oServerSnapshot || {}
-                };
-            });
-        });
+        return executeAggregateWrite(FUNCTION_IMPORTS.CREATE_CHECKLIST, mArgs, mDeps);
     }
 
     function copyChecklist(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST, {
+        return GatewayODataClient.postFunction(FUNCTION_IMPORTS.COPY_CHECKLIST, {
             RootId: mDeps.normalizeRootKey(sRootId),
             SessionGuid: sSessionGuid
         }).then(function (oServerPayload) {
@@ -68,17 +69,14 @@ sap.ui.define([
     }
 
     function autosaveChecklist(mArgs, mDeps) {
-        var sRootId = mDeps.rootId(mArgs);
-        var oDelta = (mArgs && mArgs.delta) || {};
-        var oRequest = withSessionGuid(
-            ODataChecklistPayloadMapper.normalizeSavePayload(sRootId, oDelta),
-            mArgs && mArgs.sessionGuid
-        );
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.AUTO_SAVE, oRequest).then(function (oResponse) {
-            return mDeps.enrichServerSnapshot(oResponse, sRootId).then(function (oServerSnapshot) {
+        return GatewayODataClient.postFunction(
+            FUNCTION_IMPORTS.AUTO_SAVE,
+            normalizeAggregatePayload(mArgs, mDeps)
+        ).then(function (oServerPayload) {
+            return mDeps.enrichServerSnapshot(oServerPayload, mDeps.rootId(mArgs)).then(function (oServerSnapshot) {
                 return {
                     autosavedAt: new Date().toISOString(),
-                    serverHints: oResponse || {},
+                    serverHints: oServerPayload || {},
                     serverSnapshot: oServerSnapshot || {}
                 };
             });

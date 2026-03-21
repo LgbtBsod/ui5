@@ -104,8 +104,8 @@
         onChangeChecklistStatus: function (oEvent) {
             var oSrc = oEvent && oEvent.getSource && oEvent.getSource();
             var sStatus = String((oSrc && (oSrc.data("status") || oSrc.data("targetStatus"))) || "").trim().toUpperCase();
-            var oSelectedModel = this.getModel && this.getModel(ModelContracts.MODELS.SELECTED);
-            var sCurrentStatus = String(ModelStateRuntime.readOnModel(oSelectedModel, "/root/status", "") || "").trim().toUpperCase();
+        var oDetailModel = this.getModel && this.getModel(ModelContracts.MODELS.DETAIL);
+        var sCurrentStatus = String(ModelStateRuntime.readOnModel(oDetailModel, "/current/root/status", "") || "").trim().toUpperCase();
 
             if (!sStatus) {
                 return Promise.resolve(false);
@@ -118,8 +118,8 @@
                     return false;
                 }
                 if (sCurrentStatus !== sStatus) {
-                    ModelStateRuntime.writeOnModel(oSelectedModel, "/root/status", sStatus);
-                    ModelStateRuntime.writeOnModel(oSelectedModel, "/root/Status", sStatus);
+                    ModelStateRuntime.writeOnModel(oDetailModel, "/current/root/status", sStatus);
+                    ModelStateRuntime.writeOnModel(oDetailModel, "/current/root/Status", sStatus);
                     ModelStateRuntime.write(this, STATE_MODEL, "/isDirty", true);
                 }
                 return DetailStateActionRuntime.save(this, {

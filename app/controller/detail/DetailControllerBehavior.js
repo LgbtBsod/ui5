@@ -40,7 +40,7 @@
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
 
     function getBundleText(oController, sKey) {
         var oI18nModel = oController.getModel && oController.getModel("i18n");
@@ -134,9 +134,9 @@
             ControllerViewStateRuntime.initModel(this, DetailViewStateFactory.create.bind(null, this));
             DetailAttachmentViewState.sync(this);
 
-            this._oSelectedModel = ControllerModelRuntime.selected(this);
-            if (this._oSelectedModel && this._oSelectedModel.attachPropertyChange) {
-                this._oSelectedModel.attachPropertyChange(this._onSelectedChecklistChanged, this);
+            this._oDetailModel = ControllerModelRuntime.detail(this);
+            if (this._oDetailModel && this._oDetailModel.attachPropertyChange) {
+                this._oDetailModel.attachPropertyChange(this._onDetailModelChanged, this);
             }
             bindStateValidationModel(this);
         },
@@ -151,8 +151,8 @@
         },
 
         onExit: function () {
-            if (this._oSelectedModel && this._oSelectedModel.detachPropertyChange) {
-                this._oSelectedModel.detachPropertyChange(this._onSelectedChecklistChanged, this);
+            if (this._oDetailModel && this._oDetailModel.detachPropertyChange) {
+                this._oDetailModel.detachPropertyChange(this._onDetailModelChanged, this);
             }
             if (this._oStateValidationModel && this._fnStateValidationChange && this._oStateValidationModel.detachPropertyChange) {
                 this._oStateValidationModel.detachPropertyChange(this._fnStateValidationChange, this);
@@ -164,7 +164,7 @@
             this._unbindViewportPinnedControlRail();
             this._unbindAttachmentDropZone();
             ControllerResourceCleanup.destroyMapEntries(this._mLazyDialogs);
-            this._oSelectedModel = null;
+            this._oDetailModel = null;
             this._mLazyDialogs = null;
             this._mDialogReturnFocus = null;
             this._oAdaptiveViewportResizeObserver = null;
@@ -184,16 +184,16 @@
         },
 
         isDetailSectionEmpty: function (sKind) {
-            var sPath = sKind === "barrier" ? "/barriers" : "/checks";
-            var oSelectedModel = this.getModel && this.getModel(SELECTED_MODEL);
-            var aRows = oSelectedModel && oSelectedModel.getProperty ? oSelectedModel.getProperty(sPath) : [];
+            var sPath = sKind === "barrier" ? "/current/barriers" : "/current/checks";
+            var oDetailModel = this.getModel && this.getModel(DETAIL_MODEL);
+            var aRows = oDetailModel && oDetailModel.getProperty ? oDetailModel.getProperty(sPath) : [];
             return !Array.isArray(aRows) || aRows.length === 0;
         },
 
         formatSectionRowCount: function (sKind) {
-            var sPath = sKind === "barrier" ? "/barriers" : "/checks";
-            var oSelectedModel = this.getModel && this.getModel(SELECTED_MODEL);
-            var aRows = oSelectedModel && oSelectedModel.getProperty ? oSelectedModel.getProperty(sPath) : [];
+            var sPath = sKind === "barrier" ? "/current/barriers" : "/current/checks";
+            var oDetailModel = this.getModel && this.getModel(DETAIL_MODEL);
+            var aRows = oDetailModel && oDetailModel.getProperty ? oDetailModel.getProperty(sPath) : [];
             return this.formatRowCount(Array.isArray(aRows) ? aRows : []);
         },
 

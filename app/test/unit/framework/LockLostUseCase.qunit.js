@@ -28,10 +28,10 @@
                     if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
                         return WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
                     }
-                    if (sModelName === "snapshot" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/base") {
                         return oSnapshot;
                     }
-                    if (sModelName === "selected" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/current") {
                         return {
                             root: { id: "CHK-1" },
                             basic: { Profession: "DIRTY" }
@@ -47,7 +47,7 @@
             }
         }).then(function (oResult) {
             var oSelectedEffect = (oResult.effects || []).filter(function (oEffect) {
-                return oEffect.type === "modelPatch" && oEffect.modelName === "selected" && oEffect.path === "/";
+                return oEffect.type === "modelPatch" && oEffect.modelName === "detail" && oEffect.path === "/current";
             }).pop();
             var oPendingIntentEffect = (oResult.effects || []).filter(function (oEffect) {
                 return oEffect.type === "modelPatch" && oEffect.modelName === "state" && oEffect.path === StatePaths.PENDING_NAVIGATION_INTENT;

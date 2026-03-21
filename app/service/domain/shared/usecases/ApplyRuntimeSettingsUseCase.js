@@ -33,7 +33,7 @@
         execute: function (input, ctx) {
             var oConfig = input && input.frontendConfig ? input.frontendConfig : {};
             var oStateModel = ctx.stateModel;
-            var oEnvModel = ctx.envModel;
+            var oEnvState = ctx.envState;
             var oMasterDataModel = ctx.masterDataModel;
             var oRuntimePayload = oConfig.runtimeSettingsPayload || {};
 
@@ -50,10 +50,12 @@
             oStateModel.setProperty("/timers", mTimers);
             oStateModel.setProperty("/requiredFields", aRequiredFields);
             oStateModel.setProperty("/frontendVariables", mFrontendVariables);
-            oEnvModel.setProperty("/source", oConfig.source || FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL);
-            oEnvModel.setProperty("/loadedAt", new Date().toISOString());
-            oEnvModel.setProperty("/timers", mTimers);
-            oEnvModel.setProperty("/variables", mFrontendVariables);
+            if (oEnvState) {
+                oEnvState.source = oConfig.source || FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL;
+                oEnvState.loadedAt = new Date().toISOString();
+                oEnvState.timers = mTimers;
+                oEnvState.variables = mFrontendVariables;
+            }
             if (oMasterDataModel && oMasterDataModel.setProperty) {
                 oMasterDataModel.setProperty("/runtime/timers", mTimers);
                 oMasterDataModel.setProperty("/runtime/requiredFields", aRequiredFields);

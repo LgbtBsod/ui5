@@ -19,8 +19,6 @@ CLASS zcl_zodata_lock_manager DEFINITION
         !iv_session_guid TYPE string OPTIONAL
         !iv_owner        TYPE syuname OPTIONAL
         !iv_tab_session_id TYPE string OPTIONAL
-      CHANGING
-        !cs_result TYPE any OPTIONAL
       RAISING
         zcx_zodata_error.
 ENDCLASS.
@@ -40,9 +38,27 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
         is_key            = is_key
         iv_session_guid   = is_owner-session_guid
         iv_owner          = is_owner-uname
-        iv_tab_session_id = is_owner-tab_session_id
+        iv_tab_session_id = is_owner-tab_session_id ).
+    DATA lv_now TYPE timestampl.
+    DATA lv_expires TYPE timestampl.
+    GET TIME STAMP FIELD lv_now.
+    lv_expires = cl_abap_tstmp=>add(
+      tstmp = lv_now
+      secs  = zif_zodata_contract_constants=>c_lock_ttl_seconds ).
+    mo_contract->fill_lock_acquire_result(
+      EXPORTING
+        iv_ok                  = abap_true
+        iv_code                = zif_zodata_contract_constants=>c_code_lock_ok
+        iv_owner               = is_owner-uname
+        iv_owner_session       = is_owner-session_guid
+        iv_tab_session_id      = is_owner-tab_session_id
+        iv_object_uuid         = is_key-object_id
+        iv_lock_expires        = lv_expires
+        iv_server_now          = lv_now
+        iv_lock_refreshed      = abap_true
+        iv_owner_session_match = xsdbool( is_owner-session_guid IS NOT INITIAL )
       CHANGING
-        cs_result         = cs_result ).
+        cs_result              = cs_result ).
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~heartbeat.
@@ -50,9 +66,25 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
       EXPORTING
         iv_mode         = 'H'
         is_key          = is_key
-        iv_session_guid = iv_session_guid
+        iv_session_guid = iv_session_guid ).
+    DATA lv_now TYPE timestampl.
+    DATA lv_expires TYPE timestampl.
+    GET TIME STAMP FIELD lv_now.
+    lv_expires = cl_abap_tstmp=>add(
+      tstmp = lv_now
+      secs  = zif_zodata_contract_constants=>c_lock_ttl_seconds ).
+    mo_contract->fill_lock_heartbeat_result(
+      EXPORTING
+        iv_ok                  = abap_true
+        iv_code                = zif_zodata_contract_constants=>c_code_lock_ok
+        iv_owner_session       = iv_session_guid
+        iv_object_uuid         = is_key-object_id
+        iv_lock_expires        = lv_expires
+        iv_server_now          = lv_now
+        iv_lock_refreshed      = abap_true
+        iv_owner_session_match = xsdbool( iv_session_guid IS NOT INITIAL )
       CHANGING
-        cs_result       = cs_result ).
+        cs_result              = cs_result ).
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~release.
@@ -60,9 +92,7 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
       EXPORTING
         iv_mode         = 'R'
         is_key          = is_key
-        iv_session_guid = iv_session_guid
-      CHANGING
-        cs_result       = cs_result ).
+        iv_session_guid = iv_session_guid ).
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~status.
@@ -70,9 +100,7 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
       EXPORTING
         iv_mode         = 'S'
         is_key          = is_key
-        iv_session_guid = iv_session_guid
-      CHANGING
-        cs_result       = cs_result ).
+        iv_session_guid = iv_session_guid ).
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~ensure_session_lock.
@@ -104,8 +132,6 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD call_lock_fm.
-    DATA lv_now TYPE timestampl.
-    DATA lv_expires TYPE timestampl.
     DATA lv_error_code TYPE string.
     DATA lv_error_text TYPE string.
 
@@ -127,17 +153,17 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
     IF sy-subrc <> 0.
       CASE iv_mode.
         WHEN 'H' OR 'V'.
-          lv_error_code = zcl_zodata_contract_constants=>c_code_lock_not_owned_by_session.
-          lv_error_text = zcl_zodata_contract_constants=>c_msg_lock_session_required.
+          lv_error_code = zif_zodata_contract_constants=>c_code_lock_not_owned_by_session.
+          lv_error_text = zif_zodata_contract_constants=>c_msg_lock_session_required.
         WHEN 'R'.
-          lv_error_code = zcl_zodata_contract_constants=>c_code_lock_not_owned_by_session.
-          lv_error_text = zcl_zodata_contract_constants=>c_msg_lock_session_required.
+          lv_error_code = zif_zodata_contract_constants=>c_code_lock_not_owned_by_session.
+          lv_error_text = zif_zodata_contract_constants=>c_msg_lock_session_required.
         WHEN 'S'.
-          lv_error_code = zcl_zodata_contract_constants=>c_code_lock_missing.
-          lv_error_text = zcl_zodata_contract_constants=>c_code_lock_missing.
+          lv_error_code = zif_zodata_contract_constants=>c_code_lock_missing.
+          lv_error_text = zif_zodata_contract_constants=>c_code_lock_missing.
         WHEN OTHERS.
-          lv_error_code = zcl_zodata_contract_constants=>c_code_lock_missing.
-          lv_error_text = zcl_zodata_contract_constants=>c_code_lock_missing.
+          lv_error_code = zif_zodata_contract_constants=>c_code_lock_missing.
+          lv_error_text = zif_zodata_contract_constants=>c_code_lock_missing.
       ENDCASE.
       RAISE EXCEPTION TYPE zcx_zodata_error
         EXPORTING
@@ -145,36 +171,6 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
           iv_msg  = lv_error_text.
     ENDIF.
 
-    IF cs_result IS SUPPLIED.
-      GET TIME STAMP FIELD lv_now.
-      lv_expires = cl_abap_tstmp=>add(
-        tstmp = lv_now
-        secs  = zcl_zodata_contract_constants=>c_lock_ttl_seconds ).
-
-      DATA(lv_action) = SWITCH string(
-        iv_mode
-        WHEN 'A' THEN zcl_zodata_contract_constants=>c_action_acquired
-        WHEN 'H' THEN zcl_zodata_contract_constants=>c_action_heartbeat
-        WHEN 'R' THEN zcl_zodata_contract_constants=>c_action_released
-        WHEN 'S' THEN zcl_zodata_contract_constants=>c_action_owned
-        ELSE zcl_zodata_contract_constants=>c_action_none ).
-
-      mo_contract->fill_lock_result(
-        EXPORTING
-          iv_ok                  = abap_true
-          iv_code                = zcl_zodata_contract_constants=>c_code_lock_ok
-          iv_action              = lv_action
-          iv_owner               = iv_owner
-          iv_owner_session       = iv_session_guid
-          iv_tab_session_id      = iv_tab_session_id
-          iv_object_uuid         = is_key-object_id
-          iv_lock_expires        = lv_expires
-          iv_server_now          = lv_now
-          iv_lock_refreshed      = xsdbool( iv_mode = 'H' OR iv_mode = 'A' )
-          iv_owner_session_match = xsdbool( iv_session_guid IS NOT INITIAL )
-        CHANGING
-          cs_result              = cs_result ).
-    ENDIF.
   ENDMETHOD.
 
 ENDCLASS.

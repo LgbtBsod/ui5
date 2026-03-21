@@ -32,8 +32,20 @@ sap.ui.define([
         return String(vValue == null ? "" : vValue).trim().length > 0;
     }
 
+    function normalizeRequiredPath(sPath) {
+        return ("/" + String(sPath || "").replace(/^\//, "")).replace(/^\/current(?=\/|$)/, "") || "/";
+    }
+
+    function toDetailModelPath(sPath) {
+        var sNormalized = normalizeRequiredPath(sPath);
+        if (sNormalized === "/") {
+            return "/current";
+        }
+        return "/current" + sNormalized;
+    }
+
     function shouldTrackSelectedDirtyPath(sModelPath) {
-        var sPath = "/" + String(sModelPath || "").replace(/^\//, "");
+        var sPath = normalizeRequiredPath(sModelPath);
         if (sPath === "/") {
             return false;
         }
@@ -50,13 +62,15 @@ sap.ui.define([
         return ValidationPathMap.toValidationKey(sRequiredPath);
     }
 
-    return {
-        isFilledValidationValue: isFilledValidationValue,
-        setValidationMissing: setValidationMissing,
-        setValidationMissingKey: setValidationMissingKey,
-        shouldTrackSelectedDirtyPath: shouldTrackSelectedDirtyPath,
-        showValidation: showValidation,
-        toValidationKey: toValidationKey,
-        validationSummaryPath: validationSummaryPath
-    };
+        return {
+            isFilledValidationValue: isFilledValidationValue,
+            normalizeRequiredPath: normalizeRequiredPath,
+            setValidationMissing: setValidationMissing,
+            setValidationMissingKey: setValidationMissingKey,
+            shouldTrackSelectedDirtyPath: shouldTrackSelectedDirtyPath,
+            showValidation: showValidation,
+            toDetailModelPath: toDetailModelPath,
+            toValidationKey: toValidationKey,
+            validationSummaryPath: validationSummaryPath
+        };
 });

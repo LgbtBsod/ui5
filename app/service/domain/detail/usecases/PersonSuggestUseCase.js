@@ -10,7 +10,7 @@ sap.ui.define([
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var SELECTED_MODEL = ModelContracts.MODELS.SELECTED;
+    var DETAIL_MODEL = ModelContracts.MODELS.DETAIL;
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
     function PersonSuggestUseCase() {
@@ -21,7 +21,7 @@ sap.ui.define([
 
 function selectedItemPayload(oItem) {
         if (!oItem || !oItem.getBindingContext) { return null; }
-        var oCtx = oItem.getBindingContext("view");
+        var oCtx = oItem.getBindingContext(VIEW_MODEL);
         return oCtx && oCtx.getObject ? oCtx.getObject() : null;
     }
 
@@ -75,13 +75,13 @@ function selectedItemPayload(oItem) {
             var oItem = selectedItemPayload(mInput && mInput.item);
             if (!oItem) { return Promise.resolve(Result.ok({ selected: false }, [])); }
             var aEffects = [
-                Effects.modelPatch("view", sInputPath, oItem.fullName || ""),
+                Effects.modelPatch(VIEW_MODEL, sInputPath, oItem.fullName || ""),
                 Effects.modelPatch(VIEW_MODEL, sPath, []),
                 Effects.modelPatch(VIEW_MODEL, "/personSuggestHint", ""),
-                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_FULLNAME", oItem.fullName || ""),
-                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_PERNER", oItem.perner || ""),
-                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_POSITION", oItem.position || ""),
-                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_ORGUNIT", oItem.orgUnit || ""),
+                Effects.modelPatch(DETAIL_MODEL, "/current/basic/" + sPrefix + "_FULLNAME", oItem.fullName || ""),
+                Effects.modelPatch(DETAIL_MODEL, "/current/basic/" + sPrefix + "_PERNER", oItem.perner || ""),
+                Effects.modelPatch(DETAIL_MODEL, "/current/basic/" + sPrefix + "_POSITION", oItem.position || ""),
+                Effects.modelPatch(DETAIL_MODEL, "/current/basic/" + sPrefix + "_ORGUNIT", oItem.orgUnit || ""),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, true)
             ];
             return Promise.resolve(Result.ok({ selected: true }, aEffects));
@@ -93,10 +93,10 @@ function selectedItemPayload(oItem) {
                 Effects.modelPatch(VIEW_MODEL, sInputPath, sValue),
                 Effects.modelPatch(VIEW_MODEL, sPath, []),
                 Effects.modelPatch(VIEW_MODEL, "/personSuggestHint", ""),
-                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_FULLNAME", sValue),
-                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_PERNER", ""),
-                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_POSITION", ""),
-                Effects.modelPatch(SELECTED_MODEL, "/basic/" + sPrefix + "_ORGUNIT", ""),
+                Effects.modelPatch(DETAIL_MODEL, "/current/basic/" + sPrefix + "_FULLNAME", sValue),
+                Effects.modelPatch(DETAIL_MODEL, "/current/basic/" + sPrefix + "_PERNER", ""),
+                Effects.modelPatch(DETAIL_MODEL, "/current/basic/" + sPrefix + "_POSITION", ""),
+                Effects.modelPatch(DETAIL_MODEL, "/current/basic/" + sPrefix + "_ORGUNIT", ""),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, true)
             ]));
         }

@@ -16,7 +16,7 @@
 
     var MODELS = ModelContracts.MODELS;
     var STATE_MODEL = MODELS.STATE;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
     var APP_SOURCES = OperationSourceContracts.APP;
 
@@ -85,13 +85,13 @@
         var sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         var sCurrentRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
         var sPostOpenHydratedRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
-        var oSelected = oController.getModel(SELECTED_MODEL);
-        var oSelectedData = (oSelected && oSelected.getData && oSelected.getData()) || {};
-        var sSelectedRootId = String((oSelectedData && oSelectedData.root && oSelectedData.root.id) || "").trim();
+        var oDetailModel = oController.getModel(DETAIL_MODEL);
+        var oDetailData = (oDetailModel && oDetailModel.getData && oDetailModel.getData()) || {};
+        var sSelectedRootId = String((oDetailData && oDetailData.current && oDetailData.current.root && oDetailData.current.root.id) || "").trim();
 
         return {
             bCreate: bCreate,
-            oSelected: oSelected,
+            oDetailModel: oDetailModel,
             sCurrentRootId: sCurrentRootId,
             sCurrentRouteName: sCurrentRouteName,
             sId: sId,
@@ -121,9 +121,12 @@
     }
 
     function openCreateDraft(oController, mContext, mHooks) {
-        if (mContext.oSelected && mContext.oSelected.setData) {
-            mContext.oSelected.setData(DraftChecklistFactory.createEmptyDraft());
-            ModelStateRuntime.writeOnModel(mContext.oSelected, DETAIL_MODEL_PATHS.ATTACHMENTS, []);
+        if (mContext.oDetailModel && mContext.oDetailModel.setData) {
+            mContext.oDetailModel.setData({
+                current: DraftChecklistFactory.createEmptyDraft(),
+                base: {}
+            });
+            ModelStateRuntime.writeOnModel(mContext.oDetailModel, DETAIL_MODEL_PATHS.ATTACHMENTS, []);
         }
         return mHooks.openChecklist({ id: CreateSentinel.VALUE, rootId: CreateSentinel.VALUE });
     }

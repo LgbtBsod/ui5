@@ -1581,6 +1581,59 @@ def checklist_root_entity(entity_key: str, response: Response, db: Session = Dep
     return odata_entity(_to_root(root, db=db))
 
 
+@router.post(f"{SERVICE_ROOT}/ChecklistRootSet")
+def checklist_root_create(payload: dict, response: Response, db: Session = Depends(get_db)):
+    basic_values = _normalize_basic_payload(payload, db)
+    requested_id = _pick_text(payload, "RequestId", "Id", "checklist_id")
+    requested_status = _pick_text(payload, "Status", "status") or "DRAFT"
+    user_name = CurrentUserService.resolve_uname(db=db)
+
+    root = ChecklistRoot(
+        id=str(uuid.uuid4()),
+        checklist_id=requested_id or _next_checklist_id(db),
+        lpc=str(payload.get("lpc") or basic_values.get("lpc") or ""),
+        status=_normalize_status_input(requested_status),
+        integration_flag=False,
+        created_by=user_name,
+        changed_by=user_name,
+        version_number=1,
+    )
+    _apply_basic_payload(root, basic_values)
+    root.changed_on = now_utc()
+    db.add(root)
+    db.commit()
+    AnalyticsService.mark_dirty()
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
+    response.headers["sap-message"] = build_sap_message("Checklist created", "success", code="CREATED")
+    return odata_entity(_to_root(root, db=db))
+
+
+@router.patch(f"{SERVICE_ROOT}/ChecklistRootSet({{entity_key}})")
+def checklist_root_update(entity_key: str, payload: dict, response: Response, db: Session = Depends(get_db)):
+    root, err = _load_root_or_error(db, entity_key)
+    if err:
+        return err
+    session_guid = str(payload.get("SessionGuid") or payload.get("session_guid") or "").strip()
+    if session_guid:
+        try:
+            LockService.validate_session_lock(db, root.id, session_guid)
+        except ValueError as ex:
+            if str(ex) in {"LOCK_MISSING", "LOCK_NOT_OWNED_BY_SESSION"}:
+                return _err(409, str(ex), "Active lock for session is required")
+            return _err(409, "LOCK_EXPIRED", "Lock expired")
+
+    _apply_root_payload(root, payload)
+    _apply_basic_payload(root, _normalize_basic_payload(payload, db))
+    root.changed_by = CurrentUserService.resolve_uname(db=db) or root.changed_by or "ANON"
+    root.changed_on = now_utc()
+    root.version_number = int(root.version_number or 0) + 1
+    db.commit()
+    AnalyticsService.mark_dirty()
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
+    response.headers["sap-message"] = build_sap_message("Checklist updated", "success", code="SAVED")
+    return odata_entity(_to_root(root, db=db))
+
+
 @router.delete(f"{SERVICE_ROOT}/ChecklistRootSet({{entity_key}})")
 def checklist_root_delete(entity_key: str, db: Session = Depends(get_db)):
     root, err = _load_root_or_error(db, entity_key)
@@ -1618,6 +1671,62 @@ def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expan
     return odata_payload([_to_check(c) for c in rows], total if inlinecount == "allpages" else None)
 
 
+@router.post(f"{SERVICE_ROOT}/ChecklistCheckSet")
+def checklist_check_create(payload: dict, db: Session = Depends(get_db)):
+    root, err = _load_root_or_error(db, payload.get("RootKey") or payload.get("RootId") or "")
+    if err:
+        return err
+    check = ChecklistCheck(
+        id=str(uuid.uuid4()),
+        root_id=root.id,
+        text=str(payload.get("Text") or "").strip(),
+        comment=str(payload.get("Comment") or "").strip(),
+        status="PASS" if bool(payload.get("Result")) else "FAIL",
+        position=int(payload.get("ChecksNum") or 0) or 1,
+        created_on=now_utc(),
+        changed_on=now_utc(),
+    )
+    db.add(check)
+    root.changed_on = now_utc()
+    root.version_number = int(root.version_number or 0) + 1
+    db.commit()
+    return odata_entity(_to_check(check))
+
+
+@router.patch(f"{SERVICE_ROOT}/ChecklistCheckSet({{entity_key}})")
+def checklist_check_update(entity_key: str, payload: dict, db: Session = Depends(get_db)):
+    key = _entity_key(entity_key)
+    row = db.query(ChecklistCheck).filter(ChecklistCheck.id == key).first()
+    if not row:
+        return _err(404, "NOT_FOUND", "Check row not found")
+    row.text = str(payload.get("Text") or row.text or "").strip()
+    row.comment = str(payload.get("Comment") or row.comment or "").strip()
+    row.status = "PASS" if bool(payload.get("Result")) else "FAIL"
+    row.position = int(payload.get("ChecksNum") or row.position or 1)
+    row.changed_on = now_utc()
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == row.root_id).first()
+    if root:
+        root.changed_on = now_utc()
+        root.version_number = int(root.version_number or 0) + 1
+    db.commit()
+    return odata_entity(_to_check(row))
+
+
+@router.delete(f"{SERVICE_ROOT}/ChecklistCheckSet({{entity_key}})")
+def checklist_check_delete(entity_key: str, db: Session = Depends(get_db)):
+    key = _entity_key(entity_key)
+    row = db.query(ChecklistCheck).filter(ChecklistCheck.id == key).first()
+    if not row:
+        return _err(404, "NOT_FOUND", "Check row not found")
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == row.root_id).first()
+    db.delete(row)
+    if root:
+        root.changed_on = now_utc()
+        root.version_number = int(root.version_number or 0) + 1
+    db.commit()
+    return Response(status_code=204)
+
+
 @router.get(f"{SERVICE_ROOT}/ChecklistBarrierSet")
 def checklist_barrier_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
     if (err := _reject_expand(expand)):
@@ -1626,6 +1735,62 @@ def checklist_barrier_set(filter: str | None = Query(None, alias="$filter"), exp
     filter = _normalize_filter_hex_keys(filter, fields=("RootKey", "RootId", "Key"))
     rows, total = _apply_order_filter(db.query(ChecklistBarrier), ChecklistBarrier, BARRIER_MAP, filter, None, top, skip)
     return odata_payload([_to_barrier(c) for c in rows], total if inlinecount == "allpages" else None)
+
+
+@router.post(f"{SERVICE_ROOT}/ChecklistBarrierSet")
+def checklist_barrier_create(payload: dict, db: Session = Depends(get_db)):
+    root, err = _load_root_or_error(db, payload.get("RootKey") or payload.get("RootId") or "")
+    if err:
+        return err
+    row = ChecklistBarrier(
+        id=str(uuid.uuid4()),
+        root_id=root.id,
+        description=str(payload.get("Text") or "").strip(),
+        comment=str(payload.get("Comment") or "").strip(),
+        is_active=bool(payload.get("Result")),
+        position=int(payload.get("BarriersNum") or 0) or 1,
+        created_on=now_utc(),
+        changed_on=now_utc(),
+    )
+    db.add(row)
+    root.changed_on = now_utc()
+    root.version_number = int(root.version_number or 0) + 1
+    db.commit()
+    return odata_entity(_to_barrier(row))
+
+
+@router.patch(f"{SERVICE_ROOT}/ChecklistBarrierSet({{entity_key}})")
+def checklist_barrier_update(entity_key: str, payload: dict, db: Session = Depends(get_db)):
+    key = _entity_key(entity_key)
+    row = db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).first()
+    if not row:
+        return _err(404, "NOT_FOUND", "Barrier row not found")
+    row.description = str(payload.get("Text") or row.description or "").strip()
+    row.comment = str(payload.get("Comment") or row.comment or "").strip()
+    row.is_active = bool(payload.get("Result"))
+    row.position = int(payload.get("BarriersNum") or row.position or 1)
+    row.changed_on = now_utc()
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == row.root_id).first()
+    if root:
+        root.changed_on = now_utc()
+        root.version_number = int(root.version_number or 0) + 1
+    db.commit()
+    return odata_entity(_to_barrier(row))
+
+
+@router.delete(f"{SERVICE_ROOT}/ChecklistBarrierSet({{entity_key}})")
+def checklist_barrier_delete(entity_key: str, db: Session = Depends(get_db)):
+    key = _entity_key(entity_key)
+    row = db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).first()
+    if not row:
+        return _err(404, "NOT_FOUND", "Barrier row not found")
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == row.root_id).first()
+    db.delete(row)
+    if root:
+        root.changed_on = now_utc()
+        root.version_number = int(root.version_number or 0) + 1
+    db.commit()
+    return Response(status_code=204)
 
 
 @router.get(f"{SERVICE_ROOT}/DictionaryItemSet")
@@ -2408,6 +2573,55 @@ def attachment_get(entity_key: str, db: Session = Depends(get_db)):
     if not entry:
         return _err(404, "NOT_FOUND", "Attachment not found")
     return odata_entity(_to_attachment(entry, db=db, include_value=True))
+
+
+@router.post(f"{SERVICE_ROOT}/AttachmentSet")
+def attachment_create(payload: dict, db: Session = Depends(get_db)):
+    root, err = _load_root_or_error(db, payload.get("RootKey") or "")
+    if err:
+        return err
+    try:
+        _apply_save_attachments(db, root, [payload])
+    except ValueError:
+        db.rollback()
+        return _err(400, "INVALID_ATTACHMENT_PAYLOAD", "Attachment payload is invalid")
+    except RuntimeError as ex:
+        db.rollback()
+        return ex.args[0]
+    root.changed_on = now_utc()
+    root.version_number = int(root.version_number or 0) + 1
+    db.commit()
+    entry = db.query(AttachmentEntry).filter(AttachmentEntry.root_id == root.id).order_by(desc(AttachmentEntry.created_on), desc(AttachmentEntry.changed_on)).first()
+    return odata_entity(_to_attachment(entry, db=db))
+
+
+@router.patch(f"{SERVICE_ROOT}/AttachmentSet({{entity_key}})")
+def attachment_update(entity_key: str, payload: dict, db: Session = Depends(get_db)):
+    key = _entity_key(entity_key)
+    entry = db.query(AttachmentEntry).filter(AttachmentEntry.id == key).first()
+    if not entry:
+        return _err(404, "NOT_FOUND", "Attachment not found")
+    if "Description" in payload:
+        entry.description = str(payload.get("Description") or "").strip()
+    if "CategoryKey" in payload:
+        entry.category_key = str(payload.get("CategoryKey") or entry.category_key or "GEN").strip() or "GEN"
+    if payload.get("Value"):
+        try:
+            blob = base64.b64decode(str(payload.get("Value") or ""), validate=True)
+        except Exception:
+            return _err(400, "INVALID_ATTACHMENT_PAYLOAD", "Attachment payload is invalid")
+        Path(entry.storage_path or "").write_bytes(blob)
+        entry.file_size = len(blob)
+        entry.mime_type = str(payload.get("MimeType") or entry.mime_type or "application/octet-stream").strip() or "application/octet-stream"
+    if payload.get("FileName"):
+        entry.file_name = str(payload.get("FileName") or entry.file_name or "").strip()
+    entry.changed_on = now_utc()
+    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == entry.root_id).first()
+    if root:
+        root.changed_on = now_utc()
+        root.version_number = int(root.version_number or 0) + 1
+    db.commit()
+    return odata_entity(_to_attachment(entry, db=db))
 
 
 @router.delete(f"{SERVICE_ROOT}/AttachmentSet({{entity_key}})")

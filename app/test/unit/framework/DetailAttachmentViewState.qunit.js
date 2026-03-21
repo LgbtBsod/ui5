@@ -7,7 +7,7 @@ sap.ui.define([
     function createController(mSeed) {
         var mModels = {
             state: new JSONModel((mSeed && mSeed.state) || {}),
-            selected: new JSONModel((mSeed && mSeed.selected) || {}),
+            detail: new JSONModel((mSeed && mSeed.detail) || {}),
             view: new JSONModel((mSeed && mSeed.view) || {})
         };
 
@@ -27,8 +27,8 @@ sap.ui.define([
                 selectedId: "ROOT-1",
                 activeObjectId: "ROOT-1"
             },
-            selected: {
-                root: { id: "ROOT-1" }
+            detail: {
+                current: { root: { id: "ROOT-1" } }
             },
             view: {
                 attachmentsExpanded: false,
@@ -50,8 +50,8 @@ sap.ui.define([
                 workflow: { detail: { editMode: "READ" } },
                 selectedId: "ROOT-1"
             },
-            selected: {
-                root: { id: "ROOT-1" }
+            detail: {
+                current: { root: { id: "ROOT-1" } }
             },
             view: {}
         });

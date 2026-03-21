@@ -1,4 +1,5 @@
 sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
@@ -9,10 +10,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (Result, Effects, JsRuntime, AttachmentEffectRuntime, AttachmentValueCodec, DetailAttachmentStateRuntime, DetailStateAccess, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
+], function (ModelContracts, Result, Effects, JsRuntime, AttachmentEffectRuntime, AttachmentValueCodec, DetailAttachmentStateRuntime, DetailStateAccess, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
     function buildLocalObjectUrl(oFile) {
         if (typeof window !== "undefined" && window.URL && typeof window.URL.createObjectURL === TYPE_FUNCTION && oFile) {
@@ -59,10 +61,10 @@ sap.ui.define([
 
     function buildUploadEffects(mCtx, oAttachment, sToastKey) {
         var oUiState = mCtx && mCtx.uiState;
-        var bLoadedAll = !!(oUiState && oUiState.get("view", ViewPathContracts.ATTACHMENTS_LOADED));
+        var bLoadedAll = !!(oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.ATTACHMENTS_LOADED));
         var aEffects = DetailAttachmentStateRuntime.appendSessionAttachment(mCtx, oAttachment, sToastKey);
         if (bLoadedAll) {
-            aEffects.push(Effects.modelPatch("view", ViewPathContracts.ATTACHMENTS_LOADED, true));
+            aEffects.push(Effects.modelPatch(VIEW_MODEL, ViewPathContracts.ATTACHMENTS_LOADED, true));
         }
         return aEffects;
     }

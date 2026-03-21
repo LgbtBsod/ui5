@@ -1,20 +1,22 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/UiDecisionBehaviorHelpers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (UiDecisionBehaviorHelpers, BehaviorRegistry) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchMessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ShellMessageKeyConstants"
+], function (UiDecisionBehaviorHelpers, BehaviorRegistry, DetailMessageKeyConstants, SearchMessageKeyConstants, ShellMessageKeyConstants) {
     "use strict";
 
     var UI_DECISION_SCOPE = "uiDecision";
     var ACTION_DELETE = "Delete";
-    var TEXT_DELETE_CHECKLIST_CONFIRM = "deleteChecklistConfirmText";
-    var TEXT_NOTHING_TO_OPEN = "nothingToOpen";
-    var TEXT_OPEN_USES_FIRST = "searchOpenUsesFirstHint";
-    var TEXT_COPY_SINGLE_SELECTION = "searchCopySingleSelectionHint";
-    var TEXT_SELECT_VISIBLE_EMPTY = "searchSelectVisibleEmpty";
-    var TEXT_SHELL_REFRESH_SUCCESS = "shellContextRefreshed";
-    var TEXT_SHELL_REFRESH_FAILURE = "shellUserRefreshFailed";
-    var TEXT_CORRELATION_COPIED = "correlationIdCopied";
-    var ERROR_UNKNOWN = "Unknown error";
+    var TEXT_DELETE_CHECKLIST_CONFIRM = DetailMessageKeyConstants.DELETE_CHECKLIST_CONFIRM;
+    var TEXT_NOTHING_TO_OPEN = SearchMessageKeyConstants.NOTHING_TO_OPEN;
+    var TEXT_OPEN_USES_FIRST = SearchMessageKeyConstants.OPEN_USES_FIRST_HINT;
+    var TEXT_COPY_SINGLE_SELECTION = SearchMessageKeyConstants.COPY_SINGLE_SELECTION_HINT;
+    var TEXT_SELECT_VISIBLE_EMPTY = SearchMessageKeyConstants.SELECT_VISIBLE_EMPTY;
+    var TEXT_SHELL_REFRESH_SUCCESS = ShellMessageKeyConstants.CONTEXT_REFRESHED;
+    var TEXT_SHELL_REFRESH_FAILURE = ShellMessageKeyConstants.USER_REFRESH_FAILED;
+    var TEXT_CORRELATION_COPIED = ShellMessageKeyConstants.CORRELATION_COPIED;
     var bDefaultsRegistered = false;
 
     function runOptionalHandler(fnHandler) {
@@ -81,7 +83,7 @@ sap.ui.define([
 
     function notifyShellRefreshFailure(mContext) {
         var oError = mContext && mContext.error;
-        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, TEXT_SHELL_REFRESH_FAILURE, [oError && oError.message || ERROR_UNKNOWN]);
+        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, TEXT_SHELL_REFRESH_FAILURE, [String((oError && oError.message) || "")]);
         return false;
     }
 

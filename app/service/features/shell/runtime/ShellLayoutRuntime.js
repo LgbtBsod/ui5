@@ -4,12 +4,36 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (LayoutStateRuntime, RootIdRuntime, ModelStateRuntime, ThemeDomRuntime, NavigationContracts, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+], function (LayoutStateRuntime, RootIdRuntime, ModelStateRuntime, ThemeDomRuntime, NavigationContracts, ModelContracts, ModelPathContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var STATE_MODEL = MODELS.STATE;
+    var SHELL_MODEL = MODELS.SHELL;
+
+    function resolveDesiredLayout(oController, oStateModel) {
+        var oShellModel = ModelStateRuntime.model(oController, SHELL_MODEL);
+        var sCurrentLayout = LayoutStateRuntime.readLayout(oShellModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
+        var sRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
+        var sSelectedId = RootIdRuntime.resolveFromStateModel(oStateModel);
+
+        if (sRouteName === NavigationContracts.ROUTES.SEARCH) {
+            return NavigationContracts.LAYOUTS.ONE_COLUMN;
+        }
+        if (sRouteName === NavigationContracts.ROUTES.ANALYTICS || sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT) {
+            return NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
+        }
+        if (sRouteName === NavigationContracts.ROUTES.DETAIL) {
+            return sSelectedId ? NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED : NavigationContracts.LAYOUTS.ONE_COLUMN;
+        }
+        if (!sSelectedId) {
+            return NavigationContracts.LAYOUTS.ONE_COLUMN;
+        }
+        return LayoutStateRuntime.normalizeLayout(sCurrentLayout);
+    }
 
     function syncMidColumnPage(oController, sRouteName) {
         var oLayout = oController.byId && oController.byId("mainFcl");
@@ -27,28 +51,17 @@
     }
 
     function syncLayoutState(oController, oStateModel) {
-        var sLayoutRaw = ModelStateRuntime.read(oController, STATE_MODEL, "/layout", NavigationContracts.LAYOUTS.ONE_COLUMN);
-        var sLayout = LayoutStateRuntime.normalizeLayout(sLayoutRaw);
-        var sRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-        var sSelectedId = RootIdRuntime.resolveFromStateModel(oStateModel);
+        var oShellModel = ModelStateRuntime.model(oController, SHELL_MODEL);
+        var sLayout = resolveDesiredLayout(oController, oStateModel);
+        var sRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         var bSingle = sLayout === NavigationContracts.LAYOUTS.ONE_COLUMN;
         var bDetailOnly = sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
         var oRoot = oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
         var oClassHost = (oRoot && oRoot.querySelector && oRoot.querySelector(".chkSkin")) || oRoot;
         var oLayout = oController.byId && oController.byId("mainFcl");
 
-        if (sRouteName === NavigationContracts.ROUTES.ANALYTICS && sLayout !== NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
-            sLayout = NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
-            bSingle = false;
-            bDetailOnly = true;
-        }
-        if (!sSelectedId
-            && sLayout !== NavigationContracts.LAYOUTS.ONE_COLUMN
-            && sRouteName !== NavigationContracts.ROUTES.ANALYTICS
-            && !NavigationContracts.isDetailRoute(sRouteName)) {
-            sLayout = NavigationContracts.LAYOUTS.ONE_COLUMN;
-            bSingle = true;
-            bDetailOnly = false;
+        if (oShellModel && ModelStateRuntime.readOnModel(oShellModel, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN) !== sLayout) {
+            ModelStateRuntime.writeOnModel(oShellModel, MODEL_PATHS.SHELL_LAYOUT, sLayout);
         }
         if (oClassHost && oClassHost.classList) {
             ThemeDomRuntime.toggleClass([oClassHost], "appLayoutSingle", bSingle);
@@ -62,6 +75,7 @@
     }
 
     return {
+        resolveDesiredLayout: resolveDesiredLayout,
         syncLayoutState: syncLayoutState
     };
 });

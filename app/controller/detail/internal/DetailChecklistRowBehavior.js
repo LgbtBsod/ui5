@@ -72,8 +72,8 @@
         onInfoCardKeyDown: function (oEvent, sCardKey) { DetailRowBehaviorRuntime.onInfoCardKeyDown(this, oEvent, sCardKey, resolveHooks(this)); },
         onConfirmTestUser: function () { DetailCommandPolicy.resolveConflict(this, { intent: DETAIL_SOURCES.TEST_USER }); },
         onSelectionToggle: function () { DetailCommandPolicy.rowOps(this, { op: "selectionToggle" }); },
-        onRowValueChange: function (oEvent) { this._applySelectedFieldChange(oEvent, { property: "value", parameter: "value" }); },
-        onRowStateChange: function (oEvent) { this._applySelectedFieldChange(oEvent, { property: "state", parameter: "state" }); },
+        onRowValueChange: function (oEvent) { this._applyDetailFieldChange(oEvent, { property: "value", parameter: "value" }); },
+        onRowStateChange: function (oEvent) { this._applyDetailFieldChange(oEvent, { property: "state", parameter: "state" }); },
         onDialogClosed: function () { DetailCommandPolicy.resolveConflict(this, { intent: DETAIL_SOURCES.DIALOG_CLOSED }); }
     };
 });

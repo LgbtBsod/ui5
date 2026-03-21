@@ -9,7 +9,7 @@
 
     var MODELS = ModelContracts.MODELS;
     var VIEW_MODEL = MODELS.VIEW;
-    var SELECTED_MODEL = MODELS.SELECTED;
+    var DETAIL_MODEL = MODELS.DETAIL;
 
     function base64ToBlob(sBase64, sMimeType) {
         var sBinary = atob(String(sBase64 || "").trim());
@@ -26,7 +26,7 @@
 
     function resolveAttachmentContext(oEvent) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-        return (oSource && oSource.getBindingContext && (oSource.getBindingContext(SELECTED_MODEL) || oSource.getBindingContext(VIEW_MODEL))) || null;
+        return (oSource && oSource.getBindingContext && (oSource.getBindingContext(DETAIL_MODEL) || oSource.getBindingContext(VIEW_MODEL))) || null;
     }
 
     function openAttachment(oController, oEvent) {

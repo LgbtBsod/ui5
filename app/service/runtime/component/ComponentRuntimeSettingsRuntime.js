@@ -14,7 +14,7 @@
 
     function initializeRuntimeSettings(oComponent, mOptions) {
         var oStateModel = mOptions.stateModel;
-        var oEnvModel = mOptions.envModel;
+        var oEnvState = mOptions.envState;
         var oMasterDataModel = mOptions.masterDataModel;
         var SettingsManager = mOptions.settingsManager;
         var GatewayClient = mOptions.gatewayBackendService;
@@ -29,7 +29,7 @@
                 return oComponent._applyFrontendRuntimeConfig({
                     source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                     runtimeSettingsPayload: oRuntime || {}
-                }, oStateModel, oEnvModel, oMasterDataModel).then(function () {
+                }, oStateModel, oEnvState, oMasterDataModel).then(function () {
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
                     fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig(FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL));
                     return oRuntime || {};

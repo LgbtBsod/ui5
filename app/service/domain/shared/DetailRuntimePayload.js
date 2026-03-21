@@ -7,6 +7,7 @@
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var DETAIL_MODEL = ModelContracts.MODELS.DETAIL;
 
     function sanitizeId(vId) {
         return String(vId || "").trim();
@@ -21,7 +22,7 @@
         var oUiState = mCtx && mCtx.uiState;
         var sInputRootId = sanitizeId(UseCaseValue.rootId(mInput));
         var sSelectedRootId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, "/postOpenHydratedRootId"));
-        var sSelectedSnapshotRootId = sanitizeId(oUiState && oUiState.get("selected", "/root/id"));
+        var sSelectedSnapshotRootId = sanitizeId(oUiState && oUiState.get(DETAIL_MODEL, "/current/root/id"));
         var sActiveRootId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID));
         var sSelectedId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.SELECTED_ID));
         var aCandidates = [sInputRootId, sSelectedSnapshotRootId, sSelectedRootId, sActiveRootId, sSelectedId];

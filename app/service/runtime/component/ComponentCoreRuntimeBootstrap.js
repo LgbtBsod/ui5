@@ -13,7 +13,7 @@ sap.ui.define([], function () {
         });
         var oRuntimeSettingsRuntime = mDeps.ComponentFeedbackInitRuntime.initializeRuntimeSettings(oComponent, {
             stateModel: mModels.stateModel,
-            envModel: mModels.envModel,
+            envState: mModels.envState,
             masterDataModel: mModels.masterDataModel,
             settingsManager: mDeps.Managers && mDeps.Managers.SettingsManager || mDeps.SettingsManager,
             gatewayBackendService: mDeps.GatewayClient,
@@ -107,11 +107,6 @@ sap.ui.define([], function () {
                 bundleText: mDeps.bundleText,
                 emitTelemetry: mDeps.emitTelemetry,
                 timerDefaults: mDeps.ComponentStateSeedRuntime.seedInitialState(mModels.stateModel, mDeps.StatePaths, mDeps.TimeConfigService)
-            },
-            navigation: {
-                syncShellRuntimeState: function () {
-                    return oComponentRuntimeSupport.syncShellRuntimeState(mModels.stateModel, mModels.shellModel);
-                }
             }
         };
     }

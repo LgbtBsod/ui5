@@ -4,9 +4,6 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
@@ -17,9 +14,6 @@
     ControllerModelRuntime,
     ModelStateRuntime,
     ThemeContracts,
-    TimeConfigService,
-    TimerDefaults,
-    SchedulingRuntime,
     NavigationContracts,
     ModelPathContracts,
     ModelContracts,
@@ -27,7 +21,6 @@
 ) {
     "use strict";
 
-    var MODELS = ModelContracts.MODELS;
     var SHELL_PATHS = ThemeContracts.SHELL_PATHS;
     var LAYOUTS = NavigationContracts.LAYOUTS;
     var SYNC_SOURCES = ThemeContracts.SYNC_SOURCES;
@@ -37,10 +30,8 @@
         return ControllerModelRuntime.state(oController);
     }
 
-    function ensureControllerStateModel(oController, oStateModel) {
-        if (oStateModel && !ControllerModelRuntime.state(oController)) {
-            ControllerModelRuntime.view(oController).setModel(oStateModel, MODELS.STATE);
-        }
+    function resolveShellModel(oController) {
+        return ControllerModelRuntime.shell(oController);
     }
 
     function buildShellModelData(oThemeResult) {
@@ -71,43 +62,36 @@
     }
 
     function initStateBoundUi(oController, oStateModel) {
-        var oResolvedState;
-        var iBootstrapRetryMs;
-
         if (oController._oRouteModeCoordinator) {
             return;
         }
-        oResolvedState = oStateModel || resolveStateModel(oController);
-        if (!oResolvedState) {
-            SchedulingRuntime.restartTimer(0, function () {
-                initStateBoundUi(oController);
-            }, Number((TimerDefaults.bootstrapRetryMs || {}).defaultValue || 50));
+        if (!oStateModel) {
             return;
         }
-        iBootstrapRetryMs = Number(TimeConfigService.read(oResolvedState, "bootstrapRetryMs") || (TimerDefaults.bootstrapRetryMs || {}).defaultValue || 50);
-        ensureControllerStateModel(oController, oResolvedState);
         oController._oRouteModeCoordinator = new RouteModeCoordinator({
             router: oController.getRouter(),
-            stateModel: oResolvedState,
-            fcl: oController.byId("mainFcl")
+            stateModel: oStateModel
         });
         oController._oRouteModeCoordinator.start();
-        oController._iBootstrapRetryMs = iBootstrapRetryMs;
     }
 
     return {
         onInit: function (oController) {
             var oApplied = oController.applyStoredTheme();
             var oState = resolveStateModel(oController);
+            var oShell = resolveShellModel(oController);
 
             syncThemeState(oController, SYNC_SOURCES.INIT, oApplied);
-            ensureControllerStateModel(oController, oState);
             if (oState) {
                 ModelStateRuntime.setManyOnModel(oState, {
-                    [ModelPathContracts.LAYOUT]: ModelStateRuntime.readOnModel(oState, ModelPathContracts.LAYOUT, LAYOUTS.ONE_COLUMN) || LAYOUTS.ONE_COLUMN,
                     [ModelPathContracts.SELECTED_ID]: typeof ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, undefined) === TYPE_UNDEFINED
                         ? null
                         : ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, null)
+                });
+            }
+            if (oShell) {
+                ModelStateRuntime.setManyOnModel(oShell, {
+                    [ModelContracts.MODEL_PATHS.SHELL_LAYOUT]: ModelStateRuntime.readOnModel(oShell, ModelContracts.MODEL_PATHS.SHELL_LAYOUT, LAYOUTS.ONE_COLUMN) || LAYOUTS.ONE_COLUMN
                 });
             }
             initStateBoundUi(oController, oState);

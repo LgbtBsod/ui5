@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
-    <VBox binding="{view>/detailSections/barriers}" visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}" class="detailBarriersTableCard">
-        <VBox binding="{selected>/barriers}" width="100%" renderType="Bare">
+<VBox binding="{view>/detailSections/barriers}" visible="{path:'detail>/current/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}" class="detailBarriersTableCard">
+    <VBox binding="{detail>/current/barriers}" width="100%" renderType="Bare">
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailChecklistSectionShell" type="XML"/>
         </VBox>
     </VBox>

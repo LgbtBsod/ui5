@@ -4,15 +4,16 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
-], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade, DetailPersistenceConstants, UiSemanticConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade, DetailPersistenceConstants, UiSemanticConstants, DetailMessageKeyConstants) {
     "use strict";
 
     var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
     var LIFECYCLE_TEXT_KEYS = {};
-    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.REGISTERED] = { key: "statusRegistered", fallback: "Registered" };
-    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.CLOSED] = { key: "statusClosed", fallback: "Closed" };
-    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.DRAFT] = { key: "statusDraft", fallback: "Draft" };
+    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.REGISTERED] = DetailMessageKeyConstants.STATUS_REGISTERED;
+    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.CLOSED] = DetailMessageKeyConstants.STATUS_CLOSED;
+    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.DRAFT] = DetailMessageKeyConstants.STATUS_DRAFT;
     var LIFECYCLE_STATES = {};
     LIFECYCLE_STATES[CHECKLIST_STATUSES.REGISTERED] = UiSemanticConstants.OBJECT_STATUS_STATE.WARNING;
     LIFECYCLE_STATES[CHECKLIST_STATUSES.CLOSED] = UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
@@ -23,13 +24,11 @@
     };
     var LOCK_ACTIVE_STATES = {};
     var LOCK_TRANSITION_STATES = {};
-    var AUTOSAVE_TEXT_FALLBACKS = {
-        autosaveWaiting: "Autosave waiting",
-        autosaveSaving: "Saving...",
-        autosaveSaved: "All changes synced",
-        autosaveError: "Autosave error",
-        autosaveDisabled: "Autosave disabled (read-only mode)"
-    };
+    var AUTOSAVE_TEXT_KEYS = {};
+    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.IDLE] = DetailMessageKeyConstants.AUTOSAVE_WAITING;
+    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.SAVING] = DetailMessageKeyConstants.AUTOSAVE_SAVING;
+    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.SAVED] = DetailMessageKeyConstants.AUTOSAVE_SAVED;
+    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.FAILED] = DetailMessageKeyConstants.AUTOSAVE_ERROR;
     var PERSISTENCE_SEMANTICS = {
         saving: UiSemanticConstants.OBJECT_STATUS_STATE.WARNING,
         autosaving: UiSemanticConstants.OBJECT_STATUS_STATE.WARNING,
@@ -42,22 +41,19 @@
         conflict: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR,
         idle: UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION
     };
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     LOCK_ACTIVE_STATES[WorkflowContracts.LOCK_STATES.EDIT_LOCKED] = true;
     LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK] = true;
     LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE] = true;
 
-    function text(oController, sKey, vArgs, vFallback) {
+    function text(oController, sKey, vArgs) {
         var aArgs = [];
-        var sFallback = "";
+        var sResolvedText = "";
         if (Array.isArray(vArgs)) {
             aArgs = vArgs;
-            sFallback = typeof vFallback === "string" ? vFallback : "";
-        } else if (typeof vArgs === "string") {
-            sFallback = vArgs;
-        } else if (typeof vFallback === "string") {
-            sFallback = vFallback;
         }
-        return EffectTextResolver.getText(oController, sKey, aArgs, sFallback);
+        sResolvedText = EffectTextResolver.getText(oController, sKey, aArgs, "");
+        return sResolvedText === sKey ? "" : sResolvedText;
     }
 
     function readMissingCount(oSummary) {
@@ -146,7 +142,7 @@
         },
 
         formatValidationText: function (bShown, bMissing) {
-            return (bShown && bMissing) ? text(this, "requiredFieldHint") : "";
+            return (bShown && bMissing) ? text(this, DetailMessageKeyConstants.REQUIRED_FIELD_HINT) : "";
         },
 
         formatWarningMessageType: function () {
@@ -156,38 +152,38 @@
         formatValidationSummaryText: function (oSummary) {
             var iCount = readMissingCount(oSummary);
             if (iCount > 0) {
-                return text(this, "validationSummaryTitleCount", [iCount], text(this, "validationSummaryTitle"));
+                return text(this, DetailMessageKeyConstants.VALIDATION_SUMMARY_TITLE_COUNT, [iCount]);
             }
-            return text(this, "validationSummaryTitle");
+            return text(this, DetailMessageKeyConstants.VALIDATION_SUMMARY_TITLE);
         },
 
         formatValidationSummaryLinkText: function (oSummary) {
             var iCount = readMissingCount(oSummary);
             if (iCount > 1) {
-                return text(this, "validationSummaryLinkMany", [iCount], text(this, "requiredFieldHint"));
+                return text(this, DetailMessageKeyConstants.VALIDATION_SUMMARY_LINK_MANY, [iCount]);
             }
             if (iCount === 1) {
-                return text(this, "validationSummaryLinkSingle", [], text(this, "requiredFieldHint"));
+                return text(this, DetailMessageKeyConstants.VALIDATION_SUMMARY_LINK_SINGLE);
             }
-            return text(this, "requiredFieldHint");
+            return text(this, DetailMessageKeyConstants.REQUIRED_FIELD_HINT);
         },
 
         formatBooleanResultText: function (vValue) {
             if (typeof vValue === "string") {
                 var sValue = String(vValue).trim().toUpperCase();
                 if (sValue === "OK" || sValue === "TRUE" || sValue === "X") {
-                    return text(this, "statusOk", "OK");
+                    return text(this, DetailMessageKeyConstants.STATUS_OK);
                 }
                 if (sValue === "FAILED" || sValue === "ERROR" || sValue === "FALSE") {
-                    return text(this, "statusFailed", "Failed");
+                    return text(this, DetailMessageKeyConstants.STATUS_FAILED);
                 }
                 return "-";
             }
             if (vValue === true) {
-                return text(this, "statusOk", "OK");
+                return text(this, DetailMessageKeyConstants.STATUS_OK);
             }
             if (vValue === false) {
-                return text(this, "statusFailed", "Failed");
+                return text(this, DetailMessageKeyConstants.STATUS_FAILED);
             }
             return "-";
         },
@@ -214,8 +210,7 @@
 
         formatLifecycleStatusText: function (sStatus) {
             var sNormalized = String(sStatus || "").toUpperCase();
-            var oMeta = LIFECYCLE_TEXT_KEYS[sNormalized] || LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.DRAFT];
-            return text(this, oMeta.key, oMeta.fallback);
+            return text(this, LIFECYCLE_TEXT_KEYS[sNormalized] || LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.DRAFT]);
         },
 
         formatLifecycleStatusState: function (sStatus) {
@@ -224,7 +219,7 @@
         },
 
         formatDraftStateText: function (bDirty) {
-            return bDirty ? text(this, "detailDraftChanged") : text(this, "detailDraftClean");
+            return bDirty ? text(this, DetailMessageKeyConstants.DETAIL_DRAFT_CHANGED) : text(this, DetailMessageKeyConstants.DETAIL_DRAFT_CLEAN);
         },
 
         formatDraftStateState: function (bDirty) {
@@ -236,8 +231,8 @@
                 return sTextValue;
             }
             return WorkflowContracts.isEditableMode(sMode)
-                ? text(this, "modeEdit", "Edit")
-                : text(this, "modeRead", "Read");
+                ? text(this, DetailMessageKeyConstants.MODE_EDIT)
+                : text(this, DetailMessageKeyConstants.MODE_READ);
         },
 
         formatLockStateSemantic: function (sState, sMode) {
@@ -264,57 +259,52 @@
         formatHeartbeatText: function (sMode, sLockState) {
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
             if (WorkflowContracts.isEditableMode(sMode) && LOCK_ACTIVE_STATES[sNormalizedLockState]) {
-                return text(this, "heartbeatLockedActive", "Heartbeat active");
+                return text(this, DetailMessageKeyConstants.HEARTBEAT_LOCKED_ACTIVE);
             }
             if (WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.CREATE) {
-                return text(this, "heartbeatDraftCreate", "Draft editing active");
+                return text(this, DetailMessageKeyConstants.HEARTBEAT_DRAFT_CREATE);
             }
             if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK) {
-                return text(this, "autosaveSaving", "Saving...");
+                return text(this, DetailMessageKeyConstants.AUTOSAVE_SAVING);
             }
             if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE) {
-                return text(this, "idleTimeoutGraceBannerTitle", "Idle timeout warning");
+                return text(this, DetailMessageKeyConstants.IDLE_TIMEOUT_GRACE_BANNER_TITLE);
             }
             if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.LOCK_LOST) {
-                return text(this, "lockLostBannerTitle", "Lock lost");
+                return text(this, DetailMessageKeyConstants.LOCK_LOST_BANNER_TITLE);
             }
             if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.FORCED_READ_ONLY) {
-                return text(this, "detailForcedReadOnlyTitle", "Read-only enforced");
+                return text(this, DetailMessageKeyConstants.DETAIL_FORCED_READ_ONLY_TITLE);
             }
-            return text(this, "heartbeatInactive", "Heartbeat paused (read-only mode)");
+            return text(this, DetailMessageKeyConstants.HEARTBEAT_INACTIVE);
         },
 
         formatAutosaveText: function (sMode, sLockState, sAutosaveState) {
             var sState = WorkflowContracts.normalizeAutosaveState(sAutosaveState);
-            var mKeyByState = {};
             var sNormalizedMode = WorkflowContracts.normalizeEditMode(sMode);
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
-            mKeyByState[WorkflowContracts.AUTOSAVE_STATES.IDLE] = "autosaveWaiting";
-            mKeyByState[WorkflowContracts.AUTOSAVE_STATES.SAVING] = "autosaveSaving";
-            mKeyByState[WorkflowContracts.AUTOSAVE_STATES.SAVED] = "autosaveSaved";
-            mKeyByState[WorkflowContracts.AUTOSAVE_STATES.FAILED] = "autosaveError";
             if (sNormalizedMode === WorkflowContracts.EDIT_MODES.CREATE) {
-                return text(this, "autosaveCreateDraft", "Draft changes are local until first save");
+                return text(this, DetailMessageKeyConstants.AUTOSAVE_CREATE_DRAFT);
             }
             if (sNormalizedMode !== WorkflowContracts.EDIT_MODES.EDIT || !LOCK_ACTIVE_STATES[sNormalizedLockState]) {
-                return text(this, "autosaveDisabled", "Autosave disabled (read-only mode)");
+                return text(this, DetailMessageKeyConstants.AUTOSAVE_DISABLED);
             }
-            return text(this, mKeyByState[sState] || "autosaveWaiting", AUTOSAVE_TEXT_FALLBACKS[mKeyByState[sState] || "autosaveWaiting"] || "Autosave waiting");
+            return text(this, AUTOSAVE_TEXT_KEYS[sState] || DetailMessageKeyConstants.AUTOSAVE_WAITING);
         },
 
         formatPersistenceText: function (sMessageKey, sPersistenceState, sLastSavedAt) {
             if (sMessageKey) {
-                if (sMessageKey === "persistenceSaved" || sMessageKey === "persistenceAutosaveSaved") {
+                if (sMessageKey === DETAIL_MESSAGE_KEYS.PERSISTENCE_SAVED || sMessageKey === DETAIL_MESSAGE_KEYS.PERSISTENCE_AUTOSAVE_SAVED) {
                     if (sLastSavedAt) {
-                        return text(this, "persistenceSavedAt", [formatAutosaveTime(sLastSavedAt)], "Saved");
+                        return text(this, DETAIL_MESSAGE_KEYS.PERSISTENCE_SAVED_AT, [formatAutosaveTime(sLastSavedAt)]);
                     }
                 }
-                return text(this, sMessageKey, sMessageKey);
+                return text(this, sMessageKey);
             }
             if (sPersistenceState === DetailPersistenceConstants.STATES.SAVED && sLastSavedAt) {
-                return text(this, "persistenceSavedAt", [formatAutosaveTime(sLastSavedAt)], "Saved");
+                return text(this, DETAIL_MESSAGE_KEYS.PERSISTENCE_SAVED_AT, [formatAutosaveTime(sLastSavedAt)]);
             }
-            return text(this, "persistenceIdle", "No pending changes");
+            return text(this, DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE);
         },
 
         formatPersistenceTooltip: function (sMessageKey, sPersistenceState, sLastSavedAt, oLastSaveError) {
@@ -324,7 +314,7 @@
             if (!sCode && !sMessage) {
                 return sPrimary;
             }
-            return text(this, "persistenceTooltipWithDetails", [sPrimary, [sCode, sMessage].filter(Boolean).join(": ")], sPrimary);
+            return text(this, DetailMessageKeyConstants.PERSISTENCE_TOOLTIP_WITH_DETAILS, [sPrimary, [sCode, sMessage].filter(Boolean).join(": ")]);
         },
 
         formatPersistenceState: function (sPersistenceState) {
@@ -426,8 +416,8 @@
 
         formatAttachmentsEmptyStateText: function (sRootId) {
             return CreateSentinel.isCreateId(sRootId)
-                ? text(this, "attachmentDraftStageHint")
-                : text(this, "detailEmptyAttachmentsSavedText", text(this, "detailEmptyAttachmentsText"));
+                ? text(this, DetailMessageKeyConstants.ATTACHMENT_DRAFT_STAGE_HINT)
+                : text(this, DetailMessageKeyConstants.DETAIL_EMPTY_ATTACHMENTS_SAVED_TEXT) || text(this, DetailMessageKeyConstants.DETAIL_EMPTY_ATTACHMENTS_TEXT);
         }
     };
 });

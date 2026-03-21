@@ -1,5 +1,5 @@
 "! <p class="shorttext synchronized">BOPF Mapper Interface – Production Control Checklist</p>
-"! Contract for mapping OData deep payloads to BOPF modification tables.
+"! Contract for mapping aggregate write payloads to BOPF modification tables.
 "! The mapper is node-config driven: callers register node mappings once,
 "! and the mapper resolves field maps automatically via RTTI + shared buffer cache.
 INTERFACE zif_zodata_bopf_mapper PUBLIC.
@@ -68,7 +68,7 @@ INTERFACE zif_zodata_bopf_mapper PUBLIC.
       zcx_zodata_error.
 
   " ── Auto-change-list builder (from deep payload) ───────────────
-  " High-level helper: given a structured SaveChanges request,
+  " High-level helper: given a normalized aggregate write request,
   " build the full tt_change list by iterating all delta tables.
   " The mapper owns node-config, so callers don't need BOPF constants.
   " Expected deep contract:

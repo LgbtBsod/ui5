@@ -1,8 +1,9 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/ForceReadOnlyUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
-], function (ForceReadOnlyUseCase, StatePaths, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (ForceReadOnlyUseCase, StatePaths, WorkflowContracts, DetailMessageKeyConstants) {
     "use strict";
 
     QUnit.module("ForceReadOnlyUseCase");
@@ -21,7 +22,7 @@
 
         oUseCase.execute({
             reason: "IDLE_TIMEOUT",
-            messageKey: "lockIdleTimeoutMessage",
+            messageKey: DetailMessageKeyConstants.LOCK_IDLE_TIMEOUT,
             preserveDirty: true,
             rootId: "CHK-1",
             sessionGuid: "SESSION-1"
@@ -34,10 +35,10 @@
                     if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
                         return WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
                     }
-                    if (sModelName === "snapshot" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/base") {
                         return oSnapshot;
                     }
-                    if (sModelName === "selected" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/current") {
                         return oSelected;
                     }
                     if (sModelName === "state" && sPath === StatePaths.WORKFLOW_SESSION_GUID) {
@@ -53,7 +54,7 @@
             }
         }).then(function (oResult) {
             var aSelectedEffects = (oResult.effects || []).filter(function (oEffect) {
-                return oEffect.type === "modelPatch" && oEffect.modelName === "selected" && oEffect.path === "/";
+                return oEffect.type === "modelPatch" && oEffect.modelName === "detail" && oEffect.path === "/current";
             });
             var oLastSelectedEffect = aSelectedEffects[aSelectedEffects.length - 1];
             var oDirtyEffect = (oResult.effects || []).filter(function (oEffect) {

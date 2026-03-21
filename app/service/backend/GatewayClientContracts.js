@@ -22,6 +22,8 @@ sap.ui.define([
     return {
         DIRECT_DELETE_ALLOWLIST: [
             entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, "(?:[^)]+)"),
+            entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK, "(?:Key=)?[^)]+"),
+            entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER, "(?:Key=)?[^)]+"),
             entityDeletePattern(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, "(?:AttachmentKey=)?[^)]+")
         ],
         DIRECT_FUNCTION_BODY_ALLOWLIST: [

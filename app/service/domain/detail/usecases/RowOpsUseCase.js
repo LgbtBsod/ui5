@@ -6,13 +6,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, DetailPersistenceConstants, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, DetailPersistenceConstants, ModelContracts, DetailMessageKeyConstants) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var SELECTED_MODEL = ModelContracts.MODELS.SELECTED;
+    var DETAIL_MODEL = ModelContracts.MODELS.DETAIL;
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
 
     function RowOpsUseCase() {
         return {
@@ -33,7 +35,7 @@ function nextNum(aRows, sField) {
 
     function resolveRowIndexFromEvent(oEvent, sModelName, sCollectionPath) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
-        var oContext = DetailRowBindingRuntime.resolveSelectedBindingContext(oSource, sModelName);
+        var oContext = DetailRowBindingRuntime.resolveDetailBindingContext(oSource, sModelName);
         var sPath = String((oContext && oContext.getPath && oContext.getPath()) || "");
         var sPrefix = String(sCollectionPath || "");
         var oMatch;
@@ -80,7 +82,7 @@ function nextNum(aRows, sField) {
         return Result.ok({ entity: sEntity, op: sOp }, [
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, true),
             Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_STATE, DetailPersistenceConstants.STATES.DIRTY),
-            Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_MESSAGE_KEY, "persistenceDirty")
+            Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_MESSAGE_KEY, DETAIL_MESSAGE_KEYS.PERSISTENCE_DIRTY)
         ]);
     }
 
@@ -94,20 +96,20 @@ function nextNum(aRows, sField) {
     function handleEntityRowOp(oUiState, sEntity, sOp, mInput) {
         var oConfig = DetailRowEntityConfig.get(sEntity);
         var sRowsPath = DetailRowBindingRuntime.resolveRowsPath(oConfig);
-        var aRows = oUiState.get(SELECTED_MODEL, sRowsPath) || [];
+        var aRows = oUiState.get(DETAIL_MODEL, sRowsPath) || [];
         var sExpandedDialogPath;
         var oExpandedDialogState;
         var iRowIndex;
         if (sOp === "add") {
-            oUiState.set(SELECTED_MODEL, sRowsPath, aRows.concat([createRow(aRows, oConfig)]));
+            oUiState.set(DETAIL_MODEL, sRowsPath, aRows.concat([createRow(aRows, oConfig)]));
             return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "delete") {
             iRowIndex = resolveRowIndexFromInput(mInput, aRows, sRowsPath);
             if (iRowIndex < 0) {
-                iRowIndex = resolveRowIndexFromEvent(mInput && mInput.event, SELECTED_MODEL, sRowsPath);
+                iRowIndex = resolveRowIndexFromEvent(mInput && mInput.event, DETAIL_MODEL, sRowsPath);
             }
-            oUiState.set(SELECTED_MODEL, sRowsPath, removeRows(aRows, iRowIndex));
+            oUiState.set(DETAIL_MODEL, sRowsPath, removeRows(aRows, iRowIndex));
             return markDirtyResult(sEntity, sOp);
         }
         if (sOp === "expand" || sOp === "collapse") {
@@ -126,7 +128,7 @@ function nextNum(aRows, sField) {
     function resolveCardKeyFromControl(oControl) {
         var oCursor = oControl;
         while (oCursor) {
-            var oCtx = oCursor.getBindingContext && oCursor.getBindingContext("view");
+            var oCtx = oCursor.getBindingContext && oCursor.getBindingContext(VIEW_MODEL);
             var oData = oCtx && oCtx.getObject && oCtx.getObject();
             if (oData && oData.key) {
                 return oData.key;

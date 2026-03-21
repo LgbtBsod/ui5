@@ -28,7 +28,7 @@
             type="Transparent"
             class="detailSectionAnchorBtn chkRipple"
             tooltip="{i18n>detailAnchorBarriers}"
-            visible="{path:'selected>/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}"
+                    visible="{path:'detail>/current/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}"
             press=".onJumpToDetailSection">
             <customData>
                 <core:CustomData key="targetSection" value="ssBarriers"/>

@@ -18,7 +18,7 @@ sap.ui.define([
         );
     });
 
-    QUnit.test("binds selected collection context from spec", function (assert) {
+    QUnit.test("binds detail collection context from spec", function (assert) {
         var oBound = null;
         var oControl = {
             getBindingContext: function () {
@@ -29,11 +29,11 @@ sap.ui.define([
             }
         };
 
-        DetailRowBindingRuntime.bindSelectedCollectionContext(oControl, { rowsPath: "/checks" });
+        DetailRowBindingRuntime.bindDetailCollectionContext(oControl, { rowsPath: "/checks" });
 
         assert.deepEqual(oBound, {
             path: "/checks",
-            model: "selected"
-        }, "selected collection binding is derived from helper spec");
+            model: "detail"
+        }, "detail collection binding is derived from helper spec");
     });
 });

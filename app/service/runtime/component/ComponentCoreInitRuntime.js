@@ -14,7 +14,7 @@ sap.ui.define([], function () {
 
         return {
             resolveDetailCurrent: function () {
-                return ComponentRuntimeSupport.resolveDetailCurrent(mModels.selectedModel);
+                return ComponentRuntimeSupport.resolveDetailCurrent(mModels.detailModel);
             },
             buildLatestCtx: function () {
                 oComponent._ctx = CtxFactory.buildCtx(oComponent, {});
@@ -24,7 +24,6 @@ sap.ui.define([], function () {
                 component: oComponent,
                 effectApplier: EffectApplier,
                 actionDispatcher: oComponent._actionDispatcher,
-                selectedModel: mModels.selectedModel,
                 shellModel: mModels.shellModel,
                 componentRuntimeSupport: ComponentRuntimeSupport
             })

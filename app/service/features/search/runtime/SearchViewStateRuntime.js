@@ -7,8 +7,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts, UiSemanticConstants, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchMessageKeyConstants"
+], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts, UiSemanticConstants, JsRuntime, SearchMessageKeyConstants) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -162,21 +163,16 @@
     }
 
     function formatWorkflowStageText(oBundle, sStage) {
-        var mFallbackText = {
-            ANALYZE: "Analyze",
-            REVIEW: "Review",
-            DISCOVER: "Discover"
-        };
         var mStageKey = {
-            ANALYZE: "workflowStageAnalyze",
-            REVIEW: "workflowStageReview"
+            ANALYZE: SearchMessageKeyConstants.WORKFLOW_STAGE_ANALYZE,
+            REVIEW: SearchMessageKeyConstants.WORKFLOW_STAGE_REVIEW
         };
         var sStageNorm = String(sStage || "").toUpperCase() || "DISCOVER";
-        var sKey = mStageKey[sStageNorm] || "workflowStageDiscover";
+        var sKey = mStageKey[sStageNorm] || SearchMessageKeyConstants.WORKFLOW_STAGE_DISCOVER;
         if (oBundle && oBundle.hasText && oBundle.hasText(sKey)) {
             return oBundle.getText(sKey);
         }
-        return mFallbackText[sStageNorm] || mFallbackText.DISCOVER;
+        return "";
     }
 
     function formatWorkflowStageState(sStage) {

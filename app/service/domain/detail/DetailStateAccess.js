@@ -7,8 +7,7 @@ sap.ui.define([
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var SELECTED_MODEL = MODELS.SELECTED;
-    var SNAPSHOT_MODEL = MODELS.SNAPSHOT;
+    var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
@@ -19,7 +18,7 @@ sap.ui.define([
 
     function readCurrentChecklist(mCtx) {
         var oUiState = uiState(mCtx);
-        return (oUiState && oUiState.get(SELECTED_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
+        return (oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
     }
 
     function readCurrentAttachments(mCtx) {
@@ -38,7 +37,7 @@ sap.ui.define([
 
     function readDetailSnapshot(mCtx) {
         var oUiState = uiState(mCtx);
-        return (oUiState && oUiState.get(SNAPSHOT_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
+        return (oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE)) || {};
     }
 
     function readRequiredFields(mCtx) {

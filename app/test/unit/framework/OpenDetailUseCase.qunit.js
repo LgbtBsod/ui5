@@ -117,7 +117,7 @@
             assert.strictEqual(findPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE).value, "EDIT", "edit mode is preserved");
             assert.strictEqual(findPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE).value, "EDIT_LOCKED", "lock state is preserved");
             assert.strictEqual(findPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED).value, true, "autosave stays enabled");
-            assert.deepEqual(findPatch("selected", "/attachments").value, oSnapshot.attachments, "snapshot attachments are preserved");
+            assert.deepEqual(findPatch("detail", "/current/attachments").value, oSnapshot.attachments, "snapshot attachments are preserved");
             done();
         });
     });
@@ -153,10 +153,10 @@
             },
             uiState: {
                 get: function (sModelName, sPath) {
-                    if (sModelName === "selected" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/current") {
                         return oCurrentSelected;
                     }
-                    if (sModelName === "snapshot" && sPath === "/") {
+                    if (sModelName === "detail" && sPath === "/base") {
                         return oCurrentSelected;
                     }
                     return null;
@@ -171,8 +171,8 @@
             }
 
             assert.ok(oResult && oResult.ok, "open detail succeeds");
-            assert.strictEqual(findPatch("selected", "/").value.basic.equipment, "Session equipment", "missing basic equipment is preserved for the same root");
-            assert.strictEqual(findPatch("snapshot", "/").value.basic.equipment, "Session equipment", "base snapshot keeps preserved basic equipment");
+            assert.strictEqual(findPatch("detail", "/current").value.basic.equipment, "Session equipment", "missing basic equipment is preserved for the same root");
+            assert.strictEqual(findPatch("detail", "/base").value.basic.equipment, "Session equipment", "base snapshot keeps preserved basic equipment");
             done();
         });
     });
@@ -222,7 +222,7 @@
             }
         }).then(function (oResult) {
             var oSelectedPatch = (oResult.effects || []).filter(function (oEffect) {
-                return oEffect.type === "modelPatch" && oEffect.modelName === "selected" && oEffect.path === "/";
+                return oEffect.type === "modelPatch" && oEffect.modelName === "detail" && oEffect.path === "/current";
             }).pop();
 
             assert.ok(oResult && oResult.ok, "open detail succeeds");

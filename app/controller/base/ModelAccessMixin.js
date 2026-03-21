@@ -1,13 +1,36 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
-], function (LockAdapter, ControllerModelRuntime, JsRuntime) {
+], function (LockAdapter, ModelContracts, ControllerModelRuntime, JsRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var TYPE_UNDEFINED = JsRuntime.TYPEOF.UNDEFINED;
     var METHODS = JsRuntime.METHODS;
+    var MODELS = ModelContracts.MODELS;
+
+    function resolveNamedModel(oController, sName) {
+        switch (sName) {
+        case MODELS.STATE:
+            return ControllerModelRuntime.state(oController);
+        case MODELS.SHELL:
+            return ControllerModelRuntime.shell(oController);
+        case MODELS.DETAIL:
+            return ControllerModelRuntime.detail(oController);
+        case MODELS.MASTER_DATA:
+            return ControllerModelRuntime.masterData(oController);
+        case MODELS.VIEW:
+            return ControllerModelRuntime.viewState(oController);
+        case MODELS.I18N:
+        case MODELS.DEVICE:
+        case "mainService":
+            return ControllerModelRuntime.model(oController, sName, true);
+        default:
+            return null;
+        }
+    }
 
     function decodeBase64(sBase64) {
         if (typeof window !== TYPE_UNDEFINED && typeof window.atob === TYPE_FUNCTION) {
@@ -21,12 +44,15 @@ sap.ui.define([
 
     return {
         getModel: function (sName) {
-            return ControllerModelRuntime.model(this, sName, true);
+            if (typeof sName === TYPE_UNDEFINED) {
+                return ControllerModelRuntime.defaultModel(this, true);
+            }
+            return resolveNamedModel(this, sName);
         },
         setModel: function (oModel, sName) { return this.getView().setModel(oModel, sName); },
         getResourceBundle: function () {
             var oOwner = typeof this.getOwnerComponent === TYPE_FUNCTION && this.getOwnerComponent();
-            var oI18nModel = oOwner && typeof oOwner[METHODS.GET_MODEL] === TYPE_FUNCTION ? oOwner[METHODS.GET_MODEL]("i18n") : null;
+            var oI18nModel = oOwner && typeof oOwner[METHODS.GET_MODEL] === TYPE_FUNCTION ? oOwner[METHODS.GET_MODEL](MODELS.I18N) : null;
             return oI18nModel && typeof oI18nModel[METHODS.GET_RESOURCE_BUNDLE] === TYPE_FUNCTION ? oI18nModel[METHODS.GET_RESOURCE_BUNDLE]() : null;
         },
         releaseLock: function (sObjectId, sSessionId) {

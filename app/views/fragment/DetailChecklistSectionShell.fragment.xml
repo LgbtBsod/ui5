@@ -16,7 +16,7 @@
                     <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
                 </ObjectStatus>
                 <Input
-                    value="{= ${selected>/basic/CHECKS_NUMBER_TEXT} || ${selected>/basic/CHECKS_NUMBER} || '' }"
+                    value="{= ${detail>/current/basic/CHECKS_NUMBER_TEXT} || ${detail>/current/basic/CHECKS_NUMBER} || '' }"
                     placeholder="{i18n>checksNumberLabel}"
                     visible="{= ${view>kind} === 'check' &amp;&amp; ${view>/isEditMode} }"
                     showValueHelp="true"
@@ -29,7 +29,7 @@
                     </layoutData>
                 </Input>
                 <Input
-                    value="{= ${selected>/basic/BARRIERS_NUMBER_TEXT} || ${selected>/basic/BARRIERS_NUMBER} || '' }"
+                    value="{= ${detail>/current/basic/BARRIERS_NUMBER_TEXT} || ${detail>/current/basic/BARRIERS_NUMBER} || '' }"
                     placeholder="{i18n>barriersNumberLabel}"
                     visible="{= ${view>kind} === 'barrier' &amp;&amp; ${view>/isEditMode} }"
                     showValueHelp="true"
@@ -42,7 +42,7 @@
                     </layoutData>
                 </Input>
                 <ObjectStatus
-                    text="{= ${view>kind} === 'check' ? (${selected>/basic/CHECKS_NUMBER_TEXT} || ${selected>/basic/CHECKS_NUMBER} || '-') : (${selected>/basic/BARRIERS_NUMBER_TEXT} || ${selected>/basic/BARRIERS_NUMBER} || '-') }"
+                text="{= ${view>kind} === 'check' ? (${detail>/current/basic/CHECKS_NUMBER_TEXT} || ${detail>/current/basic/CHECKS_NUMBER} || '-') : (${detail>/current/basic/BARRIERS_NUMBER_TEXT} || ${detail>/current/basic/BARRIERS_NUMBER} || '-') }"
                     state="Information"
                     visible="{= !${view>/isEditMode} }"
                     class="chipSm statusChip detailSectionNumberChip">
@@ -76,7 +76,7 @@
             <VBox
                 class="detailEmptyStateCard workflowEmptyStateCard"
                 renderType="Bare"
-                visible="{path:'selected>', formatter:'.isEmptyRows'}">
+        visible="{path:'detail>', formatter:'.isEmptyRows'}">
                 <core:Icon src="{view>emptyIcon}" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
                 <Title text="{path:'view>emptyTitleKey', formatter:'.formatI18nByKey'}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
                 <Text text="{path:'view>emptyTextKey', formatter:'.formatI18nByKey'}" class="detailEmptyStateText workflowEmptyStateText"/>
@@ -95,7 +95,7 @@
             <VBox
                 class="detailSectionTableHost"
                 renderType="Bare"
-                visible="{path:'selected>', formatter:'.hasRows'}">
+        visible="{path:'detail>', formatter:'.hasRows'}">
                 <VBox width="100%" binding="{view>tableSpec}">
                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailChecklistRowsTable" type="XML"/>
                 </VBox>

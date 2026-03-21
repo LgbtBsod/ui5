@@ -8,8 +8,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ShellMessageKeyConstants"
+], function (LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, ShellMessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -17,25 +18,30 @@
     var STATE_MODEL = MODELS.STATE;
     var SHELL_MODEL = MODELS.SHELL;
     var PERMISSION_TEXT_KEY_MAP = {
-        "01": "shellPermissionCreate",
-        "02": "shellPermissionChange",
-        "03": "shellPermissionDisplay",
-        "06": "shellPermissionDelete"
+        "01": ShellMessageKeyConstants.PERMISSION_CREATE,
+        "02": ShellMessageKeyConstants.PERMISSION_CHANGE,
+        "03": ShellMessageKeyConstants.PERMISSION_DISPLAY,
+        "06": ShellMessageKeyConstants.PERMISSION_DELETE
     };
 
-    function resolveText(mHooks, oController, sKey, aArgs, sFallback) {
+    function resolveText(mHooks, oController, sKey, aArgs) {
+        var oBundle;
         if (mHooks && typeof mHooks.getText === "function") {
-            return mHooks.getText(oController, sKey, aArgs, sFallback);
+            return mHooks.getText(oController, sKey, aArgs, "");
         }
-        return sFallback;
+        oBundle = oController && oController.getResourceBundle && oController.getResourceBundle();
+        if (!sKey || !oBundle || !oBundle.getText) {
+            return "";
+        }
+        return String(oBundle.getText(sKey, Array.isArray(aArgs) ? aArgs : []) || "");
     }
 
     function buildPermissionScopeLabel(oController, oPermission) {
         var sScopeKind = String(oPermission && oPermission.scopeKind || "all").trim().toLowerCase() || "all";
         var sScopeValue = String(oPermission && oPermission.scopeValue || "ALL").trim() || "ALL";
         return sScopeKind === "bukrs" && sScopeValue.toUpperCase() !== "ALL"
-            ? resolveText(null, oController, "shellPermissionScopeBukrs", [sScopeValue], "BUKRS " + sScopeValue)
-            : resolveText(null, oController, "shellPermissionScopeAll", null, "ALL");
+            ? resolveText(null, oController, ShellMessageKeyConstants.PERMISSION_SCOPE_BUKRS, [sScopeValue])
+            : resolveText(null, oController, ShellMessageKeyConstants.PERMISSION_SCOPE_ALL);
     }
 
     function buildPermissionSheets(oController, aPermissionRules, mHooks) {
@@ -45,11 +51,11 @@
                 var sScopeKind = String(oRule && oRule.scopeKind || "all").trim().toLowerCase() || "all";
                 var sScopeValue = String(oRule && oRule.scopeValue || "ALL").trim() || "ALL";
                 return sScopeKind === "bukrs" && sScopeValue.toUpperCase() !== "ALL"
-                    ? resolveText(mHooks, oController, "shellPermissionScopeBukrs", [sScopeValue], "BUKRS " + sScopeValue)
-                    : resolveText(mHooks, oController, "shellPermissionScopeAll", null, "ALL");
+                    ? resolveText(mHooks, oController, ShellMessageKeyConstants.PERMISSION_SCOPE_BUKRS, [sScopeValue])
+                    : resolveText(mHooks, oController, ShellMessageKeyConstants.PERMISSION_SCOPE_ALL);
             },
             codeLabel: function (oRule) {
-                return resolveText(mHooks, oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || "shellPermissionUnknown", [oRule.code], oRule.code);
+                return resolveText(mHooks, oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || ShellMessageKeyConstants.PERMISSION_UNKNOWN, [oRule.code]);
             }
         });
     }
@@ -58,7 +64,7 @@
         return PermissionPresentation.buildSummaryText(
             sBackendSummary,
             aPermissionSheets,
-            resolveText(mHooks, oController, "shellUserPermissionsEmpty", null, "No permissions assigned")
+            resolveText(mHooks, oController, ShellMessageKeyConstants.USER_PERMISSIONS_EMPTY)
         );
     }
 
@@ -110,6 +116,27 @@
         ModelStateRuntime.setMany(oController, SHELL_MODEL, mPatch);
     }
 
+    function syncRuntimeShellState(oStateModel, oShellModel) {
+        if (!oStateModel || !oShellModel) {
+            return false;
+        }
+        return ModelStateRuntime.setManyOnModel(oShellModel, {
+            [MODEL_PATHS.SHELL_BUSY]: !!(
+                ModelStateRuntime.readOnModel(oStateModel, "/ui/busy/detail", false)
+                || ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false)
+            ),
+            [MODEL_PATHS.SHELL_CURRENT_ROOT_KEY]: String(
+                ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "")
+                || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
+                || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
+                || ""
+            ).trim(),
+            [MODEL_PATHS.SHELL_SESSION_GUID]: String(
+                ModelStateRuntime.readOnModel(oStateModel, "/sessionId", "") || ""
+            ).trim()
+        });
+    }
+
     function syncShellState(oController, mHooks) {
         var oState = ControllerModelRuntime.state(oController);
         var mShellPatch = {};
@@ -138,7 +165,7 @@
         oCurrentUser = ModelStateRuntime.read(oController, STATE_MODEL, "/currentUser", {}) || {};
         sFullName = hasResolvedCurrentUser(oCurrentUser)
             ? String(oCurrentUser.fullName || "")
-            : resolveText(mHooks, oController, "shellUserLoading", null, "Loading session profile...");
+            : resolveText(mHooks, oController, ShellMessageKeyConstants.USER_LOADING);
         aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
         aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];
         aPermissionSheets = buildPermissionSheets(oController, aPermissionRules, mHooks);
@@ -153,24 +180,24 @@
         bEditWorkspace = !bSearchWorkspace && sMode === WorkflowContracts.EDIT_MODES.EDIT;
 
         mShellPatch["/shell/eyebrow"] = bSearchWorkspace
-            ? resolveText(mHooks, oController, "appTitle", null, "Production Control Checklists")
-            : resolveText(mHooks, oController, "detailWorkspaceSectionTitle", null, "Checklist Workspace");
+            ? resolveText(mHooks, oController, ShellMessageKeyConstants.APP_TITLE)
+            : resolveText(mHooks, oController, ShellMessageKeyConstants.DETAIL_WORKSPACE_SECTION_TITLE);
         mShellPatch["/shell/productName"] = sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS
-            ? resolveText(mHooks, oController, "shellProductNameAnalytics", null, "Analytics")
-            : resolveText(mHooks, oController, "shellProductNameSearch", null, "Production control checklists");
+            ? resolveText(mHooks, oController, ShellMessageKeyConstants.PRODUCT_NAME_ANALYTICS)
+            : resolveText(mHooks, oController, ShellMessageKeyConstants.PRODUCT_NAME_SEARCH);
         mShellPatch["/shell/routeLabel"] = sCurrentRouteName;
         mShellPatch["/shell/contextSubtitle"] = sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS
-            ? resolveText(mHooks, oController, "shellContextAnalytics", null, "Gateway-backed workflow dashboard with operational totals and breakdowns.")
-            : (!sSelectedId ? resolveText(mHooks, oController, "shellContextSearch", null, "Discover, filter, and open checklist flows.")
-                : (CreateSentinel.isCreateId(sSelectedId) ? resolveText(mHooks, oController, "shellContextDraft", null, "Draft checklist workspace")
-                    : resolveText(mHooks, oController, "shellContextDetail", [sSelectedId], "Checklist " + sSelectedId)));
+            ? resolveText(mHooks, oController, ShellMessageKeyConstants.CONTEXT_ANALYTICS)
+            : (!sSelectedId ? resolveText(mHooks, oController, ShellMessageKeyConstants.CONTEXT_SEARCH)
+                : (CreateSentinel.isCreateId(sSelectedId) ? resolveText(mHooks, oController, ShellMessageKeyConstants.CONTEXT_DRAFT)
+                    : resolveText(mHooks, oController, ShellMessageKeyConstants.CONTEXT_DETAIL, [sSelectedId])));
         mShellPatch["/shell/userLabel"] = buildHeaderUserLabel(sFullName, aPermissionSheets);
         mShellPatch["/shell/userMeta"] = sFullName;
         mShellPatch["/shell/userLoginLabel"] = "";
         mShellPatch["/shell/userEnvironmentLabel"] = sFrontendSource;
         mShellPatch["/shell/userPermissions"] = aPermissionSheets;
         mShellPatch["/shell/userSummaryText"] = sUserSummaryText;
-        mShellPatch["/shell/userSessionLabel"] = resolveText(mHooks, oController, "shellUserSessionManaged", null, "Live backend profile");
+        mShellPatch["/shell/userSessionLabel"] = resolveText(mHooks, oController, ShellMessageKeyConstants.USER_SESSION_MANAGED);
         mShellPatch["/shell/userSessionState"] = hasResolvedCurrentUser(oCurrentUser)
             ? (aPermissionRules.length || aPermissions.length ? "Success" : "Warning")
             : "Information";
@@ -179,9 +206,9 @@
         mShellPatch["/shell/userActionIcon"] = "sap-icon://employee";
         mShellPatch["/shell/userActionType"] = "Transparent";
         mShellPatch["/shell/userActionKind"] = "";
-        mShellPatch["/shell/userActionPassiveText"] = bEditWorkspace ? resolveText(mHooks, oController, "shellLockLocked", null, "Lock owned by you") : "";
-        mShellPatch["/shell/userActionHint"] = resolveText(mHooks, oController, "shellUserHintRuntime", null, "The backend resolves the current SAP user profile for this session.");
-        mShellPatch["/shell/userTooltip"] = sUserSummaryText || resolveText(mHooks, oController, "shellUserTooltipStandalone", null, "Open user session controls");
+        mShellPatch["/shell/userActionPassiveText"] = bEditWorkspace ? resolveText(mHooks, oController, ShellMessageKeyConstants.LOCK_LOCKED) : "";
+        mShellPatch["/shell/userActionHint"] = resolveText(mHooks, oController, ShellMessageKeyConstants.USER_HINT_RUNTIME);
+        mShellPatch["/shell/userTooltip"] = sUserSummaryText || resolveText(mHooks, oController, ShellMessageKeyConstants.USER_TOOLTIP_STANDALONE);
         mShellPatch["/shell/userIcon"] = "sap-icon://employee";
         mShellPatch["/shell/showHints"] = bShowHints;
         ModelStateRuntime.setMany(oController, SHELL_MODEL, mShellPatch);
@@ -192,6 +219,7 @@
 
     return {
         ensureShellDefaults: ensureShellDefaults,
+        syncRuntimeShellState: syncRuntimeShellState,
         syncShellState: syncShellState
     };
 });

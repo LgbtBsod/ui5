@@ -1,23 +1,32 @@
 ﻿sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
-], function (ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, RootIdRuntime, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+], function (ModelContracts, StatePaths, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, RootIdRuntime, WorkflowContracts, DetailUseCaseConstants) {
     "use strict";
 
+    var MODELS = ModelContracts.MODELS;
+    var STATE_MODEL = MODELS.STATE;
+    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
+
     function hasActiveRoot(oController) {
-        var oSelected = ControllerModelRuntime.selected(oController);
-        var sSelectedRootId = String(ModelStateRuntime.readOnModel(oSelected, "/root/id", "") || "").trim();
+        var oDetailModel = ControllerModelRuntime.detail(oController);
+        var sDetailRootId = String(ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ROOT_ID, "") || "").trim();
         var sCanonicalRootId = RootIdRuntime.resolveFromController(oController);
         var aSessionAttachments = ControllerViewStateRuntime.get(oController, "/sessionAttachments", []);
 
-        return !!(sSelectedRootId || sCanonicalRootId || (Array.isArray(aSessionAttachments) && aSessionAttachments.length));
+        return !!(sDetailRootId || sCanonicalRootId || (Array.isArray(aSessionAttachments) && aSessionAttachments.length));
     }
 
     function sync(oController) {
-        var sEditMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, "state", "/workflow/detail/editMode", ""));
+        var sEditMode = WorkflowContracts.normalizeEditMode(
+            ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "")
+        );
         var bEditable = sEditMode !== WorkflowContracts.EDIT_MODES.READ;
         var bHasRoot = hasActiveRoot(oController);
         var bExpanded = !!ControllerViewStateRuntime.get(oController, "/attachmentsExpanded", false);

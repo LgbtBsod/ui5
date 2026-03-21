@@ -3,20 +3,22 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/SearchUiConfig",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, WorkflowRuntimeConstants, DetailPersistenceConstants, SearchUiConfig, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, DetailPersistenceConstants, SearchUiConfig, ShellStateRuntime, ModelContracts, DetailMessageKeyConstants) {
     "use strict";
 
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var PATHS = ComponentListenerContracts.PATHS;
     var VALUES = ComponentListenerContracts.VALUES;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var PERSISTENCE_DIRTY_SOURCE_STATES = Object.freeze({
-        idle: true,
-        saved: true,
-        dirty: true
+        [DetailPersistenceConstants.STATES.IDLE]: true,
+        [DetailPersistenceConstants.STATES.SAVED]: true,
+        [DetailPersistenceConstants.STATES.DIRTY]: true
     });
 
     function syncDirtyPersistence(oStateModel, bDirty) {
@@ -25,7 +27,7 @@ sap.ui.define([
             return;
         }
         ModelStateRuntime.writeOnModel(oStateModel, "/persistence/state", bDirty ? DetailPersistenceConstants.STATES.DIRTY : DetailPersistenceConstants.STATES.IDLE);
-        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/messageKey", bDirty ? "persistenceDirty" : "persistenceIdle");
+        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/messageKey", bDirty ? DETAIL_MESSAGE_KEYS.PERSISTENCE_DIRTY : DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE);
     }
 
     function createBeforeUnloadHandler(oStateModel, mOptions) {
@@ -47,7 +49,7 @@ sap.ui.define([
         var oShellModel = mOptions.shellModel;
         var oSearchConfig = mOptions.searchConfig || SearchUiConfig.getLayoutSeed();
 
-        mOptions.componentRuntimeSupport.syncShellRuntimeState(oStateModel, oShellModel);
+        ShellStateRuntime.syncRuntimeShellState(oStateModel, oShellModel);
         ComponentDetailMetaSyncRuntime.syncDetailMeta(oStateModel, mOptions.statePaths || {});
         if (oComponent._fnOnFullSave) {
             window.removeEventListener(VALUES.FULL_SAVE_EVENT, oComponent._fnOnFullSave);
@@ -55,15 +57,14 @@ sap.ui.define([
         oComponent._fnOnFullSave = function () { oComponent._oGcd.resetOnFullSave(); };
         window.addEventListener(VALUES.FULL_SAVE_EVENT, oComponent._fnOnFullSave);
         oComponent.setModel(mOptions.shellModel, ComponentListenerContracts.MODEL_NAMES.SHELL);
-        oComponent.setModel(mOptions.cacheModel, ComponentListenerContracts.MODEL_NAMES.CACHE);
         oComponent.setModel(mOptions.masterDataModel, ComponentListenerContracts.MODEL_NAMES.MASTER_DATA);
-        oComponent.setModel(mOptions.envModel, ComponentListenerContracts.MODEL_NAMES.ENV);
         if (oComponent._fnBeforeUnload) {
             window.removeEventListener("beforeunload", oComponent._fnBeforeUnload);
         }
         oComponent._fnBeforeUnload = createBeforeUnloadHandler(oStateModel, mOptions);
         window.addEventListener("beforeunload", oComponent._fnBeforeUnload);
         ModelStateRuntime.setManyOnModel(oShellModel, {
+            [MODEL_PATHS.SHELL_LAYOUT]: ModelStateRuntime.readOnModel(oShellModel, MODEL_PATHS.SHELL_LAYOUT, VALUES.ONE_COLUMN) || VALUES.ONE_COLUMN,
             [MODEL_PATHS.SHELL_SMART_FILTER_FIELDS]: oSearchConfig.smartFilter.fields,
             [MODEL_PATHS.SHELL_SMART_TABLE_COLUMNS]: oSearchConfig.smartTable.columns,
             [MODEL_PATHS.SHELL_SMART_TABLE_SELECTION_MODE]: oSearchConfig.smartTable.selectionMode

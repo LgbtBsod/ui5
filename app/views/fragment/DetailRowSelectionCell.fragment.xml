@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
     <CheckBox
-        selected="{selected>selected}"
+    selected="{detail>selected}"
         select=".onSelectionToggle"
         visible="{view>/isEditMode}"/>
 </core:FragmentDefinition>

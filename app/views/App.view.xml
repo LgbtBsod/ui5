@@ -78,7 +78,7 @@
             <f:FlexibleColumnLayout
                 id="mainFcl"
                 class="appRootFcl appRootFclTransparent"
-                layout="{= ${state>/layout} || 'OneColumn' }"
+                layout="{= ${shell>/layout} || 'OneColumn' }"
                 />
         </VBox>
     </VBox>

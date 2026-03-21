@@ -9,6 +9,6 @@ sap.ui.define([
         compute: DetailValidationStateRuntime.compute,
         recompute: DetailValidationStateRuntime.recompute,
         focusFirstInvalidField: DetailValidationFocusRuntime.focusFirstInvalidField,
-        onSelectedChecklistChanged: DetailValidationReactiveRuntime.onSelectedChecklistChanged
+        onDetailModelChanged: DetailValidationReactiveRuntime.onDetailModelChanged
     };
 });

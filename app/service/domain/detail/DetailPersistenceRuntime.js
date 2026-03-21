@@ -3,13 +3,15 @@
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (Effects, StatePaths, WorkflowContracts, DetailPersistenceConstants, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+], function (Effects, StatePaths, WorkflowContracts, DetailPersistenceConstants, ModelContracts, DetailMessageKeyConstants) {
     "use strict";
 
     var STATES = DetailPersistenceConstants.STATES;
     var TAXONOMY = DetailPersistenceConstants.TAXONOMY;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
 
     function upper(vValue) {
         return String(vValue || "").trim().toUpperCase();
@@ -65,90 +67,90 @@
             return {
                 taxonomy: TAXONOMY.LOCK_EXPIRED,
                 persistenceState: STATES.LOCK_LOST,
-                messageKey: "persistenceLockExpired"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_EXPIRED
             };
         }
         if (sBackendCode === TAXONOMY.LOCK_STOLEN) {
             return {
                 taxonomy: TAXONOMY.LOCK_STOLEN,
                 persistenceState: STATES.LOCK_LOST,
-                messageKey: "persistenceLockStolen"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_STOLEN
             };
         }
         if (sBackendCode === TAXONOMY.LOCK_NOT_OWNED_BY_SESSION) {
             return {
                 taxonomy: TAXONOMY.LOCK_NOT_OWNED_BY_SESSION,
                 persistenceState: STATES.LOCK_LOST,
-                messageKey: "persistenceLockNotOwned"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_NOT_OWNED
             };
         }
         if (sBackendCode === TAXONOMY.LOCK_MISSING) {
             return {
                 taxonomy: TAXONOMY.LOCK_MISSING,
                 persistenceState: STATES.LOCK_LOST,
-                messageKey: "persistenceLockMissing"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_MISSING
             };
         }
         if (iStatus === 401 || iStatus === 403 || hasAny(sSignal, ["PERMISSION", "AUTH", "SESSION_EXPIRED"])) {
             return {
                 taxonomy: TAXONOMY.PERMISSION_DENIED,
                 persistenceState: STATES.ERROR,
-                messageKey: "persistencePermissionDenied"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_PERMISSION_DENIED
             };
         }
         if (iStatus === 409 || hasAny(sSignal, ["ETAG", "VERSION_CONFLICT", "CONFLICT", "STALE"])) {
             return {
                 taxonomy: TAXONOMY.VERSION_CONFLICT,
                 persistenceState: STATES.CONFLICT,
-                messageKey: "persistenceConflict"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_CONFLICT
             };
         }
         if (hasAny(sSignal, ["LOCK_STOLEN", "LOCK_REPLACED", "KILLED", "TAKEN OVER", "TAKEOVER"])) {
             return {
                 taxonomy: TAXONOMY.LOCK_STOLEN,
                 persistenceState: STATES.LOCK_LOST,
-                messageKey: "persistenceLockStolen"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_STOLEN
             };
         }
         if (hasAny(sSignal, ["LOCK_EXPIRED", "EXPIRED"])) {
             return {
                 taxonomy: TAXONOMY.LOCK_EXPIRED,
                 persistenceState: STATES.LOCK_LOST,
-                messageKey: "persistenceLockExpired"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_EXPIRED
             };
         }
         if (hasAny(sSignal, ["NOT_OWNED", "OWNER_SESSION", "OWNED_BY_OTHER", "OWNED BY ANOTHER", "SESSION"])) {
             return {
                 taxonomy: TAXONOMY.LOCK_NOT_OWNED_BY_SESSION,
                 persistenceState: STATES.LOCK_LOST,
-                messageKey: "persistenceLockNotOwned"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_NOT_OWNED
             };
         }
         if (hasAny(sSignal, ["LOCK_MISSING", "LOCK_REQUIRED", "MISSING LOCK", "NOT_FOUND"])) {
             return {
                 taxonomy: TAXONOMY.LOCK_MISSING,
                 persistenceState: STATES.LOCK_LOST,
-                messageKey: "persistenceLockMissing"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_MISSING
             };
         }
         if (hasAny(sSignal, ["VALIDATION"])) {
             return {
                 taxonomy: TAXONOMY.VALIDATION_ERROR,
                 persistenceState: STATES.ERROR,
-                messageKey: "persistenceValidationError"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_VALIDATION_ERROR
             };
         }
         if (iStatus === 0 || iStatus === 408 || hasAny(sSignal, ["NETWORK", "TIMEOUT", "OFFLINE"])) {
             return {
                 taxonomy: TAXONOMY.NETWORK_ERROR,
                 persistenceState: STATES.ERROR,
-                messageKey: "persistenceNetworkError"
+                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_NETWORK_ERROR
             };
         }
         return {
             taxonomy: TAXONOMY.TECHNICAL_ERROR,
             persistenceState: STATES.ERROR,
-            messageKey: "persistenceTechnicalError"
+            messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_TECHNICAL_ERROR
         };
     }
 
@@ -159,7 +161,7 @@
     function createPayload(mPartial) {
         return Object.assign({
             state: STATES.IDLE,
-            messageKey: "persistenceIdle",
+            messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE,
             lastSavedAt: null,
             lastSaveError: null,
             taxonomy: "",
@@ -197,7 +199,7 @@
     function startEffects(sKind, sRequestId, mExtra) {
         return modelEffects(Object.assign({
             state: sKind === "manual" ? STATES.SAVING : STATES.AUTOSAVING,
-            messageKey: sKind === "manual" ? "persistenceSaving" : "persistenceAutosaving",
+            messageKey: sKind === "manual" ? DETAIL_MESSAGE_KEYS.PERSISTENCE_SAVING : DETAIL_MESSAGE_KEYS.PERSISTENCE_AUTOSAVING,
             currentWriteRequestId: sRequestId || buildWriteId(sKind),
             isManualSaveInFlight: sKind === "manual",
             isAutoSaveInFlight: sKind === "auto"
@@ -207,7 +209,7 @@
     function successEffects(sKind, sSavedAt, mExtra) {
         return modelEffects(Object.assign({
             state: STATES.SAVED,
-            messageKey: sKind === "manual" ? "persistenceSaved" : "persistenceAutosaveSaved",
+            messageKey: sKind === "manual" ? DETAIL_MESSAGE_KEYS.PERSISTENCE_SAVED : DETAIL_MESSAGE_KEYS.PERSISTENCE_AUTOSAVE_SAVED,
             lastSavedAt: sSavedAt || new Date().toISOString(),
             lastSaveError: null,
             taxonomy: "",
@@ -245,7 +247,7 @@
     function dirtyEffects(bDirty, mExtra) {
         return modelEffects(Object.assign({
             state: bDirty ? STATES.DIRTY : STATES.IDLE,
-            messageKey: bDirty ? "persistenceDirty" : "persistenceIdle"
+            messageKey: bDirty ? DETAIL_MESSAGE_KEYS.PERSISTENCE_DIRTY : DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE
         }, mExtra || {}));
     }
 

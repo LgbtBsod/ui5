@@ -1,25 +1,33 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
-], function (SearchViewStateRuntime, SearchRuntimeContracts, UiSemanticConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchMessageKeyConstants"
+], function (SearchViewStateRuntime, SearchRuntimeContracts, UiSemanticConstants, SearchMessageKeyConstants) {
     "use strict";
 
     var SEARCH_MODE = SearchRuntimeContracts.SEARCH_MODE;
 
+    function resolveBundleText(oController, sKey) {
+        var oBundle = oController && oController.getResourceBundle && oController.getResourceBundle();
+        if (!sKey || !oBundle || !oBundle.getText) {
+            return "";
+        }
+        return String(oBundle.getText(sKey) || "");
+    }
+
     function formatSearchModeChipText(oController, sMode) {
-        var oBundle = oController.getResourceBundle && oController.getResourceBundle();
         var sNorm = String(sMode || "").toUpperCase() === SEARCH_MODE.LOOSE ? SEARCH_MODE.LOOSE : SEARCH_MODE.EXACT;
-        var sLabel = oBundle && oBundle.getText("searchModeLabel") || "Mode";
+        var sLabel = resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_MODE_LABEL);
         var sModeText = sNorm === SEARCH_MODE.LOOSE
-            ? (oBundle && oBundle.getText("searchModeLoose") || "Loose")
-            : (oBundle && oBundle.getText("searchModeExact") || "Exact");
+            ? resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_MODE_LOOSE)
+            : resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_MODE_EXACT);
         return sLabel + ": " + sModeText;
     }
 
     function formatWorkflowStageText(oController, sStage) {
         return SearchViewStateRuntime.formatWorkflowStageText(
-            oController.getResourceBundle && oController.getResourceBundle(),
+            oController && oController.getResourceBundle && oController.getResourceBundle(),
             sStage
         );
     }
@@ -29,25 +37,24 @@
     }
 
     function formatSearchResultsCompactText(oController, iResultCount, bHasRows) {
-        var oBundle = oController.getResourceBundle && oController.getResourceBundle();
         var iSafeCount = Math.max(0, Number(iResultCount || 0));
+        var sResultsLabel = resolveBundleText(oController, SearchMessageKeyConstants.RESULTS_LABEL);
         if (!bHasRows || !iSafeCount) {
-            return (oBundle && oBundle.getText("resultsLabel")) || "Results";
+            return sResultsLabel;
         }
-        return ((oBundle && oBundle.getText("resultsLabel")) || "Results") + ": " + iSafeCount;
+        return sResultsLabel + ": " + iSafeCount;
     }
 
     function formatSearchSelectionSummary(oController, iSelectionCount, sSelectedRowDisplayId) {
-        var oBundle = oController.getResourceBundle && oController.getResourceBundle();
         var iSafeCount = Math.max(0, Number(iSelectionCount || 0));
         var sPrimaryId = String(sSelectedRowDisplayId || "").trim();
         if (!iSafeCount) {
-            return (oBundle && oBundle.getText("searchSelectionNone")) || "No selection";
+            return resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_SELECTION_NONE);
         }
         if (iSafeCount === 1 && sPrimaryId) {
-            return ((oBundle && oBundle.getText("searchSelectionPrimaryPrefix")) || "Primary") + ": " + sPrimaryId;
+            return resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_SELECTION_PRIMARY_PREFIX) + ": " + sPrimaryId;
         }
-        return iSafeCount + " " + ((oBundle && oBundle.getText("searchSelectionUnits")) || "selected");
+        return iSafeCount + " " + resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_SELECTION_UNITS);
     }
 
     function formatSelectionSummaryState() {
