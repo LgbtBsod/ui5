@@ -81,7 +81,7 @@
 .chkApp .detailViewportNarrow .detailSectionToolbar,
 .chkApp .detailViewportNarrow .detailControlRowActions {
   flex-wrap: wrap;
-  align-content: center;
+
   overflow: visible;
   row-gap: 0.3rem;
 }

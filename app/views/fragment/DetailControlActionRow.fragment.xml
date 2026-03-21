@@ -43,9 +43,6 @@
                 <OverflowToolbarLayoutData priority="High"/>
             </layoutData>
         </Button>
-
-        <ToolbarSpacer class="detailControlRowSpacer"/>
-
         <Button
             icon="sap-icon://delete"
             text="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteButton} }"
