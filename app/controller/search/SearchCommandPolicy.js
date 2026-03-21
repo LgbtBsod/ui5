@@ -8,7 +8,12 @@ sap.ui.define([
 
     var COMMAND = FacadeCommandConstants.SEARCH;
 
-    function normalizePayload(mInput) {
+    function normalizePayload(sMethod, mInput) {
+        if (sMethod === COMMAND.APPLY_REBIND_POLICY) {
+            return RuntimePayloadNormalizer.normalize(mInput, {
+                booleanKeys: ["silent", "userInitiated"]
+            });
+        }
         return RuntimePayloadNormalizer.normalize(mInput);
     }
 
@@ -17,7 +22,7 @@ sap.ui.define([
             oController,
             oController && oController._facade,
             sMethod,
-            normalizePayload(mInput || {}),
+            normalizePayload(sMethod, mInput || {}),
             ControllerCommandContextRuntime.buildSearchCtx(oController)
         );
     }

@@ -39,6 +39,14 @@ sap.ui.define([
         return (aFilters || []).map(sanitizeFilter).filter(Boolean);
     }
 
+    function flattenLooseFilters(aFilters) {
+        var aSanitized = sanitizeFilters(aFilters);
+        if (aSanitized.length !== 1 || !Array.isArray(aSanitized[0].aFilters)) {
+            return aSanitized;
+        }
+        return aSanitized[0].aFilters.map(sanitizeFilter).filter(Boolean);
+    }
+
     function applyRebindParams(mArgs) {
         var oBindingParams = mArgs.bindingParams || {};
         var mState = mArgs.state || {};
@@ -53,6 +61,11 @@ sap.ui.define([
         if (oBarriersFilter) { oBindingParams.filters.push(oBarriersFilter); }
         if (sSearchMode === SEARCH_MODE.LOOSE && oBindingParams.filters.length > 1) {
             oBindingParams.filters = [new Filter({ filters: oBindingParams.filters, and: false })];
+        } else if (sSearchMode === SEARCH_MODE.LOOSE) {
+            oBindingParams.filters = flattenLooseFilters(oBindingParams.filters || []);
+            if (oBindingParams.filters.length > 1) {
+                oBindingParams.filters = [new Filter({ filters: oBindingParams.filters, and: false })];
+            }
         }
         applySortAndGroupPolicy(oBindingParams, mState);
 

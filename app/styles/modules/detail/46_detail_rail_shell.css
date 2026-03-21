@@ -24,8 +24,8 @@
   flex: 0 0 auto;
   align-self: stretch;
   padding:
-    calc(0.96rem * var(--theme-density-scale))
-    calc(1rem * var(--theme-density-scale));
+    calc(0.8rem * var(--theme-density-scale))
+    calc(0.88rem * var(--theme-density-scale));
   border-radius: var(--radius-xl);
 }
 
@@ -39,11 +39,11 @@
 }
 
 .chkApp .detailRailHeader {
-  margin-bottom: 0.1rem;
-  padding-bottom: 0.2rem;
+  margin-bottom: 0.06rem;
+  padding-bottom: 0.14rem;
   border-bottom: 1px solid rgba(160, 184, 220, 0.18);
   flex-wrap: wrap;
-  row-gap: 0.45rem;
+  row-gap: 0.32rem;
 }
 
 .chkApp .detailSectionAnchorRail,
@@ -59,17 +59,29 @@
 .chkApp .detailSectionAnchorRail {
   row-gap: 0.45rem;
   column-gap: 0.4rem;
-  margin-bottom: 0.28rem;
-  padding: 0.18rem;
+  margin-bottom: 0.18rem;
+  padding: 0.12rem 0.16rem;
 }
 
 .chkApp .detailControlRowTop,
 .chkApp .detailControlRowActions {
   width: 100%;
   max-width: 100%;
-  row-gap: 0.45rem;
-  column-gap: 0.5rem;
-  padding: 0.18rem 0.3rem;
+  row-gap: 0.2rem;
+  column-gap: 0.24rem;
+  padding: 0.1rem 0.18rem;
+}
+
+.chkApp .detailControlRowTop {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(246, 250, 255, 0.12));
+  border-color: color-mix(in srgb, var(--theme-rail-border) 38%, transparent);
+}
+
+.chkApp .detailControlRowActions {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(244, 248, 255, 0.16));
+  border-color: color-mix(in srgb, var(--theme-rail-border) 48%, transparent);
 }
 
 .chkApp .detailControlRowTop .sapMOTBOverflowButton,
@@ -107,7 +119,7 @@
 
 .chkApp .detailControlRowTop .detailRailStatusChip .sapMObjStatusText {
   display: inline-block;
-  max-width: min(20rem, 100%);
+  max-width: min(16rem, 100%);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

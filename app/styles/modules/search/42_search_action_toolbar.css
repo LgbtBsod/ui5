@@ -33,8 +33,8 @@ body.chkAppRoot.appDark .chkApp .searchToolbarGhostAction .sapMBtnInner {
   background: transparent;
   border: 0;
   box-shadow: none;
-  padding-block: 0.35rem;
-  min-height: 2.75rem;
+  padding-block: 0.12rem;
+  min-height: auto;
 }
 
 .chkApp .searchActionRailStack {
@@ -43,7 +43,7 @@ body.chkAppRoot.appDark .chkApp .searchToolbarGhostAction .sapMBtnInner {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.38rem;
+  gap: 0.2rem;
 }
 
 .chkApp .searchPrimaryAction .sapMBtnInner {
@@ -93,22 +93,28 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   margin-bottom: 0;
   box-sizing: border-box;
   padding:
-    calc(0.28rem * var(--theme-density-scale))
-    calc(0.34rem * var(--theme-density-scale))
-    calc(0.3rem * var(--theme-density-scale));
+    calc(0.06rem * var(--theme-density-scale))
+    calc(0.24rem * var(--theme-density-scale))
+    calc(0.08rem * var(--theme-density-scale));
   border-radius: calc(var(--radius-lg) - 0.15rem);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 58%, transparent);
   background: color-mix(in srgb, var(--surface-1) 96%, rgba(255, 255, 255, 0.92));
   box-shadow:
-    0 8px 18px rgba(18, 36, 64, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
-  overflow-x: hidden;
-  overflow-y: visible;
+    0 6px 14px rgba(18, 36, 64, 0.045),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
   isolation: isolate;
   position: relative;
   top: auto;
   z-index: auto;
-  min-height: 2.7rem;
+  min-height: calc(var(--theme-workbench-control-height) + 0.24rem);
+}
+
+.chkApp .searchResultsActionRail.actionToolbarSurface {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(246, 250, 255, 0.68));
+  border-color: color-mix(in srgb, var(--theme-rail-border) 54%, transparent);
 }
 
 .chkApp .searchSettingsRail {
@@ -118,22 +124,30 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   margin-bottom: 0;
   box-sizing: border-box;
   padding:
-    calc(0.24rem * var(--theme-density-scale))
-    calc(0.34rem * var(--theme-density-scale))
-    calc(0.26rem * var(--theme-density-scale));
+    calc(0.02rem * var(--theme-density-scale))
+    calc(0.22rem * var(--theme-density-scale))
+    calc(0.04rem * var(--theme-density-scale));
   border-radius: calc(var(--radius-lg) - 0.15rem);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 46%, transparent);
   background: color-mix(in srgb, var(--surface-1) 98%, rgba(255, 255, 255, 0.94));
   box-shadow:
-    0 6px 14px rgba(18, 36, 64, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    0 4px 10px rgba(18, 36, 64, 0.036),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  overflow-y: hidden !important;
+  min-height: calc(var(--theme-workbench-control-height) + 0.18rem);
+}
+
+.chkApp .searchResultsActionRail.sapMTB,
+.chkApp .searchSettingsRail.sapMTB {
+  height: auto !important;
+  max-height: none !important;
 }
 
 .chkApp .searchResultsActionRail {
   align-items: center;
   align-content: center;
-  row-gap: 0.34rem;
-  column-gap: 0.32rem;
+  row-gap: 0.18rem;
+  column-gap: 0.2rem;
 }
 
 .chkApp .searchResultsActionRail > * {
@@ -148,6 +162,19 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   align-items: center;
   min-height: var(--theme-workbench-control-height);
   min-width: 0;
+}
+
+.chkApp .searchSettingsRail {
+  align-items: center;
+  align-content: center;
+  row-gap: 0.14rem;
+  column-gap: 0.16rem;
+}
+
+.chkApp .searchResultsActionRail .sapMBarChild,
+.chkApp .searchSettingsRail .sapMBarChild {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .chkApp .searchResultsActionRail > * {
@@ -191,6 +218,9 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
 
 .chkApp .searchSettingsRail .searchToolbarFieldLabel {
   white-space: nowrap;
+  opacity: 0.66;
+  font-size: 0.69rem;
+  letter-spacing: 0.01em;
 }
 
 .chkApp .searchResultsActionRail .searchToolbarNumberInput {
@@ -209,8 +239,27 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
 
 .chkApp .searchSettingsRail .backendTopInput,
 .chkApp .searchSettingsRail .maxRowsInput {
-  min-width: 4.6rem;
+  min-width: 4.2rem;
   max-width: 100%;
+}
+
+.chkApp .searchSelectionStatusChip {
+  font-size: 0.74rem;
+  font-weight: 600;
+}
+
+.chkApp .searchSelectionPrimaryId {
+  font-size: 0.7rem;
+  opacity: 0.72;
+  max-width: 10.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chkApp .searchSettingsRail .sapMOTBOverflowButton {
+  margin-inline-start: 0.08rem;
+  opacity: 0.92;
 }
 
 .chkApp .searchResultsActionRail .searchToolbarToggleSwitch {
@@ -295,5 +344,15 @@ body.chkAppRoot.appDark .chkApp .searchSettingsRail {
   .chkApp .searchSettingsRail .searchToolbarNumberInput {
     min-width: 4rem;
     width: 100%;
+  }
+
+  .chkApp .searchActionRailStack {
+    gap: 0.22rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  .chkApp .searchSelectionPrimaryId {
+    max-width: 7.25rem;
   }
 }

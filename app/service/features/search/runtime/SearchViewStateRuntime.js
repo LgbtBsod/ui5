@@ -25,7 +25,7 @@
             hasRows: false,
             resultCount: 0,
             canExport: false,
-            smartFilterReady: false,
+            smartFilterReady: true,
             smartTableReady: false,
             smartFilterPersistencyKey: PERSISTENCY_PREFIXES.SMART_FILTER_SESSION + String(sScope || "volatile"),
             smartTablePersistencyKey: PERSISTENCY_PREFIXES.SMART_TABLE_SESSION + String(sScope || "volatile"),

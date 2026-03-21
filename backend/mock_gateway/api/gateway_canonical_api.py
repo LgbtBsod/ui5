@@ -705,8 +705,8 @@ def _build_search_predicate(filter_expr: str | None):
             second = lit(tokens[idx]); idx += 1
             if idx < len(tokens) and tokens[idx] == ")":
                 idx += 1
-            field = second if low == "contains(" else second
-            needle = first if low == "contains(" else first
+            field = first if low == "contains(" else second
+            needle = second if low == "contains(" else first
             fn = lambda row, f=field, n=str(needle or "").lower(): n in str(row.get(f) or "").lower()
             if idx + 1 < len(tokens) and tokens[idx].lower() == "eq":
                 idx += 1

@@ -23,7 +23,7 @@
 .chkApp .detailHeroHeader {
   display: grid;
   grid-template-columns: minmax(13.5rem, 0.7fr) minmax(0, 1.45fr);
-  gap: 0.68rem 0.86rem;
+  gap: 0.52rem 0.72rem;
   align-items: start;
 }
 
@@ -63,7 +63,7 @@
 .chkApp .detailControlRowTop .detailSectionToolbarButton .sapMBtnInner,
 .chkApp .detailControlRowActions .detailSectionToolbarButton .sapMBtnInner {
   min-width: 0;
-  padding-inline: 0.85rem;
+  padding-inline: 0.72rem;
 }
 
 .chkApp .detailControlRowActions .detailRailActionBtn {

@@ -136,6 +136,13 @@ sap.ui.define([
             .catch(function () {
                 return null;
             });
+        if (mHooks && typeof mHooks.refreshAnalyticsRail === "function") {
+            logStartupMetric(oController, SEARCH_READINESS.STARTUP_EVENTS.ANALYTICS_STARTED);
+            Promise.resolve(mHooks.refreshAnalyticsRail())
+                .catch(function () {
+                    return null;
+                });
+        }
         mHooks.restoreSearchScrollPosition();
         refreshSearchTableIfNeeded(oController, "routeMatchedReturn", {
             rebind: mHooks.rebind

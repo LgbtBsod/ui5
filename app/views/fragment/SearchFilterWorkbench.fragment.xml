@@ -3,23 +3,24 @@
     xmlns:core="sap.ui.core"
     xmlns:smartFilterBar="sap.ui.comp.smartfilterbar">
     <VBox id="searchFilterCard" width="100%" class="searchFilterSurface searchWorkbenchSurface searchFilterExperienceShell">
-        <VBox visible="{= !${view>/smartFilterReady} || ${view>/bootstrapBusy} }" class="searchFilterSkeletonShell" renderType="Bare">
+        <VBox visible="{view>/bootstrapBusy}" class="searchFilterSkeletonShell" renderType="Bare">
             <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.SkeletonFormSection" type="XML"/>
         </VBox>
         <smartFilterBar:SmartFilterBar
             id="searchSmartFilterBar"
-            visible="{= ${view>/smartFilterReady} &amp;&amp; !${view>/bootstrapBusy} }"
+            visible="{= !${view>/bootstrapBusy} }"
             class="searchSmartFilterWorkbench"
             entitySet="ChecklistSearchSet"
             persistencyKey="{view>/smartFilterPersistencyKey}"
             useToolbar="true"
             showGoOnFB="true"
             showClearOnFB="true"
-            searchEnabled="{= ${view>/smartFilterReady} &amp;&amp; !${view>/bootstrapBusy} &amp;&amp; !${view>/searchActionBusy} }"
+            searchEnabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/searchActionBusy} }"
             liveMode="false"
             enableBasicSearch="false"
             useDateRangeType="true"
             initialise=".onSmartFilterInitialise"
+            clear=".onSmartFilterClear"
             search=".onSmartSearch"
             filterChange=".onSmartFilterChanged">
             <smartFilterBar:controlConfiguration>

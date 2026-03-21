@@ -74,6 +74,10 @@
             SearchSmartTableBehavior.onSmartFilterChanged(this);
         },
 
+        onSmartFilterClear: function () {
+            SearchSmartTableBehavior.onSmartFilterClear(this);
+        },
+
         onSmartTableInitialise: function () {
             SearchSmartTableBehavior.onSmartTableInitialise(this, this._readSearchRows.bind(this));
         },

@@ -73,6 +73,9 @@ sap.ui.define([
         onSmartFilterChanged: function (oController) {
             SearchFilterLifecycleBehavior.onSmartFilterChanged(oController);
         },
+        onSmartFilterClear: function (oController) {
+            SearchFilterLifecycleBehavior.onSmartFilterClear(oController);
+        },
         onMaxRowsChange: function (oController, oEvent) {
             SearchFilterLifecycleBehavior.onMaxRowsChange(oController, oEvent);
         },

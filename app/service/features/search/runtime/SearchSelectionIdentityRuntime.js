@@ -16,38 +16,23 @@ sap.ui.define([
     }
 
     function extractSelectedRowIds(oEvent, oTable) {
-        var aListItems = [];
         var aSelectedContexts = [];
         var aRowContexts = [];
         var aIds = [];
+        var aSelectedItems = oTable && oTable.getSelectedItems ? (oTable.getSelectedItems() || []) : [];
         if (oEvent && typeof oEvent.getParameter === "function") {
-            aListItems = oEvent.getParameter("listItems") || [];
-            if (!Array.isArray(aListItems) || !aListItems.length) {
-                [
-                    oEvent.getParameter("listItem"),
-                    oEvent.getParameter("item"),
-                    oEvent.getParameter("selectedItem")
-                ].forEach(function (oCandidate) {
-                    if (oCandidate) {
-                        aListItems.push(oCandidate);
-                    }
-                });
-            }
             aSelectedContexts = oEvent.getParameter("selectedContexts") || [];
             if (oEvent.getParameter("rowContext")) {
                 aRowContexts.push(oEvent.getParameter("rowContext"));
             }
         }
-        aIds = (aListItems || []).map(extractChecklistIdFromListItem);
-        aIds = aIds.concat((aSelectedContexts || []).map(function (oCtx) {
+        aIds = (aSelectedContexts || []).map(function (oCtx) {
             return ChecklistIdentity.extractChecklistId(oCtx && oCtx.getObject && oCtx.getObject());
-        }));
+        });
         aIds = aIds.concat((aRowContexts || []).map(function (oCtx) {
             return ChecklistIdentity.extractChecklistId(oCtx && oCtx.getObject && oCtx.getObject());
         }));
-        aIds = aIds.concat(
-            ((oTable && oTable.getSelectedItems && oTable.getSelectedItems()) || []).map(extractChecklistIdFromListItem)
-        );
+        aIds = aIds.concat(aSelectedItems.map(extractChecklistIdFromListItem));
         return ChecklistIdentity.normalizeChecklistIds(aIds);
     }
 
@@ -56,15 +41,8 @@ sap.ui.define([
     }
 
     function extractSelectedRowDisplayId(oEvent, oTable) {
-        var oListItem = null;
         var oSelectedItems = oTable && oTable.getSelectedItems ? (oTable.getSelectedItems() || []) : [];
-        if (oEvent && typeof oEvent.getParameter === "function") {
-            oListItem = oEvent.getParameter("listItem")
-                || oEvent.getParameter("item")
-                || oEvent.getParameter("selectedItem")
-                || ((oEvent.getParameter("listItems") || [])[0]);
-        }
-        oListItem = oListItem || oSelectedItems[0] || null;
+        var oListItem = oSelectedItems[0] || null;
         return String((oListItem && extractChecklistDisplayIdFromListItem(oListItem)) || "").trim();
     }
 

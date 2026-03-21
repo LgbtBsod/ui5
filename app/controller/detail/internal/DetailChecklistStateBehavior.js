@@ -1,12 +1,13 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailStateActionRuntime",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (DetailActionConstants, DetailCommandPolicy, ModelStateRuntime, RootIdRuntime, DetailStateActionRuntime, CreateSentinel, ModelContracts) {
+], function (DetailActionConstants, DetailCommandPolicy, DetailPersonInputRuntime, ModelStateRuntime, RootIdRuntime, DetailStateActionRuntime, CreateSentinel, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -16,7 +17,11 @@
         onToggleEdit: function (oEvent) {
             return DetailStateActionRuntime.toggleEdit(this, oEvent, {
                 enterEdit: function (mInput) {
-                    return DetailCommandPolicy.enterEdit(this, RootIdRuntime.withCurrentRootId(this, mInput));
+                    return DetailCommandPolicy.enterEdit(this, RootIdRuntime.withCurrentRootId(this, mInput)).then(function (vResult) {
+                        var oDetailModel = this.getModel && this.getModel(ModelContracts.MODELS.DETAIL);
+                        DetailPersonInputRuntime.syncDrafts(this, oDetailModel, "/current");
+                        return vResult;
+                    }.bind(this));
                 }.bind(this)
             });
         },

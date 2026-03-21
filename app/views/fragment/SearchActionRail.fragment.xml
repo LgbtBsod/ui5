@@ -10,7 +10,7 @@
                 <layoutData><OverflowToolbarLayoutData priority="High" moveToOverflow="true"/></layoutData>
             </Button>
             <MenuButton text="{i18n>exportMenuButton}" enabled="{view>/canExport}" visible="{view>/canExport}" tooltip="{i18n>searchShortcutExport}" class="searchToolbarGhostAction searchToolbarAction searchExportMenuBtn" icon="sap-icon://excel-attachment">
-                <layoutData><OverflowToolbarLayoutData priority="High" moveToOverflow="true"/></layoutData>
+                <layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData>
                 <menu>
                     <Menu itemSelected=".onExportMenuAction">
                         <items>
@@ -28,7 +28,7 @@
                 <layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData>
             </Text>
             <ToolbarSpacer class="searchToolbarPrimarySpacer"/>
-            <Button text="{i18n>selectVisibleButton}" icon="sap-icon://multi-select" press=".onSelectVisibleRows" enabled="{= ${view>/hasRows} &amp;&amp; !${view>/tableBusy} }" visible="{view>/hasRows}" tooltip="{i18n>searchShortcutSelectVisible}" class="searchToolbarGhostAction searchToolbarAction searchSelectVisibleActionBtn">
+            <Button text="{i18n>selectVisibleButton}" icon="sap-icon://multi-select" press=".onSelectVisibleRows" enabled="{= ${view>/hasRows} &amp;&amp; !${view>/tableBusy} }" visible="{= ${view>/resultCount} > 1 }" tooltip="{i18n>searchShortcutSelectVisible}" class="searchToolbarGhostAction searchToolbarAction searchSelectVisibleActionBtn">
                 <layoutData><OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/></layoutData>
             </Button>
             <Button text="{i18n>clearSelectionButton}" icon="sap-icon://sys-cancel" press=".onClearSelection" enabled="{view>/hasSelection}" visible="{view>/hasSelection}" tooltip="{i18n>searchShortcutClearSelection}" class="searchToolbarGhostAction searchToolbarAction searchClearSelectionActionBtn">
@@ -42,7 +42,7 @@
             <core:InvisibleText id="searchModeA11y" text="{i18n>searchModeLabel}"/>
             <Label text="{i18n>searchBackendTopLabel}" labelFor="backendTopInput" class="searchToolbarFieldLabel">
                 <layoutData>
-                    <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false" shrinkable="false"/>
+                    <OverflowToolbarLayoutData priority="High" moveToOverflow="true" shrinkable="false"/>
                 </layoutData>
             </Label>
             <Input
@@ -56,7 +56,7 @@
                 ariaLabelledBy="searchBackendTopA11y"
                 class="backendTopInput searchToolbarNumberInput searchToolbarBackendInput">
                 <layoutData>
-                    <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false" shrinkable="true" minWidth="4rem"/>
+                    <OverflowToolbarLayoutData priority="High" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
                 </layoutData>
             </Input>
             <Label text="{i18n>searchMaxResultsLabel}" labelFor="maxRowsInput" class="searchToolbarFieldLabel">
@@ -84,7 +84,7 @@
                 state="{path: 'state>/searchMode', formatter: '.formatSearchModeState'}"
                 class="searchModeStatusChip statusChipSemantic searchToolbarStatusChip">
                 <layoutData>
-                    <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
+                    <OverflowToolbarLayoutData priority="High" moveToOverflow="true"/>
                 </layoutData>
             </ObjectStatus>
             <Switch
@@ -94,7 +94,7 @@
                 customTextOff=""
                 class="appAccentSwitch searchModeToggleSwitch searchToolbarToggleSwitch">
                 <layoutData>
-                    <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
+                    <OverflowToolbarLayoutData priority="High" moveToOverflow="true"/>
                 </layoutData>
             </Switch>
             <ToolbarSpacer class="searchToolbarSecondarySpacer"/>

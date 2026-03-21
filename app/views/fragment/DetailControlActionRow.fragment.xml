@@ -40,7 +40,7 @@
             tooltip="{i18n>validateTooltip}"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="NeverOverflow"/>
+                <OverflowToolbarLayoutData priority="High"/>
             </layoutData>
         </Button>
         <Button
@@ -129,7 +129,7 @@
             class="detailRailActionBtn appActionSecondary chkRipple"
             visible="{path:'state>/activeObjectId', formatter:'.formatCopyLinkVisible'}">
             <layoutData>
-                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+                <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
         </Button>
 
@@ -141,7 +141,7 @@
             tooltip="{i18n>detailFullscreenTooltip}"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+                <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
         </Button>
     </OverflowToolbar>

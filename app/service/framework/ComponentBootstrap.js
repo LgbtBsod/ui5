@@ -194,6 +194,7 @@ sap.ui.define([
             }
         });
         ComponentModelInitRuntime.registerModels(oComponent, oModelBootstrap.models);
+        oComponent.setModel(oModelBootstrap.mainServiceModel);
         oRuntimeContext = ComponentCoreRuntimeBootstrap.bootstrap(oComponent, Object.assign({}, mBootstrapDeps, {
             bundleText: ComponentActionRuntime.createBundleText(oComponent),
             emitTelemetry: function (sEventName, oPayload) {

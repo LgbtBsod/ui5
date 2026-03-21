@@ -33,14 +33,25 @@
   gap: 0.54rem;
   align-items: stretch;
   width: 100%;
+  max-width: 100%;
+}
+
+.chkApp .detailInfoExperienceCard .infoCardGrid.sapFGridList,
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapFGridList,
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapMListUl,
+.chkApp .detailInfoExperienceCard .infoCardGrid .sapFGLIWrapper {
+  width: 100% !important;
+  max-width: 100%;
 }
 
 .chkApp .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
 .chkApp .detailInfoExperienceCard .infoCardGrid .sapMListUl {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr)) !important;
   gap: 0.54rem;
   align-items: stretch;
+  justify-items: stretch;
 }
 
 .chkApp .detailContent .infoCardGrid .sapFGLI {
@@ -130,7 +141,7 @@
 
 .chkApp .appLayoutSplit .detailPage .detailInfoExperienceCard .infoCardGrid .sapFGridListDefault,
 .chkApp .appLayoutSplit .detailPage .detailInfoExperienceCard .infoCardGrid .sapMListUl {
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-columns: repeat(auto-fit, minmax(12.25rem, 1fr)) !important;
   gap: 0.42rem;
 }
 

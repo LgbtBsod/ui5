@@ -11,6 +11,12 @@ sap.ui.define([
         return oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
     }
 
+    function resolveSmartSearchButton(oController) {
+        return oController && oController.byId
+            ? oController.byId("searchSmartFilterBar-btnGo")
+            : null;
+    }
+
     function selectVisibleRows(oController, fnSelectionChanged) {
         var oInnerTable = resolveSearchInnerTable(oController);
         var aItems = [];
@@ -63,6 +69,7 @@ sap.ui.define([
         focusSearchToolbar: function (oController) {
             return SearchSelectionFocusRuntime.focusSearchToolbar(oController);
         },
+        resolveSmartSearchButton: resolveSmartSearchButton,
         resolveSearchInnerTable: resolveSearchInnerTable,
         selectVisibleRows: selectVisibleRows,
         syncSearchTableRuntimeState: SearchSelectionTableRuntime.syncSearchTableRuntimeState

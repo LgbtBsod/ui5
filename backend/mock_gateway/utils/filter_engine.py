@@ -77,12 +77,18 @@ def parse_filter_to_predicate(filter_string: str | None, field_map: dict[str, st
         tok = tokens[i]; low = tok.lower()
         if low in {"substringof(", "contains("}:
             i += 1
-            needle = str(_literal(tokens[i])); i += 1
+            first = str(_literal(tokens[i])); i += 1
             if i < len(tokens) and tokens[i] == ",":
                 i += 1
-            fld = field_name(str(_literal(tokens[i]))); i += 1
+            second = str(_literal(tokens[i])); i += 1
             if i < len(tokens) and tokens[i] == ")":
                 i += 1
+            if low == "contains(":
+                fld = field_name(first)
+                needle = second
+            else:
+                fld = field_name(second)
+                needle = first
             fn = lambda row, f=fld, n=needle.lower(): n in str(row.get(f, "")).lower()
             return fn
 
