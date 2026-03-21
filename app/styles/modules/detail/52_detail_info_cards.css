@@ -1,8 +1,7 @@
 .chkApp .detailInfoBridgeCard {
   position: relative;
   margin-bottom: 0.18rem;
-  border-bottom-left-radius: calc(var(--radius-xl) - 0.1rem);
-  border-bottom-right-radius: calc(var(--radius-xl) - 0.1rem);
+  border-radius: calc(var(--radius-xl) - 0.1rem);
 }
 
 /* Sanctioned compatibility hook: ObjectPage host keeps painting its own background in UI5 1.71. */
@@ -96,8 +95,7 @@
 .chkApp .detailContent .infoCardGrid .sapFGLI:focus-within .infoCardTile {
   border-color: color-mix(in srgb, var(--accent) 44%, transparent);
   box-shadow:
-    0 0 0 0.14rem color-mix(in srgb, rgba(var(--accent-rgb), 0.16) 80%, transparent),
-    0 14px 30px rgba(18, 36, 64, 0.1);
+    none;
 }
 
 .chkApp .detailContent .infoCardGrid .appMetricSurface:hover,
