@@ -74,9 +74,22 @@ function mapFieldDelta(mInput, oCurrent) {
         );
     }
 
+    function writeDetailCache(oCacheWrite, sRootId, oSnapshot, mCtx) {
+        if (!oCacheWrite || typeof oCacheWrite.execute !== "function" || !sRootId || !oSnapshot) {
+            return Promise.resolve(null);
+        }
+        return Promise.resolve(oCacheWrite.execute({
+            rootId: sRootId,
+            snapshot: oSnapshot
+        }, mCtx || {})).catch(function () {
+            return null;
+        });
+    }
+
 function execute(mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
+        var oCacheWrite = mCtx && mCtx.cacheWrite;
         var oDelta;
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
         var aSerializedAttachments = [];
@@ -136,16 +149,18 @@ function execute(mInput, mCtx) {
                 ctx: mCtx,
                 hasStagedPayload: aSerializedAttachments.length > 0
             }).then(function (oAttachmentSync) {
-                return Result.ok({ autosavedAt: sAt }, [
-                    Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, oAttachmentSync.hasPendingAttachments),
-                    Effects.modelPatch("snapshot", "/", CloneUtil.clone(oAttachmentSync.snapshot, {}))
-                ].concat(oAttachmentSync.effects, DetailPersistenceRuntime.successEffects("auto", sAt, {
-                    state: oAttachmentSync.hasPendingAttachments ? DetailPersistenceRuntime.STATES.DIRTY : DetailPersistenceRuntime.STATES.SAVED,
-                    messageKey: oAttachmentSync.hasPendingAttachments ? "persistenceAutosavePendingAttachments" : "persistenceAutosaveSaved",
-                    hasValidLock: true,
-                    lockOwnerSessionMatches: true,
-                    lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sAt : null
-                })));
+                return writeDetailCache(oCacheWrite, sRootId, oAttachmentSync.snapshot, mCtx).then(function () {
+                    return Result.ok({ autosavedAt: sAt }, [
+                        Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, oAttachmentSync.hasPendingAttachments),
+                        Effects.modelPatch("snapshot", "/", CloneUtil.clone(oAttachmentSync.snapshot, {}))
+                    ].concat(oAttachmentSync.effects, DetailPersistenceRuntime.successEffects("auto", sAt, {
+                        state: oAttachmentSync.hasPendingAttachments ? DetailPersistenceRuntime.STATES.DIRTY : DetailPersistenceRuntime.STATES.SAVED,
+                        messageKey: oAttachmentSync.hasPendingAttachments ? "persistenceAutosavePendingAttachments" : "persistenceAutosaveSaved",
+                        hasValidLock: true,
+                        lockOwnerSessionMatches: true,
+                        lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sAt : null
+                    })));
+                });
             });
         }).catch(function (oError) {
             var oClassification = DetailPersistenceRuntime.classifyError(oError);

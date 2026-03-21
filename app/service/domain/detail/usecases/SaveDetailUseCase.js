@@ -10,17 +10,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/ChecklistValidationService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ChecklistValidationService, ValidationPathMap, ModelPathContracts, ViewPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime) {
     "use strict";
 
     function SaveDetailUseCase() {
@@ -29,19 +26,25 @@ sap.ui.define([
         };
     }
 
-function readSelectedChecklist(mCtx) {
+    function readSelectedChecklist(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         return (oUiState && typeof oUiState.get === "function" && oUiState.get("selected", "/")) || null;
     }
 
-function readCurrentChecklist(mCtx) {
+    function readCurrentChecklist(mCtx) {
         return readSelectedChecklist(mCtx) || DetailSaveRuntime.readCurrentChecklist(mCtx);
     }
 
-    function buildSearchReturnContext(sMode, sRootId, oSavedSnapshot) {
+    function resolveChecklistDisplayId(oCurrentChecklist, oSelectedChecklist, oSavedSnapshot) {
+        return ChecklistIdentity.extractChecklistDisplayId(oCurrentChecklist)
+            || ChecklistIdentity.extractChecklistDisplayId(oSelectedChecklist)
+            || ChecklistIdentity.extractChecklistDisplayId(oSavedSnapshot);
+    }
+
+    function buildSearchReturnContext(sMode, sRootId, oCurrentChecklist, oSelectedChecklist, oSavedSnapshot) {
         return SearchReturnRediscoveryRuntime.buildContext({
             rootId: sRootId,
-            checklistId: ChecklistIdentity.extractChecklistDisplayId(oSavedSnapshot),
+            checklistId: resolveChecklistDisplayId(oCurrentChecklist, oSelectedChecklist, oSavedSnapshot),
             reason: "detailSaveCompleted",
             mode: sMode,
             focusRequested: true,
@@ -49,40 +52,26 @@ function readCurrentChecklist(mCtx) {
         });
     }
 
-    function buildBlockedCreateValidationResult(mCtx, oValidation) {
-        var aMissingPaths = (oValidation && oValidation.missingPaths) || [];
-        var mMissing = ValidationPathMap.toMissingMap(aMissingPaths);
-        var aMissingKeys = Object.keys(mMissing).filter(function (sKey) {
-            return !!mMissing[sKey];
+    function writeDetailCache(oCacheWrite, sRootId, oSnapshot, mCtx) {
+        if (!oCacheWrite || typeof oCacheWrite.execute !== "function" || !sRootId || !oSnapshot) {
+            return Promise.resolve(null);
+        }
+        return Promise.resolve(oCacheWrite.execute({
+            rootId: sRootId,
+            snapshot: oSnapshot
+        }, mCtx || {})).catch(function () {
+            return null;
         });
-
-        return Result.ok({
-            blocked: true,
-            reason: "VALIDATION_FAILED",
-            missingPaths: aMissingPaths
-        }, [
-            Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-            Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
-            Effects.modelPatch("view", ViewPathContracts.VALIDATION_SHOWN, true),
-            Effects.modelPatch("view", ViewPathContracts.VALIDATION_MISSING, mMissing),
-            Effects.modelPatch("state", StatePaths.VALIDATION_SUMMARY, {
-                hasErrors: true,
-                missingPaths: aMissingPaths,
-                missingKeys: aMissingKeys,
-                source: "save",
-                firstMissingPath: aMissingPaths[0] || "",
-                firstMissingKey: aMissingKeys[0] || ""
-            }),
-            Effects.toast("checklistValidationFailedToast", "warning")
-        ]);
     }
 
     function execute(mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oUiState = mCtx && mCtx.uiState;
         var oCurrent = readCurrentChecklist(mCtx);
+        var oSelectedChecklist = readSelectedChecklist(mCtx);
         var oSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
         var oRepo = mCtx && mCtx.repo;
+        var oCacheWrite = mCtx && mCtx.cacheWrite;
         var oLock = mCtx && mCtx.lock;
         var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var bCreate = CreateSentinel.isCreateId(sRootId) || sMode === "CREATE";
@@ -91,7 +80,6 @@ function readCurrentChecklist(mCtx) {
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
         var sLockState = DetailSaveRuntime.readLockState(mCtx, StatePaths);
         var aCurrentAttachments = DetailStateAccess.readWorkingAttachments(mCtx);
-        var oValidation = null;
 
         if (!oRepo) {
             return Promise.resolve(Result.fail({ message: "Save handler unavailable", code: "SAVE_HANDLER_MISSING" }));
@@ -101,26 +89,6 @@ function readCurrentChecklist(mCtx) {
         }
         if (bCreate && typeof oRepo.createChecklist !== "function") {
             return Promise.resolve(Result.fail({ message: "Create handler unavailable", code: "CREATE_HANDLER_MISSING" }));
-        }
-        if (bCreate) {
-            oValidation = ChecklistValidationService.validateRequiredFields(oCurrent, {
-                requiredFields: DetailStateAccess.readRequiredFields(mCtx)
-            });
-            if (oValidation.unavailable) {
-                return Promise.resolve(Result.fail({
-                    message: "Validation rules are not loaded yet",
-                    code: "REQUIRED_FIELDS_UNAVAILABLE"
-                }, [
-                    Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                    Effects.modelPatch("state", StatePaths.SAVE_IN_FLIGHT, false),
-                    Effects.modelPatch("view", ViewPathContracts.VALIDATION_SHOWN, false),
-                    Effects.modelPatch("view", ViewPathContracts.VALIDATION_MISSING, {}),
-                    Effects.toast("checklistValidationUnavailableToast", "warning")
-                ]));
-            }
-            if (!oValidation.valid) {
-                return Promise.resolve(buildBlockedCreateValidationResult(mCtx, oValidation));
-            }
         }
         if (!bCreate && !oDelta) {
             return Promise.resolve(Result.ok({ saved: false, skipped: true, reason: "NO_CHANGES" }, [
@@ -200,51 +168,55 @@ function readCurrentChecklist(mCtx) {
                         DetailSaveRuntime.preserveBasicFields(oAttachmentSync.snapshot, oCurrent, oSnapshot)
                     );
                     var oSelectedSnapshot = CloneUtil.clone(oAttachmentSync.selectedSnapshot, {});
-                    var aEffects = [
-                        Effects.toast("objectSaved", "success"),
-                        Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
-                        Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
-                        Effects.modelPatch("snapshot", "/", CloneUtil.clone(oSavedSnapshot, {}))
-                    ];
-                    aEffects = aEffects.concat(oAttachmentSync.effects);
-                    aEffects = aEffects.concat(DetailPersistenceRuntime.successEffects("manual", sNow, {
-                        hasValidLock: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
-                        lockOwnerSessionMatches: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
-                        lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sNow : null
-                    }));
-                    if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
-                        aEffects.push(Effects.modelPatch(
-                            "state",
-                            ModelPathContracts.SEARCH_RETURN_CONTEXT,
-                            buildSearchReturnContext(
-                                bCreate ? SearchReturnRediscoveryRuntime.MODES.CREATE : SearchReturnRediscoveryRuntime.MODES.SAVE,
-                                sServerRootId,
-                                oSavedSnapshot
-                            )
-                        ));
-                        aEffects.push(Effects.modelPatch("selected", "/root/id", sServerRootId));
-                        if (bCreate) {
-                            var bLockAcquired = !!(oLockResult && oLockResult.ok);
-                            if (bLockAcquired) {
-                                aEffects = aEffects.concat(DetailPostOpenRuntime.buildEditableDetailEffects(sServerRootId, {
-                                    snapshot: oSelectedSnapshot,
-                                    autosaveEnabled: true
-                                }));
+                    return writeDetailCache(oCacheWrite, sServerRootId, oSavedSnapshot, mCtx).then(function () {
+                        var aEffects = [
+                            Effects.toast("objectSaved", "success"),
+                            Effects.modelPatch("state", StatePaths.WORKFLOW_DIRTY, false),
+                            Effects.modelPatch("state", StatePaths.UI_BUSY_DETAIL, false),
+                            Effects.modelPatch("snapshot", "/", CloneUtil.clone(oSavedSnapshot, {}))
+                        ];
+                        aEffects = aEffects.concat(oAttachmentSync.effects);
+                        aEffects = aEffects.concat(DetailPersistenceRuntime.successEffects("manual", sNow, {
+                            hasValidLock: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
+                            lockOwnerSessionMatches: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
+                            lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sNow : null
+                        }));
+                        if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
+                            aEffects.push(Effects.modelPatch(
+                                "state",
+                                ModelPathContracts.SEARCH_RETURN_CONTEXT,
+                                buildSearchReturnContext(
+                                    bCreate ? SearchReturnRediscoveryRuntime.MODES.CREATE : SearchReturnRediscoveryRuntime.MODES.SAVE,
+                                    sServerRootId,
+                                    oCurrent,
+                                    oSelectedChecklist,
+                                    oSavedSnapshot
+                                )
+                            ));
+                            aEffects.push(Effects.modelPatch("selected", "/root/id", sServerRootId));
+                            if (bCreate) {
+                                var bLockAcquired = !!(oLockResult && oLockResult.ok);
+                                if (bLockAcquired) {
+                                    aEffects = aEffects.concat(DetailPostOpenRuntime.buildEditableDetailEffects(sServerRootId, {
+                                        snapshot: oSelectedSnapshot,
+                                        autosaveEnabled: true
+                                    }));
+                                } else {
+                                    aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
+                                    aEffects.push(Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sServerRootId));
+                                    aEffects.push(Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sServerRootId));
+                                    aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
+                                    aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
+                                    aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false));
+                                }
+                                aEffects.push(Effects.navigate("detail", { id: sServerRootId }, true));
                             } else {
                                 aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
                                 aEffects.push(Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sServerRootId));
-                                aEffects.push(Effects.modelPatch("state", ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sServerRootId));
-                                aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
-                                aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
-                                aEffects.push(Effects.modelPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false));
                             }
-                            aEffects.push(Effects.navigate("detail", { id: sServerRootId }, true));
-                        } else {
-                            aEffects.push(Effects.modelPatch("state", ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
-                            aEffects.push(Effects.modelPatch("state", ModelPathContracts.SELECTED_ID, sServerRootId));
                         }
-                    }
-                return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);
+                        return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);
+                    });
                 });
             }).catch(function (oError) {
                 var oClassification = DetailPersistenceRuntime.classifyError(oError);

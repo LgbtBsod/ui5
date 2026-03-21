@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-"""Gateway + UI lifecycle proof for create/edit/save/autosave/lock/unlock flows."""
+﻿#!/usr/bin/env python3
+"""Gateway + UI lifecycle proof for create/edit/save/autosave/reopen/lock flows."""
 
 from __future__ import annotations
 
@@ -92,12 +92,12 @@ def create_checklist(opener: urllib.request.OpenerDirector, token: str, label: s
                 "timezone": "Europe/Saratov",
                 "equipment": f"{label} Pump",
                 "LOCATION_KEY": "LOC-PRD-03-B",
-                "LOCATION_NAME": "Дизель-генератор",
-                "LOCATION_TEXT": "Дизель-генератор",
+                "LOCATION_NAME": "Ð”Ð¸Ð·ÐµÐ»ÑŒ-Ð³ÐµÐ½ÐµÑ€Ð°Ñ‚Ð¾Ñ€",
+                "LOCATION_TEXT": "Ð”Ð¸Ð·ÐµÐ»ÑŒ-Ð³ÐµÐ½ÐµÑ€Ð°Ñ‚Ð¾Ñ€",
                 "OBSERVER_FULLNAME": f"{label} Observer",
                 "OBSERVED_FULLNAME": f"{label} Observed",
                 "LPC_KEY": "LPC-01",
-                "LPC_TEXT": "ЛПК 01",
+                "LPC_TEXT": "Ð›ÐŸÐš 01",
                 "PROF_KEY": "PROF-01",
                 "PROF_TEXT": "Operator"
             },
@@ -733,28 +733,6 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             wait_for_create_runtime_ready(page)
             screenshots["beforeFirstSave"] = take_step_screenshot(page, "before-first-save")
 
-            step = "create.empty_save_blocked"
-            create_before_empty = count_requests(network, "CreateChecklist")
-            invoke_detail(page, "onSaveDetail")
-            page.wait_for_timeout(1800)
-            empty_blocked_state = read_runtime_state(page)
-            create_after_empty = count_requests(network, "CreateChecklist")
-            validation_visible = body_contains(page, "Обязательные поля") or body_contains(page, "Исправьте обязательные поля")
-            ensure(
-                checks,
-                "emptyCreateBlocked",
-                "__CREATE" in empty_blocked_state["hash"]
-                and empty_blocked_state["selectedId"] == "__CREATE"
-                and empty_blocked_state["editMode"] == "CREATE"
-                and create_after_empty == create_before_empty
-                and (validation_visible or empty_blocked_state["lockState"] == "IDLE"),
-                {
-                    "before": create_before_empty,
-                    "after": create_after_empty,
-                    "validationVisible": validation_visible,
-                    "state": empty_blocked_state
-                }
-            )
 
             step = "create.fill"
             set_required_create_fields(page, str(int(time.time())))

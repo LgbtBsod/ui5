@@ -176,4 +176,59 @@
             done();
         });
     });
+
+    QUnit.test("opening detail uses valid cache snapshot without backend reload", function (assert) {
+        var done = assert.async();
+        var oUseCase = OpenDetailUseCase();
+        var bLoaded = false;
+        var oCachedSnapshot = {
+            root: { id: "ROOT-CACHE-1", checklistId: "CHK-CACHE-1" },
+            basic: { equipment: "Cached equipment" }
+        };
+
+        oUseCase.execute({
+            rootId: "ROOT-CACHE-1"
+        }, {
+            repo: {
+                checkChecklistPermission: function () {
+                    return Promise.resolve({
+                        rootId: "ROOT-CACHE-1",
+                        canView: true,
+                        canEdit: true,
+                        canDelete: true,
+                        reasonCode: "AUTHORIZED"
+                    });
+                },
+                loadDetailSnapshot: function () {
+                    bLoaded = true;
+                    return Promise.resolve({});
+                }
+            },
+            cacheValidation: {
+                execute: function () {
+                    return Promise.resolve({
+                        ok: true,
+                        data: {
+                            valid: true,
+                            snapshot: oCachedSnapshot
+                        }
+                    });
+                }
+            },
+            uiState: {
+                get: function () {
+                    return null;
+                }
+            }
+        }).then(function (oResult) {
+            var oSelectedPatch = (oResult.effects || []).filter(function (oEffect) {
+                return oEffect.type === "modelPatch" && oEffect.modelName === "selected" && oEffect.path === "/";
+            }).pop();
+
+            assert.ok(oResult && oResult.ok, "open detail succeeds");
+            assert.notOk(bLoaded, "backend reload is skipped for valid cache");
+            assert.strictEqual(oSelectedPatch.value.basic.equipment, "Cached equipment", "cached snapshot is used");
+            done();
+        });
+    });
 });

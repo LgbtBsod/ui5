@@ -120,7 +120,12 @@ sap.ui.define([
             formatPersistenceText: DetailFormatters.formatPersistenceText,
             formatPersistenceTooltip: DetailFormatters.formatPersistenceTooltip,
             formatCopyLinkVisible: DetailFormatters.formatCopyLinkVisible,
+            formatPersistedActionVisible: DetailFormatters.formatPersistedActionVisible,
+            formatEditActionVisible: DetailFormatters.formatEditActionVisible,
+            formatEditSwitchState: DetailFormatters.formatEditSwitchState,
+            formatEditSwitchEnabled: DetailFormatters.formatEditSwitchEnabled,
             formatDeleteChecklistVisible: DetailFormatters.formatDeleteChecklistVisible,
+            formatDeleteChecklistConfirmVisible: DetailFormatters.formatDeleteChecklistConfirmVisible,
             formatAutosaveText: DetailFormatters.formatAutosaveText,
             formatAttachmentsEmptyStateText: DetailFormatters.formatAttachmentsEmptyStateText,
             isCheckSectionEmpty: function (sKind, aRows) {

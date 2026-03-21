@@ -3,15 +3,34 @@ sap.ui.define([
 ], function (ChecklistIdentity) {
     "use strict";
 
-    function applySelectionState(oController, aSelectedRowIds, sSelectedRowDisplayId, sSource, fnSelectionChanged) {
+    function buildSelectionStatePayload(aSelectedRowIds, sSelectedRowDisplayId) {
         var aIds = ChecklistIdentity.normalizeChecklistIds(aSelectedRowIds);
+        var sPrimaryId = aIds[0] || "";
+        var sDisplayId = String(sSelectedRowDisplayId || "").trim() || sPrimaryId;
+        var iSelectionCount = aIds.length;
+        var bHasSelection = iSelectionCount > 0;
+        var bSingleSelection = iSelectionCount === 1;
+
+        return {
+            selectedRowId: sPrimaryId,
+            selectedRowDisplayId: bHasSelection ? sDisplayId : "",
+            selectedRowIds: aIds,
+            selectionCount: iSelectionCount,
+            hasSelection: bHasSelection,
+            canCopy: bSingleSelection,
+            canDelete: bSingleSelection
+        };
+    }
+
+    function applySelectionState(oController, aSelectedRowIds, sSelectedRowDisplayId, sSource, fnSelectionChanged) {
+        var mSelectionState = buildSelectionStatePayload(aSelectedRowIds, sSelectedRowDisplayId);
         if (typeof fnSelectionChanged !== "function") {
             return Promise.resolve();
         }
         return fnSelectionChanged({
-            selectedRowId: aIds[0] || "",
-            selectedRowDisplayId: String(sSelectedRowDisplayId || "").trim(),
-            selectedRowIds: aIds,
+            selectedRowId: mSelectionState.selectedRowId,
+            selectedRowDisplayId: mSelectionState.selectedRowDisplayId,
+            selectedRowIds: mSelectionState.selectedRowIds,
             source: sSource || "selectionRuntime"
         });
     }
@@ -35,6 +54,7 @@ sap.ui.define([
 
     return {
         applySelectionState: applySelectionState,
+        buildSelectionStatePayload: buildSelectionStatePayload,
         clearSelection: function (oController, fnSelectionChanged) {
             return Promise.resolve(applySelectionState(oController, [], "", "clearSelection", fnSelectionChanged));
         },

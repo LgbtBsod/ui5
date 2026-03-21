@@ -78,6 +78,7 @@
         var done = assert.async();
         var oUseCase = AutosaveDetailUseCase();
         var bCalled = false;
+        var aCacheWrites = [];
         var oCtx = {
             repo: {
                 autosaveChecklist: function (mArgs) {
@@ -90,6 +91,12 @@
                             basic: { equipment: "Edited equipment" }
                         }
                     });
+                }
+            },
+            cacheWrite: {
+                execute: function (mInput) {
+                    aCacheWrites.push(mInput);
+                    return Promise.resolve({ ok: true });
                 }
             },
             uiState: {
@@ -142,6 +149,8 @@
             assert.ok(oResult && oResult.ok, "autosave succeeds");
             assert.strictEqual(oSnapshotPatch.value.basic.equipment, "Edited equipment", "current basic fields are preserved when backend snapshot is partial");
             assert.strictEqual(oRefreshPatch, undefined, "autosave does not arm search return rediscovery");
+            assert.strictEqual(aCacheWrites.length, 1, "autosave refreshes cache snapshot");
+            assert.strictEqual(aCacheWrites[0].rootId, "CHK-2", "autosave cache write keeps persisted root id");
             done();
         });
     });

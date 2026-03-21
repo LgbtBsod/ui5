@@ -401,10 +401,30 @@
             return !!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId);
         },
 
+        formatPersistedActionVisible: function (sActiveObjectId) {
+            return !!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId);
+        },
+
+        formatEditActionVisible: function (sMode) {
+            return WorkflowContracts.isEditableMode(sMode);
+        },
+
+        formatEditSwitchState: function (sMode) {
+            return WorkflowContracts.isEditableMode(sMode);
+        },
+
+        formatEditSwitchEnabled: function (sActiveObjectId, bLockOperationPending) {
+            return !!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId) && !bLockOperationPending;
+        },
+
         formatDeleteChecklistVisible: function (sMode, sActiveObjectId) {
             return WorkflowContracts.isEditableMode(sMode) &&
                 !!sActiveObjectId &&
                 !CreateSentinel.isCreateId(sActiveObjectId);
+        },
+
+        formatDeleteChecklistConfirmVisible: function (bArmed, sMode, sActiveObjectId) {
+            return !!bArmed && this.formatDeleteChecklistVisible(sMode, sActiveObjectId);
         },
 
         formatAttachmentsEmptyStateText: function (sRootId) {

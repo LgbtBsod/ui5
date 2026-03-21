@@ -4,9 +4,9 @@
     </BusyIndicator>
     <Switch
         id="detailEditSwitch"
-        visible="{view>/hasPersistedObject}"
-        state="{view>/isEditMode}"
-        enabled="{= ${view>/hasPersistedObject} &amp;&amp; !${state>/lockOperationPending} }"
+        visible="{path:'state>/activeObjectId', formatter:'.formatPersistedActionVisible'}"
+        state="{path:'state>/workflow/detail/editMode', formatter:'.formatEditSwitchState'}"
+        enabled="{parts:[{path:'state>/activeObjectId'},{path:'state>/lockOperationPending'}], formatter:'.formatEditSwitchEnabled'}"
         customTextOn=""
         customTextOff=""
         change=".onToggleEdit"

@@ -93,6 +93,7 @@ sap.ui.define([
 
     function refreshSearchTableIfNeeded(oController, sSource, mHooks) {
         var bRebindStarted = false;
+        var bCanRebind = false;
         if (!shouldRefreshSearchOnReturn(oController)) {
             resetReturnRefreshRetry(oController);
             return;
@@ -106,10 +107,15 @@ sap.ui.define([
         if (mHooks && typeof mHooks.rebindTableDirect === "function") {
             bRebindStarted = !!mHooks.rebindTableDirect();
         }
+        bCanRebind = bRebindStarted || !!(mHooks && typeof mHooks.rebind === "function");
         if (!bRebindStarted && mHooks && typeof mHooks.rebind === "function") {
             mHooks.rebind({
                 source: sSource || SEARCH_SOURCES.SEARCH_RETRY
             });
+        }
+        if (!bCanRebind) {
+            resetReturnRefreshRetry(oController);
+            return;
         }
         scheduleReturnRefreshRetry(oController, sSource || SEARCH_SOURCES.SEARCH_RETRY, mHooks);
     }

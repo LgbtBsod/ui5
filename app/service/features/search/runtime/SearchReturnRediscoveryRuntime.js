@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity"
-], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, ModelPathContracts, ChecklistIdentity) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionMutationRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, ModelPathContracts, ChecklistIdentity, SearchSelectionMutationRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -98,21 +99,19 @@ sap.ui.define([
     }
 
     function applySelectionState(oController, oOptions) {
-        var sSelectedRowId = normalizeString(oOptions && oOptions.selectedRowId);
-        var sSelectedRowDisplayId = normalizeString(oOptions && oOptions.selectedRowDisplayId) || sSelectedRowId;
-        var aSelectedRowIds = sSelectedRowId ? [sSelectedRowId] : [];
-        var iSelectionCount = aSelectedRowIds.length;
-        var bHasSelection = iSelectionCount > 0;
-        var bSingleSelection = iSelectionCount === 1;
+        var mSelectionState = SearchSelectionMutationRuntime.buildSelectionStatePayload(
+            oOptions && oOptions.selectedRowId ? [oOptions.selectedRowId] : [],
+            oOptions && oOptions.selectedRowDisplayId
+        );
 
         ControllerViewStateRuntime.setMany(oController, {
-            "/selectedRowId": sSelectedRowId,
-            "/selectedRowDisplayId": bHasSelection ? sSelectedRowDisplayId : "",
-            "/selectedRowIds": aSelectedRowIds,
-            "/selectionCount": iSelectionCount,
-            "/hasSelection": bHasSelection,
-            "/canCopy": bSingleSelection,
-            "/canDelete": bSingleSelection
+            "/selectedRowId": mSelectionState.selectedRowId,
+            "/selectedRowDisplayId": mSelectionState.selectedRowDisplayId,
+            "/selectedRowIds": mSelectionState.selectedRowIds,
+            "/selectionCount": mSelectionState.selectionCount,
+            "/hasSelection": mSelectionState.hasSelection,
+            "/canCopy": mSelectionState.canCopy,
+            "/canDelete": mSelectionState.canDelete
         });
     }
 
