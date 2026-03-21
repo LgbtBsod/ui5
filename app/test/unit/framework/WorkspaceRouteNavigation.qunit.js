@@ -6,6 +6,12 @@
 ], function (JSONModel, WorkspaceRouteNavigation, NavigationContracts, ModelStateRuntime) {
     "use strict";
 
+    function createShellModel(sLayout) {
+        return new JSONModel({
+            layout: sLayout || NavigationContracts.LAYOUTS.ONE_COLUMN
+        });
+    }
+
     QUnit.module("WorkspaceRouteNavigation");
 
     QUnit.test("buildCurrentIntent keeps search intent when only stale selection remains", function (assert) {
@@ -16,7 +22,7 @@
             postOpenHydratedRootId: "",
             layout: NavigationContracts.LAYOUTS.ONE_COLUMN
         });
-        var oIntent = WorkspaceRouteNavigation.buildCurrentIntent(oStateModel);
+        var oIntent = WorkspaceRouteNavigation.buildCurrentIntent(oStateModel, createShellModel(NavigationContracts.LAYOUTS.ONE_COLUMN));
 
         assert.strictEqual(oIntent.routeName, NavigationContracts.ROUTES.SEARCH, "search route stays canonical");
         assert.deepEqual(oIntent.routeArgs, {}, "stale search selection does not synthesize detail navigation");
@@ -30,7 +36,7 @@
             postOpenHydratedRootId: "",
             layout: NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED
         });
-        var oIntent = WorkspaceRouteNavigation.buildCurrentIntent(oStateModel);
+        var oIntent = WorkspaceRouteNavigation.buildCurrentIntent(oStateModel, createShellModel(NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED));
 
         assert.strictEqual(oIntent.routeName, NavigationContracts.ROUTES.DETAIL, "detail route is preserved");
         assert.strictEqual(oIntent.routeArgs.id, "CHK-ACTIVE-2", "active detail id wins over stale selected id");
@@ -48,7 +54,7 @@
                 restoreEdit: true
             }
         });
-        var oIntent = WorkspaceRouteNavigation.buildCurrentIntent(oStateModel);
+        var oIntent = WorkspaceRouteNavigation.buildCurrentIntent(oStateModel, createShellModel(NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN));
 
         assert.strictEqual(oIntent.routeName, NavigationContracts.ROUTES.DETAIL_LAYOUT, "analytics route resolves to current active detail");
         assert.strictEqual(oIntent.routeArgs.id, "CHK-ACTIVE-2", "active detail id stays canonical");
@@ -69,18 +75,35 @@
             }
         });
         var oController = {
+            getView: function () {
+                return {
+                    getModel: function () {
+                        return null;
+                    }
+                };
+            },
+            getOwnerComponent: function () {
+                return {
+                    getModel: function (sName) {
+                        if (sName === "state") {
+                            return oStateModel;
+                        }
+                        if (sName === "shell") {
+                            return createShellModel(NavigationContracts.LAYOUTS.ONE_COLUMN);
+                        }
+                        return null;
+                    }
+                };
+            },
             getRouter: function () {
                 return null;
-            },
-            getModel: function (sName) {
-                return sName === "state" ? oStateModel : null;
             }
         };
 
         WorkspaceRouteNavigation.setAnalyticsReturnIntent(oController);
 
         assert.deepEqual(
-            ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", {}),
+            ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", null),
             {
                 hash: "",
                 rootId: "",

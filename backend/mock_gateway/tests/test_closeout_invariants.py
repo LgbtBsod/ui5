@@ -550,11 +550,75 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     assert "ChecklistIdentity.extractChecklistId" in search_rediscovery
     assert "ChecklistIdentity.extractChecklistDisplayId" in search_rediscovery
     assert "is_root-edit_mode IS NOT INITIAL" in abap_mapper
-    assert "METHOD validate_save_request." in abap_dpc
-    assert "checks[].edit_mode is required." in abap_dpc
-    assert "barriers[].edit_mode is required." in abap_dpc
-    assert "participants[].edit_mode is required." in abap_dpc
-    assert "attachments[].edit_mode is required." in abap_dpc
+    assert "METHOD validate_save_request." not in abap_dpc
+    assert "METHOD execute_save." not in abap_dpc
+    assert "mo_save_service->execute_save(" in abap_dpc
+    assert "validate_save_request( is_request )" in _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_save_service.clas.abap")
+
+
+def test_abap_gateway_cleanup_uses_service_owned_runtime_read_and_save_seams():
+    dpc_ext = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_dpc_ext.clas.abap")
+    save_service = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_save_service.clas.abap")
+    read_service = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_read_service.clas.abap")
+    runtime_settings_service = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_runtime_settings_svc.clas.abap")
+    contract_constants = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zif_zodata_contract_constants.intf.abap")
+
+    assert "NEW zcl_zodata_runtime_settings_svc" in dpc_ext
+    assert "NEW zcl_zodata_read_service" in dpc_ext
+    assert "NEW zcl_zodata_save_service" in dpc_ext
+    assert "mo_runtime_settings->read_runtime_settings( )" in dpc_ext
+    assert "mo_read_service->read_root_row" in dpc_ext
+    assert "mo_read_service->read_root_rows( )" in dpc_ext
+    assert "mo_read_service->read_check_rows" in dpc_ext
+    assert "mo_read_service->read_barrier_rows" in dpc_ext
+    assert "SELECT " not in dpc_ext
+    assert "FOR ALL ENTRIES" not in dpc_ext
+    assert "CALL FUNCTION 'Z_PCCT_MPL_TREE_GET'" not in dpc_ext
+
+    assert "TYPE any" not in save_service
+    assert "TYPE STANDARD TABLE" not in save_service
+    assert "TYPE zcl_zodata_read_service=>ty_root_row" in save_service
+    assert "TYPE zcl_zodata_read_service=>tt_check_row" in save_service
+    assert "TYPE zcl_zodata_read_service=>tt_barrier_row" in save_service
+
+    assert "FOR ALL ENTRIES" not in read_service
+    assert "GROUP BY pcct_uuid" in read_service
+
+    assert "METHODS read_runtime_settings_source" in runtime_settings_service
+    assert "METHODS apply_fallback_defaults" in runtime_settings_service
+    assert "METHODS read_frontend_variables_json" in runtime_settings_service
+    assert "METHODS read_required_fields_json" in runtime_settings_service
+    assert "METHODS read_upload_policy_json" in runtime_settings_service
+    assert "METHODS read_permission_rules_json" in runtime_settings_service
+    assert "c_heartbeat_ms" not in contract_constants
+    assert "c_idle_ms" not in contract_constants
+    assert "c_autosave_ms" not in contract_constants
+    assert "c_lock_refresh_cooldown_ms" not in contract_constants
+    assert "c_analytics_refresh_ms" not in contract_constants
+    assert "c_gcd_interval_ms" not in contract_constants
+    assert "c_network_grace_ms" not in contract_constants
+    assert "c_cache_tolerance_ms" not in contract_constants
+    assert "c_environment_production" not in contract_constants
+
+
+def test_abap_runtime_settings_source_has_cds_design_examples():
+    ddls_runtime = REPO_ROOT / "backend" / "sap_backend" / "src" / "zc_pcct_runtime_settings.ddls.asddls"
+    ddls_vars = REPO_ROOT / "backend" / "sap_backend" / "src" / "zc_pcct_frontend_variables.ddls.asddls"
+    ddls_required = REPO_ROOT / "backend" / "sap_backend" / "src" / "zc_pcct_required_fields.ddls.asddls"
+    ddls_upload = REPO_ROOT / "backend" / "sap_backend" / "src" / "zc_pcct_upload_policy.ddls.asddls"
+    ddls_rules = REPO_ROOT / "backend" / "sap_backend" / "src" / "zc_pcct_permission_rules.ddls.asddls"
+    runtime_service = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_runtime_settings_svc.clas.abap")
+
+    assert ddls_runtime.exists()
+    assert ddls_vars.exists()
+    assert ddls_required.exists()
+    assert ddls_upload.exists()
+    assert ddls_rules.exists()
+    assert "ZC_PCCT_RuntimeSettings" in runtime_service
+    assert "ZC_PCCT_FrontendVariables" in runtime_service
+    assert "ZC_PCCT_RequiredFields" in runtime_service
+    assert "ZC_PCCT_UploadPolicy" in runtime_service
+    assert "ZC_PCCT_PermissionRules" in runtime_service
 
 
 def test_active_frontend_mutations_use_hybrid_aggregate_function_import_contract():

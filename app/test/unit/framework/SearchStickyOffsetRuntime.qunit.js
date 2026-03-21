@@ -8,6 +8,7 @@ sap.ui.define([
             Array.prototype.slice.call(document.querySelectorAll("[data-qunit-sticky-offset='true']")).forEach(function (oNode) {
                 oNode.remove();
             });
+            document.documentElement.style.removeProperty("--app-shell-offset");
         }
     });
 
@@ -19,12 +20,8 @@ sap.ui.define([
         oShellHeader.className = "appShellHeader";
         oShellHeader.setAttribute("data-qunit-sticky-offset", "true");
         oScrollHost.setAttribute("data-qunit-sticky-offset", "true");
+        document.documentElement.style.setProperty("--app-shell-offset", "112px");
 
-        oShellHeader.getBoundingClientRect = function () {
-            return {
-                bottom: 112
-            };
-        };
         oScrollHost.getBoundingClientRect = function () {
             return {
                 top: 40

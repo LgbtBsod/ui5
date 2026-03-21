@@ -4,8 +4,6 @@ CLASS zcl_zodata_save_service DEFINITION
   CREATE PUBLIC.
 
   PUBLIC SECTION.
-    TYPES ty_root_reader TYPE REF TO object.
-
     METHODS constructor
       IMPORTING
         io_mapper       TYPE REF TO zif_zodata_bopf_mapper
@@ -36,9 +34,9 @@ CLASS zcl_zodata_save_service DEFINITION
     METHODS build_copy_request
       IMPORTING
         is_request     TYPE zstr_pcct_savechanges_rq
-        is_source_root TYPE any
-        it_checks      TYPE STANDARD TABLE
-        it_barriers    TYPE STANDARD TABLE
+        is_source_root TYPE zcl_zodata_read_service=>ty_root_row
+        it_checks      TYPE zcl_zodata_read_service=>tt_check_row
+        it_barriers    TYPE zcl_zodata_read_service=>tt_barrier_row
       RETURNING
         VALUE(rs_request) TYPE zstr_pcct_savechanges_rq.
 

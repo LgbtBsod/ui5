@@ -8,14 +8,6 @@ INTERFACE zif_zodata_contract_constants PUBLIC.
   CONSTANTS c_op_delete TYPE c LENGTH 2 VALUE '06'.
 
   CONSTANTS c_lock_ttl_seconds TYPE i VALUE 600.
-  CONSTANTS c_heartbeat_ms TYPE i VALUE 270000.
-  CONSTANTS c_idle_ms TYPE i VALUE 570000.
-  CONSTANTS c_autosave_ms TYPE i VALUE 150000.
-  CONSTANTS c_lock_refresh_cooldown_ms TYPE i VALUE 150000.
-  CONSTANTS c_analytics_refresh_ms TYPE i VALUE 900000.
-  CONSTANTS c_gcd_interval_ms TYPE i VALUE 30000.
-  CONSTANTS c_network_grace_ms TYPE i VALUE 15000.
-  CONSTANTS c_cache_tolerance_ms TYPE i VALUE 5500.
 
   CONSTANTS c_code_lock_ok TYPE string VALUE 'LOCK_OK'.
   CONSTANTS c_code_validation_error TYPE string VALUE 'VALIDATION_ERROR'.
@@ -41,8 +33,6 @@ INTERFACE zif_zodata_contract_constants PUBLIC.
 
   CONSTANTS c_reason_saved TYPE string VALUE 'SAVED'.
   CONSTANTS c_reason_no_changes TYPE string VALUE 'NO_CHANGES'.
-  CONSTANTS c_environment_production TYPE string VALUE 'production'.
-  CONSTANTS c_permission_rules_empty_json TYPE string VALUE '{}'.
   CONSTANTS c_request_id_prefix_save TYPE string VALUE 'SAVE'.
 
   CONSTANTS c_msg_lock_acquire_required TYPE string VALUE 'object_uuid and session_guid are required for lock acquire'.

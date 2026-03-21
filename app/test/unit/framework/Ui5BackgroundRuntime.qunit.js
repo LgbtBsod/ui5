@@ -38,8 +38,8 @@ sap.ui.define([], function () {
         oHost.classList.toggle("is-disabled", document.body.getAttribute("data-bg-enabled") === "false");
 
         assert.strictEqual(document.body.getAttribute("data-theme"), "light", "body theme stays locked to light");
-        assert.true(oHost.classList.contains("is-light"), "light class is applied");
-        assert.false(oHost.classList.contains("is-dark"), "dark class is not used");
-        assert.true(oHost.classList.contains("is-disabled"), "disabled class tracks animation flag");
+        assert.ok(oHost.classList.contains("is-light"), "light class is applied");
+        assert.notOk(oHost.classList.contains("is-dark"), "dark class is not used");
+        assert.ok(oHost.classList.contains("is-disabled"), "disabled class tracks animation flag");
     });
 });

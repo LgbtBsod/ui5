@@ -16,6 +16,8 @@ CLASS zcl_zodata_frontend_context_svc DEFINITION
         VALUE(rs_result) TYPE zstr_pcct_permission_rs.
 
     METHODS build_current_user_result
+      IMPORTING
+        iv_permission_rules_json TYPE string
       RETURNING
         VALUE(rs_result) TYPE zstr_pcct_current_user_rs.
 
@@ -128,7 +130,7 @@ CLASS zcl_zodata_frontend_context_svc IMPLEMENTATION.
       lv_csv = COND string( WHEN lv_csv IS INITIAL THEN zif_zodata_contract_constants=>c_op_delete ELSE |{ lv_csv },{ zif_zodata_contract_constants=>c_op_delete }| ).
     ENDIF.
 
-    lv_rules = zif_zodata_contract_constants=>c_permission_rules_empty_json.
+    lv_rules = iv_permission_rules_json.
     lv_summary = |{ zif_zodata_contract_constants=>c_msg_permission_summary_prefix } { lv_csv }|.
 
     mo_contract->fill_current_user(

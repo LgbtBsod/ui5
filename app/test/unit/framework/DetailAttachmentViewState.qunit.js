@@ -12,8 +12,22 @@ sap.ui.define([
         };
 
         return {
+            getView: function () {
+                return {
+                    getModel: function (sName) {
+                        return sName === "view" || sName === "detail" ? mModels[sName] : null;
+                    }
+                };
+            },
+            getOwnerComponent: function () {
+                return {
+                    getModel: function (sName) {
+                        return sName === "state" ? mModels[sName] : null;
+                    }
+                };
+            },
             getModel: function (sName) {
-                return mModels[sName];
+                return mModels[sName] || null;
             }
         };
     }
@@ -38,9 +52,9 @@ sap.ui.define([
 
         DetailAttachmentViewState.sync(oController);
 
-        assert.true(oController.getModel("view").getProperty("/attachmentActionsEnabled"), "actions enabled");
-        assert.true(oController.getModel("view").getProperty("/attachmentMetaEditable"), "meta enabled");
-        assert.false(oController.getModel("view").getProperty("/showSessionAttachments"), "expanded state hides session list");
+        assert.ok(oController.getModel("view").getProperty("/attachmentActionsEnabled"), "actions enabled");
+        assert.ok(oController.getModel("view").getProperty("/attachmentMetaEditable"), "meta enabled");
+        assert.ok(oController.getModel("view").getProperty("/showSessionAttachments"), "collapsed state keeps session list visible");
         assert.strictEqual(oController.getModel("view").getProperty("/attachmentActionsColumnWidth"), "9rem", "narrow viewport width applied");
     });
 
@@ -58,7 +72,7 @@ sap.ui.define([
 
         DetailAttachmentViewState.sync(oController);
 
-        assert.false(oController.getModel("view").getProperty("/attachmentActionsEnabled"), "actions disabled");
-        assert.false(oController.getModel("view").getProperty("/attachmentMetaEditable"), "meta disabled");
+        assert.notOk(oController.getModel("view").getProperty("/attachmentActionsEnabled"), "actions disabled");
+        assert.notOk(oController.getModel("view").getProperty("/attachmentMetaEditable"), "meta disabled");
     });
 });

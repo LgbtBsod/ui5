@@ -19,7 +19,7 @@ sap.ui.define([
 
     QUnit.test("defaults to morning mode", function (assert) {
         assert.strictEqual(ThemeMixin.getCurrentThemeMode(), "morning", "Morning mode remains the productive default");
-        assert.strictEqual(ThemeMixin.isDarkThemeEnabled(), false, "Dark mode is disabled by default");
+        assert.strictEqual(ThemeMixin.getCurrentTheme(), "sap_fiori_3", "productive theme stays on sap_fiori_3");
     });
 
     QUnit.test("toggleTheme keeps the supported productive mode", function (assert) {

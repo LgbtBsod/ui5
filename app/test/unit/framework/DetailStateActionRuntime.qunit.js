@@ -33,14 +33,30 @@ sap.ui.define([
 
     QUnit.test("navigationActions.toggleFullscreen delegates layout application", function (assert) {
         var sAppliedLayout = "";
+        var oStateModel = new JSONModel({});
+        var oShellModel = new JSONModel({
+            layout: "TwoColumnsMidExpanded"
+        });
         var oController = {
-            getModel: function (sName) {
-                if (sName === "state") {
-                    return new JSONModel({
-                        layout: "TwoColumnsMidExpanded"
-                    });
-                }
-                return null;
+            getView: function () {
+                return {
+                    getModel: function () {
+                        return null;
+                    }
+                };
+            },
+            getOwnerComponent: function () {
+                return {
+                    getModel: function (sName) {
+                        if (sName === "state") {
+                            return oStateModel;
+                        }
+                        if (sName === "shell") {
+                            return oShellModel;
+                        }
+                        return null;
+                    }
+                };
             }
         };
 

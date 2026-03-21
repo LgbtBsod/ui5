@@ -30,10 +30,10 @@ sap.ui.define([
 
         assert.strictEqual(oState.detailSections.checks.kind, "check", "checks section kind is defined");
         assert.strictEqual(oState.detailSections.checks.tableSpec.kind, "check", "checks table spec is wired");
-        assert.strictEqual(oState.detailSections.checks.tableSpec.rowsPath, "/checks", "checks table path is wired");
+        assert.strictEqual(oState.detailSections.checks.tableSpec.rowsPath, "/current/checks", "checks table path is wired");
         assert.strictEqual(oState.detailSections.barriers.kind, "barrier", "barriers section kind is defined");
         assert.strictEqual(oState.detailSections.barriers.tableSpec.kind, "barrier", "barriers table spec is wired");
-        assert.strictEqual(oState.detailSections.barriers.tableSpec.rowsPath, "/barriers", "barriers table path is wired");
+        assert.strictEqual(oState.detailSections.barriers.tableSpec.rowsPath, "/current/barriers", "barriers table path is wired");
     });
 
     QUnit.test("creates expanded dialog specs from the same entity config", function (assert) {
@@ -50,12 +50,12 @@ sap.ui.define([
 
 
     QUnit.test("D-03: isEditMode defaults to false (READ mode on open)", function (assert) {
-        var oState = DetailViewStateFactory.create(oMockController);
+        var oState = DetailViewStateFactory.create(createControllerDouble());
         assert.strictEqual(oState.isEditMode, false, "isEditMode initially false");
     });
 
     QUnit.test("D-03: isCreateMode defaults to false", function (assert) {
-        var oState = DetailViewStateFactory.create(oMockController);
+        var oState = DetailViewStateFactory.create(createControllerDouble());
         assert.strictEqual(oState.isCreateMode, false, "isCreateMode initially false");
     });
 

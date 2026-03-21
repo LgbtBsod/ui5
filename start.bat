@@ -7,7 +7,7 @@ pushd "%~dp0" || (
 )
 
 set "COMMAND=%~1"
-if "%COMMAND%"=="" set "COMMAND=start"
+if "%COMMAND%"=="" set "COMMAND=toggle"
 
 set "START_SCRIPT=scripts\start-local-env.ps1"
 set "STOP_SCRIPT=scripts\stop-local-env.ps1"
@@ -25,7 +25,20 @@ if /I "%COMMAND%"=="stop" goto do_stop
 if /I "%COMMAND%"=="restart" goto do_restart
 if /I "%COMMAND%"=="status" goto do_status
 if /I "%COMMAND%"=="clean" goto do_clean
+if /I "%COMMAND%"=="toggle" goto do_toggle
 goto usage
+
+:stack_running
+if exist "%RUNTIME_DIR%\mock_backend.pid" exit /b 0
+if exist "%RUNTIME_DIR%\ui_server.pid" exit /b 0
+exit /b 1
+
+:do_toggle
+call :stack_running
+if errorlevel 1 (
+  goto do_start
+)
+goto do_stop
 
 :do_start
 if not exist "%START_SCRIPT%" (
@@ -50,6 +63,7 @@ echo ==============================
 echo Environment is up.
 echo UI:            http://127.0.0.1:8080/index.html
 echo Service root:  http://127.0.0.1:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/
+echo Toggle:        start.bat
 echo Stop command:  start.bat stop
 echo Clean command: start.bat clean
 echo Window mode:   keep this window open while servers are running
@@ -131,7 +145,8 @@ endlocal
 exit /b 0
 
 :usage
-echo Usage: start.bat [start^|stop^|restart^|status^|clean]
+echo Usage: start.bat [start^|stop^|restart^|status^|clean^|toggle]
+echo Default without arguments: toggle local stack state
 popd
 endlocal
 exit /b 1

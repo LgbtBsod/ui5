@@ -25,7 +25,8 @@ sap.ui.define([
             _bLeaveReleaseSent: false
         };
 
-        assert.strictEqual(ComponentAppRuntime.releaseActiveLockOnLeave(oComponent, oStateModel, null), true, "leave release is marked");
+        oStateModel.setProperty("/workflow/detail/lock/state", "EDIT_LOCKED");
+        assert.strictEqual(ComponentAppRuntime.releaseActiveLockOnLeave(oComponent, oStateModel, null), false, "leave release stays local when no backend model is available");
         assert.strictEqual(oComponent._bLeaveReleasePending, true, "pending marker is set");
         assert.strictEqual(oComponent._bLeaveReleaseAttempted, true, "attempt marker is set");
         assert.strictEqual(oComponent._bLeaveReleaseSent, false, "no backend success is assumed");

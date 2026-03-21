@@ -20,19 +20,27 @@ sap.ui.define([
         var oViewRoot;
         var oStateModel = createStateModel();
 
-        oScrollHost = {
-            scrollTop: 0,
-            clientHeight: 120,
-            scrollHeight: 600
-        };
-        oViewRoot = {
-            parentElement: oScrollHost
-        };
+        oScrollHost = document.createElement("div");
+        oScrollHost.setAttribute("data-qunit-search-scroll", "true");
+        oScrollHost.style.height = "120px";
+        oScrollHost.style.overflow = "auto";
+        Object.defineProperty(oScrollHost, "clientHeight", { value: 120, configurable: true });
+        Object.defineProperty(oScrollHost, "scrollHeight", { value: 600, configurable: true });
+        oScrollHost.scrollTop = 0;
+
+        oViewRoot = document.createElement("div");
+        oViewRoot.setAttribute("data-qunit-search-scroll", "true");
+        oViewRoot.style.height = "600px";
+        oScrollHost.appendChild(oViewRoot);
+        document.body.appendChild(oScrollHost);
 
         return {
             scrollHost: oScrollHost,
             viewRoot: oViewRoot,
             controller: {
+                getModel: function (sName) {
+                    return sName === "state" ? oStateModel : null;
+                },
                 getView: function () {
                     return {
                         getDomRef: function () {
