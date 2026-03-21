@@ -46,6 +46,11 @@ sap.ui.define([
         return oController.byId && oController.byId("searchWorkbenchDock");
     }
 
+    function resolveSearchActionRail(oController) {
+        return (oController.byId && oController.byId("searchActionRailStack"))
+            || (oController.byId && oController.byId("searchResultsActionRail"));
+    }
+
     function resolveResultsTableToolbarHeight(oController) {
         return resolveDomHeight(resolveSearchTableToolbarDom(oController));
     }
@@ -103,7 +108,7 @@ sap.ui.define([
         var oWorkbenchDock = resolveSearchWorkbenchDock(oController);
         var oWorkbenchDom = oWorkbenchDock && oWorkbenchDock.getDomRef && oWorkbenchDock.getDomRef();
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
-        var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
+        var oActionRail = resolveSearchActionRail(oController);
         var oSummaryRailDom = resolveSearchSummaryRailDom(oController);
         var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
         var iResultsToolbarHeight = resolveResultsTableToolbarHeight(oController);
@@ -153,7 +158,7 @@ sap.ui.define([
         var oSummaryRailDom = resolveSearchSummaryRailDom(oController);
         var oResultsToolbarDom = resolveSearchTableToolbarDom(oController);
         var oFilterCard = oController.byId && oController.byId("searchFilterCard");
-        var oActionRail = oController.byId && oController.byId("searchResultsActionRail");
+        var oActionRail = resolveSearchActionRail(oController);
 
         return [
             resolveShellHeaderOffset(SEARCH_MIN_HEADER_OFFSET_PX, SEARCH_HEADER_OFFSET_PADDING_PX, oScrollHost),

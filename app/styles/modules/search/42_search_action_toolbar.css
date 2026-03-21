@@ -37,6 +37,15 @@ body.chkAppRoot.appDark .chkApp .searchToolbarGhostAction .sapMBtnInner {
   min-height: 2.75rem;
 }
 
+.chkApp .searchActionRailStack {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+
 .chkApp .searchPrimaryAction .sapMBtnInner {
   border-color: var(--control-primary-border);
   background: var(--control-primary-bg);
@@ -102,6 +111,24 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   min-height: 2.7rem;
 }
 
+.chkApp .searchSettingsRail {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  padding:
+    calc(0.24rem * var(--theme-density-scale))
+    calc(0.34rem * var(--theme-density-scale))
+    calc(0.26rem * var(--theme-density-scale));
+  border-radius: calc(var(--radius-lg) - 0.15rem);
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 46%, transparent);
+  background: color-mix(in srgb, var(--surface-1) 98%, rgba(255, 255, 255, 0.94));
+  box-shadow:
+    0 6px 14px rgba(18, 36, 64, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
 .chkApp .searchResultsActionRail {
   align-items: center;
   align-content: center;
@@ -116,7 +143,18 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   min-width: 0;
 }
 
+.chkApp .searchSettingsRail > * {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--theme-workbench-control-height);
+  min-width: 0;
+}
+
 .chkApp .searchResultsActionRail > * {
+  align-self: center;
+}
+
+.chkApp .searchSettingsRail > * {
   align-self: center;
 }
 
@@ -151,7 +189,15 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   padding-block: 0;
 }
 
+.chkApp .searchSettingsRail .searchToolbarFieldLabel {
+  white-space: nowrap;
+}
+
 .chkApp .searchResultsActionRail .searchToolbarNumberInput {
+  width: auto;
+}
+
+.chkApp .searchSettingsRail .searchToolbarNumberInput {
   width: auto;
 }
 
@@ -161,11 +207,26 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   max-width: 100%;
 }
 
+.chkApp .searchSettingsRail .backendTopInput,
+.chkApp .searchSettingsRail .maxRowsInput {
+  min-width: 4.6rem;
+  max-width: 100%;
+}
+
 .chkApp .searchResultsActionRail .searchToolbarToggleSwitch {
   height: var(--theme-workbench-control-height);
 }
 
+.chkApp .searchSettingsRail .searchToolbarToggleSwitch {
+  height: var(--theme-workbench-control-height);
+}
+
 .chkApp .searchResultsActionRail .searchToolbarToggleSwitch .sapMSwtCont {
+  display: inline-flex;
+  align-items: center;
+}
+
+.chkApp .searchSettingsRail .searchToolbarToggleSwitch .sapMSwtCont {
   display: inline-flex;
   align-items: center;
 }
@@ -177,11 +238,19 @@ body.chkAppRoot.appDark .chkApp .searchResultsActionRail {
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+body.chkAppRoot.appDark .chkApp .searchSettingsRail {
+  background: color-mix(in srgb, rgba(12, 20, 34, 0.96) 98%, rgba(22, 32, 48, 0.88));
+  box-shadow:
+    0 12px 24px rgba(1, 8, 18, 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
 .chkApp .searchResultsActionRail > :first-child {
   margin-inline-start: 0;
 }
 
 .chkApp .searchResultsActionRail .sapMOTBOverflowButton .sapMBtnInner,
+.chkApp .searchSettingsRail .sapMOTBOverflowButton .sapMBtnInner,
 .chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnInner,
 .chkApp .searchFilterExperienceShell .sapMOTBOverflowButton .sapMBtnInner {
   min-width: 2.4rem;
@@ -191,17 +260,9 @@ body.chkAppRoot.appDark .chkApp .searchResultsActionRail {
 
 .chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent,
 .chkApp .searchActionToolbar .sapMOTBOverflowButton .sapMBtnContent,
+.chkApp .searchSettingsRail .sapMOTBOverflowButton .sapMBtnContent,
 .chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent {
-  font-size: 0;
-}
-
-.chkApp .searchActionToolbarDensity .sapMOTBOverflowButton .sapMBtnContent::after,
-.chkApp .searchActionToolbar .sapMOTBOverflowButton .sapMBtnContent::after,
-.chkApp .searchSmartToolbarRail .sapMOTBOverflowButton .sapMBtnContent::after {
-  content: "...";
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: inherit;
 }
 
 .chkApp .searchResultsActionRail .sapMBtn.sapMBtnDisabled .sapMBtnInner,
@@ -214,11 +275,24 @@ body.chkAppRoot.appDark .chkApp .searchResultsActionRail {
     align-items: stretch;
   }
 
+  .chkApp .searchSettingsRail {
+    align-items: stretch;
+  }
+
   .chkApp .searchResultsActionRail > * {
     max-width: 100%;
   }
 
+  .chkApp .searchSettingsRail > * {
+    max-width: 100%;
+  }
+
   .chkApp .searchResultsActionRail .searchToolbarNumberInput {
+    min-width: 4rem;
+    width: 100%;
+  }
+
+  .chkApp .searchSettingsRail .searchToolbarNumberInput {
     min-width: 4rem;
     width: 100%;
   }

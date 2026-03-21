@@ -40,7 +40,7 @@
             tooltip="{i18n>validateTooltip}"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="High"/>
+                <OverflowToolbarLayoutData priority="NeverOverflow"/>
             </layoutData>
         </Button>
         <Button
@@ -53,7 +53,7 @@
             tooltip="{= ${view>/deleteChecklistConfirmArmed} ? ${i18n>deleteArmCancelButton} : ${i18n>deleteTooltip} }"
             class="detailRailActionBtn appActionDanger appActionReject chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="Low"/>
+                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
             </layoutData>
         </Button>
 
@@ -67,7 +67,7 @@
             tooltip="{i18n>deleteConfirmTooltip}"
             class="detailRailActionBtn appActionDanger appActionReject chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="High"/>
+                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
             </layoutData>
         </Button>
 
@@ -80,7 +80,7 @@
             tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusDraftTooltip} }"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="Low"/>
+                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
             </layoutData>
             <customData>
                 <core:CustomData key="targetStatus" value="{view>/statusTargets/DRAFT}"/>
@@ -96,7 +96,7 @@
             tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusRegisteredTooltip} }"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="Low"/>
+                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
             </layoutData>
             <customData>
                 <core:CustomData key="targetStatus" value="{view>/statusTargets/REGISTERED}"/>
@@ -112,7 +112,7 @@
             tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusClosedTooltip} }"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="Low"/>
+                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
             </layoutData>
             <customData>
                 <core:CustomData key="targetStatus" value="{view>/statusTargets/CLOSED}"/>
@@ -129,7 +129,7 @@
             class="detailRailActionBtn appActionSecondary chkRipple"
             visible="{path:'state>/activeObjectId', formatter:'.formatCopyLinkVisible'}">
             <layoutData>
-                <OverflowToolbarLayoutData priority="Disappear"/>
+                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
             </layoutData>
         </Button>
 
@@ -141,7 +141,7 @@
             tooltip="{i18n>detailFullscreenTooltip}"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
-                <OverflowToolbarLayoutData priority="Disappear"/>
+                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
             </layoutData>
         </Button>
     </OverflowToolbar>

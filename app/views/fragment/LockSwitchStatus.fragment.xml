@@ -11,12 +11,12 @@
         customTextOff=""
         change=".onToggleEdit"
         class="appAccentSwitch detailControlEditSwitch lockStatusEditSwitch">
-        <layoutData><OverflowToolbarLayoutData priority="High"/></layoutData>
+        <layoutData><OverflowToolbarLayoutData priority="NeverOverflow"/></layoutData>
     </Switch>
     <ObjectStatus
         text="{parts:[{path:'state>/lockStateText'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateText'}"
         state="{parts:[{path:'state>/workflow/detail/lock/state'},{path:'state>/workflow/detail/editMode'}], formatter:'.formatLockStateSemantic'}"
         class="detailRailStatusChip detailRailLockStatusChip statusChipSemantic lockStatusChip">
-        <layoutData><OverflowToolbarLayoutData priority="Disappear"/></layoutData>
+        <layoutData><OverflowToolbarLayoutData priority="Low"/></layoutData>
     </ObjectStatus>
 </core:FragmentDefinition>

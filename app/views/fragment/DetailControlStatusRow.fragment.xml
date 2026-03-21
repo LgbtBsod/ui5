@@ -3,10 +3,14 @@
         <ObjectStatus
             id="detailLifecycleStatusChip"
             icon="sap-icon://status-in-process"
-        text="{path:'detail>/current/root/status', formatter:'.formatLifecycleStatusText'}"
-        state="{path:'detail>/current/root/status', formatter:'.formatLifecycleStatusState'}"
+            text="{path:'detail>/current/root/status', formatter:'.formatLifecycleStatusText'}"
+            state="{path:'detail>/current/root/status', formatter:'.formatLifecycleStatusState'}"
             class="detailRailStatusChip statusChipSemantic"
-            tooltip="{i18n>objectStatusLabel}"/>
+            tooltip="{i18n>objectStatusLabel}">
+            <layoutData>
+                <OverflowToolbarLayoutData priority="NeverOverflow"/>
+            </layoutData>
+        </ObjectStatus>
 
         <ObjectStatus
             id="detailDirtyStatusChip"
@@ -27,7 +31,7 @@
             tooltip="{i18n>heartbeatLabel}"
             class="detailRailStatusChip statusChipSemantic">
             <layoutData>
-                <OverflowToolbarLayoutData priority="Disappear"/>
+                <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
         </ObjectStatus>
 
@@ -39,7 +43,7 @@
             tooltip="{parts:[{path:'state>/persistence/messageKey'},{path:'state>/persistence/state'},{path:'state>/persistence/lastSavedAt'},{path:'state>/persistence/lastSaveError'}], formatter:'.formatPersistenceTooltip'}"
             class="detailRailStatusChip statusChipSemantic">
             <layoutData>
-                <OverflowToolbarLayoutData priority="Disappear"/>
+                <OverflowToolbarLayoutData priority="Low"/>
             </layoutData>
         </ObjectStatus>
 

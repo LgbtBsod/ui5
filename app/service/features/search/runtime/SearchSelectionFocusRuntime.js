@@ -26,7 +26,11 @@ sap.ui.define([
         ".searchResultsActionRail input",
         ".searchResultsActionRail button",
         ".searchResultsActionRail [role='button']",
-        ".searchResultsActionRail [role='combobox']"
+        ".searchResultsActionRail [role='combobox']",
+        ".searchSettingsRail input",
+        ".searchSettingsRail button",
+        ".searchSettingsRail [role='button']",
+        ".searchSettingsRail [role='combobox']"
     ];
 
     function focusDomNode(oNode) {
@@ -105,6 +109,7 @@ sap.ui.define([
     function resolveToolbarControl(oController) {
         return oController.byId("backendTopInput")
             || oController.byId("maxRowsInput")
+            || oController.byId("searchActionRailStack")
             || oController.byId("searchResultsActionRail");
     }
 

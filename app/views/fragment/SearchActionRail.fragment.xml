@@ -1,103 +1,105 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core">
-    <OverflowToolbar id="searchResultsActionRail" width="100%" class="toolbarTransparent searchActionToolbar searchResultsActionRail actionToolbarSurface">
-        <Button text="{i18n>createButton}" icon="sap-icon://task" press=".onCreate" tooltip="{i18n>searchShortcutCreate}" enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }" class="searchPrimaryAction searchToolbarAction searchCreateActionBtn">
-            <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
-        </Button>
-        <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" enabled="{view>/canCopy}" tooltip="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }" class="searchToolbarGhostAction searchToolbarAction searchCopyActionBtn">
-            <layoutData><OverflowToolbarLayoutData priority="Disappear" moveToOverflow="true"/></layoutData>
-        </Button>
-        <Button text="{i18n>selectVisibleButton}" icon="sap-icon://multi-select" press=".onSelectVisibleRows" enabled="{= ${view>/hasRows} &amp;&amp; !${view>/tableBusy} }" tooltip="{i18n>searchShortcutSelectVisible}" class="searchToolbarGhostAction searchToolbarAction searchSelectVisibleActionBtn">
-            <layoutData><OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/></layoutData>
-        </Button>
-        <Button text="{i18n>clearSelectionButton}" icon="sap-icon://sys-cancel" press=".onClearSelection" enabled="{view>/hasSelection}" tooltip="{i18n>searchShortcutClearSelection}" class="searchToolbarGhostAction searchToolbarAction searchClearSelectionActionBtn">
-            <layoutData><OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/></layoutData>
-        </Button>
-        <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
-        <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
-        <core:InvisibleText id="searchModeA11y" text="{i18n>searchModeLabel}"/>
-        <Label
-            text="{i18n>searchBackendTopLabel}"
-            labelFor="backendTopInput"
-            class="searchToolbarFieldLabel">
-            <layoutData>
-                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
-            </layoutData>
-        </Label>
-        <Input
-            id="backendTopInput"
-            value="{state>/searchBackendTop}"
-            type="Number"
-            placeholder="{i18n>searchBackendTopLabel}"
-            width="5rem"
-            change=".onBackendTopChange"
-            submit=".onBackendTopChange"
-            ariaLabelledBy="searchBackendTopA11y"
-            class="backendTopInput searchToolbarNumberInput searchToolbarBackendInput">
-            <layoutData>
-                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
-            </layoutData>
-        </Input>
-        <Label
-            text="{i18n>searchMaxResultsLabel}"
-            labelFor="maxRowsInput"
-            class="searchToolbarFieldLabel">
-            <layoutData>
-                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
-            </layoutData>
-        </Label>
-        <Input
-            id="maxRowsInput"
-            value="{state>/searchMaxResults}"
-            type="Number"
-            placeholder="{i18n>searchMaxResultsLabel}"
-            width="5rem"
-            change=".onMaxRowsChange"
-            submit=".onMaxRowsChange"
-            ariaLabelledBy="searchMaxRowsA11y"
-            class="maxRowsInput searchToolbarNumberInput searchToolbarMaxRowsInput">
-            <layoutData>
-                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
-            </layoutData>
-        </Input>
-        <ObjectStatus
-            id="searchModeStatusChip"
-            text="{path: 'state>/searchMode', formatter: '.formatSearchModeChipText'}"
-            state="{path: 'state>/searchMode', formatter: '.formatSearchModeState'}"
-            class="searchModeStatusChip statusChipSemantic searchToolbarStatusChip">
-            <layoutData>
-                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
-            </layoutData>
-        </ObjectStatus>
-        <Switch
-            state="{= ${state>/searchMode} === 'LOOSE' }"
-            change=".onSearchModeToggle"
-            customTextOn=""
-            customTextOff=""
-            class="appAccentSwitch searchModeToggleSwitch searchToolbarToggleSwitch">
-            <layoutData>
-                <OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/>
-            </layoutData>
-        </Switch>
-        <Button text="{i18n>searchSortButton}" icon="sap-icon://sort" type="Transparent" press=".onOpenSearchSortDialog" tooltip="{i18n>searchSortButton}" class="searchToolbarGhostAction searchToolbarAction searchSortButton"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData></Button>
-        <Button text="{i18n>searchGroupButton}" icon="sap-icon://group-2" type="Transparent" press=".onOpenSearchGroupDialog" tooltip="{i18n>searchGroupButton}" class="searchToolbarGhostAction searchToolbarAction searchGroupButton"><layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData></Button>
-        <MenuButton text="{i18n>exportMenuButton}" enabled="{view>/canExport}" tooltip="{i18n>searchShortcutExport}" class="searchToolbarGhostAction searchToolbarAction searchExportMenuBtn" icon="sap-icon://excel-attachment">
-            <menu>
-                <Menu itemSelected=".onExportMenuAction">
-                    <items>
-                        <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view"><customData><core:CustomData key="entity" value="screen"/></customData></MenuItem>
-                        <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2"><customData><core:CustomData key="entity" value="barrier"/></customData></MenuItem>
-                        <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection"><customData><core:CustomData key="entity" value="check"/></customData></MenuItem>
-                    </items>
-                </Menu>
-            </menu>
-        </MenuButton>
-        <ObjectStatus id="searchSelectionStatusChip" text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }" state="{path:'view>/selectionCount', formatter: '.formatToolbarSelectionState'}" class="searchSelectionStatusChip statusChipSemantic searchToolbarStatusChip">
-            <layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="false"/></layoutData>
-        </ObjectStatus>
-        <Text text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowDisplayId} }" visible="{= ${view>/hasSelection} &amp;&amp; !!${view>/selectedRowDisplayId} }" tooltip="{view>/selectedRowDisplayId}" class="searchSelectionPrimaryId" wrapping="false">
-            <layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData>
-        </Text>
-    </OverflowToolbar>
+    <VBox id="searchActionRailStack" width="100%" renderType="Bare" class="searchActionRailStack">
+        <OverflowToolbar id="searchResultsActionRail" width="100%" class="toolbarTransparent searchActionToolbar searchResultsActionRail actionToolbarSurface">
+            <Button text="{i18n>createButton}" icon="sap-icon://task" press=".onCreate" tooltip="{i18n>searchShortcutCreate}" enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }" class="searchPrimaryAction searchToolbarAction searchCreateActionBtn">
+                <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
+            </Button>
+            <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" enabled="{view>/canCopy}" visible="{view>/hasSelection}" tooltip="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }" class="searchToolbarGhostAction searchToolbarAction searchCopyActionBtn">
+                <layoutData><OverflowToolbarLayoutData priority="High" moveToOverflow="true"/></layoutData>
+            </Button>
+            <MenuButton text="{i18n>exportMenuButton}" enabled="{view>/canExport}" visible="{view>/canExport}" tooltip="{i18n>searchShortcutExport}" class="searchToolbarGhostAction searchToolbarAction searchExportMenuBtn" icon="sap-icon://excel-attachment">
+                <layoutData><OverflowToolbarLayoutData priority="High" moveToOverflow="true"/></layoutData>
+                <menu>
+                    <Menu itemSelected=".onExportMenuAction">
+                        <items>
+                            <MenuItem text="{i18n>exportModeScreen}" icon="sap-icon://table-view"><customData><core:CustomData key="entity" value="screen"/></customData></MenuItem>
+                            <MenuItem text="{i18n>exportBarriersButton}" icon="sap-icon://warning2"><customData><core:CustomData key="entity" value="barrier"/></customData></MenuItem>
+                            <MenuItem text="{i18n>exportChecksButton}" icon="sap-icon://inspection"><customData><core:CustomData key="entity" value="check"/></customData></MenuItem>
+                        </items>
+                    </Menu>
+                </menu>
+            </MenuButton>
+            <ObjectStatus id="searchSelectionStatusChip" text="{= ${view>/selectionCount} ? ${view>/selectionCount} + ' ' + ${i18n>searchSelectionUnits} : ${i18n>searchSelectionNone} }" state="{path:'view>/selectionCount', formatter: '.formatToolbarSelectionState'}" class="searchSelectionStatusChip statusChipSemantic searchToolbarStatusChip">
+                <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
+            </ObjectStatus>
+            <Text text="{= ${i18n>searchSelectionPrimaryPrefix} + ': ' + ${view>/selectedRowDisplayId} }" visible="{= ${view>/hasSelection} &amp;&amp; !!${view>/selectedRowDisplayId} }" tooltip="{view>/selectedRowDisplayId}" class="searchSelectionPrimaryId" wrapping="false">
+                <layoutData><OverflowToolbarLayoutData priority="Low" moveToOverflow="true"/></layoutData>
+            </Text>
+            <ToolbarSpacer class="searchToolbarPrimarySpacer"/>
+            <Button text="{i18n>selectVisibleButton}" icon="sap-icon://multi-select" press=".onSelectVisibleRows" enabled="{= ${view>/hasRows} &amp;&amp; !${view>/tableBusy} }" visible="{view>/hasRows}" tooltip="{i18n>searchShortcutSelectVisible}" class="searchToolbarGhostAction searchToolbarAction searchSelectVisibleActionBtn">
+                <layoutData><OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/></layoutData>
+            </Button>
+            <Button text="{i18n>clearSelectionButton}" icon="sap-icon://sys-cancel" press=".onClearSelection" enabled="{view>/hasSelection}" visible="{view>/hasSelection}" tooltip="{i18n>searchShortcutClearSelection}" class="searchToolbarGhostAction searchToolbarAction searchClearSelectionActionBtn">
+                <layoutData><OverflowToolbarLayoutData priority="AlwaysOverflow" moveToOverflow="true"/></layoutData>
+            </Button>
+        </OverflowToolbar>
+
+        <OverflowToolbar id="searchSettingsRail" width="100%" class="toolbarTransparent searchActionToolbar searchSettingsRail actionToolbarSurface">
+            <core:InvisibleText id="searchBackendTopA11y" text="{i18n>searchBackendTopLabel}"/>
+            <core:InvisibleText id="searchMaxRowsA11y" text="{i18n>searchMaxResultsLabel}"/>
+            <core:InvisibleText id="searchModeA11y" text="{i18n>searchModeLabel}"/>
+            <Label text="{i18n>searchBackendTopLabel}" labelFor="backendTopInput" class="searchToolbarFieldLabel">
+                <layoutData>
+                    <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false" shrinkable="false"/>
+                </layoutData>
+            </Label>
+            <Input
+                id="backendTopInput"
+                value="{state>/searchBackendTop}"
+                type="Number"
+                placeholder="{i18n>searchBackendTopLabel}"
+                width="5rem"
+                change=".onBackendTopChange"
+                submit=".onBackendTopChange"
+                ariaLabelledBy="searchBackendTopA11y"
+                class="backendTopInput searchToolbarNumberInput searchToolbarBackendInput">
+                <layoutData>
+                    <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false" shrinkable="true" minWidth="4rem"/>
+                </layoutData>
+            </Input>
+            <Label text="{i18n>searchMaxResultsLabel}" labelFor="maxRowsInput" class="searchToolbarFieldLabel">
+                <layoutData>
+                    <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="false"/>
+                </layoutData>
+            </Label>
+            <Input
+                id="maxRowsInput"
+                value="{state>/searchMaxResults}"
+                type="Number"
+                placeholder="{i18n>searchMaxResultsLabel}"
+                width="5rem"
+                change=".onMaxRowsChange"
+                submit=".onMaxRowsChange"
+                ariaLabelledBy="searchMaxRowsA11y"
+                class="maxRowsInput searchToolbarNumberInput searchToolbarMaxRowsInput">
+                <layoutData>
+                    <OverflowToolbarLayoutData priority="Low" moveToOverflow="true" shrinkable="true" minWidth="4rem"/>
+                </layoutData>
+            </Input>
+            <ObjectStatus
+                id="searchModeStatusChip"
+                text="{path: 'state>/searchMode', formatter: '.formatSearchModeChipText'}"
+                state="{path: 'state>/searchMode', formatter: '.formatSearchModeState'}"
+                class="searchModeStatusChip statusChipSemantic searchToolbarStatusChip">
+                <layoutData>
+                    <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
+                </layoutData>
+            </ObjectStatus>
+            <Switch
+                state="{= ${state>/searchMode} === 'LOOSE' }"
+                change=".onSearchModeToggle"
+                customTextOn=""
+                customTextOff=""
+                class="appAccentSwitch searchModeToggleSwitch searchToolbarToggleSwitch">
+                <layoutData>
+                    <OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/>
+                </layoutData>
+            </Switch>
+            <ToolbarSpacer class="searchToolbarSecondarySpacer"/>
+            <Button text="{i18n>searchSortButton}" icon="sap-icon://sort" type="Transparent" press=".onOpenSearchSortDialog" tooltip="{i18n>searchSortButton}" class="searchToolbarGhostAction searchToolbarAction searchSortButton"><layoutData><OverflowToolbarLayoutData priority="High" moveToOverflow="true"/></layoutData></Button>
+            <Button text="{i18n>searchGroupButton}" icon="sap-icon://group-2" type="Transparent" press=".onOpenSearchGroupDialog" tooltip="{i18n>searchGroupButton}" class="searchToolbarGhostAction searchToolbarAction searchGroupButton"><layoutData><OverflowToolbarLayoutData priority="High" moveToOverflow="true"/></layoutData></Button>
+        </OverflowToolbar>
+    </VBox>
 </core:FragmentDefinition>

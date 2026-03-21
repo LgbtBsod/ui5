@@ -35,6 +35,14 @@
 
 .chkApp .searchWorkbenchDock > .searchResultsActionRail {
   margin-top: 0;
+  margin-bottom: 0;
+  position: sticky;
+  top: var(--search-sticky-action-top, var(--search-action-sticky-top));
+  z-index: 23;
+}
+
+.chkApp .searchWorkbenchDock > .searchActionRailStack {
+  margin-top: 0;
   margin-bottom: 0.22rem;
   position: sticky;
   top: var(--search-sticky-action-top, var(--search-action-sticky-top));
@@ -42,7 +50,8 @@
 }
 
 .chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky > .searchFilterCardDense,
-.chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky > .searchResultsActionRail {
+.chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky > .searchResultsActionRail,
+.chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky > .searchActionRailStack {
   position: relative;
   top: auto;
 }
@@ -149,7 +158,8 @@
   }
 }
 
-.chkApp .searchWorkbenchDock > .searchResultsActionRail {
+.chkApp .searchWorkbenchDock > .searchResultsActionRail,
+.chkApp .searchWorkbenchDock > .searchActionRailStack {
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -161,6 +171,7 @@
 }
 
 .chkApp .searchResultsActionRail,
+.chkApp .searchSettingsRail,
 .chkApp .searchResultsSummaryRail,
 .chkApp .searchResultsToolbarHost {
   background: color-mix(in srgb, var(--theme-block-bg) 58%, transparent);
@@ -185,7 +196,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
 
-.chkApp .searchResultsActionRail {
+.chkApp .searchActionRailStack {
   border-radius: calc(var(--radius-lg) - 0.1rem);
 }
 
@@ -194,11 +205,9 @@
 }
 
 .chkApp .searchResultsActionRail,
+.chkApp .searchSettingsRail,
 .chkApp .searchResultsToolbarHost {
-  flex-wrap: wrap;
   align-items: center;
-  align-content: flex-start;
-  row-gap: 0.32rem;
 }
 
 .chkApp .searchExperienceStack,
@@ -239,12 +248,14 @@
 }
 
 .chkApp .searchResultsActionRail > *,
+.chkApp .searchSettingsRail > *,
 .chkApp .searchResultsToolbarHost > * {
   min-width: 0;
   max-width: 100%;
 }
 
 .chkApp .searchResultsActionRail .searchToolbarPrimarySpacer,
+.chkApp .searchSettingsRail .searchToolbarSecondarySpacer,
 .chkApp .searchResultsActionRail .searchToolbarSecondarySpacer {
   min-width: 0.3rem;
 }
@@ -282,6 +293,8 @@
 
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsActionRail,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsActionRail,
+.chkApp .appLayoutSplit #searchPaneHost .searchActionRailStack,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchActionRailStack,
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsSummaryRail,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchResultsSummaryRail,
 .chkApp .appLayoutSplit #searchPaneHost .searchResultsToolbarHost,
@@ -322,6 +335,7 @@ body.chkAppRoot.appDark .chkApp .searchResultsToolbarHost {
 
 @media (min-width: 72rem) {
   .chkApp .searchResultsActionRail,
+  .chkApp .searchSettingsRail,
   .chkApp .searchToolbarMetaRail,
   .chkApp .searchResultsToolbarHost {
     padding: 0.16rem 0.22rem;
