@@ -1,8 +1,7 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (FrontendConfigConstants, WorkflowContracts, WorkflowRuntimeConstants) {
+], function (FrontendConfigConstants, WorkflowContracts) {
     "use strict";
 
     return {
@@ -30,32 +29,32 @@ sap.ui.define([
             fetchedAt: ""
         },
         frontendVariables: Object.assign({}, FrontendConfigConstants.FALLBACKS.FRONTEND_VARIABLES),
-        frontendConfigSource: WorkflowRuntimeConstants.SOURCES.GATEWAY,
+        frontendConfigSource: WorkflowContracts.SOURCES.GATEWAY,
         requestGroups: {
-            save: WorkflowRuntimeConstants.REQUEST_GROUPS.SAVE_FLOW,
-            autosave: WorkflowRuntimeConstants.REQUEST_GROUPS.AUTOSAVE,
-            lock: WorkflowRuntimeConstants.REQUEST_GROUPS.LOCKS,
-            unlock: WorkflowRuntimeConstants.REQUEST_GROUPS.LOCKS,
-            lockHeartbeat: WorkflowRuntimeConstants.REQUEST_GROUPS.LOCKS,
-            lockStatus: WorkflowRuntimeConstants.REQUEST_GROUPS.LOCKS,
-            functionImport: WorkflowRuntimeConstants.REQUEST_GROUPS.LOCKS
+            save: WorkflowContracts.REQUEST_GROUPS.SAVE_FLOW,
+            autosave: WorkflowContracts.REQUEST_GROUPS.AUTOSAVE,
+            lock: WorkflowContracts.REQUEST_GROUPS.LOCKS,
+            unlock: WorkflowContracts.REQUEST_GROUPS.LOCKS,
+            lockHeartbeat: WorkflowContracts.REQUEST_GROUPS.LOCKS,
+            lockStatus: WorkflowContracts.REQUEST_GROUPS.LOCKS,
+            functionImport: WorkflowContracts.REQUEST_GROUPS.LOCKS
         },
         searchReturnContext: null,
         readiness: {
-            app: { status: WorkflowRuntimeConstants.READINESS_STATUS.PENDING, ready: false, readyAt: "", error: "" },
-            search: { status: WorkflowRuntimeConstants.READINESS_STATUS.PENDING, ready: false, readyAt: "", error: "" },
-            detail: { status: WorkflowRuntimeConstants.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "", rootId: "", mode: WorkflowContracts.EDIT_MODES.READ, permissionKnown: false, lockKnown: false },
-            analytics: { status: WorkflowRuntimeConstants.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "" }
+            app: { status: WorkflowContracts.READINESS_STATUS.PENDING, ready: false, readyAt: "", error: "" },
+            search: { status: WorkflowContracts.READINESS_STATUS.PENDING, ready: false, readyAt: "", error: "" },
+            detail: { status: WorkflowContracts.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "", rootId: "", mode: WorkflowContracts.EDIT_MODES.READ, permissionKnown: false, lockKnown: false },
+            analytics: { status: WorkflowContracts.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "" }
         },
         detailMeta: {
             rootId: "",
-            readiness: { status: WorkflowRuntimeConstants.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "" },
+            readiness: { status: WorkflowContracts.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "" },
             mode: WorkflowContracts.EDIT_MODES.READ,
             lock: { state: WorkflowContracts.LOCK_STATES.READ_ONLY, known: false },
             dirty: false,
             permission: { known: false, allowed: false },
             save: { state: WorkflowContracts.AUTOSAVE_STATES.IDLE, lastSavedAt: null },
-            validation: { state: WorkflowRuntimeConstants.VALIDATION_STATUS.IDLE }
+            validation: { state: WorkflowContracts.VALIDATION_STATUS.IDLE }
         },
         operationalKpiSnapshots: [],
         operationalKpiSnapshotLimit: 50,

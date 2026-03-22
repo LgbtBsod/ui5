@@ -2,14 +2,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader"
-], function (ModelStateRuntime, NavigationIntentService, AnalyticsContracts, AnalyticsUiContracts, ModelContracts, AnalyticsMonthRuntime, AnalyticsViewStateReader) {
+], function (ModelStateRuntime, NavigationIntentService, AnalyticsContracts, ModelContracts, AnalyticsMonthRuntime, AnalyticsViewStateReader) {
     "use strict";
 
-    var PATHS = AnalyticsUiContracts.PATHS;
+    var PATHS = AnalyticsContracts.PATHS;
     var TOKENS = ModelContracts.TOKENS;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
 

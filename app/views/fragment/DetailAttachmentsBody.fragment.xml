@@ -45,58 +45,7 @@
     </VBox>
 
     <VBox id="attachmentDropScope" renderType="Bare" width="100%">
-        <VBox id="attachmentSessionScope" renderType="Bare" width="100%" visible="{view>/showSessionAttachments}">
-            <Table
-                items="{view>/sessionAttachments}"
-                class="flatEditorTable detailAttachmentTable detailAttachmentTableSession"
-                visible="{path:'view>/sessionAttachments', formatter:'.hasRows'}"
-                noDataText="{i18n>noAttachmentsData}">
-                <columns>
-                    <Column>
-                        <Text text="{i18n>attachmentFileName}"/>
-                    </Column>
-                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
-                        <Text text="{i18n>attachmentCategoryLabel}"/>
-                    </Column>
-                    <Column width="7rem" hAlign="End">
-                        <Text text="{i18n>attachmentSize}"/>
-                    </Column>
-                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
-                        <Text text="{i18n>attachmentChangedOn}"/>
-                    </Column>
-                    <Column width="{view>/attachmentActionsColumnWidth}" hAlign="Center">
-                        <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem class="detailAttachmentRow detailAttachmentSessionRow">
-                        <cells>
-                            <ObjectIdentifier title="{view>FileName}" text="{view>MimeType}" class="detailAttachmentNameCell"/>
-                            <Text
-                                text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"
-                                class="detailAttachmentCategoryCell"/>
-                            <Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End" class="detailAttachmentSizeCell"/>
-                            <Text text="{view>ChangedOn}" class="detailAttachmentChangedCell"/>
-                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions detailAttachmentActionCell" wrap="Wrap">
-                                <Button
-                                    icon="sap-icon://download"
-                                    text="{i18n>rowActionDownload}"
-                                    type="Transparent"
-                                    press=".onOpenAttachment"
-                                    class="tableRowActionBtn"/>
-                                <Button
-                                    icon="sap-icon://delete"
-                                    text="{i18n>rowActionDelete}"
-                                    type="Transparent"
-                                    press=".onDeleteAttachment"
-                                    visible="{view>/attachmentMetaEditable}"
-                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
-                            </HBox>
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
-        </VBox>
+        <VBox id="attachmentSessionScope" renderType="Bare" width="100%" visible="{view>/showSessionAttachments}"/>
 
         <VBox id="attachmentExpandedScope" renderType="Bare" width="100%" visible="{view>/attachmentsExpanded}">
             <HBox
@@ -109,56 +58,57 @@
                 text="{path:'detail>/current/root/id', formatter:'.formatAttachmentsEmptyStateText'}"
                     class="detailEmptyStateText workflowEmptyStateText"/>
             </HBox>
-            <Table
-                items="{view>/sessionAttachments}"
-                class="flatEditorTable detailAttachmentTable"
-                visible="{path:'view>/sessionAttachments', formatter:'.hasRows'}"
-                noDataText="{i18n>noAttachmentsData}">
-                <columns>
-                    <Column>
-                        <Text text="{i18n>attachmentFileName}"/>
-                    </Column>
-                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
-                        <Text text="{i18n>attachmentCategoryLabel}"/>
-                    </Column>
-                    <Column width="7rem" hAlign="End">
-                        <Text text="{i18n>attachmentSize}"/>
-                    </Column>
-                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
-                        <Text text="{i18n>attachmentChangedOn}"/>
-                    </Column>
-                    <Column width="{view>/attachmentActionsColumnWidth}" hAlign="Center">
-                        <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem class="detailAttachmentRow detailAttachmentExpandedRow">
-                        <cells>
-                            <ObjectIdentifier title="{view>FileName}" text="{view>MimeType}" class="detailAttachmentNameCell"/>
-                            <Text
-                                text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"
-                                class="detailAttachmentCategoryCell"/>
-                            <Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End" class="detailAttachmentSizeCell"/>
-                            <Text text="{view>ChangedOn}" class="detailAttachmentChangedCell"/>
-                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions detailAttachmentActionCell" wrap="Wrap">
-                                <Button
-                                    icon="sap-icon://download"
-                                    text="{i18n>rowActionDownload}"
-                                    type="Transparent"
-                                    press=".onOpenAttachment"
-                                    class="tableRowActionBtn"/>
-                                <Button
-                                    icon="sap-icon://delete"
-                                    text="{i18n>rowActionDelete}"
-                                    type="Transparent"
-                                    press=".onDeleteAttachment"
-                                    visible="{view>/attachmentMetaEditable}"
-                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
-                            </HBox>
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
         </VBox>
+
+        <Table
+            items="{view>/sessionAttachments}"
+            class="{view>/attachmentTableClass}"
+            visible="{path:'view>/sessionAttachments', formatter:'.hasRows'}"
+            noDataText="{i18n>noAttachmentsData}">
+            <columns>
+                <Column>
+                    <Text text="{i18n>attachmentFileName}"/>
+                </Column>
+                <Column minScreenWidth="Tablet" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
+                    <Text text="{i18n>attachmentCategoryLabel}"/>
+                </Column>
+                <Column width="7rem" hAlign="End">
+                    <Text text="{i18n>attachmentSize}"/>
+                </Column>
+                <Column minScreenWidth="Desktop" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
+                    <Text text="{i18n>attachmentChangedOn}"/>
+                </Column>
+                <Column width="{view>/attachmentActionsColumnWidth}" hAlign="Center">
+                    <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                </Column>
+            </columns>
+            <items>
+                <ColumnListItem class="{= ${view>/showSessionAttachments} ? 'detailAttachmentRow detailAttachmentSessionRow' : 'detailAttachmentRow detailAttachmentExpandedRow' }">
+                    <cells>
+                        <ObjectIdentifier title="{view>FileName}" text="{view>MimeType}" class="detailAttachmentNameCell"/>
+                        <Text
+                            text="{parts:[{path:'view>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'view>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"
+                            class="detailAttachmentCategoryCell"/>
+                        <Text text="{path:'view>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End" class="detailAttachmentSizeCell"/>
+                        <Text text="{view>ChangedOn}" class="detailAttachmentChangedCell"/>
+                        <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions detailAttachmentActionCell" wrap="Wrap">
+                            <Button
+                                icon="sap-icon://download"
+                                text="{i18n>rowActionDownload}"
+                                type="Transparent"
+                                press=".onOpenAttachment"
+                                class="tableRowActionBtn"/>
+                            <Button
+                                icon="sap-icon://delete"
+                                text="{i18n>rowActionDelete}"
+                                type="Transparent"
+                                press=".onDeleteAttachment"
+                                visible="{view>/attachmentMetaEditable}"
+                                class="tableRowActionBtn tableRowActionBtnDanger"/>
+                        </HBox>
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
     </VBox>
 </core:FragmentDefinition>

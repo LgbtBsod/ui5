@@ -1,8 +1,7 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (WorkflowContracts, WorkflowRuntimeConstants, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
+], function (WorkflowContracts, DetailPersistenceRuntime) {
     "use strict";
 
     return {
@@ -26,25 +25,12 @@ sap.ui.define([
         autosaveState: WorkflowContracts.AUTOSAVE_STATES.IDLE,
         autosaveAt: null,
         autosaveEnabled: false,
-        persistence: {
-            state: WorkflowRuntimeConstants.PERSISTENCE_STATES.IDLE,
-            messageKey: DetailMessageKeyConstants.PERSISTENCE_IDLE,
-            lastSavedAt: null,
-            lastSaveError: null,
-            taxonomy: "",
-            currentWriteRequestId: "",
-            isManualSaveInFlight: false,
-            isAutoSaveInFlight: false,
-            hasValidLock: false,
-            lockOwnerSessionMatches: false,
-            lastLockRefreshAt: null,
-            nextHeartbeatAt: null
-        },
+        persistence: DetailPersistenceRuntime.createInitialPersistenceState(),
         validationSummary: {
             hasErrors: false,
             missingPaths: [],
             missingKeys: [],
-            source: WorkflowRuntimeConstants.VALIDATION_STATUS.IDLE,
+            source: WorkflowContracts.VALIDATION_STATUS.IDLE,
             firstMissingPath: "",
             firstMissingKey: ""
         },
@@ -57,7 +43,7 @@ sap.ui.define([
         requiredFields: [],
         mainServiceMetadataOk: null,
         mainServiceMetadataError: "",
-        capabilityStatus: WorkflowRuntimeConstants.READINESS_STATUS.PENDING,
+        capabilityStatus: WorkflowContracts.READINESS_STATUS.PENDING,
         capabilityDegradedReason: "",
         capabilityMessageKey: "capabilityPending",
         capabilityDiagnostics: {},

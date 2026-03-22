@@ -1,12 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
-], function (SearchViewStateRuntime, SearchRuntimeContracts, UiSemanticConstants, SearchMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
+], function (SearchViewStateRuntime, SearchContracts, UiSemanticConstants) {
     "use strict";
 
-    var SEARCH_MODE = SearchRuntimeContracts.SEARCH_MODE;
+    var SEARCH_MODE = SearchContracts.SEARCH_MODE;
 
     function resolveBundleText(oController, sKey) {
         var oBundle = oController && oController.getResourceBundle && oController.getResourceBundle();
@@ -18,10 +17,10 @@ sap.ui.define([
 
     function formatSearchModeChipText(oController, sMode) {
         var sNorm = String(sMode || "").toUpperCase() === SEARCH_MODE.LOOSE ? SEARCH_MODE.LOOSE : SEARCH_MODE.EXACT;
-        var sLabel = resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_MODE_LABEL);
+        var sLabel = resolveBundleText(oController, SearchContracts.SEARCH_MODE_LABEL);
         var sModeText = sNorm === SEARCH_MODE.LOOSE
-            ? resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_MODE_LOOSE)
-            : resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_MODE_EXACT);
+            ? resolveBundleText(oController, SearchContracts.SEARCH_MODE_LOOSE)
+            : resolveBundleText(oController, SearchContracts.SEARCH_MODE_EXACT);
         return sLabel + ": " + sModeText;
     }
 
@@ -38,7 +37,7 @@ sap.ui.define([
 
     function formatSearchResultsCompactText(oController, iResultCount, bHasRows) {
         var iSafeCount = Math.max(0, Number(iResultCount || 0));
-        var sResultsLabel = resolveBundleText(oController, SearchMessageKeyConstants.RESULTS_LABEL);
+        var sResultsLabel = resolveBundleText(oController, SearchContracts.RESULTS_LABEL);
         if (!bHasRows || !iSafeCount) {
             return sResultsLabel;
         }
@@ -49,12 +48,12 @@ sap.ui.define([
         var iSafeCount = Math.max(0, Number(iSelectionCount || 0));
         var sPrimaryId = String(sSelectedRowDisplayId || "").trim();
         if (!iSafeCount) {
-            return resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_SELECTION_NONE);
+            return resolveBundleText(oController, SearchContracts.SEARCH_SELECTION_NONE);
         }
         if (iSafeCount === 1 && sPrimaryId) {
-            return resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_SELECTION_PRIMARY_PREFIX) + ": " + sPrimaryId;
+            return resolveBundleText(oController, SearchContracts.SEARCH_SELECTION_PRIMARY_PREFIX) + ": " + sPrimaryId;
         }
-        return iSafeCount + " " + resolveBundleText(oController, SearchMessageKeyConstants.SEARCH_SELECTION_UNITS);
+        return iSafeCount + " " + resolveBundleText(oController, SearchContracts.SEARCH_SELECTION_UNITS);
     }
 
     function formatSelectionSummaryState() {

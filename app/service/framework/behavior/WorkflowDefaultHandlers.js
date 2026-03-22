@@ -1,26 +1,18 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/WorkflowBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (LockAdapter, DialogOrchestrator, StatePaths, RootIdRuntime, ModelStateRuntime, WorkflowBehaviorHelpers, BehaviorRegistry, CreateSentinel, WorkflowContracts, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/WorkflowDecisionRuntime"
+], function (DialogOrchestrator, StatePaths, ModelStateRuntime, WorkflowBehaviorHelpers, BehaviorRegistry, ModelContracts, DetailMessageKeyConstants, WorkflowDecisionRuntime) {
     "use strict";
 
     var WORKFLOW_SCOPE = "workflow";
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var RESULT_SAVE = "SAVE";
-    var RESULT_DISCARD = "DISCARD";
-    var RESULT_CANCEL = "CANCEL";
-    var RESULT_NO_CHANGES = DetailUseCaseConstants.CODES.NO_CHANGES;
-    var RESULT_SAVE_FAILED = "SAVE_FAILED";
+    var RESULTS = WorkflowDecisionRuntime.RESULTS;
     var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
     var HTTP_CONFLICT = 409;
     var HTTP_GONE = 410;
@@ -44,54 +36,17 @@ sap.ui.define([
         }
     }
 
-    function releaseWithTrySave(mContext) {
-        var oController = mContext && mContext.controller;
-        var sRootId = RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, STATE_MODEL));
-        if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
-            return Promise.resolve(null);
-        }
-        return LockAdapter.release({
-            rootId: sRootId,
-            sessionGuid: ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.SESSION_ID, ""),
-            payload: (mContext && mContext.payload) || {}
-        }).catch(function () {
-            return null;
-        });
-    }
-
-    function resolveUnsavedAction(sAction, mContext) {
-        var oController = mContext && mContext.controller;
-        var fnOnSave = mContext && mContext.onSave;
-        var fnOnCancel = mContext && mContext.onCancel;
-        if (sAction === DialogOrchestrator.actions.YES) {
-            return Promise.resolve(fnOnSave && fnOnSave()).then(function (vSaveResult) {
-                return (vSaveResult === false || (vSaveResult && vSaveResult.ok === false)) ? RESULT_SAVE_FAILED : RESULT_SAVE;
-            }).catch(function () {
-                return RESULT_SAVE_FAILED;
-            });
-        }
-        if (sAction === DialogOrchestrator.actions.NO) {
-            return releaseWithTrySave(mContext).then(function () {
-                WorkflowBehaviorHelpers.resetDetailWorkflowState(oController);
-                return RESULT_DISCARD;
-            });
-        }
-        return Promise.resolve(typeof fnOnCancel === "function" ? fnOnCancel() : null).then(function () {
-            return RESULT_CANCEL;
-        });
-    }
-
     function confirmUnsavedAndHandle(mContext) {
         var oController = mContext && mContext.controller;
         if (!ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DIRTY, false)) {
-            return Promise.resolve(RESULT_NO_CHANGES);
+            return Promise.resolve(RESULTS.NO_CHANGES);
         }
         return DialogOrchestrator.promptConfirm(
             WorkflowBehaviorHelpers.resolveText(oController, "unsavedChangesPrompt", [], "unsavedChangesPrompt"),
             [DialogOrchestrator.actions.YES, DialogOrchestrator.actions.NO, DialogOrchestrator.actions.CANCEL],
             DialogOrchestrator.actions.YES
         ).then(function (sAction) {
-            return resolveUnsavedAction(sAction, mContext);
+            return WorkflowDecisionRuntime.resolveUnsavedDecision(sAction, mContext, DialogOrchestrator);
         });
     }
 
@@ -158,7 +113,7 @@ sap.ui.define([
 
     var mHandlers = {
         extractBackendDetail: extractBackendDetail,
-        releaseWithTrySave: releaseWithTrySave,
+        releaseWithTrySave: WorkflowDecisionRuntime.releaseWithTrySave,
         confirmUnsavedAndHandle: confirmUnsavedAndHandle,
         handleBackendError: handleBackendError,
         confirmStealOwnLock: confirmStealOwnLock,

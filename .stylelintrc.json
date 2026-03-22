@@ -5,7 +5,7 @@
   "rules": {
     "color-function-alias-notation": null,
     "alpha-value-notation": null,
-    "no-duplicate-selectors": null,
+    "no-duplicate-selectors": true,
     "selector-class-pattern": null,
     "selector-id-pattern": null,
     "selector-pseudo-class-no-unknown": [

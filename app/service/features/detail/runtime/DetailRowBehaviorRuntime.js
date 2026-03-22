@@ -138,8 +138,6 @@ sap.ui.define([
         },
         onInfoCardPress: function (oController, oEvent, sCardKey, oItem, mHooks) {
             var oTarget = oEvent && oEvent.target;
-            var oDomRef;
-            var oFocusable;
             var sNormalized = String(sCardKey || "").trim();
             if (!sNormalized || !mHooks.isEditMode() || isInteractiveTarget(oTarget)) {
                 return;

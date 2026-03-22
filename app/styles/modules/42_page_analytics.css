@@ -199,6 +199,7 @@
 
 .chkApp .analyticsTabBar {
   width: 100%;
+  background: transparent;
 }
 
 .chkApp .analyticsComparisonToolbar,
@@ -239,11 +240,6 @@ body.chkAppRoot .analyticsYearPickerPopover .sapMDialogScrollCont {
 .chkApp .analyticsYearPickerButton,
 .chkApp .analyticsYearPickerButton .sapMBtnInner {
   width: 100%;
-}
-
-.chkApp .analyticsTabBar {
-  width: 100%;
-  background: transparent;
 }
 
 .chkApp .analyticsTabBar .sapMITBHead {

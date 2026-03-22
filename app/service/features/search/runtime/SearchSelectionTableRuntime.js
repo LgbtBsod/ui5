@@ -11,7 +11,6 @@ sap.ui.define([
     var COMPACT_VIEWPORT_REM_MAX = SearchUiContracts.VIEWPORT.COMPACT_REM_MAX;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var TYPE_OBJECT = JsRuntime.TYPEOF.OBJECT;
-    var METHODS = JsRuntime.METHODS;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function parseColumnPersonalizationData(oColumn) {

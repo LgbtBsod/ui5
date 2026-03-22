@@ -41,9 +41,6 @@ sap.ui.define([
             this._bRunning = false;
             this._iTimer = TimerRuntime.clearTimer(this._iTimer, clearTimeout);
         },
-        destroyManager: function () {
-            this.stop();
-        },
         isRunning: function () {
             return this._bRunning;
         }

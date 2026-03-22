@@ -23,7 +23,6 @@ sap.ui.define([
 
     var MODELS = ModelContracts.MODELS;
     var STATE_MODEL = MODELS.STATE;
-    var APP_SOURCES = OperationSourceContracts.APP;
 
     function isDirtyTrackMode(oController) {
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));

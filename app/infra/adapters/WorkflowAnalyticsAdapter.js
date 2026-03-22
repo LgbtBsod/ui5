@@ -200,10 +200,6 @@ sap.ui.define([
                 var sBreakdownFilter = buildBreakdownFilter(mInput);
                 var iSelectedYear = toNumber(mInput && mInput.selectedYear);
                 var iCompareYear = resolveCompareYear(mInput, iSelectedYear);
-                var mCompareParams = readParams({
-                    selectedYear: iCompareYear,
-                    selectedSource: mInput && mInput.selectedSource
-                });
                 var sCompareBreakdownFilter = buildBreakdownFilter({
                     selectedYear: iCompareYear,
                     selectedSource: mInput && mInput.selectedSource

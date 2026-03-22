@@ -170,7 +170,6 @@ sap.ui.define([
                     pLockAcquire
                 ]).then(function (aPostSave) {
                     var oAttachmentSync = aPostSave[0];
-                    var aSyncedAttachments = oAttachmentSync.attachments;
                     var oLockResult = aPostSave[1];
                     var oSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
                         DetailSaveRuntime.preserveBasicFields(oAttachmentSync.snapshot, oCurrent, oSnapshot)

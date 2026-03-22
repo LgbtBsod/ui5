@@ -14,10 +14,8 @@ sap.ui.define([
 ], function (ActionContract, AppShellActionRuntime, ClipboardRuntime, FocusRuntime, FeedbackBannerState, FeedbackBannerRuntime, AppShellCoordinator, NavigationIntentService, ModelStateRuntime, UiDecisionCoordinator, NavigationContracts, ModelContracts) {
     "use strict";
 
-    var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-    var STATE_MODEL = MODELS.STATE;
-    var SHELL_MODEL = MODELS.SHELL;
+    var SHELL_MODEL = ModelContracts.MODELS.SHELL;
 
     return {
         onToggleTheme: function () {

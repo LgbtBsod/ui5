@@ -7,13 +7,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
-], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts, UiSemanticConstants, JsRuntime, SearchMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
+], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchContracts, UiSemanticConstants, JsRuntime) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
-    var PERSISTENCY_PREFIXES = SearchRuntimeContracts.PERSISTENCY_PREFIXES;
+    var PERSISTENCY_PREFIXES = SearchContracts.PERSISTENCY_PREFIXES;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function createViewModel(sScope) {
@@ -164,11 +163,11 @@ sap.ui.define([
 
     function formatWorkflowStageText(oBundle, sStage) {
         var mStageKey = {
-            ANALYZE: SearchMessageKeyConstants.WORKFLOW_STAGE_ANALYZE,
-            REVIEW: SearchMessageKeyConstants.WORKFLOW_STAGE_REVIEW
+            ANALYZE: SearchContracts.WORKFLOW_STAGE_ANALYZE,
+            REVIEW: SearchContracts.WORKFLOW_STAGE_REVIEW
         };
         var sStageNorm = String(sStage || "").toUpperCase() || "DISCOVER";
-        var sKey = mStageKey[sStageNorm] || SearchMessageKeyConstants.WORKFLOW_STAGE_DISCOVER;
+        var sKey = mStageKey[sStageNorm] || SearchContracts.WORKFLOW_STAGE_DISCOVER;
         if (oBundle && oBundle.hasText && oBundle.hasText(sKey)) {
             return oBundle.getText(sKey);
         }

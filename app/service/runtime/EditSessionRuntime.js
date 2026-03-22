@@ -59,8 +59,8 @@ sap.ui.define([
 
     function stopAll(oManagers) {
         stopLockScoped(oManagers);
-        if (oManagers && oManagers.gcd && typeof oManagers.gcd.destroyManager === TYPE_FUNCTION) {
-            oManagers.gcd.destroyManager();
+        if (oManagers && oManagers.gcd && typeof oManagers.gcd.stop === TYPE_FUNCTION) {
+            oManagers.gcd.stop();
         }
     }
 

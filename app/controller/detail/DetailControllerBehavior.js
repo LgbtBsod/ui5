@@ -11,6 +11,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
@@ -29,6 +30,7 @@ sap.ui.define([
     DetailAttachmentViewState,
     StatusChipClassRuntime,
     SemanticDomRuntime,
+    ControllerTextRuntime,
     NavigationContracts,
     ModelContracts,
     CreateSentinel,
@@ -40,24 +42,18 @@ sap.ui.define([
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL = MODELS.DETAIL;
 
-    function getBundleText(oController, sKey) {
-        var oI18nModel = oController.getModel && oController.getModel("i18n");
-        var oBundle = oI18nModel && oI18nModel.getResourceBundle && oI18nModel.getResourceBundle();
-        return oBundle && oBundle.getText ? oBundle.getText(sKey) : "";
-    }
-
     function syncSemanticRegions(oController) {
         SemanticDomRuntime.syncControllerTarget(oController, "detailControlActionRow", {
             role: "region",
-            "aria-label": getBundleText(oController, "detailActionRailAriaLabel")
+            "aria-label": ControllerTextRuntime.getText(oController, "detailActionRailAriaLabel", [], "")
         });
         SemanticDomRuntime.syncControllerTarget(oController, "detailHeroStatsRegion", {
             role: "region",
-            "aria-label": getBundleText(oController, "detailStatsAriaLabel")
+            "aria-label": ControllerTextRuntime.getText(oController, "detailStatsAriaLabel", [], "")
         });
         SemanticDomRuntime.syncControllerTarget(oController, "detailSectionAnchorRail", {
             role: "navigation",
-            "aria-label": getBundleText(oController, "sectionNavAriaLabel")
+            "aria-label": ControllerTextRuntime.getText(oController, "sectionNavAriaLabel", [], "")
         });
     }
 

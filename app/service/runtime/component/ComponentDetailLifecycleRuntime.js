@@ -1,58 +1,13 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (ModelStateRuntime, RootIdRuntime, NavigationContracts, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationGuardDecisionRuntime"
+], function (ModelStateRuntime, RootIdRuntime, WorkflowContracts, ComponentNavigationGuardDecisionRuntime) {
     "use strict";
 
-    function normalizeRouteName(vRouteName) {
-        return String(vRouteName || "").trim();
-    }
-
-    function normalizeId(vId) {
-        return String(vId || "").trim();
-    }
-
-    function isDetailRoute(sRouteName) {
-        return sRouteName === NavigationContracts.ROUTES.DETAIL;
-    }
-
-    function resolveCurrentRootId(oStateModel) {
-        return normalizeId(RootIdRuntime.resolveFromStateModel(oStateModel));
-    }
-
-    function resolveNextRouteIntent(oRouteEvent) {
-        var mArgs = oRouteEvent && oRouteEvent.getParameter && oRouteEvent.getParameter("arguments") || {};
-        return {
-            routeName: normalizeRouteName(oRouteEvent && oRouteEvent.getParameter && oRouteEvent.getParameter("name")),
-            routeArgs: mArgs,
-            rootId: normalizeId(mArgs && mArgs.id)
-        };
-    }
-
-    function isSameDetailTarget(oStateModel, oRouteEvent) {
-        var oNextIntent = resolveNextRouteIntent(oRouteEvent);
-        var sCurrentRootId = resolveCurrentRootId(oStateModel);
-        return !!(sCurrentRootId && isDetailRoute(oNextIntent.routeName) && oNextIntent.rootId === sCurrentRootId);
-    }
-
-    function shouldGuardDetailNavigation(oStateModel, oRouteEvent) {
-        var sCurrentRootId = resolveCurrentRootId(oStateModel);
-        var oNextIntent = resolveNextRouteIntent(oRouteEvent);
-        if (!sCurrentRootId || isSameDetailTarget(oStateModel, oRouteEvent) || !oNextIntent.routeName) {
-            return false;
-        }
-        return true;
-    }
-
     function shouldReleaseDetailLock(oStateModel, oRouteEvent, StatePaths) {
-        var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
-        var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
-        if (!shouldGuardDetailNavigation(oStateModel, oRouteEvent)) {
-            return false;
-        }
-        return WorkflowContracts.isEditableMode(sMode) || sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
+        return ComponentNavigationGuardDecisionRuntime.shouldReleaseDetailLock(oStateModel, oRouteEvent, StatePaths);
     }
 
     function syncDetailMeta(oStateModel, StatePaths) {

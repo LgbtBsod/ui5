@@ -36,6 +36,9 @@ sap.ui.define([
             "/attachmentActionsEnabled": bEditable && bHasRoot,
             "/attachmentMetaEditable": bEditable && bHasRoot,
             "/showSessionAttachments": !bExpanded,
+            "/attachmentTableClass": !bExpanded
+                ? "flatEditorTable detailAttachmentTable detailAttachmentTableSession"
+                : "flatEditorTable detailAttachmentTable",
             "/attachmentDesktopColumnsVisible": !bNarrow,
             "/attachmentActionsColumnWidth": bNarrow ? "9rem" : "14rem"
         });

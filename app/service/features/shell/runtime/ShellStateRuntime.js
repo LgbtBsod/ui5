@@ -36,14 +36,6 @@ sap.ui.define([
         return String(oBundle.getText(sKey, Array.isArray(aArgs) ? aArgs : []) || "");
     }
 
-    function buildPermissionScopeLabel(oController, oPermission) {
-        var sScopeKind = String(oPermission && oPermission.scopeKind || "all").trim().toLowerCase() || "all";
-        var sScopeValue = String(oPermission && oPermission.scopeValue || "ALL").trim() || "ALL";
-        return sScopeKind === "bukrs" && sScopeValue.toUpperCase() !== "ALL"
-            ? resolveText(null, oController, ShellMessageKeyConstants.PERMISSION_SCOPE_BUKRS, [sScopeValue])
-            : resolveText(null, oController, ShellMessageKeyConstants.PERMISSION_SCOPE_ALL);
-    }
-
     function buildPermissionSheets(oController, aPermissionRules, mHooks) {
         return PermissionPresentation.buildPermissionSheets(aPermissionRules, {
             codeOrder: ["01", "02", "03", "06"],

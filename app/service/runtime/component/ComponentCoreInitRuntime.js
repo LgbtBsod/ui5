@@ -1,14 +1,16 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxRuntimeFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFacadeEffectRuntime"
+], function (CtxRuntimeFactory, ComponentFacadeEffectRuntime) {
     "use strict";
 
-    function initializeComponentRuntime(oComponent, mDeps, mModels, mOptions) {
-        var CtxFactory = mDeps.CtxFactory;
+    function initializeComponentRuntime(oComponent, mDeps, mModels) {
         var DetailFacade = mDeps.DetailFacade;
         var ActionDispatcher = mDeps.ActionDispatcher;
         var ComponentRuntimeSupport = mDeps.ComponentRuntimeSupport;
         var EffectApplier = mDeps.EffectApplier;
 
-        oComponent._ctx = CtxFactory.buildCtx(oComponent, {});
+        oComponent._ctx = CtxRuntimeFactory.build(oComponent, {});
         oComponent._detailFacade = new DetailFacade();
         oComponent._actionDispatcher = new ActionDispatcher();
 
@@ -17,10 +19,10 @@ sap.ui.define([], function () {
                 return ComponentRuntimeSupport.resolveDetailCurrent(mModels.detailModel);
             },
             buildLatestCtx: function () {
-                oComponent._ctx = CtxFactory.buildCtx(oComponent, {});
+                oComponent._ctx = CtxRuntimeFactory.build(oComponent, {});
                 return oComponent._ctx;
             },
-            applyFacadeResult: mOptions.createApplyFacadeResult({
+            applyFacadeResult: ComponentFacadeEffectRuntime.createApplyFacadeResult({
                 component: oComponent,
                 effectApplier: EffectApplier,
                 actionDispatcher: oComponent._actionDispatcher,

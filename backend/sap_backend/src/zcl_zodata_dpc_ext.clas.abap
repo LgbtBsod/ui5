@@ -31,6 +31,7 @@ CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE
     DATA mo_runtime_settings TYPE REF TO zcl_zodata_runtime_settings_svc.
     DATA mo_read_service TYPE REF TO zcl_zodata_read_service.
     DATA mo_save_service TYPE REF TO zcl_zodata_save_service.
+    DATA mv_deps_initialized TYPE abap_bool VALUE abap_false.
 
     METHODS init_deps.
     METHODS ensure_deps.
@@ -115,6 +116,9 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD ensure_deps.
+    IF mv_deps_initialized = abap_true.
+      RETURN.
+    ENDIF.
     IF mo_mapper IS INITIAL. mo_mapper = zcl_zodata_bopf_mapper=>create( ). ENDIF.
     IF mo_lock_manager IS INITIAL. mo_lock_manager = NEW zcl_zodata_lock_manager( ). ENDIF.
     IF mo_contract IS INITIAL. mo_contract = NEW zcl_zodata_contract_service( ). ENDIF.
@@ -124,6 +128,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     IF mo_read_service IS INITIAL OR mo_save_service IS INITIAL.
       init_deps( ).
     ENDIF.
+    mv_deps_initialized = abap_true.
   ENDMETHOD.
 
   METHOD get_srv_mgr.

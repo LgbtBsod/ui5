@@ -1,12 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts"
-], function (ControllerViewStateRuntime, SchedulingRuntime, AnalyticsContracts, AnalyticsUiContracts) {
+], function (ControllerViewStateRuntime, SchedulingRuntime, AnalyticsContracts) {
     "use strict";
 
-    var PATHS = AnalyticsUiContracts.PATHS;
+    var PATHS = AnalyticsContracts.PATHS;
     var REFRESH_POLL_DELAY_MS = AnalyticsContracts.REFRESH.POLL_DELAY_MS;
     var REFRESH_POLL_MAX_ATTEMPTS = AnalyticsContracts.REFRESH.POLL_MAX_ATTEMPTS;
 

@@ -31,7 +31,6 @@ sap.ui.define([
     }
 
     function deleteAttachment(mArgs) {
-        var sRootId = normalizeRootKey(mArgs && mArgs.rootId);
         var sAttachmentId = String((mArgs && (mArgs.attachmentId || mArgs.attachmentKey)) || "").trim().toUpperCase();
         if (!sAttachmentId) {
             return Promise.resolve({ deleted: true });

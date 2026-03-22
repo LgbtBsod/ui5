@@ -157,8 +157,8 @@ sap.ui.define([
         return [sPrefix || "write", Date.now(), Math.round(Math.random() * 100000)].join("-");
     }
 
-    function createPayload(mPartial) {
-        return Object.assign({
+    function createInitialPersistenceState() {
+        return {
             state: STATES.IDLE,
             messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE,
             lastSavedAt: null,
@@ -171,7 +171,11 @@ sap.ui.define([
             lockOwnerSessionMatches: false,
             lastLockRefreshAt: null,
             nextHeartbeatAt: null
-        }, mPartial || {});
+        };
+    }
+
+    function createPayload(mPartial) {
+        return Object.assign(createInitialPersistenceState(), mPartial || {});
     }
 
     function modelEffects(mPayload) {
@@ -283,6 +287,7 @@ sap.ui.define([
         canAutosaveFromState: canAutosaveFromState,
         canScheduleAutosave: canScheduleAutosave,
         classifyError: classifyError,
+        createInitialPersistenceState: createInitialPersistenceState,
         dirtyEffects: dirtyEffects,
         extractSignal: extractSignal,
         failureEffects: failureEffects,

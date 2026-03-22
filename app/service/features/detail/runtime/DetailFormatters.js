@@ -4,16 +4,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade, DetailPersistenceConstants, UiSemanticConstants, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
+], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade, DetailContracts, UiSemanticConstants) {
     "use strict";
 
     var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
     var LIFECYCLE_TEXT_KEYS = {};
-    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.REGISTERED] = DetailMessageKeyConstants.STATUS_REGISTERED;
-    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.CLOSED] = DetailMessageKeyConstants.STATUS_CLOSED;
-    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.DRAFT] = DetailMessageKeyConstants.STATUS_DRAFT;
+    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.REGISTERED] = DetailContracts.STATUS_REGISTERED;
+    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.CLOSED] = DetailContracts.STATUS_CLOSED;
+    LIFECYCLE_TEXT_KEYS[CHECKLIST_STATUSES.DRAFT] = DetailContracts.STATUS_DRAFT;
     var LIFECYCLE_STATES = {};
     LIFECYCLE_STATES[CHECKLIST_STATUSES.REGISTERED] = UiSemanticConstants.OBJECT_STATUS_STATE.WARNING;
     LIFECYCLE_STATES[CHECKLIST_STATUSES.CLOSED] = UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
@@ -25,10 +24,10 @@ sap.ui.define([
     var LOCK_ACTIVE_STATES = {};
     var LOCK_TRANSITION_STATES = {};
     var AUTOSAVE_TEXT_KEYS = {};
-    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.IDLE] = DetailMessageKeyConstants.AUTOSAVE_WAITING;
-    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.SAVING] = DetailMessageKeyConstants.AUTOSAVE_SAVING;
-    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.SAVED] = DetailMessageKeyConstants.AUTOSAVE_SAVED;
-    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.FAILED] = DetailMessageKeyConstants.AUTOSAVE_ERROR;
+    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.IDLE] = DetailContracts.AUTOSAVE_WAITING;
+    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.SAVING] = DetailContracts.AUTOSAVE_SAVING;
+    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.SAVED] = DetailContracts.AUTOSAVE_SAVED;
+    AUTOSAVE_TEXT_KEYS[WorkflowContracts.AUTOSAVE_STATES.FAILED] = DetailContracts.AUTOSAVE_ERROR;
     var PERSISTENCE_SEMANTICS = {
         saving: UiSemanticConstants.OBJECT_STATUS_STATE.WARNING,
         autosaving: UiSemanticConstants.OBJECT_STATUS_STATE.WARNING,
@@ -41,7 +40,7 @@ sap.ui.define([
         conflict: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR,
         idle: UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION
     };
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
     LOCK_ACTIVE_STATES[WorkflowContracts.LOCK_STATES.EDIT_LOCKED] = true;
     LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK] = true;
     LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE] = true;
@@ -142,7 +141,7 @@ sap.ui.define([
         },
 
         formatValidationText: function (bShown, bMissing) {
-            return (bShown && bMissing) ? text(this, DetailMessageKeyConstants.REQUIRED_FIELD_HINT) : "";
+            return (bShown && bMissing) ? text(this, DetailContracts.REQUIRED_FIELD_HINT) : "";
         },
 
         formatWarningMessageType: function () {
@@ -152,38 +151,38 @@ sap.ui.define([
         formatValidationSummaryText: function (oSummary) {
             var iCount = readMissingCount(oSummary);
             if (iCount > 0) {
-                return text(this, DetailMessageKeyConstants.VALIDATION_SUMMARY_TITLE_COUNT, [iCount]);
+                return text(this, DetailContracts.VALIDATION_SUMMARY_TITLE_COUNT, [iCount]);
             }
-            return text(this, DetailMessageKeyConstants.VALIDATION_SUMMARY_TITLE);
+            return text(this, DetailContracts.VALIDATION_SUMMARY_TITLE);
         },
 
         formatValidationSummaryLinkText: function (oSummary) {
             var iCount = readMissingCount(oSummary);
             if (iCount > 1) {
-                return text(this, DetailMessageKeyConstants.VALIDATION_SUMMARY_LINK_MANY, [iCount]);
+                return text(this, DetailContracts.VALIDATION_SUMMARY_LINK_MANY, [iCount]);
             }
             if (iCount === 1) {
-                return text(this, DetailMessageKeyConstants.VALIDATION_SUMMARY_LINK_SINGLE);
+                return text(this, DetailContracts.VALIDATION_SUMMARY_LINK_SINGLE);
             }
-            return text(this, DetailMessageKeyConstants.REQUIRED_FIELD_HINT);
+            return text(this, DetailContracts.REQUIRED_FIELD_HINT);
         },
 
         formatBooleanResultText: function (vValue) {
             if (typeof vValue === "string") {
                 var sValue = String(vValue).trim().toUpperCase();
                 if (sValue === "OK" || sValue === "TRUE" || sValue === "X") {
-                    return text(this, DetailMessageKeyConstants.STATUS_OK);
+                    return text(this, DetailContracts.STATUS_OK);
                 }
                 if (sValue === "FAILED" || sValue === "ERROR" || sValue === "FALSE") {
-                    return text(this, DetailMessageKeyConstants.STATUS_FAILED);
+                    return text(this, DetailContracts.STATUS_FAILED);
                 }
                 return "-";
             }
             if (vValue === true) {
-                return text(this, DetailMessageKeyConstants.STATUS_OK);
+                return text(this, DetailContracts.STATUS_OK);
             }
             if (vValue === false) {
-                return text(this, DetailMessageKeyConstants.STATUS_FAILED);
+                return text(this, DetailContracts.STATUS_FAILED);
             }
             return "-";
         },
@@ -220,12 +219,12 @@ sap.ui.define([
 
         formatDraftStateText: function (bDirty, bCreateMode) {
             if (bDirty) {
-                return text(this, DetailMessageKeyConstants.DETAIL_DRAFT_CHANGED);
+                return text(this, DetailContracts.DETAIL_DRAFT_CHANGED);
             }
             if (bCreateMode) {
-                return text(this, DetailMessageKeyConstants.DETAIL_DRAFT_LOCAL);
+                return text(this, DetailContracts.DETAIL_DRAFT_LOCAL);
             }
-            return text(this, DetailMessageKeyConstants.DETAIL_DRAFT_CLEAN);
+            return text(this, DetailContracts.DETAIL_DRAFT_CLEAN);
         },
 
         formatDraftStateState: function (bDirty, bCreateMode) {
@@ -240,8 +239,8 @@ sap.ui.define([
                 return sTextValue;
             }
             return WorkflowContracts.isEditableMode(sMode)
-                ? text(this, DetailMessageKeyConstants.MODE_EDIT)
-                : text(this, DetailMessageKeyConstants.MODE_READ);
+                ? text(this, DetailContracts.MODE_EDIT)
+                : text(this, DetailContracts.MODE_READ);
         },
 
         formatLockStateSemantic: function (sState, sMode) {
@@ -268,24 +267,24 @@ sap.ui.define([
         formatHeartbeatText: function (sMode, sLockState) {
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
             if (WorkflowContracts.isEditableMode(sMode) && LOCK_ACTIVE_STATES[sNormalizedLockState]) {
-                return text(this, DetailMessageKeyConstants.HEARTBEAT_LOCKED_ACTIVE);
+                return text(this, DetailContracts.HEARTBEAT_LOCKED_ACTIVE);
             }
             if (WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.CREATE) {
-                return text(this, DetailMessageKeyConstants.HEARTBEAT_DRAFT_CREATE);
+                return text(this, DetailContracts.HEARTBEAT_DRAFT_CREATE);
             }
             if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK) {
-                return text(this, DetailMessageKeyConstants.AUTOSAVE_SAVING);
+                return text(this, DetailContracts.AUTOSAVE_SAVING);
             }
             if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE) {
-                return text(this, DetailMessageKeyConstants.IDLE_TIMEOUT_GRACE_BANNER_TITLE);
+                return text(this, DetailContracts.IDLE_TIMEOUT_GRACE_BANNER_TITLE);
             }
             if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.LOCK_LOST) {
-                return text(this, DetailMessageKeyConstants.LOCK_LOST_BANNER_TITLE);
+                return text(this, DetailContracts.LOCK_LOST_BANNER_TITLE);
             }
             if (sNormalizedLockState === WorkflowContracts.LOCK_STATES.FORCED_READ_ONLY) {
-                return text(this, DetailMessageKeyConstants.DETAIL_FORCED_READ_ONLY_TITLE);
+                return text(this, DetailContracts.DETAIL_FORCED_READ_ONLY_TITLE);
             }
-            return text(this, DetailMessageKeyConstants.HEARTBEAT_INACTIVE);
+            return text(this, DetailContracts.HEARTBEAT_INACTIVE);
         },
 
         formatAutosaveText: function (sMode, sLockState, sAutosaveState) {
@@ -293,16 +292,16 @@ sap.ui.define([
             var sNormalizedMode = WorkflowContracts.normalizeEditMode(sMode);
             var sNormalizedLockState = String(sLockState || "").toUpperCase();
             if (sNormalizedMode === WorkflowContracts.EDIT_MODES.CREATE) {
-                return text(this, DetailMessageKeyConstants.AUTOSAVE_CREATE_DRAFT);
+                return text(this, DetailContracts.AUTOSAVE_CREATE_DRAFT);
             }
             if (sNormalizedMode !== WorkflowContracts.EDIT_MODES.EDIT || !LOCK_ACTIVE_STATES[sNormalizedLockState]) {
-                return text(this, DetailMessageKeyConstants.AUTOSAVE_DISABLED);
+                return text(this, DetailContracts.AUTOSAVE_DISABLED);
             }
-            return text(this, AUTOSAVE_TEXT_KEYS[sState] || DetailMessageKeyConstants.AUTOSAVE_WAITING);
+            return text(this, AUTOSAVE_TEXT_KEYS[sState] || DetailContracts.AUTOSAVE_WAITING);
         },
 
         formatPersistenceText: function (sMessageKey, sPersistenceState, sLastSavedAt, bCreateMode) {
-            if (bCreateMode && sPersistenceState !== DetailPersistenceConstants.STATES.SAVED) {
+            if (bCreateMode && sPersistenceState !== DetailContracts.STATES.SAVED) {
                 return text(this, DETAIL_MESSAGE_KEYS.AUTOSAVE_CREATE_DRAFT);
             }
             if (sMessageKey) {
@@ -313,7 +312,7 @@ sap.ui.define([
                 }
                 return text(this, sMessageKey);
             }
-            if (sPersistenceState === DetailPersistenceConstants.STATES.SAVED && sLastSavedAt) {
+            if (sPersistenceState === DetailContracts.STATES.SAVED && sLastSavedAt) {
                 return text(this, DETAIL_MESSAGE_KEYS.PERSISTENCE_SAVED_AT, [formatAutosaveTime(sLastSavedAt)]);
             }
             return text(this, DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE);
@@ -326,7 +325,7 @@ sap.ui.define([
             if (!sCode && !sMessage) {
                 return sPrimary;
             }
-            return text(this, DetailMessageKeyConstants.PERSISTENCE_TOOLTIP_WITH_DETAILS, [sPrimary, [sCode, sMessage].filter(Boolean).join(": ")]);
+            return text(this, DetailContracts.PERSISTENCE_TOOLTIP_WITH_DETAILS, [sPrimary, [sCode, sMessage].filter(Boolean).join(": ")]);
         },
 
         formatPersistenceState: function (sPersistenceState) {
@@ -428,8 +427,8 @@ sap.ui.define([
 
         formatAttachmentsEmptyStateText: function (sRootId) {
             return CreateSentinel.isCreateId(sRootId)
-                ? text(this, DetailMessageKeyConstants.ATTACHMENT_DRAFT_STAGE_HINT)
-                : text(this, DetailMessageKeyConstants.DETAIL_EMPTY_ATTACHMENTS_SAVED_TEXT) || text(this, DetailMessageKeyConstants.DETAIL_EMPTY_ATTACHMENTS_TEXT);
+                ? text(this, DetailContracts.ATTACHMENT_DRAFT_STAGE_HINT)
+                : text(this, DetailContracts.DETAIL_EMPTY_ATTACHMENTS_SAVED_TEXT) || text(this, DetailContracts.DETAIL_EMPTY_ATTACHMENTS_TEXT);
         }
     };
 });

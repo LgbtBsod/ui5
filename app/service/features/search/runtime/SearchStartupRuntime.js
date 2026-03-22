@@ -4,16 +4,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime"
-], function (ControllerViewStateRuntime, SchedulingRuntime, ModelContracts, OperationSourceContracts, ProgressiveReadinessContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, DebugLogger, SearchReturnRediscoveryRuntime) {
+], function (ControllerViewStateRuntime, SchedulingRuntime, ModelContracts, OperationSourceContracts, RuntimeOrchestrationContracts, ReadinessTelemetryRuntime, DebugLogger, SearchReturnRediscoveryRuntime) {
     "use strict";
 
-    var STATE_MODEL = ModelContracts.MODELS.STATE;
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
-    var SEARCH_READINESS = ProgressiveReadinessContracts.SEARCH;
+    var SEARCH_READINESS = RuntimeOrchestrationContracts.SEARCH;
     var SEARCH_RETURN_REFRESH_RETRY_DELAY_MS = 500;
     var SEARCH_RETURN_REFRESH_RETRY_LIMIT = 12;
 
@@ -124,7 +122,7 @@ sap.ui.define([
         mHooks.syncSmartControlAvailability();
         mHooks.bindSearchViewportRuntime();
         logStartupMetric(oController, SEARCH_READINESS.STARTUP_EVENTS.FIRST_ROUTE_READY);
-        ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.SEARCH_ROUTE_READY, {
+        ReadinessTelemetryRuntime.markControllerStage(oController, RuntimeOrchestrationContracts.STAGES.SEARCH_ROUTE_READY, {
             reason: "routeMatched"
         });
         ControllerViewStateRuntime.set(oController, "/bootstrapBusy", true);

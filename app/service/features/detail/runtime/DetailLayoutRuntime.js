@@ -9,7 +9,6 @@ sap.ui.define([
 ], function (LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerModelRuntime, ModelStateRuntime, ModelContracts, NavigationContracts) {
     "use strict";
 
-    var STATE_MODEL = ModelContracts.MODELS.STATE;
     var SHELL_MODEL = ModelContracts.MODELS.SHELL;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
 

@@ -199,7 +199,7 @@ sap.ui.define([
             if (!oPermission.allowed) {
                 return Result.fail({ message: "No permission to open checklist", code: DETAIL_CODES.NO_VIEW_PERMISSION }, resetTransientDetailIncidentEffects().concat([
                     Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
-                        status: WorkflowRuntimeConstants.READINESS_STATUS.DENIED,
+                        status: WorkflowContracts.READINESS_STATUS.DENIED,
                         ready: false,
                         readyAt: "",
                         error: DETAIL_CODES.NO_VIEW_PERMISSION,
@@ -263,7 +263,7 @@ sap.ui.define([
             var oSelectedSnapshot = cloneSnapshot(oNormalizedSnapshot);
             return Result.ok({ snapshot: oBaseSnapshot }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
                 Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
-                    status: WorkflowRuntimeConstants.READINESS_STATUS.READY,
+                    status: WorkflowContracts.READINESS_STATUS.READY,
                     ready: true,
                     readyAt: sReadyAt,
                     error: "",
@@ -288,7 +288,7 @@ sap.ui.define([
         }).catch(function (oError) {
             return Result.fail(oError, resetTransientDetailIncidentEffects().concat([
                 Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
-                    status: WorkflowRuntimeConstants.READINESS_STATUS.ERROR,
+                    status: WorkflowContracts.READINESS_STATUS.ERROR,
                     ready: false,
                     readyAt: "",
                     error: String((oError && oError.message) || "detail_open_failed"),

@@ -5,7 +5,5 @@
         editable="{view>/isEditMode}"
         placeholder="{i18n>commentPlaceholder}"
         rows="1"
-        growing="true"
-        growingMaxLines="6"
         class="commentExpandableField"/>
 </core:FragmentDefinition>

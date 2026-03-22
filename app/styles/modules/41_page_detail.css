@@ -29,10 +29,13 @@
   display: flex;
   flex-direction: column;
   gap: 0.42rem;
-  align-self: start;
+  align-self: stretch;
   min-height: 0;
   min-width: 0;
   height: auto;
+  width: 100% !important;
+  max-width: 100%;
+  flex: 1 1 auto;
   overflow-x: visible;
   overflow-y: visible;
 }
@@ -513,6 +516,9 @@ body.chkAppRoot.appDark .chkApp .detailHistoryTimeline .sapMTLIIcon {
 
 .chkApp .detailAttachmentToolbar {
   row-gap: 0.38rem;
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 76%, transparent);
+  background: var(--theme-rail-bg);
+  box-shadow: none;
 }
 
 .chkApp .detailAttachmentToolbar > * {
@@ -649,7 +655,7 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
 }
 
 .chkApp .detailCreateModeBanner {
-  gap: 0.7rem;
+  gap: 0.55rem;
   padding: 1rem 1.05rem;
   border-radius: calc(var(--radius-lg) - 0.2rem);
   border: 1px solid rgba(var(--accent-rgb), 0.18);
@@ -663,7 +669,7 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
 }
 
 .chkApp .detailCreateModeBannerTop {
-  gap: 0.55rem;
+  gap: 0.45rem;
   justify-content: space-between;
 }
 
@@ -694,6 +700,9 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
 .chkApp .detailCreateModeText {
   color: var(--text-subtle);
   line-height: 1.45;
+  max-width: 52rem;
+  font-size: 0.92rem;
+  opacity: 0.8;
 }
 
 .chkApp .detailParticipantsFlowHint {
@@ -723,9 +732,6 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
   box-shadow:
     var(--theme-rail-shadow),
     inset 0 1px 0 rgba(255, 255, 255, 0.22);
-}
-
-.chkApp .detailEmptyStateCard {
   flex: 0 0 auto;
   align-self: stretch;
 }
@@ -774,6 +780,7 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
   border-radius: 2rem;
   max-width: 70rem;
   margin-inline: auto;
+  margin-top: 0;
 }
 
 .chkApp .detailAccessDeniedSceneVisual,
@@ -871,13 +878,13 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
 .chkApp .appLayoutSplit .detailPage .detailAccessDeniedScene {
   inline-size: 100%;
   width: 100%;
-  max-width: 100%;
-  min-height: min(100%, calc(100vh - var(--app-shell-offset) - 1.6rem));
+  max-width: min(100%, 42rem);
+  min-height: min(34rem, calc(100vh - var(--app-shell-offset) - 3rem));
   height: calc(100vh - var(--app-shell-offset) - 1.6rem);
   grid-template-columns: minmax(11rem, 16rem) minmax(0, 1fr);
   gap: clamp(1rem, 2vw, 1.5rem);
-  padding: 1.1rem 1.2rem;
-  align-self: stretch;
+  padding: 1.2rem 1.25rem 1.35rem;
+  align-self: start;
 }
 
 .chkApp .appLayoutSplit .detailPage .detailAccessDeniedIllustration {
@@ -907,12 +914,6 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
   box-shadow: var(--theme-block-shadow);
 }
 
-.chkApp .detailAttachmentToolbar {
-  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 76%, transparent);
-  background: var(--theme-rail-bg);
-  box-shadow: none;
-}
-
 .chkApp .detailAccessDeniedIllustration {
   width: min(100%, 18rem);
   margin-inline: auto;
@@ -930,6 +931,7 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
 
 .chkApp .detailAccessDeniedReason {
   margin-top: 1rem;
+  color: var(--text-main);
 }
 
 .chkApp .detailAccessDeniedAction {
@@ -993,9 +995,6 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
     padding: 0.22rem 0.24rem 0.3rem;
     row-gap: 0.3rem;
     column-gap: 0.26rem;
-  }
-
-  .chkApp .detailAttachmentToolbar {
     min-height: 0;
     height: auto;
     align-items: stretch;
@@ -1063,23 +1062,12 @@ body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
 
 }
 
-.chkApp .appLayoutSplit .detailPage .detailAccessDeniedScene {
-  min-height: min(34rem, calc(100vh - var(--app-shell-offset) - 3rem));
-  max-width: min(100%, 42rem);
-  padding: 1.2rem 1.25rem 1.35rem;
-  align-self: start;
-}
-
 .chkApp .appLayoutSplit .detailPage .detailAccessDeniedSceneCopy {
   max-width: 24rem;
 }
 .chkApp .detailAccessDeniedScene + .detailControlPinnedDock,
 .chkApp .detailAccessDeniedScene + .detailControlPinnedDock + .detailControlSkeletonCard {
   display: none;
-}
-
-.chkApp .detailAccessDeniedScene {
-  margin-top: 0;
 }
 
 .chkApp .detailAttachmentItem {
@@ -1094,10 +1082,6 @@ body.chkAppRoot.appLight .chkApp .detailAttachmentItem {
 
 body.chkAppRoot.appDark .chkApp .detailAttachmentItem {
   background: rgba(50, 100, 210, 0.08);
-}
-
-.chkApp .detailAccessDeniedReason {
-  color: var(--text-main);
 }
 
 .chkApp .detailControlStickyBlock {
@@ -1149,6 +1133,7 @@ background: transparent;
   flex-direction: column;
   height: auto;
   min-height: 0;
+  gap: 0.42rem;
 }
 
 .chkApp .detailRailHeader {
@@ -1195,6 +1180,7 @@ background: transparent;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(244, 248, 255, 0.16));
   border-color: color-mix(in srgb, var(--theme-rail-border) 48%, transparent);
+  gap: 0.22rem;
 }
 
 .chkApp .detailControlRowTop .sapMOTBOverflowButton,
@@ -1329,10 +1315,6 @@ body.chkAppRoot.appLight .chkApp .detailControlRowActions {
 .chkApp .detailRailStatusChip {
   border-radius: 999px;
   transition: transform 180ms ease, box-shadow 220ms ease, border-color 220ms ease, background 220ms ease;
-}
-
-.chkApp .detailControlRowActions {
-  gap: 0.22rem;
 }
 
 .chkApp .detailControlRowActions .detailControlRowSpacer {
@@ -1608,11 +1590,6 @@ body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipDraft {
   min-width: 0;
 }
 
-.chkApp .detailControlRowTop .sapMOTBOverflowButton,
-.chkApp .detailControlRowActions .sapMOTBOverflowButton {
-  flex: 0 0 auto;
-}
-
 .chkApp .detailSectionAnchorBtn .sapMBtnInner,
 .chkApp .detailControlRow .detailRailActionBtn .sapMBtnInner,
 .chkApp .detailControlRow .detailSectionToolbarButton .sapMBtnInner {
@@ -1730,66 +1707,8 @@ body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipDraft {
   box-sizing: border-box;
 }
 
-.chkApp .detailControlToolbarStack {
-  gap: 0.42rem;
-}
-
 .chkApp .detailMainExperienceStack {
   gap: 0.76rem;
-}
-
-.chkApp .detailTableExperienceCard {
-  padding:
-    calc(0.62rem * var(--theme-density-scale))
-    calc(0.72rem * var(--theme-density-scale))
-    calc(0.68rem * var(--theme-density-scale));
-  border-radius: var(--radius-xl);
-}
-
-.chkApp .detailBarriersTableCard {
-  min-height: 18.4rem;
-}
-
-.chkApp .detailSectionBody {
-  display: flex;
-  flex-direction: column;
-  gap: 0.42rem;
-  align-items: stretch;
-  min-height: 0;
-  min-width: 0;
-  width: 100% !important;
-  max-width: 100%;
-  flex: 1 1 auto;
-}
-
-.chkApp .detailSectionBody > * {
-  flex: 0 0 auto;
-  align-self: stretch;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.chkApp .detailSectionToolbar {
-  gap: 0.42rem;
-}
-
-.chkApp .detailSectionToolbar .detailSectionToolbarSpacer,
-.chkApp .detailSectionToolbar .detailAttachmentToolbarSpacer {
-  min-width: 0.4rem;
-}
-
-.chkApp .detailSectionValueHelpInput {
-  width: clamp(12rem, 22vw, 15rem);
-  max-width: 100%;
-}
-
-.chkApp .detailSectionValueHelpInput .sapMInputBaseContentWrapper,
-.chkApp .detailSectionValueHelpInput .sapMInputBaseInner {
-  border-radius: 999px;
-}
-
-.chkApp .detailSectionNumberChip {
-  max-width: min(16rem, 100%);
 }
 
 .chkApp .detailAnchorBarHost {
@@ -1911,20 +1830,6 @@ body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipDraft {
 
 .chkApp .detailHeroStatBoardCompact .uxStatValue {
   font-weight: 600;
-}
-
-.chkApp .detailCreateModeBanner {
-  gap: 0.55rem;
-}
-
-.chkApp .detailCreateModeBannerTop {
-  gap: 0.45rem;
-}
-
-.chkApp .detailCreateModeText {
-  max-width: 52rem;
-  font-size: 0.92rem;
-  opacity: 0.8;
 }
 
 .chkApp .detailInlineHintText,

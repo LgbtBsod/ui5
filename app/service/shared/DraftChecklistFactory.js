@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BrowserLocaleUtils",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (ClientKeyGenerator, WorkflowContracts) {
+], function (ClientKeyGenerator, BrowserLocaleUtils, WorkflowContracts) {
     "use strict";
 
     var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
@@ -15,7 +16,7 @@ sap.ui.define([
                 String(oNow.getDate()).padStart(2, "0")
             ].join("-"),
             time: [String(oNow.getHours()).padStart(2, "0"), String(oNow.getMinutes()).padStart(2, "0")].join(":"),
-            timezone: (Intl && Intl.DateTimeFormat && Intl.DateTimeFormat().resolvedOptions && Intl.DateTimeFormat().resolvedOptions().timeZone) || "UTC"
+            timezone: BrowserLocaleUtils.resolveTimezone()
         };
     }
 

@@ -74,7 +74,9 @@ sap.ui.define([
         });
     }
 
-    return Object.freeze({
-        createClass: buildClass
-    });
+    var PollingManager = buildClass("PRODUCTION_CONTROL_CHECKLIST.service.runtime.PollingManager");
+
+    PollingManager.createClass = buildClass;
+
+    return PollingManager;
 });

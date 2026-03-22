@@ -2,13 +2,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (LockAdapter, ModelContracts, ControllerModelRuntime, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/EncodingUtils"
+], function (LockAdapter, ModelContracts, ControllerModelRuntime, JsRuntime, EncodingUtils) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var TYPE_UNDEFINED = JsRuntime.TYPEOF.UNDEFINED;
-    var METHODS = JsRuntime.METHODS;
     var MODELS = ModelContracts.MODELS;
 
     function resolveNamedModel(oController, sName) {
@@ -32,16 +32,6 @@ sap.ui.define([
         }
     }
 
-    function decodeBase64(sBase64) {
-        if (typeof window !== TYPE_UNDEFINED && typeof window.atob === TYPE_FUNCTION) {
-            return window.atob(sBase64);
-        }
-        if (typeof atob === TYPE_FUNCTION) {
-            return atob(sBase64);
-        }
-        throw new Error("base64_decode_unavailable");
-    }
-
     return {
         getModel: function (sName) {
             if (typeof sName === TYPE_UNDEFINED) {
@@ -52,8 +42,8 @@ sap.ui.define([
         setModel: function (oModel, sName) { return this.getView().setModel(oModel, sName); },
         getResourceBundle: function () {
             var oOwner = typeof this.getOwnerComponent === TYPE_FUNCTION && this.getOwnerComponent();
-            var oI18nModel = oOwner && typeof oOwner[METHODS.GET_MODEL] === TYPE_FUNCTION ? oOwner[METHODS.GET_MODEL](MODELS.I18N) : null;
-            return oI18nModel && typeof oI18nModel[METHODS.GET_RESOURCE_BUNDLE] === TYPE_FUNCTION ? oI18nModel[METHODS.GET_RESOURCE_BUNDLE]() : null;
+            var oI18nModel = oOwner && typeof oOwner.getModel === TYPE_FUNCTION ? oOwner.getModel(MODELS.I18N) : null;
+            return oI18nModel && typeof oI18nModel.getResourceBundle === TYPE_FUNCTION ? oI18nModel.getResourceBundle() : null;
         },
         releaseLock: function (sObjectId, sSessionId) {
             if (!sObjectId || !sSessionId) { return Promise.resolve(); }
@@ -83,11 +73,7 @@ sap.ui.define([
             return Promise.resolve().then(fnTask).finally(function () { oStateModel.setProperty(sPath, false); });
         },
         base64ToHex: function (sBase64) {
-            if (!sBase64) { return ""; }
-            var sBinary = decodeBase64(String(sBase64));
-            var aHex = [];
-            for (var i = 0; i < sBinary.length; i += 1) { var h = sBinary.charCodeAt(i).toString(16); aHex.push(h.length >= 2 ? h : "0" + h); }
-            return aHex.join("");
+            return EncodingUtils.base64ToHex(sBase64);
         }
     };
 });

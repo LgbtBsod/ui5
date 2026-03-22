@@ -1,86 +1,66 @@
 sap.ui.define([
-    "sap/ui/core/Core",
     "sap/ui/core/Fragment",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsYearRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsDrilldownRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsFormatRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsExportRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsInteractionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsSelectionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
 ], function (
-    Core,
     Fragment,
+    ControllerTextRuntime,
     AnalyticsFacade,
     ControllerCommandContextRuntime,
     AnalyticsBuilderRuntime,
     AnalyticsYearRuntime,
     AnalyticsContracts,
-    AnalyticsUiContracts,
     ModelContracts,
     ControllerViewStateRuntime,
     AnalyticsDrilldownRuntime,
+    AnalyticsFormatRuntime,
     AnalyticsExportRuntime,
+    AnalyticsInteractionRuntime,
     AnalyticsRefreshRuntime,
     NavigationIntentService,
     AnalyticsSelectionBehavior,
     AnalyticsLifecycleBehavior,
     AnalyticsLoadBehavior,
-    UiSemanticConstants,
-    AnalyticsStateConstants
+    UiSemanticConstants
 ) {
     "use strict";
 
-    var PATHS = AnalyticsUiContracts.PATHS;
+    var PATHS = AnalyticsContracts.PATHS;
     var REFRESH_STATE_TASK_KEY = AnalyticsContracts.REFRESH.TASK_KEY;
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
-    var LOAD_REASONS = AnalyticsUiContracts.LOAD_REASONS;
-    var VALIDATION_STATES = AnalyticsUiContracts.VALIDATION_STATES;
-    var YEAR_PICKER_FIELDS = AnalyticsUiContracts.YEAR_PICKER_FIELDS;
+    var LOAD_REASONS = AnalyticsContracts.LOAD_REASONS;
+    var VALIDATION_STATES = AnalyticsContracts.VALIDATION_STATES;
+    var YEAR_PICKER_FIELDS = AnalyticsContracts.YEAR_PICKER_FIELDS;
 
     function buildCtx(oController) {
         return ControllerCommandContextRuntime.buildDefaultCtx(oController);
     }
 
-    function coerceText(vValue) {
-        return String(vValue || "").trim();
-    }
-
     function getBundleText(oController, sKey, aArgs, sFallback) {
-        var oBundle = oController && oController.getResourceBundle && oController.getResourceBundle();
-        try {
-            if (oBundle && oBundle.getText) {
-                return String(oBundle.getText(sKey, aArgs || []) || sFallback || sKey);
-            }
-        } catch (_bundleError) {
-            // Fall back to the provided static text below.
-        }
-        return String(sFallback || sKey || "");
-    }
-
-    function getEventSource(oEvent) {
-        return oEvent && oEvent.getSource ? oEvent.getSource() : null;
-    }
-
-    function getEventParameter(oEvent, sName) {
-        return oEvent && oEvent.getParameter ? oEvent.getParameter(sName) : undefined;
+        return ControllerTextRuntime.getText(oController, sKey, aArgs || [], sFallback || sKey);
     }
 
     function extractYearValueFromEvent(oEvent) {
-        var oSource = getEventSource(oEvent);
-        var oSelectedItem = getEventParameter(oEvent, "selectedItem");
-        var sSelectedKey = getEventParameter(oEvent, "selectedKey");
-        var sValue = getEventParameter(oEvent, "value");
+        var oSource = AnalyticsInteractionRuntime.getEventSource(oEvent);
+        var oSelectedItem = AnalyticsInteractionRuntime.getEventParameter(oEvent, "selectedItem");
+        var sSelectedKey = AnalyticsInteractionRuntime.getEventParameter(oEvent, "selectedKey");
+        var sValue = AnalyticsInteractionRuntime.getEventParameter(oEvent, "value");
 
         return AnalyticsYearRuntime.normalizeYearString(
             (oSelectedItem && oSelectedItem.getKey && oSelectedItem.getKey()) ||
@@ -111,7 +91,7 @@ sap.ui.define([
     }
 
     function openYearPicker(oController, oEvent, sTargetField) {
-        var oSource = getEventSource(oEvent);
+        var oSource = AnalyticsInteractionRuntime.getEventSource(oEvent);
         AnalyticsYearRuntime.ensureYearPickerRangeForValue(oController, sTargetField);
         return AnalyticsYearRuntime.ensureYearPicker(oController).then(function (oPopover) {
             if (oSource) {
@@ -132,12 +112,17 @@ sap.ui.define([
         if (oController._pAnalyticsBreakdownsContent) {
             return oController._pAnalyticsBreakdownsContent;
         }
-        oController._pAnalyticsBreakdownsContent = Core.loadLibrary("sap.viz", { async: true }).then(function () {
-            return Fragment.load({
-                id: oController.getView().createId("analyticsBreakdownsFragment"),
-                name: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsBreakdowns",
-                controller: oController
-            });
+        oController._pAnalyticsBreakdownsContent = new Promise(function (resolve, reject) {
+            sap.ui.require([
+                "sap/viz/ui5/controls/VizFrame",
+                "sap/viz/ui5/controls/Popover"
+            ], function () {
+                resolve(Fragment.load({
+                    id: oController.getView().createId("analyticsBreakdownsFragment"),
+                    name: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.WorkflowAnalyticsBreakdowns",
+                    controller: oController
+                }));
+            }, reject);
         }).then(function (oFragment) {
             var aContent = Array.isArray(oFragment) ? oFragment : [oFragment];
             oHost.removeAllItems();
@@ -197,7 +182,7 @@ sap.ui.define([
         }).then(function () {
             return oController._loadAnalytics("manualRefresh");
         }).catch(function (oError) {
-            ControllerViewStateRuntime.set(oController, PATHS.ERROR, String((oError && oError.message) || AnalyticsUiContracts.MESSAGES.ANALYTICS_REFRESH_FAILED));
+            ControllerViewStateRuntime.set(oController, PATHS.ERROR, String((oError && oError.message) || AnalyticsContracts.MESSAGES.ANALYTICS_REFRESH_FAILED));
             throw oError;
         }).finally(function () {
             ControllerViewStateRuntime.set(oController, PATHS.REFRESH_BUSY, false);
@@ -240,7 +225,7 @@ sap.ui.define([
                     return oController._loadAnalytics(sReason);
                 });
             }.bind(this)).catch(function (oError) {
-                ControllerViewStateRuntime.set(this, PATHS.ERROR, String((oError && oError.message) || AnalyticsUiContracts.MESSAGES.ANALYTICS_LOAD_FAILED));
+                ControllerViewStateRuntime.set(this, PATHS.ERROR, String((oError && oError.message) || AnalyticsContracts.MESSAGES.ANALYTICS_LOAD_FAILED));
                 return null;
             }.bind(this));
         },
@@ -258,7 +243,7 @@ sap.ui.define([
         },
 
         onSelectAnalyticsYear: function (oEvent) {
-            var oSource = getEventSource(oEvent);
+            var oSource = AnalyticsInteractionRuntime.getEventSource(oEvent);
             var sYear = extractYearValueFromEvent(oEvent);
             if (!sYear) {
                 if (oSource && oSource.setValue) {
@@ -270,19 +255,15 @@ sap.ui.define([
         },
 
         onLiveChangeAnalyticsYear: function (oEvent) {
-            var oInput = getEventSource(oEvent);
-            var sValue = AnalyticsYearRuntime.sanitizeYearValue(getEventParameter(oEvent, "value"));
+            var oInput = AnalyticsInteractionRuntime.getEventSource(oEvent);
+            var sValue = AnalyticsYearRuntime.sanitizeYearValue(AnalyticsInteractionRuntime.getEventParameter(oEvent, "value"));
             if (oInput && oInput.getValue && oInput.getValue() !== sValue && oInput.setValue) {
                 oInput.setValue(sValue);
             }
         },
 
         onSelectAnalyticsSource: function (oEvent) {
-            var sSource = String(
-                getEventParameter(oEvent, "selectedKey") ||
-                getEventSource(oEvent) && getEventSource(oEvent).getSelectedKey && getEventSource(oEvent).getSelectedKey() ||
-                ""
-            ).trim().toUpperCase();
+            var sSource = AnalyticsInteractionRuntime.resolveSelectedSource(oEvent);
             if (!sSource) {
                 return Promise.resolve();
             }
@@ -296,8 +277,8 @@ sap.ui.define([
         },
 
         onLiveChangeAnalyticsCompareYear: function (oEvent) {
-            var oInput = getEventSource(oEvent);
-            var sValue = AnalyticsYearRuntime.sanitizeYearValue(getEventParameter(oEvent, "value"));
+            var oInput = AnalyticsInteractionRuntime.getEventSource(oEvent);
+            var sValue = AnalyticsYearRuntime.sanitizeYearValue(AnalyticsInteractionRuntime.getEventParameter(oEvent, "value"));
             if (oInput && oInput.getValue && oInput.getValue() !== sValue && oInput.setValue) {
                 oInput.setValue(sValue);
             }
@@ -327,7 +308,7 @@ sap.ui.define([
         onSelectAnalyticsYearFromPicker: function (oEvent) {
             var sTargetField = String(ControllerViewStateRuntime.get(this, PATHS.YEAR_PICKER_TARGET_FIELD, YEAR_PICKER_FIELDS.SELECTED) || YEAR_PICKER_FIELDS.SELECTED);
             var iRangeStart = Number(ControllerViewStateRuntime.get(this, PATHS.YEAR_PICKER_RANGE_START, new Date().getFullYear() - 9) || 0);
-            var oSource = getEventSource(oEvent);
+            var oSource = AnalyticsInteractionRuntime.getEventSource(oEvent);
             var sYear = AnalyticsYearRuntime.normalizeYearString(oSource && oSource.data && oSource.data("year"));
             var sTargetPath = sTargetField === YEAR_PICKER_FIELDS.COMPARE ? PATHS.COMPARE_YEAR : PATHS.SELECTED_YEAR;
             var sReason = sTargetField === YEAR_PICKER_FIELDS.COMPARE ? LOAD_REASONS.COMPARE_YEAR_PICKED : LOAD_REASONS.YEAR_PICKED;
@@ -360,7 +341,7 @@ sap.ui.define([
         },
 
         onApplyAnalyticsYearPreset: function (oEvent) {
-            var oSource = getEventSource(oEvent);
+            var oSource = AnalyticsInteractionRuntime.getEventSource(oEvent);
             var sPreset = String((oSource && oSource.data && oSource.data("preset")) || "").trim().toUpperCase();
             if (!sPreset) {
                 return Promise.resolve();
@@ -372,20 +353,8 @@ sap.ui.define([
             var oViewModel = this.getModel && this.getModel(VIEW_MODEL);
             var sBuilderDimension = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty(PATHS.BUILDER_DIMENSION) || AnalyticsContracts.BUILDER.FALLBACK_DIMENSION).trim().toUpperCase();
             var sBuilderMetric = String(oViewModel && oViewModel.getProperty && oViewModel.getProperty(PATHS.BUILDER_METRIC) || "").trim().toUpperCase();
-            var oPoint = AnalyticsDrilldownRuntime.extractDrilldownPayload(oEvent);
-            var sLabel = String((oPoint && (oPoint.Dimension || oPoint.label || oPoint.labelShort)) || "").trim();
-            var mMap = {
-                MONTH: "DateCheck",
-                LPC: "Lpc",
-                PROFESSION: "ProfessionText",
-                LOCATION: "LocationKey",
-                SOURCE: "SourceKey"
-            };
-            return queueAnalyticsDrilldown(this, mMap[sBuilderDimension], sLabel, {
-                dimension: sBuilderDimension,
-                metric: sBuilderMetric,
-                monthLabel: sBuilderDimension === AnalyticsContracts.DIMENSIONS.MONTH ? sLabel : ""
-            });
+            var mRequest = AnalyticsInteractionRuntime.buildBuilderDrilldownRequest(oEvent, sBuilderDimension, sBuilderMetric);
+            return queueAnalyticsDrilldown(this, mRequest.filterKey, mRequest.filterValue, mRequest.payload);
         },
 
         onDrilldownAnalyticsSource: function (oEvent) {
@@ -469,69 +438,23 @@ sap.ui.define([
         },
 
         formatAnalyticsMatrixMetricLabel: function (sMetricKey) {
-            var sKey = coerceText(sMetricKey).toUpperCase();
-
-            if (sKey === AnalyticsContracts.METRICS.TOTAL) {
-                return getBundleText(this, "analyticsMetricTotal", [], "Total");
-            }
-            if (sKey === AnalyticsContracts.METRICS.FAILED_CHECKS) {
-                return getBundleText(this, "analyticsMetricFailedChecks", [], "Failed checks");
-            }
-            if (sKey === AnalyticsContracts.METRICS.FAILED_BARRIERS) {
-                return getBundleText(this, "analyticsMetricFailedBarriers", [], "Failed barriers");
-            }
-            if (sKey === AnalyticsContracts.METRICS.FAILED_CHECKLISTS) {
-                return getBundleText(this, "analyticsMetricFailedChecklistCount", [], "Failed checklists");
-            }
-            if (sKey === AnalyticsContracts.METRICS.FAILED_BARRIER_CHECKLISTS) {
-                return getBundleText(this, "analyticsMetricFailedBarrierChecklistCount", [], "Failed barrier checklists");
-            }
-            return sMetricKey;
+            return AnalyticsFormatRuntime.formatMatrixMetricLabel(sMetricKey, getBundleText.bind(null, this));
         },
 
         formatAnalyticsSourceContext: function (sSelectedSource) {
-            var sSourceKey = coerceText(sSelectedSource).toUpperCase();
-            var sResolvedSourceText = getBundleText(this, "analyticsSourceAll", [], "All");
-
-            if (sSourceKey === AnalyticsContracts.SOURCES.WEB) {
-                sResolvedSourceText = getBundleText(this, "analyticsSourceWeb", [], "Web");
-            } else if (sSourceKey === AnalyticsContracts.SOURCES.INTEGRATION) {
-                sResolvedSourceText = getBundleText(this, "analyticsSourceIntegration", [], "Integration");
-            }
-            return getBundleText(this, "analyticsSourceFilterLabel", [], "Source") + ": " + sResolvedSourceText;
+            return AnalyticsFormatRuntime.formatSourceContext(sSelectedSource, getBundleText.bind(null, this));
         },
 
         formatRefreshStatusState: function (oRefreshState) {
-            var sNormalizedStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
-            var bIsRunning = !!(oRefreshState && oRefreshState.isRunning);
-            if (sNormalizedStatus === AnalyticsStateConstants.REFRESH_STATUS.ERROR) {
-                return UiSemanticConstants.OBJECT_STATUS_STATE.ERROR;
-            }
-            if (bIsRunning) {
-                return UiSemanticConstants.OBJECT_STATUS_STATE.WARNING;
-            }
-            if (sNormalizedStatus === AnalyticsStateConstants.REFRESH_STATUS.SUCCESS || sNormalizedStatus === AnalyticsStateConstants.REFRESH_STATUS.READY) {
-                return UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS;
-            }
-            return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
+            return AnalyticsFormatRuntime.formatRefreshStatusState(oRefreshState);
         },
 
         formatRefreshStatusText: function (oRefreshState) {
-            var sStatus = coerceText(oRefreshState && oRefreshState.status);
-            var sMessage = coerceText(oRefreshState && (oRefreshState.lastMessage || oRefreshState.lastError));
-            if (sMessage) {
-                return sMessage;
-            }
-            if (!sStatus) {
-                return getBundleText(this, "analyticsRefreshIdle", [], "Idle");
-            }
-            return sStatus;
+            return AnalyticsFormatRuntime.formatRefreshStatusText(oRefreshState, getBundleText.bind(null, this));
         },
 
         formatRefreshEnabled: function (bRefreshBusy, oRefreshState) {
-            var sStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
-            var bIsRunning = !!(oRefreshState && oRefreshState.isRunning);
-            return !bRefreshBusy && !bIsRunning && sStatus !== AnalyticsStateConstants.REFRESH_STATUS.REQUESTED;
+            return AnalyticsFormatRuntime.formatRefreshEnabled(bRefreshBusy, oRefreshState);
         },
 
         formatAnalyticsInfoMessageType: function () {
@@ -554,17 +477,16 @@ sap.ui.define([
             return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
         },
 
+        formatRateState: function (sRate) {
+            return AnalyticsFormatRuntime.formatRateState(sRate);
+        },
+
         formatRefreshMessageType: function (oRefreshState) {
-            return coerceText(oRefreshState && oRefreshState.lastError)
-                ? AnalyticsStateConstants.REFRESH_MESSAGE_TYPE.ERROR
-                : AnalyticsStateConstants.REFRESH_MESSAGE_TYPE.ACTIVE;
+            return AnalyticsFormatRuntime.formatRefreshMessageType(oRefreshState);
         },
 
         formatRefreshMessageVisible: function (oRefreshState) {
-            var sStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
-            return sStatus === AnalyticsStateConstants.REFRESH_STATUS.REQUESTED ||
-                !!(oRefreshState && oRefreshState.isRunning) ||
-                !!coerceText(oRefreshState && oRefreshState.lastError);
+            return AnalyticsFormatRuntime.formatRefreshMessageVisible(oRefreshState);
         }
     };
 });

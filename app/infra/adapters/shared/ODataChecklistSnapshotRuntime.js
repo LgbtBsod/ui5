@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper"
-], function (ODataAdapterUtils, ChecklistSnapshotMapper) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BrowserLocaleUtils"
+], function (ODataAdapterUtils, ChecklistSnapshotMapper, BrowserLocaleUtils) {
     "use strict";
 
     function firstRow(vData) {
@@ -54,12 +55,11 @@ sap.ui.define([
 
     function mapBasic(oBasic) {
         var o = oBasic || {};
-        var sBrowserTimezone = (Intl && Intl.DateTimeFormat && Intl.DateTimeFormat().resolvedOptions && Intl.DateTimeFormat().resolvedOptions().timeZone) || "UTC";
         return {
             checklist_id: o.ChecklistId || o.ChecklistID || o.CHECKLIST_ID || o.checklist_id || "",
             date: toYmd(o.DateCheck || o.date),
             time: String(o.TimeCheck || o.time || "").slice(0, 5),
-            timezone: o.TimeZone || o.timezone || sBrowserTimezone,
+            timezone: o.TimeZone || o.timezone || BrowserLocaleUtils.resolveTimezone(),
             equipment: o.EquipName || o.equipment || "",
             OBSERVER_FULLNAME: o.ObserverFullname || o.OBSERVER_FULLNAME || "",
             OBSERVER_PERNER: o.ObserverPernr || o.OBSERVER_PERNER || "",

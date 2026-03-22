@@ -50,7 +50,6 @@ sap.ui.define([
             });
         },
         refresh: function (mDeps) {
-            var oStateModel = mDeps && mDeps.stateModel;
             return this.execute({ login: "" }, mDeps);
         }
     };

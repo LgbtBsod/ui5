@@ -3,17 +3,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
-], function (Fragment, EffectTextResolver, ControllerViewStateRuntime, AnalyticsContracts, AnalyticsUiContracts, DialogContracts, YearValue) {
+], function (Fragment, EffectTextResolver, ControllerViewStateRuntime, AnalyticsContracts, DialogContracts, YearValue) {
     "use strict";
 
-    var PATHS = AnalyticsUiContracts.PATHS;
-    var YEAR_PICKER_FIELDS = AnalyticsUiContracts.YEAR_PICKER_FIELDS;
-    var VALIDATION_STATES = AnalyticsUiContracts.VALIDATION_STATES;
-    var TEXT_KEYS = AnalyticsUiContracts.TEXT_KEYS;
-    var FRAGMENT_IDS = AnalyticsUiContracts.FRAGMENT_IDS;
+    var PATHS = AnalyticsContracts.PATHS;
+    var YEAR_PICKER_FIELDS = AnalyticsContracts.YEAR_PICKER_FIELDS;
+    var VALIDATION_STATES = AnalyticsContracts.VALIDATION_STATES;
+    var TEXT_KEYS = AnalyticsContracts.TEXT_KEYS;
+    var FRAGMENT_IDS = AnalyticsContracts.FRAGMENT_IDS;
 
     function normalizeYearString(vYear) {
         return YearValue.normalizeYearString(vYear);
@@ -95,7 +94,7 @@ sap.ui.define([
             "/activeYearPreset": sPreset || AnalyticsContracts.YEAR_PRESETS.CURRENT,
             [PATHS.SELECTED_YEAR]: sSelectedYear
         });
-        return fnLoadAnalytics(AnalyticsUiContracts.LOAD_REASONS.YEAR_PRESET_CHANGED);
+        return fnLoadAnalytics(AnalyticsContracts.LOAD_REASONS.YEAR_PRESET_CHANGED);
     }
 
     function revertInvalidCompareYear(oInput, sStoredCompareYear, fnSetValidation, oController) {
@@ -125,7 +124,7 @@ sap.ui.define([
         ControllerViewStateRuntime.set(oController, PATHS.COMPARE_YEAR, sNormalizedYear);
         setYearCollections(oController, PATHS.SELECTED_YEAR, PATHS.COMPARE_YEAR);
         fnSetValidation(VALIDATION_STATES.NONE, "");
-        return fnLoadAnalytics(AnalyticsUiContracts.LOAD_REASONS.COMPARE_YEAR_CHANGED);
+        return fnLoadAnalytics(AnalyticsContracts.LOAD_REASONS.COMPARE_YEAR_CHANGED);
     }
 
     function buildYearPickerItems(iRangeStart, sTargetField, oController) {

@@ -12,14 +12,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ConnectivityCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/SettingsManager",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapDependencyBuilder",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeTimerSanitizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectApplier",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
@@ -33,11 +31,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLifecycleBootstrap",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentCoreInitRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentActionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFeedbackRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeSettingsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentPollingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeHandlerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentCrossTabRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentInitListenersRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockEventsRuntime",
@@ -49,6 +45,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/InteractionFX",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapFlowRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeOptionsFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/SearchUiConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/ApplyRuntimeSettingsUseCase",
@@ -71,14 +69,12 @@ sap.ui.define([
     ConnectivityCoordinator,
     SettingsManager,
     ComponentBootstrapDependencyBuilder,
-    ComponentBootstrapContracts,
     DeltaPayloadBuilder,
     CreateSentinel,
     GatewayClient,
     DebugLogger,
     RuntimeTimerSanitizer,
     TimeConfigService,
-    CtxFactory,
     EffectApplier,
     FeedbackPolicy,
     WorkflowCoordinator,
@@ -92,11 +88,9 @@ sap.ui.define([
     ComponentLifecycleBootstrap,
     ComponentBootRuntime,
     ComponentCoreInitRuntime,
-    ComponentActionRuntime,
     ComponentFeedbackRuntime,
     ComponentRuntimeSettingsRuntime,
     ComponentPollingRuntime,
-    ComponentRuntimeHandlerRuntime,
     ComponentCrossTabRuntime,
     ComponentInitListenersRuntime,
     ComponentLockEventsRuntime,
@@ -108,6 +102,8 @@ sap.ui.define([
     InteractionFX,
     ThemeService,
     ComponentAppRuntime,
+    ComponentBootstrapFlowRuntime,
+    ComponentRuntimeOptionsFactory,
     DetailFacade,
     SearchUiConfig,
     ApplyRuntimeSettingsUseCase,
@@ -119,8 +115,8 @@ sap.ui.define([
 ) {
     "use strict";
 
-    function createBootstrapDeps(oComponent) {
-        var mGroups = ComponentBootstrapDependencyBuilder.build({
+    function createBootstrapDeps() {
+        return ComponentBootstrapFlowRuntime.createBootstrapContext({
             UIComponent: UIComponent,
             JSONModel: JSONModel,
             Device: Device,
@@ -139,7 +135,6 @@ sap.ui.define([
             DebugLogger: DebugLogger,
             RuntimeTimerSanitizer: RuntimeTimerSanitizer,
             TimeConfigService: TimeConfigService,
-            CtxFactory: CtxFactory,
             EffectApplier: EffectApplier,
             FeedbackPolicy: FeedbackPolicy,
             WorkflowCoordinator: WorkflowCoordinator,
@@ -160,65 +155,37 @@ sap.ui.define([
             InitializeAppUseCase: InitializeAppUseCase,
             LoadCurrentUserUseCase: LoadCurrentUserUseCase,
             DiagnosticsUseCase: DiagnosticsUseCase
-        });
-        var mDeps = ComponentBootstrapDependencyBuilder.flatten(mGroups);
-        mDeps.ComponentRuntimeSupport = ComponentAppRuntime.buildComponentRuntimeSupport();
-        return {
-            groups: mGroups,
-            deps: mDeps
-        };
+        }, ComponentBootstrapDependencyBuilder, ComponentAppRuntime);
     }
 
     function init(oComponent, aInitArgs) {
         var oBootstrap;
         var mBootstrapDeps;
         var oModelBootstrap;
+        var mRuntimeModels;
+        var mActionRuntimeOptions;
         var oRuntimeContext;
 
-        oComponent._oInteractionFX = InteractionFX;
-        UIComponent.prototype.init.apply(oComponent, aInitArgs || []);
-        oComponent._startupPerf = oComponent._startupPerf || {
-            t0: (window.performance && typeof window.performance.now === "function") ? window.performance.now() : Date.now(),
-            firstRouteReadyLogged: false,
-            analyticsStartedLogged: false
-        };
-        ThemeService.syncDocumentRootClasses();
+        ComponentBootstrapFlowRuntime.initializeStartupState(oComponent, UIComponent, InteractionFX, ThemeService, aInitArgs);
 
-        oBootstrap = createBootstrapDeps(oComponent);
+        oBootstrap = createBootstrapDeps();
         mBootstrapDeps = oBootstrap.deps;
 
         oModelBootstrap = ComponentModelBootstrap.bootstrap(oComponent, mBootstrapDeps);
-        DiagnosticsUseCase.execute({}, {
-            mainServiceModel: oModelBootstrap.mainServiceModel,
-            stateModel: oModelBootstrap.models.stateModel,
-            getBackendMode: function () { return BackendModeContracts.MODES.REAL; },
-            onMetadataFailed: function () {
-                mBootstrapDeps.ModelStateRuntime.writeOnModel(oModelBootstrap.models.stateModel, BackendModeContracts.PATHS.BACKEND_MODE, BackendModeContracts.MODES.REAL);
-            }
-        });
+        ComponentBootstrapFlowRuntime.runDiagnostics(DiagnosticsUseCase, BackendModeContracts, mBootstrapDeps, oModelBootstrap);
         ComponentModelInitRuntime.registerModels(oComponent, oModelBootstrap.models);
         oComponent.setModel(oModelBootstrap.mainServiceModel);
-        oRuntimeContext = ComponentCoreRuntimeBootstrap.bootstrap(oComponent, Object.assign({}, mBootstrapDeps, {
-            bundleText: ComponentActionRuntime.createBundleText(oComponent),
-            emitTelemetry: function (sEventName, oPayload) {
-                return WorkflowTelemetry.emit(sEventName, {
-                    stateModel: oModelBootstrap.models.stateModel,
-                    payload: oPayload || {}
-                });
-            }
-        }), Object.assign({}, oModelBootstrap.models, {
-            mainServiceModel: oModelBootstrap.mainServiceModel
-        }));
+        mRuntimeModels = ComponentRuntimeOptionsFactory.buildRuntimeModels(oModelBootstrap);
+        mActionRuntimeOptions = ComponentRuntimeOptionsFactory.buildActionRuntimeOptions(oComponent, {
+            WorkflowTelemetry: WorkflowTelemetry
+        }, oModelBootstrap.models);
+        oRuntimeContext = ComponentCoreRuntimeBootstrap.bootstrap(oComponent, Object.assign({}, mBootstrapDeps, mActionRuntimeOptions), mRuntimeModels);
 
-        return ComponentLifecycleBootstrap.bootstrap(oComponent, Object.assign({}, ComponentBootstrapDependencyBuilder.withManagerRuntime(mBootstrapDeps), {
-            InitializeAppUseCase: InitializeAppUseCase,
-            EnsureDictLoadedUseCase: EnsureDictLoadedUseCase,
-            LoadCurrentUserUseCase: LoadCurrentUserUseCase
-        }), Object.assign({}, oRuntimeContext, {
-            models: Object.assign({}, oRuntimeContext.models, {
-                mainServiceModel: oModelBootstrap.mainServiceModel
-            })
-        }));
+        return ComponentLifecycleBootstrap.bootstrap(
+            oComponent,
+            ComponentRuntimeOptionsFactory.buildLifecycleDeps(mBootstrapDeps, ComponentBootstrapDependencyBuilder),
+            ComponentRuntimeOptionsFactory.buildLifecycleContext(oRuntimeContext, mRuntimeModels)
+        );
     }
 
     return {

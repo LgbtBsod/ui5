@@ -435,6 +435,7 @@ body.chkAppRoot.appDark .chkApp .searchToolbarGhostAction .sapMBtnInner {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
+  border-radius: calc(var(--radius-lg) - 0.1rem);
 }
 
 .chkApp .searchPrimaryAction .sapMBtnInner {
@@ -500,6 +501,10 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   top: auto;
   z-index: auto;
   min-height: calc(var(--theme-workbench-control-height) + 0.24rem);
+  align-items: center;
+  align-content: center;
+  row-gap: 0.18rem;
+  column-gap: 0.2rem;
 }
 
 .chkApp .searchResultsActionRail.actionToolbarSurface {
@@ -526,6 +531,10 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
   overflow-y: hidden !important;
   min-height: calc(var(--theme-workbench-control-height) + 0.18rem);
+  align-items: center;
+  align-content: center;
+  row-gap: 0.14rem;
+  column-gap: 0.16rem;
 }
 
 .chkApp .searchResultsActionRail.sapMTB,
@@ -534,18 +543,12 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   max-height: none !important;
 }
 
-.chkApp .searchResultsActionRail {
-  align-items: center;
-  align-content: center;
-  row-gap: 0.18rem;
-  column-gap: 0.2rem;
-}
-
 .chkApp .searchResultsActionRail > * {
   display: inline-flex;
   align-items: center;
   min-height: var(--theme-workbench-control-height);
   min-width: 0;
+  align-self: center;
 }
 
 .chkApp .searchSettingsRail > * {
@@ -553,27 +556,13 @@ body.chkAppRoot.appDark .chkApp .searchClearSelectionActionBtn .sapMBtnInner {
   align-items: center;
   min-height: var(--theme-workbench-control-height);
   min-width: 0;
-}
-
-.chkApp .searchSettingsRail {
-  align-items: center;
-  align-content: center;
-  row-gap: 0.14rem;
-  column-gap: 0.16rem;
+  align-self: center;
 }
 
 .chkApp .searchResultsActionRail .sapMBarChild,
 .chkApp .searchSettingsRail .sapMBarChild {
   margin-top: 0;
   margin-bottom: 0;
-}
-
-.chkApp .searchResultsActionRail > * {
-  align-self: center;
-}
-
-.chkApp .searchSettingsRail > * {
-  align-self: center;
 }
 
 .chkApp .searchResultsActionRail .appActionPrimary .sapMBtnInner,
@@ -796,25 +785,9 @@ body.chkAppRoot.appDark .chkApp .searchSettingsRail {
   width: 100%;
   max-width: 100%;
   min-width: 0;
-}
-
-.chkApp .searchResultsTable > * {
   flex: 1 1 100%;
   align-self: stretch;
   box-sizing: border-box;
-}
-
-.chkApp .searchResultsTable > *,
-.chkApp .searchResultsTable > * > *,
-.chkApp .searchResultsExperienceShell > *,
-.chkApp .searchResultsSurface > * {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-}
-
-.chkApp .searchResultsTable > * {
   overflow-x: visible;
 }
 
@@ -1153,6 +1126,10 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   position: sticky;
   top: var(--search-sticky-filter-top, var(--search-filter-sticky-top));
   z-index: 24;
+  box-shadow:
+    0 18px 34px rgba(18, 36, 64, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
 }
 
 .chkApp .searchWorkbenchDock > .searchResultsActionRail {
@@ -1191,6 +1168,17 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   width: 100%;
   min-width: 0;
   min-height: 0;
+  background: color-mix(in srgb, var(--theme-block-bg) 58%, transparent);
+  border: 1px solid color-mix(in srgb, var(--theme-rail-border) 46%, transparent);
+  box-shadow:
+    0 6px 14px rgba(18, 36, 64, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  border-radius: calc(var(--radius-lg) - 0.16rem);
+  align-items: center;
+  top: var(--search-results-toolbar-sticky-top, auto);
 }
 
 .chkApp .searchWorkbenchDock > .searchResultsSummaryRail {
@@ -1236,10 +1224,6 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   min-width: 0;
   min-height: 0;
   height: 100%;
-}
-
-.chkApp .searchResultsToolbarHost {
-  top: var(--search-results-toolbar-sticky-top, auto);
 }
 
 .chkApp .searchScrollAnchorBtn {
@@ -1305,25 +1289,9 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   backdrop-filter: none;
 }
 
-.chkApp .searchWorkbenchDock > .searchFilterCardDense,
 .chkApp .searchWorkbenchDock > .searchResultsActionRail,
-.chkApp .searchResultsSummaryRail,
-.chkApp .searchResultsToolbarHost {
+.chkApp .searchResultsSummaryRail {
   transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
-}
-
-.chkApp .searchWorkbenchDock > .searchFilterCardDense {
-  box-shadow:
-    0 18px 34px rgba(18, 36, 64, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.24);
-}
-
-.chkApp .searchActionRailStack {
-  border-radius: calc(var(--radius-lg) - 0.1rem);
-}
-
-.chkApp .searchResultsToolbarHost {
-  border-radius: calc(var(--radius-lg) - 0.16rem);
 }
 
 .chkApp .searchResultsActionRail,
@@ -1339,23 +1307,8 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 .chkApp .searchResultsToolbarHost > .sapUiCompSmartTable,
 .chkApp .searchResultsToolbarHost > .sapUiCompSmartTable > div {
   min-height: 0;
-}
-
-.chkApp .searchExperienceStack,
-.chkApp .searchResultsTable,
-.chkApp .searchResultsBody,
-.chkApp .searchResultsToolbarHost,
-.chkApp .searchResultsToolbarHost > .sapUiCompSmartTable {
   display: flex;
   flex-direction: column;
-}
-
-.chkApp .searchExperienceStack,
-.chkApp .searchResultsTable,
-.chkApp .searchResultsBody,
-.chkApp .searchResultsToolbarHost,
-.chkApp .searchResultsToolbarHost > .sapUiCompSmartTable,
-.chkApp .searchResultsToolbarHost > .sapUiCompSmartTable > div {
   flex: 1 1 auto;
 }
 

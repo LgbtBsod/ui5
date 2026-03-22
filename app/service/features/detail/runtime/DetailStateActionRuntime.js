@@ -3,6 +3,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailResetRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/UiDecisionCoordinator",
@@ -12,12 +13,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/WorkflowDecisionRuntime"
 ], function (
     ClipboardRuntime,
     LayoutStateRuntime,
     ControllerModelRuntime,
     ModelStateRuntime,
+    DetailResetRuntime,
     NavigationIntentService,
     RootIdRuntime,
     UiDecisionCoordinator,
@@ -27,7 +30,8 @@ sap.ui.define([
     ModelContracts,
     OperationSourceContracts,
     JsRuntime,
-    ModelPathContracts
+    ModelPathContracts,
+    WorkflowDecisionRuntime
 ) {
     "use strict";
 
@@ -65,16 +69,16 @@ sap.ui.define([
             return WorkflowCoordinator.confirmUnsavedAndHandle(oController, function () {
                 return mHooks.saveDetail();
             }).then(function (sDecision) {
-                if (sDecision === "CANCEL" || sDecision === "SAVE_FAILED") {
+                if (sDecision === WorkflowDecisionRuntime.RESULTS.CANCEL || sDecision === WorkflowDecisionRuntime.RESULTS.SAVE_FAILED) {
                     return false;
                 }
-                if (sDecision === "DISCARD") {
-                    ModelStateRuntime.resetDetailWorkflowState(oController, {
+                if (sDecision === WorkflowDecisionRuntime.RESULTS.DISCARD) {
+                    DetailResetRuntime.resetDetailWorkflowState(oController, {
                         [ModelPathContracts.SELECTED_ID]: "",
                         [ModelPathContracts.ACTIVE_OBJECT_ID]: ""
                     });
                     ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN);
-                    ModelStateRuntime.resetDetailRuntimeData(oController);
+                    DetailResetRuntime.resetDetailRuntimeData(oController);
                     NavigationIntentService.navigateToSearch(oController);
                     return true;
                 }

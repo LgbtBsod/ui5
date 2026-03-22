@@ -57,13 +57,13 @@
                         <CustomListItem>
                             <HBox justifyContent="SpaceBetween" alignItems="Center" class="analyticsReportSummaryRow" renderType="Bare">
                                 <Text text="{i18n>analyticsChecksSuccessRate}" class="analyticsReportSummaryKey"/>
-                                <ObjectStatus text="{view>/analytics/summary/checksRate}" state="{path: 'view>/selectedYear', formatter: '.formatAnalyticsSelectedYearState'}" class="analyticsReportSummaryValue"/>
+                                <ObjectStatus text="{view>/analytics/summary/checksRate}" state="{path:'view>/analytics/summary/checksRate', formatter:'.formatRateState'}" class="analyticsReportSummaryValue"/>
                             </HBox>
                         </CustomListItem>
                         <CustomListItem>
                             <HBox justifyContent="SpaceBetween" alignItems="Center" class="analyticsReportSummaryRow" renderType="Bare">
                                 <Text text="{i18n>analyticsBarriersSuccessRate}" class="analyticsReportSummaryKey"/>
-                                <ObjectStatus text="{view>/analytics/summary/barriersRate}" state="{path: 'view>/selectedSource', formatter: '.formatAnalyticsSourceState'}" class="analyticsReportSummaryValue"/>
+                                <ObjectStatus text="{view>/analytics/summary/barriersRate}" state="{path:'view>/analytics/summary/barriersRate', formatter:'.formatRateState'}" class="analyticsReportSummaryValue"/>
                             </HBox>
                         </CustomListItem>
                     </List>

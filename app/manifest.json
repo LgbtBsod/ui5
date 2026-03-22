@@ -43,7 +43,7 @@
     "deviceTypes": {
       "desktop": true,
       "tablet": true,
-      "phone": false
+      "phone": true
     }
   },
   "sap.ui5": {
@@ -209,6 +209,6 @@
     "config": {
       "uiContractVersion": "1.0.0"
     },
-    "flexEnabled": false
+    "flexEnabled": true
   }
 }

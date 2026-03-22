@@ -13,6 +13,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts"
@@ -31,6 +32,7 @@ sap.ui.define([
     SearchViewStateRuntime,
     StatusChipClassRuntime,
     SemanticDomRuntime,
+    ControllerTextRuntime,
     ModelContracts,
     NavigationContracts,
     SearchToolbarContracts
@@ -42,29 +44,23 @@ sap.ui.define([
     var TOKENS = ModelContracts.TOKENS;
     var PATHS = SearchToolbarContracts.PATHS;
 
-    function getBundleText(oController, sKey) {
-        var oI18nModel = oController.getModel && oController.getModel("i18n");
-        var oBundle = oI18nModel && oI18nModel.getResourceBundle && oI18nModel.getResourceBundle();
-        return oBundle && oBundle.getText ? oBundle.getText(sKey) : "";
-    }
-
     function syncSemanticRegions(oController) {
         SemanticDomRuntime.syncControllerTarget(oController, "searchAnalyticsRailRegion", {
             role: "region",
-            "aria-label": getBundleText(oController, "kpiRailAriaLabel")
+            "aria-label": ControllerTextRuntime.getText(oController, "kpiRailAriaLabel", [], "")
         });
         SemanticDomRuntime.syncControllerTarget(oController, "searchFilterCard", {
             role: "search",
-            "aria-label": getBundleText(oController, "filtersAriaLabel")
+            "aria-label": ControllerTextRuntime.getText(oController, "filtersAriaLabel", [], "")
         });
         SemanticDomRuntime.syncControllerTarget(oController, "searchResultsShell", {
             role: "region",
-            "aria-label": getBundleText(oController, "searchResultsAriaLabel")
+            "aria-label": ControllerTextRuntime.getText(oController, "searchResultsAriaLabel", [], "")
         });
         SemanticDomRuntime.syncControllerTarget(oController, "searchResultsSummaryRail", {
             role: "status",
             "aria-live": "polite",
-            "aria-label": getBundleText(oController, "searchSummaryRailAriaLabel")
+            "aria-label": ControllerTextRuntime.getText(oController, "searchSummaryRailAriaLabel", [], "")
         });
     }
 

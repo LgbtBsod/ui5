@@ -48,7 +48,7 @@
                 useIconTabBar="false"
                 showAnchorBar="true"
                 upperCaseAnchorBar="false"
-                enableLazyLoading="true"
+                enableLazyLoading="false"
                 alwaysShowContentHeader="false"
                 showHeaderContent="false">
                 <uxap:layoutData>

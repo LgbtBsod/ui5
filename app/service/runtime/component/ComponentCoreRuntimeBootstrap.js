@@ -1,4 +1,16 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentPendingNavigationRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFacadeEffectRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentForceReadOnlyRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentGuardedSaveRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentCrossTabHandlerRuntime"
+], function (
+    ComponentPendingNavigationRuntime,
+    ComponentFacadeEffectRuntime,
+    ComponentForceReadOnlyRuntime,
+    ComponentGuardedSaveRuntime,
+    ComponentCrossTabHandlerRuntime
+) {
     "use strict";
 
     function initializeRuntimeSettings(oComponent, mDeps, mModels) {
@@ -22,27 +34,11 @@ sap.ui.define([], function () {
         };
     }
 
-    function createPendingNavigationRuntime(mDeps, oComponent, oStateModel, StatePaths, resumePendingNavigationIntent) {
-        return {
-            queuePendingNavigationIntent: function (oRouteEvent, mIntentOptions) {
-                return mDeps.ComponentActionRuntime.queuePendingNavigationIntent(oComponent, oStateModel, StatePaths, oRouteEvent, mIntentOptions);
-            },
-            clearPendingNavigationIntent: function () {
-                return mDeps.ComponentActionRuntime.clearPendingNavigationIntent(oStateModel, StatePaths);
-            },
-            revertPendingNavigationIntent: function () {
-                return mDeps.ComponentActionRuntime.revertPendingNavigationIntent(oComponent, oStateModel, StatePaths);
-            },
-            restorePendingNavigationIntent: function () {
-                return mDeps.ComponentActionRuntime.restorePendingNavigationIntent(oComponent, oStateModel, StatePaths);
-            },
-            resumePendingNavigationIntent: function () {
-                return resumePendingNavigationIntent(oComponent, oStateModel, StatePaths);
-            }
-        };
+    function createPendingNavigationRuntime(oComponent, oStateModel, StatePaths) {
+        return ComponentPendingNavigationRuntime.createRuntime(oComponent, oStateModel, StatePaths);
     }
 
-    function seedInitialState(oStateModel, StatePaths, TimeConfigService) {
+    function seedInitialState(oStateModel, StatePaths, TimeConfigService, ModelStateRuntime) {
         var mTimerDefaults = TimeConfigService.buildDefaultTimerMap();
         var mInitState = { "/timers": mTimerDefaults };
         mInitState[StatePaths.SAVE_IN_FLIGHT] = false;
@@ -51,36 +47,16 @@ sap.ui.define([], function () {
         mInitState["/networkOnline"] = true;
         mInitState["/networkGraceMode"] = false;
         mInitState["/networkGraceExpiresAt"] = null;
-        mDeps.ModelStateRuntime.setManyOnModel(oStateModel, mInitState);
+        ModelStateRuntime.setManyOnModel(oStateModel, mInitState);
         return mTimerDefaults;
     }
 
-    function bootstrap(oComponent, mDeps, mModels) {
-        var oCoreRuntime = mDeps.ComponentCoreInitRuntime.initializeComponentRuntime(oComponent, mDeps, mModels, {
-            buildActionValidators: mDeps.ComponentActionRuntime.buildActionValidators,
-            createApplyFacadeResult: mDeps.ComponentActionRuntime.createApplyFacadeResult
-        });
-        var oFeedbackRuntime = mDeps.ComponentFeedbackRuntime.createFeedbackRuntime({
-            stateModel: mModels.stateModel,
-            feedbackPolicy: mDeps.FeedbackPolicy,
-            bundleText: mDeps.bundleText
-        });
-        var oRuntimeSettingsRuntime = initializeRuntimeSettings(oComponent, mDeps, mModels);
-        var oPendingNavigationRuntime = createPendingNavigationRuntime(
-            mDeps,
-            oComponent,
-            mModels.stateModel,
-            mDeps.StatePaths,
-            mDeps.ComponentActionRuntime.resumePendingNavigationIntent
-        );
-        var oComponentRuntimeSupport = mDeps.ComponentRuntimeSupport || mDeps.componentRuntimeSupport;
-        var oSaveGuardRuntime = mDeps.ComponentSaveGuardRuntime || mDeps.saveGuardRuntime;
-
+    function buildHandlerRuntime(oComponent, mDeps, mModels, oCoreRuntime, oFeedbackRuntime, oPendingNavigationRuntime, oComponentRuntimeSupport, oSaveGuardRuntime) {
         function readDirty() {
             return mDeps.ModelStateRuntime.readOnModel(mModels.stateModel, mDeps.StatePaths.WORKFLOW_DIRTY, false);
         }
 
-        var fnHandleForceReadOnly = mDeps.ComponentRuntimeHandlerRuntime.createForceReadOnlyHandler({
+        var fnHandleForceReadOnly = ComponentForceReadOnlyRuntime.createHandler({
             component: oComponent,
             stateModel: mModels.stateModel,
             shellModel: mModels.shellModel,
@@ -92,7 +68,7 @@ sap.ui.define([], function () {
             clearPendingNavigationIntent: oPendingNavigationRuntime.clearPendingNavigationIntent,
             readDirty: readDirty
         });
-        var fnRunGuardedSave = mDeps.ComponentRuntimeHandlerRuntime.createGuardedSave({
+        var fnRunGuardedSave = ComponentGuardedSaveRuntime.createHandler({
             component: oComponent,
             stateModel: mModels.stateModel,
             mainServiceModel: mModels.mainServiceModel,
@@ -107,7 +83,7 @@ sap.ui.define([], function () {
             clearGlobalBanner: oFeedbackRuntime.clearGlobalBanner,
             saveGuardRuntime: oSaveGuardRuntime
         });
-        var oCrossTabRuntime = mDeps.ComponentRuntimeHandlerRuntime.registerCrossTabHandlers({
+        var oCrossTabRuntime = ComponentCrossTabHandlerRuntime.register({
             component: oComponent,
             stateModel: mModels.stateModel,
             statePaths: mDeps.StatePaths,
@@ -117,14 +93,61 @@ sap.ui.define([], function () {
             attachCrossTabRuntime: mDeps.ComponentCrossTabRuntime.attachCrossTabRuntime
         }).crossTabRuntime;
 
-        mDeps.ComponentRuntimeHandlerRuntime.registerDefaultHandlers({
-            component: oComponent,
+        ComponentFacadeEffectRuntime.registerDefaultHandlers({
+            actionDispatcher: oComponent._actionDispatcher,
             actionContract: mDeps.ActionContract,
+            detailFacade: oComponent._detailFacade,
             runGuardedSave: fnRunGuardedSave,
             buildLatestCtx: oCoreRuntime.buildLatestCtx,
             applyFacadeResult: oCoreRuntime.applyFacadeResult,
-            registerDefaultHandlers: mDeps.ComponentActionRuntime.registerDefaultHandlers
+            getCtx: function () {
+                return oComponent._ctx;
+            }
         });
+
+        return {
+            applyFacadeResult: oCoreRuntime.applyFacadeResult,
+            buildLatestCtx: oCoreRuntime.buildLatestCtx,
+            clearGlobalBanner: oFeedbackRuntime.clearGlobalBanner,
+            clearPendingNavigationIntent: oPendingNavigationRuntime.clearPendingNavigationIntent,
+            handleForceReadOnly: fnHandleForceReadOnly,
+            publishTabSignal: oCrossTabRuntime.publishTabSignal,
+            queuePendingNavigationIntent: oPendingNavigationRuntime.queuePendingNavigationIntent,
+            resolveDetailCurrent: oCoreRuntime.resolveDetailCurrent,
+            restorePendingNavigationIntent: oPendingNavigationRuntime.restorePendingNavigationIntent,
+            resumePendingNavigationIntent: oPendingNavigationRuntime.resumePendingNavigationIntent,
+            revertPendingNavigationIntent: oPendingNavigationRuntime.revertPendingNavigationIntent,
+            runGuardedSave: fnRunGuardedSave,
+            setGlobalBanner: oFeedbackRuntime.setGlobalBanner
+        };
+    }
+
+    function bootstrap(oComponent, mDeps, mModels) {
+        var oCoreRuntime = mDeps.ComponentCoreInitRuntime.initializeComponentRuntime(oComponent, mDeps, mModels);
+        var oFeedbackRuntime = mDeps.ComponentFeedbackRuntime.createFeedbackRuntime({
+            stateModel: mModels.stateModel,
+            feedbackPolicy: mDeps.FeedbackPolicy,
+            bundleText: mDeps.bundleText
+        });
+        var oRuntimeSettingsRuntime = initializeRuntimeSettings(oComponent, mDeps, mModels);
+        var oPendingNavigationRuntime = createPendingNavigationRuntime(oComponent, mModels.stateModel, mDeps.StatePaths);
+        var oComponentRuntimeSupport = mDeps.ComponentRuntimeSupport || mDeps.componentRuntimeSupport;
+        var oSaveGuardRuntime = mDeps.ComponentSaveGuardRuntime || mDeps.saveGuardRuntime;
+        var mHandlers = buildHandlerRuntime(
+            oComponent,
+            mDeps,
+            mModels,
+            oCoreRuntime,
+            oFeedbackRuntime,
+            oPendingNavigationRuntime,
+            oComponentRuntimeSupport,
+            oSaveGuardRuntime
+        );
+        var mTelemetry = {
+            bundleText: mDeps.bundleText,
+            emitTelemetry: mDeps.emitTelemetry,
+            timerDefaults: seedInitialState(mModels.stateModel, mDeps.StatePaths, mDeps.TimeConfigService, mDeps.ModelStateRuntime)
+        };
 
         return {
             models: mModels,
@@ -136,25 +159,21 @@ sap.ui.define([], function () {
                 searchConfig: mDeps.SearchUiConfig.getLayoutSeed()
             },
             handlers: {
-                applyFacadeResult: oCoreRuntime.applyFacadeResult,
-                buildLatestCtx: oCoreRuntime.buildLatestCtx,
-                clearGlobalBanner: oFeedbackRuntime.clearGlobalBanner,
-                clearPendingNavigationIntent: oPendingNavigationRuntime.clearPendingNavigationIntent,
-                handleForceReadOnly: fnHandleForceReadOnly,
-                publishTabSignal: oCrossTabRuntime.publishTabSignal,
-                queuePendingNavigationIntent: oPendingNavigationRuntime.queuePendingNavigationIntent,
-                resolveDetailCurrent: oCoreRuntime.resolveDetailCurrent,
-                restorePendingNavigationIntent: oPendingNavigationRuntime.restorePendingNavigationIntent,
-                resumePendingNavigationIntent: oPendingNavigationRuntime.resumePendingNavigationIntent,
-                revertPendingNavigationIntent: oPendingNavigationRuntime.revertPendingNavigationIntent,
-                runGuardedSave: fnRunGuardedSave,
-                setGlobalBanner: oFeedbackRuntime.setGlobalBanner
+                applyFacadeResult: mHandlers.applyFacadeResult,
+                buildLatestCtx: mHandlers.buildLatestCtx,
+                clearGlobalBanner: mHandlers.clearGlobalBanner,
+                clearPendingNavigationIntent: mHandlers.clearPendingNavigationIntent,
+                handleForceReadOnly: mHandlers.handleForceReadOnly,
+                publishTabSignal: mHandlers.publishTabSignal,
+                queuePendingNavigationIntent: mHandlers.queuePendingNavigationIntent,
+                resolveDetailCurrent: mHandlers.resolveDetailCurrent,
+                restorePendingNavigationIntent: mHandlers.restorePendingNavigationIntent,
+                resumePendingNavigationIntent: mHandlers.resumePendingNavigationIntent,
+                revertPendingNavigationIntent: mHandlers.revertPendingNavigationIntent,
+                runGuardedSave: mHandlers.runGuardedSave,
+                setGlobalBanner: mHandlers.setGlobalBanner
             },
-            telemetry: {
-                bundleText: mDeps.bundleText,
-                emitTelemetry: mDeps.emitTelemetry,
-                timerDefaults: seedInitialState(mModels.stateModel, mDeps.StatePaths, mDeps.TimeConfigService)
-            }
+            telemetry: mTelemetry
         };
     }
 

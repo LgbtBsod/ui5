@@ -1,30 +1,20 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (CloneUtil, StatePaths, WorkflowContracts, WorkflowRuntimeConstants, ModelPathContracts, JsRuntime, DetailMessageKeyConstants, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
+], function (JsRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var TYPE_UNDEFINED = JsRuntime.TYPEOF.UNDEFINED;
-    var METHODS = JsRuntime.METHODS;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var MODELS = ModelContracts.MODELS;
 
     function model(oController, sModelName) {
-        return oController && typeof oController[METHODS.GET_MODEL] === TYPE_FUNCTION ? oController[METHODS.GET_MODEL](sModelName) : null;
+        return oController && typeof oController.getModel === TYPE_FUNCTION ? oController.getModel(sModelName) : null;
     }
 
     function writeOnModel(oModel, sPath, vValue) {
-        if (!oModel || typeof oModel[METHODS.SET_PROPERTY] !== TYPE_FUNCTION) {
+        if (!oModel || typeof oModel.setProperty !== TYPE_FUNCTION) {
             return false;
         }
-        oModel[METHODS.SET_PROPERTY](sPath, vValue);
+        oModel.setProperty(sPath, vValue);
         return true;
     }
 
@@ -38,10 +28,10 @@ sap.ui.define([
 
     function readOnModel(oModel, sPath, vFallback) {
         var vValue;
-        if (!oModel || typeof oModel[METHODS.GET_PROPERTY] !== TYPE_FUNCTION) {
+        if (!oModel || typeof oModel.getProperty !== TYPE_FUNCTION) {
             return vFallback;
         }
-        vValue = oModel[METHODS.GET_PROPERTY](sPath);
+        vValue = oModel.getProperty(sPath);
         return typeof vValue === TYPE_UNDEFINED ? vFallback : vValue;
     }
 
@@ -52,10 +42,10 @@ sap.ui.define([
 
     function write(oController, sModelName, sPath, vValue) {
         var oModel = model(oController, sModelName);
-        if (!oModel || typeof oModel[METHODS.SET_PROPERTY] !== TYPE_FUNCTION) {
+        if (!oModel || typeof oModel.setProperty !== TYPE_FUNCTION) {
             return false;
         }
-        oModel[METHODS.SET_PROPERTY](sPath, vValue);
+        oModel.setProperty(sPath, vValue);
         return true;
     }
 
@@ -82,46 +72,8 @@ sap.ui.define([
         return true;
     }
 
-    function clone(vValue, vFallback) {
-        return CloneUtil.clone(vValue, vFallback);
-    }
-
     function syncDetailCurrent(oController, vData) {
         return !!(oController && vData);
-    }
-
-    function resetDetailWorkflowState(oController, mPatch) {
-        return setMany(oController, MODELS.STATE, Object.assign({
-            [StatePaths.WORKFLOW_DETAIL_EDIT_MODE]: WorkflowContracts.EDIT_MODES.READ,
-            [StatePaths.WORKFLOW_DETAIL_LOCK_STATE]: WorkflowContracts.LOCK_STATES.IDLE,
-            "/autosaveState": WorkflowContracts.AUTOSAVE_STATES.IDLE,
-            "/autosaveAt": null,
-            "/autosaveEnabled": false,
-            "/isDirty": false,
-            [ModelPathContracts.ACTIVE_OBJECT_ID]: "",
-            [ModelPathContracts.SELECTED_ID]: "",
-            "/persistence": {
-                state: WorkflowRuntimeConstants.PERSISTENCE_STATES.IDLE,
-                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE,
-                lastSavedAt: null,
-                lastSaveError: null,
-                taxonomy: "",
-                currentWriteRequestId: "",
-                isManualSaveInFlight: false,
-                isAutoSaveInFlight: false,
-                hasValidLock: false,
-                lockOwnerSessionMatches: false,
-                lastLockRefreshAt: null,
-                nextHeartbeatAt: null
-            }
-        }, mPatch || {}));
-    }
-
-    function resetDetailRuntimeData(oController) {
-        replaceData(oController, MODELS.DETAIL, {
-            current: {},
-            base: {}
-        });
     }
 
     function withFlag(oController, sModelName, sPath, fnWork, vStart, vEnd) {
@@ -161,10 +113,7 @@ sap.ui.define([
         writeBoolean: writeBoolean,
         setMany: setMany,
         replaceData: replaceData,
-        clone: clone,
         syncDetailCurrent: syncDetailCurrent,
-        resetDetailWorkflowState: resetDetailWorkflowState,
-        resetDetailRuntimeData: resetDetailRuntimeData,
         withFlag: withFlag,
         any: any,
         withFlags: withFlags

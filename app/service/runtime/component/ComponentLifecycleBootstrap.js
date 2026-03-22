@@ -1,55 +1,9 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeOptionsFactory"
+], function (
+    ComponentRuntimeOptionsFactory
+) {
     "use strict";
-
-    function buildLockRuntimeOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport) {
-        return {
-            component: oComponent,
-            mainServiceModel: mModels.mainServiceModel,
-            stateModel: mModels.stateModel,
-            shellModel: mModels.shellModel,
-            cacheState: mModels.cacheState,
-            statePaths: mDeps.StatePaths,
-            componentRuntimeSupport: oRuntimeSupport,
-            timeConfigService: mDeps.TimeConfigService,
-            debugLogger: mDeps.DebugLogger,
-            bundleText: mTelemetry.bundleText,
-            emitTelemetry: mTelemetry.emitTelemetry,
-            setGlobalBanner: mHandlers.setGlobalBanner,
-            handleForceReadOnly: mHandlers.handleForceReadOnly,
-            applyFacadeResult: mHandlers.applyFacadeResult,
-            telemetryRuntime: mDeps.TelemetryRuntime
-        };
-    }
-
-    function buildInitListenerOptions(oComponent, mDeps, mModels, mHandlers, mServices, mTelemetry, oRuntimeSupport) {
-        return {
-            component: oComponent,
-            stateModel: mModels.stateModel,
-            shellModel: mModels.shellModel,
-            detailModel: mModels.detailModel,
-            masterDataModel: mModels.masterDataModel,
-            statePaths: mDeps.StatePaths,
-            searchConfig: mServices.searchConfig,
-            componentRuntimeSupport: oRuntimeSupport,
-            timeConfigService: mDeps.TimeConfigService,
-            workflowCoordinator: mDeps.WorkflowCoordinator,
-            bundleText: mTelemetry.bundleText,
-            setGlobalBanner: mHandlers.setGlobalBanner,
-            clearGlobalBanner: mHandlers.clearGlobalBanner,
-            handleForceReadOnly: mHandlers.handleForceReadOnly,
-            runGuardedSave: mHandlers.runGuardedSave,
-            queuePendingNavigationIntent: mHandlers.queuePendingNavigationIntent,
-            clearPendingNavigationIntent: mHandlers.clearPendingNavigationIntent,
-            revertPendingNavigationIntent: mHandlers.revertPendingNavigationIntent,
-            resumePendingNavigationIntent: mHandlers.resumePendingNavigationIntent,
-            restorePendingNavigationIntent: mHandlers.restorePendingNavigationIntent,
-            emitTelemetry: mTelemetry.emitTelemetry,
-            publishTabSignal: mHandlers.publishTabSignal,
-            telemetryRuntime: mDeps.TelemetryRuntime,
-            layoutStateRuntime: mDeps.LayoutStateRuntime,
-            actionContract: mDeps.ActionContract
-        };
-    }
 
     function initializeRouter(oComponent) {
         var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
@@ -60,6 +14,26 @@ sap.ui.define([], function () {
         oComponent._routerInitialized = true;
     }
 
+    function attachPollingAndAutosave(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport) {
+        var mTelemetryManagerOptions = ComponentRuntimeOptionsFactory.buildTelemetryManagerOptions(
+            oComponent,
+            mDeps,
+            mModels,
+            mHandlers,
+            mTelemetry,
+            oRuntimeSupport
+        );
+
+        mDeps.ComponentPollingRuntime.createHeartbeatManager(mTelemetryManagerOptions);
+        mDeps.ComponentPollingRuntime.createSupportManagers({
+            component: oComponent,
+            timerDefaults: mTelemetry.timerDefaults,
+            managers: mDeps.managers
+        });
+        mDeps.ComponentAutosaveRuntime.createAutoSaveManager(mTelemetryManagerOptions);
+        mDeps.ComponentPollingRuntime.createLockStatusManager(mTelemetryManagerOptions);
+    }
+
     function bootstrap(oComponent, mDeps, oRuntimeContext) {
         var mModels = oRuntimeContext.models;
         var mHandlers = oRuntimeContext.handlers;
@@ -67,76 +41,12 @@ sap.ui.define([], function () {
         var mTelemetry = oRuntimeContext.telemetry;
         var oRuntimeSupport = mServices.componentRuntimeSupport;
 
-        mDeps.ComponentPollingRuntime.createHeartbeatManager({
-            component: oComponent,
-            stateModel: mModels.stateModel,
-            shellModel: mModels.shellModel,
-            detailModel: mModels.detailModel,
-            timerDefaults: mTelemetry.timerDefaults,
-            managers: mDeps.managers,
-            statePaths: mDeps.StatePaths,
-            deltaPayloadBuilder: mDeps.DeltaPayloadBuilder,
-            buildLatestCtx: mHandlers.buildLatestCtx,
-            resolveDetailCurrent: mHandlers.resolveDetailCurrent,
-            applyFacadeResult: mHandlers.applyFacadeResult,
-            setGlobalBanner: mHandlers.setGlobalBanner,
-            emitTelemetry: mTelemetry.emitTelemetry,
-            debugLogger: mDeps.DebugLogger,
-            actionContract: mDeps.ActionContract,
-            bundleText: mTelemetry.bundleText,
-            componentRuntimeSupport: oRuntimeSupport,
-            telemetryRuntime: mDeps.TelemetryRuntime
-        });
-        mDeps.ComponentPollingRuntime.createSupportManagers({
-            component: oComponent,
-            timerDefaults: mTelemetry.timerDefaults,
-            managers: mDeps.managers
-        });
-        mDeps.ComponentAutosaveRuntime.createAutoSaveManager({
-            component: oComponent,
-            stateModel: mModels.stateModel,
-            shellModel: mModels.shellModel,
-            detailModel: mModels.detailModel,
-            timerDefaults: mTelemetry.timerDefaults,
-            managers: mDeps.managers,
-            statePaths: mDeps.StatePaths,
-            deltaPayloadBuilder: mDeps.DeltaPayloadBuilder,
-            buildLatestCtx: mHandlers.buildLatestCtx,
-            resolveDetailCurrent: mHandlers.resolveDetailCurrent,
-            applyFacadeResult: mHandlers.applyFacadeResult,
-            setGlobalBanner: mHandlers.setGlobalBanner,
-            emitTelemetry: mTelemetry.emitTelemetry,
-            debugLogger: mDeps.DebugLogger,
-            actionContract: mDeps.ActionContract,
-            bundleText: mTelemetry.bundleText,
-            componentRuntimeSupport: oRuntimeSupport,
-            telemetryRuntime: mDeps.TelemetryRuntime
-        });
-        mDeps.ComponentPollingRuntime.createLockStatusManager({
-            component: oComponent,
-            stateModel: mModels.stateModel,
-            shellModel: mModels.shellModel,
-            detailModel: mModels.detailModel,
-            timerDefaults: mTelemetry.timerDefaults,
-            managers: mDeps.managers,
-            statePaths: mDeps.StatePaths,
-            deltaPayloadBuilder: mDeps.DeltaPayloadBuilder,
-            buildLatestCtx: mHandlers.buildLatestCtx,
-            resolveDetailCurrent: mHandlers.resolveDetailCurrent,
-            applyFacadeResult: mHandlers.applyFacadeResult,
-            setGlobalBanner: mHandlers.setGlobalBanner,
-            emitTelemetry: mTelemetry.emitTelemetry,
-            debugLogger: mDeps.DebugLogger,
-            actionContract: mDeps.ActionContract,
-            bundleText: mTelemetry.bundleText,
-            componentRuntimeSupport: oRuntimeSupport,
-            telemetryRuntime: mDeps.TelemetryRuntime
-        });
+        attachPollingAndAutosave(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport);
         mDeps.ComponentLockEventsRuntime.attachLockRuntime(
-            buildLockRuntimeOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
+            ComponentRuntimeOptionsFactory.buildLockRuntimeOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
         );
         mDeps.ComponentInitListenersRuntime.attachInitListeners(
-            buildInitListenerOptions(oComponent, mDeps, mModels, mHandlers, mServices, mTelemetry, oRuntimeSupport)
+            ComponentRuntimeOptionsFactory.buildInitListenerOptions(oComponent, mDeps, mModels, mHandlers, mServices, mTelemetry, oRuntimeSupport)
         );
 
         initializeRouter(oComponent);

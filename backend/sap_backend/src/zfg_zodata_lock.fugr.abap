@@ -105,7 +105,7 @@ FUNCTION zodata_lock_control.
       ENDIF.
 
       UPDATE ztodata_hdr
-         SET last_touch_at = sy-datum && sy-uzeit
+         SET last_touch_at = lv_now
              last_touch_by = sy-uname
              lock_expires_at = cl_abap_tstmp=>add(
                                  tstmp = lv_now
