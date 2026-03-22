@@ -83,7 +83,9 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
         iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
     ENDIF.
 
-    IF iv_edit_mode <> 'C' AND iv_edit_mode <> 'U' AND iv_edit_mode <> 'D'.
+    IF iv_edit_mode <> zif_zodata_contract_constants=>c_edit_mode_create
+       AND iv_edit_mode <> zif_zodata_contract_constants=>c_edit_mode_update
+       AND iv_edit_mode <> zif_zodata_contract_constants=>c_edit_mode_delete.
       raise_busi_exception(
         iv_text = iv_invalid_text
         iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
@@ -97,7 +99,10 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
     IF is_request-session_guid IS INITIAL.
       raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_session_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
     ENDIF.
-    IF is_request-root-edit_mode IS NOT INITIAL AND is_request-root-edit_mode <> 'C' AND is_request-root-edit_mode <> 'U' AND is_request-root-edit_mode <> 'D'.
+    IF is_request-root-edit_mode IS NOT INITIAL
+       AND is_request-root-edit_mode <> zif_zodata_contract_constants=>c_edit_mode_create
+       AND is_request-root-edit_mode <> zif_zodata_contract_constants=>c_edit_mode_update
+       AND is_request-root-edit_mode <> zif_zodata_contract_constants=>c_edit_mode_delete.
       raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_root_mode_invalid iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
     ENDIF.
     LOOP AT is_request-checks ASSIGNING FIELD-SYMBOL(<ls_check>).
@@ -229,22 +234,22 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
       rs_request-root-lock_expires_at.
     rs_request-checks = CORRESPONDING #( it_checks ).
     rs_request-barriers = CORRESPONDING #( it_barriers ).
-    rs_request-root-edit_mode = 'C'.
+    rs_request-root-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     LOOP AT rs_request-checks ASSIGNING FIELD-SYMBOL(<ls_copy_check>).
       CLEAR <ls_copy_check>-key_uuid.
-      <ls_copy_check>-edit_mode = 'C'.
+      <ls_copy_check>-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     ENDLOOP.
     LOOP AT rs_request-barriers ASSIGNING FIELD-SYMBOL(<ls_copy_barrier>).
       CLEAR <ls_copy_barrier>-key_uuid.
-      <ls_copy_barrier>-edit_mode = 'C'.
+      <ls_copy_barrier>-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     ENDLOOP.
     LOOP AT rs_request-participants ASSIGNING FIELD-SYMBOL(<ls_copy_participant>).
       CLEAR <ls_copy_participant>-key_uuid.
-      <ls_copy_participant>-edit_mode = 'C'.
+      <ls_copy_participant>-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     ENDLOOP.
     LOOP AT rs_request-attachments ASSIGNING FIELD-SYMBOL(<ls_copy_attachment>).
       CLEAR <ls_copy_attachment>-key_uuid.
-      <ls_copy_attachment>-edit_mode = 'C'.
+      <ls_copy_attachment>-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     ENDLOOP.
   ENDMETHOD.
 ENDCLASS.

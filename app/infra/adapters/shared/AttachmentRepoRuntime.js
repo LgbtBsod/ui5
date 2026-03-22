@@ -24,7 +24,7 @@ sap.ui.define([
         }
         return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
             "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY),
-            "$select": "AttachmentKey,Key,RootKey,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,ScanStatus,ScannedOn,CreatedOn,ChangedOn"
+            "$select": "AttachmentKey,Key,RootKey,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,Value,ScanStatus,ScannedOn,CreatedOn,ChangedOn"
         }).then(function (oResult) {
             return { attachments: mapAttachmentResult(oResult) };
         });

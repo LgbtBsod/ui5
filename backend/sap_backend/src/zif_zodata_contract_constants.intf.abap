@@ -6,6 +6,9 @@ INTERFACE zif_zodata_contract_constants PUBLIC.
   CONSTANTS c_op_change TYPE c LENGTH 2 VALUE '02'.
   CONSTANTS c_op_view TYPE c LENGTH 2 VALUE '03'.
   CONSTANTS c_op_delete TYPE c LENGTH 2 VALUE '06'.
+  CONSTANTS c_edit_mode_create TYPE c LENGTH 1 VALUE 'C'.
+  CONSTANTS c_edit_mode_update TYPE c LENGTH 1 VALUE 'U'.
+  CONSTANTS c_edit_mode_delete TYPE c LENGTH 1 VALUE 'D'.
 
   CONSTANTS c_lock_ttl_seconds TYPE i VALUE 600.
 

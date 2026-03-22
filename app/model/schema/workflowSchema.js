@@ -1,18 +1,19 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (FrontendConfigConstants, WorkflowContracts) {
+], function (FrontendConfigConstants, SearchContracts, WorkflowContracts) {
     "use strict";
 
     return {
         filterId: "",
         filterLpc: "",
         search: { checksFailSegment: "ALL", barriersFailSegment: "ALL" },
-        searchMode: "EXACT",
-        searchBackendTop: "100",
-        searchMaxResults: "100",
-        searchFetchLimit: "100",
-        growingPageSize: "100",
+        searchMode: SearchContracts.SEARCH_MODE.EXACT,
+        searchBackendTop: SearchContracts.DEFAULTS.SEARCH_BACKEND_TOP,
+        searchMaxResults: SearchContracts.DEFAULTS.SEARCH_VISIBLE_ROWS,
+        searchFetchLimit: SearchContracts.DEFAULTS.SEARCH_BACKEND_TOP,
+        growingPageSize: SearchContracts.DEFAULTS.SEARCH_VISIBLE_ROWS,
         exportLimit: 200000,
         searchSortKey: "DateCheck",
         searchSortDescending: true,

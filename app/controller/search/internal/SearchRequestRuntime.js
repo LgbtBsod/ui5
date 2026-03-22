@@ -16,7 +16,7 @@ sap.ui.define([
 
     function normalizeRequestValue(sNormalizedValue, sFallbackValue) {
         var sSafeFallback = String(sFallbackValue || "").trim();
-        return String(sNormalizedValue || "").trim() || sSafeFallback || "100";
+        return String(sNormalizedValue || "").trim() || sSafeFallback || SearchRuntimeContracts.DEFAULTS.SEARCH_BACKEND_TOP;
     }
 
     function normalizeOptionalRequestValue(sNormalizedValue) {

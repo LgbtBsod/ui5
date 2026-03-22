@@ -320,7 +320,7 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
     lr_int = create_internal_ref( ls_config-int_struct_type ).
 
     APPEND VALUE #(
-      edit_mode = COND #( WHEN is_root-edit_mode IS NOT INITIAL THEN is_root-edit_mode ELSE 'U' )
+      edit_mode = COND #( WHEN is_root-edit_mode IS NOT INITIAL THEN is_root-edit_mode ELSE zif_zodata_contract_constants=>c_edit_mode_update )
       node_key  = zif_i_bo_c=>sc_node-root
       key       = iv_root_key
       external  = REF #( is_root )
@@ -426,9 +426,9 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
 
   METHOD map_edit_mode.
     CASE iv_edit_mode.
-      WHEN 'C'. rv_change_mode = /bobf/if_frw_c=>sc_modify_create.
-      WHEN 'U'. rv_change_mode = /bobf/if_frw_c=>sc_modify_update.
-      WHEN 'D'. rv_change_mode = /bobf/if_frw_c=>sc_modify_delete.
+      WHEN zif_zodata_contract_constants=>c_edit_mode_create. rv_change_mode = /bobf/if_frw_c=>sc_modify_create.
+      WHEN zif_zodata_contract_constants=>c_edit_mode_update. rv_change_mode = /bobf/if_frw_c=>sc_modify_update.
+      WHEN zif_zodata_contract_constants=>c_edit_mode_delete. rv_change_mode = /bobf/if_frw_c=>sc_modify_delete.
       WHEN SPACE.
         " Default to update for backward compat (autosave root delta)
         rv_change_mode = /bobf/if_frw_c=>sc_modify_update.

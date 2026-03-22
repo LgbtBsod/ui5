@@ -77,13 +77,7 @@ sap.ui.define([
         /^\/actions\//i,
         /^\/lock\//i,
         /^\/config\/frontend(?:$|[/?])/i,
-        disallowedPathPattern("FrontendRuntimeSettings"),
-        disallowedPathPattern("capabilities"),
-        disallowedPathPattern("ChecklistRoots"),
-        disallowedPathPattern("SearchRows"),
-        disallowedPathPattern("ChecklistChecksSet"),
-        disallowedPathPattern("ChecklistBarriersSet")
-    ];
+    ].concat((GatewayContractConstants.DISALLOWED_PATHS || []).map(disallowedPathPattern));
 
     function normalizePath(sPath) {
         var sNormalized = String(sPath || "");

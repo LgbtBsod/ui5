@@ -21,7 +21,7 @@
                     <HBox class="analyticsReportScopeRail" wrap="Wrap" renderType="Bare">
                         <ObjectStatus
                             text="{= ${i18n>analyticsSourceFilterLabel} + ': ' + (${view>/selectedSource} === 'WEB' ? ${i18n>analyticsSourceWeb} : (${view>/selectedSource} === 'INTEGRATION' ? ${i18n>analyticsSourceIntegration} : ${i18n>analyticsSourceAll})) }"
-                            state="{path: 'view>/selectedSource', formatter: '.formatAnalyticsSourceState'}"
+                            state="None"
                             class="analyticsHeroContextChip statusChipSemantic"/>
                         <ObjectStatus
                             text="{= ${i18n>analyticsSelectedYear} + ': ' + ${view>/selectedYear} }"

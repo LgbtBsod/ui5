@@ -32,7 +32,17 @@ sap.ui.define([], function () {
         WORKFLOW_ANALYTICS_BREAKDOWN: "WorkflowAnalyticsBreakdownSet"
     });
 
+    var DISALLOWED_PATHS = Object.freeze([
+        "FrontendRuntimeSettings",
+        "capabilities",
+        "ChecklistRoots",
+        "SearchRows",
+        ENTITY_SETS.CHECKLIST_CHECK,
+        ENTITY_SETS.CHECKLIST_BARRIER
+    ]);
+
     return {
+        DISALLOWED_PATHS: DISALLOWED_PATHS,
         ENTITY_SETS: ENTITY_SETS,
         FUNCTION_IMPORTS: FUNCTION_IMPORTS
     };

@@ -116,7 +116,7 @@ sap.ui.define([
     "use strict";
 
     function createBootstrapDeps() {
-        return ComponentBootstrapFlowRuntime.createBootstrapContext({
+        var mStaticDeps = {
             UIComponent: UIComponent,
             JSONModel: JSONModel,
             Device: Device,
@@ -155,7 +155,18 @@ sap.ui.define([
             InitializeAppUseCase: InitializeAppUseCase,
             LoadCurrentUserUseCase: LoadCurrentUserUseCase,
             DiagnosticsUseCase: DiagnosticsUseCase
-        }, ComponentBootstrapDependencyBuilder, ComponentAppRuntime);
+        };
+        var mGroups = ComponentBootstrapDependencyBuilder.build(mStaticDeps);
+        var mDeps = ComponentBootstrapDependencyBuilder.flatten(mGroups);
+
+        mDeps = ComponentBootstrapDependencyBuilder.withManagerRuntime(mDeps);
+        mDeps.ComponentRuntimeSupport = ComponentAppRuntime.buildComponentRuntimeSupport();
+
+        return {
+            groups: mGroups,
+            deps: mDeps,
+            getBackendMode: function () { return BackendModeContracts.MODES.REAL; }
+        };
     }
 
     function init(oComponent, aInitArgs) {
@@ -172,6 +183,7 @@ sap.ui.define([
         mBootstrapDeps = oBootstrap.deps;
 
         oModelBootstrap = ComponentModelBootstrap.bootstrap(oComponent, mBootstrapDeps);
+        ModelStateRuntime.writeOnModel(oModelBootstrap.models.stateModel, BackendModeContracts.PATHS.BACKEND_MODE, oBootstrap.getBackendMode());
         ComponentBootstrapFlowRuntime.runDiagnostics(DiagnosticsUseCase, BackendModeContracts, mBootstrapDeps, oModelBootstrap);
         ComponentModelInitRuntime.registerModels(oComponent, oModelBootstrap.models);
         oComponent.setModel(oModelBootstrap.mainServiceModel);
