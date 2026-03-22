@@ -1,46 +1,110 @@
-TRUTH MATRIX FOR FINAL PRODUCTION-HARDENING RESIDUALS
+TRUTH MATRIX
 
-1. Integration-origin confirm-before-edit
-- Current repo truth: integration-origin detail objects are marked by integrationFlag and visualized via existing detail badge/chip.
-- Enter-edit truth after remediation: integration-origin objects require explicit user confirm before permission check, cache validation, lock acquire and edit-mode entry start.
-- Implementation stays in existing usecase/effect-dispatch flow and is not duplicated across controllers.
-- Target status: matched.
+1. Key contract / canonical technical identity
+- Expected by TZ:
+  - DB_KEY / RootKey / PARENT_KEY are primary command-flow keys.
+  - pcct_uuid / RootId / ObjectUuid are compatibility aliases only at boundaries.
+- Actual in code:
+  - ODataEntityContracts centralizes alias field lists, but command payload and delta serialization still build root identity around pcct_uuid and broad fallback chains.
+  - ODataChecklistPayloadMapper.normalizeSavePayload writes root.pcct_uuid as the active save identity.
+  - DeltaFieldMappers.mapRootFields writes pcct_uuid, not DB_KEY/RootKey, as the outbound root key field.
+  - DeltaPayloadBuilder.resolveRootKey still accepts RootKey, id, Key, pcct_uuid as near-equal command-flow candidates.
+  - LockAdapter still maps rootId into ObjectUuid at the Gateway boundary, which is acceptable only as last-mile contract mapping.
+- Status:
+  - Partial / compatibility-tail-heavy.
 
-2. Lock contract and status semantics
-- LockAcquire uses ObjectUuid, SessionGuid, TabSessionId, ForceTakeover.
-- LockHeartbeat uses ObjectUuid, SessionGuid.
-- LockRelease uses ObjectUuid, SessionGuid.
-- Page-leave release remains best-effort only and session-aware.
-- LockStatus metadata is enriched to describe explicit status semantics: owner/session, killed state, takeover hint, message/status fields.
-- Target status: matched.
+2. Detail initial loading
+- Expected by TZ:
+  - Phase 1 = root + basic.
+  - Phase 2 = checks + barriers asynchronously after initial render, chunked.
+  - Phase 3 = attachments explicit only.
+- Actual in code:
+  - OpenDetailUseCase now requests root/basic only for initial open.
+  - ODataChecklistReadRuntime.loadDetailRows fetches checks/barriers separately with $top/$skip chunking in pages of 20.
+  - DetailPageFlow schedules second-phase row hydration after successful open without adding a new orchestration layer.
+  - Attachments remain excluded from initial snapshot.
+- Status:
+  - Match.
 
-3. Legacy lock release compatibility tail
-- Current repo truth: releaseActiveLock is the neutral active orchestration name.
-- releaseWithTrySave remains only as a thin deprecated compatibility alias and no longer carries architectural meaning.
-- Target status: matched.
+3. Attachments metadata-first contract
+- Expected by TZ:
+  - Value is not an active source of truth.
+  - Download/open prefers DownloadUrl/document handle/stream.
+  - Persisted and session attachments are separated in state and UI.
+- Actual in code:
+  - DetailAttachmentOpenRuntime prefers DownloadUrl first, but still falls back to Value as a normal working path.
+  - ODataEntityContracts.SELECTS.ATTACHMENT and SELECTS.ATTACHMENT_CONTENT still include Value.
+  - ODataChecklistPayloadMapper.normalizeAttachmentRows filters rows by FileName && Value, making Value part of normal attachment normalization.
+  - DetailAttachmentDeltaRuntime serializes staged attachments into value base64.
+  - DetailAttachmentStateRuntime mirrors persisted attachments into view>/sessionAttachments.
+  - DetailAttachmentsBody.fragment.xml renders one table bound to view>/sessionAttachments, so dual-table dual-owner UX is not completed.
+- Status:
+  - Partial / compatibility-tail-heavy.
 
-4. Attachment metadata-first contract
-- Attachment open/download now prefers DownloadUrl from row metadata or read-back metadata before using Value fallback.
-- Value remains compatibility-only and is explicitly marked deprecated in local metadata.
-- Attachments remain lazy-loaded, outside base detail snapshot/cache, and metadata-first.
-- Target status: matched with compatibility fallback retained.
+4. Attachment lazy loading
+- Expected by TZ:
+  - No attachments on initial detail open.
+  - Persisted attachments loaded only by explicit action.
+- Actual in code:
+  - OpenDetailUseCase excludes attachments from initial snapshot fetch.
+  - LoadAttachmentsUseCase is explicit.
+  - But OpenDetailUseCase hydrates view>/sessionAttachments from current detail attachments when reopening same root.
+- Status:
+  - Partial.
 
-5. Runtime settings source of truth
-- Canonical runtime source remains masterData>/runtime/* populated from RuntimeSettingsSet('GLOBAL').
-- State model remains only an operational projection surface.
-- Target status: matched.
+5. Delete pipeline
+- Expected by TZ:
+  - Canonical delete through aggregate modification pipeline.
+  - No target direct OData DELETE.
+- Actual in code:
+  - GatewayClient.deletePath is unsupported as target flow.
+  - AttachmentRepoRuntime.deleteAttachment is deferred only.
+  - Root/child save path still goes through delta/save pipeline.
+- Status:
+  - Match.
 
-6. Analytics contract
-- SimpleAnalyticalSet remains the lightweight shared summary source.
-- WorkflowAnalyticsBreakdownSet remains the heavyweight breakdown source.
-- AnalyticsRefreshStateSet remains separate for refresh lifecycle/status.
-- Target backend direction remains precomputed persistence plus background refresh.
-- Target status: matched.
+6. Lock flow
+- Expected by TZ:
+  - acquire/status/heartbeat/release with ForceTakeover on acquire only.
+  - ObjectUuid allowed only as Gateway contract field.
+- Actual in code:
+  - LockAdapter uses ObjectUuid, SessionGuid, optional TabSessionId and ForceTakeover on acquire.
+  - Heartbeat/release use ObjectUuid + SessionGuid.
+  - Component lock runtimes still compare rootId/ObjectUuid/RootId aliases during event handling.
+- Status:
+  - Partial but acceptable at Gateway boundary.
 
-7. Search field semantics
-- Search fields remain grounded in current ChecklistSearchSet metadata and existing builder behavior.
-- Exact mode combines filters with AND.
-- Loose mode combines top-level filters with OR.
-- Default sort remains DateCheck descending.
-- Inline count remains optional in top-limited request mode.
-- Target status: matched.
+7. Runtime settings source
+- Expected by TZ:
+  - masterData>/runtime/* is canonical.
+- Actual in code:
+  - still true in current runtime settings flow.
+- Status:
+  - Match.
+
+8. Search semantics
+- Expected by TZ:
+  - exact = AND, loose/inexact = OR, backend fetch limit separate from visible chunk size.
+- Actual in code:
+  - preserved in current search behavior and request window handling.
+- Status:
+  - Match.
+
+9. Overengineering / hidden framework
+- Expected by TZ:
+  - one clear owner per responsibility, no micro pass-through layers.
+- Actual in code:
+  - search internal hidden-framework layer was heavily reduced.
+  - detail validation and attachment drop-zone micro-splits were reduced.
+  - large component runtime cluster and app/controller/app cluster still remain heavily fragmented.
+- Status:
+  - Partial.
+
+10. SAP CSS / DOM best practices
+- Expected by TZ:
+  - internal sap* selectors minimized and documented.
+- Actual in code:
+  - high debt still remains in page/detail/search/dialog/override CSS modules.
+  - search/detail viewport and drop-zone paths still use direct DOM access where supported APIs are insufficient.
+- Status:
+  - Partial / residual risk.

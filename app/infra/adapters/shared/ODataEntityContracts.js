@@ -11,23 +11,37 @@ sap.ui.define([
         ROOT_KEY: "Edm.Binary"
     });
 
+    var IDENTITY = Object.freeze({
+        ROOT_FILTER_BINARY: "RootKey",
+        ROOT_FILTER_ALIAS: "RootId",
+        ROOT_CANONICAL_FIELDS: Object.freeze(["RootKey", "Key", "id"]),
+        ROOT_ALIAS_FIELDS: Object.freeze(["rootKey", "key", "pcct_uuid", "Id"]),
+        ATTACHMENT_KEY_FIELDS: Object.freeze(["AttachmentKey", "Key", "key", "attach_uuid"]),
+        PARENT_KEY_FIELDS: Object.freeze(["ParentKey", "parentKey", "RootKey", "rootKey"]),
+        ROOT_KEY_FIELDS: Object.freeze(["RootKey", "rootKey"]),
+        FILE_NAME_FIELDS: Object.freeze(["FileName", "fileName", "Name", "name"]),
+        MIME_TYPE_FIELDS: Object.freeze(["MimeType", "mimeType"]),
+        FILE_SIZE_FIELDS: Object.freeze(["FileSize", "fileSize", "FileSizeContent", "fileSizeContent"]),
+        INLINE_VALUE_FIELDS: Object.freeze(["Value", "value"])
+    });
+
     var DETAIL_ENTITY_FILTERS = Object.freeze({
         CHECKLIST_BASIC_INFO: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.CHECKLIST_BASIC_INFO,
-            property: "RootKey",
+            property: IDENTITY.ROOT_FILTER_BINARY,
             type: TYPES.ROOT_KEY
         }),
         CHECKLIST_CHECK: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK,
-            property: "RootId"
+            property: IDENTITY.ROOT_FILTER_ALIAS
         }),
         CHECKLIST_BARRIER: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER,
-            property: "RootId"
+            property: IDENTITY.ROOT_FILTER_ALIAS
         }),
         ATTACHMENT: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.ATTACHMENT,
-            property: "RootKey",
+            property: IDENTITY.ROOT_FILTER_BINARY,
             type: TYPES.ROOT_KEY
         })
     });
@@ -55,6 +69,7 @@ sap.ui.define([
     }
 
     return {
+        IDENTITY: IDENTITY,
         TYPES: TYPES,
         DETAIL_ENTITY_FILTERS: DETAIL_ENTITY_FILTERS,
         SELECTS: SELECTS,

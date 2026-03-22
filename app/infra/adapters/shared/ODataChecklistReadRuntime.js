@@ -8,6 +8,8 @@ sap.ui.define([
 ], function (GatewayODataClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataEntityContracts, ChecklistSnapshotMapper, GatewayContractConstants) {
     "use strict";
 
+    var DETAIL_ROW_CHUNK_SIZE = 20;
+
     /*
      * AB-01 FIX: Standardized filter helpers.
      *
@@ -45,9 +47,8 @@ sap.ui.define([
 
     function fetchDetailSnapshot(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
+        var bIncludeChildren = !mArgs || mArgs.includeChildren !== false;
         var oBasicFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BASIC_INFO;
-        var oCheckFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_CHECK;
-        var oBarrierFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BARRIER;
         var pRoot = GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
             type: ODataEntityContracts.TYPES.ROOT_KEY
         }).replace(/^\//, ""));
@@ -57,18 +58,67 @@ sap.ui.define([
             "$filter": buildDetailFilter(oBasicFilter, sRootId),
             "$select": ODataEntityContracts.SELECTS.CHECKLIST_BASIC_INFO
         });
-        var pChecks = GatewayODataClient.get(oCheckFilter.entitySet, {
-            "$filter": buildDetailFilter(oCheckFilter, sRootId),
-            "$select": ODataEntityContracts.SELECTS.CHECKLIST_CHECK
-        });
-        var pBarriers = GatewayODataClient.get(oBarrierFilter.entitySet, {
-            "$filter": buildDetailFilter(oBarrierFilter, sRootId),
-            "$select": ODataEntityContracts.SELECTS.CHECKLIST_BARRIER
-        });
-        return Promise.all([pRoot, pBasic, pChecks, pBarriers]).then(function (aResult) {
-            var oSnapshot = ODataChecklistSnapshotRuntime.mapResult(aResult[0], aResult[1], aResult[2], aResult[3]);
+        var pRows = bIncludeChildren ? loadDetailRows({
+            rootId: sRootId,
+            includeChecks: true,
+            includeBarriers: true
+        }, mDeps) : Promise.resolve({ checks: [], barriers: [] });
+        return Promise.all([pRoot, pBasic, pRows]).then(function (aResult) {
+            var oRows = aResult[2] || {};
+            var oSnapshot = ODataChecklistSnapshotRuntime.mapResult(aResult[0], aResult[1], oRows.checks || [], oRows.barriers || []);
             oSnapshot.attachments = [];
             return oSnapshot;
+        });
+    }
+
+    function loadChunkedCollection(oFilterContract, sRootId, sSelect, fnMapRow) {
+        var aRows = [];
+
+        function loadPage(iSkip) {
+            return GatewayODataClient.get(oFilterContract.entitySet, {
+                "$filter": buildDetailFilter(oFilterContract, sRootId),
+                "$select": sSelect,
+                "$top": DETAIL_ROW_CHUNK_SIZE,
+                "$skip": iSkip
+            }).then(function (oResponse) {
+                var aChunk = ODataAdapterUtils.asArray(oResponse).map(fnMapRow);
+                aRows = aRows.concat(aChunk);
+                if (aChunk.length < DETAIL_ROW_CHUNK_SIZE) {
+                    return aRows;
+                }
+                return loadPage(iSkip + DETAIL_ROW_CHUNK_SIZE);
+            });
+        }
+
+        return loadPage(0);
+    }
+
+    function loadDetailRows(mArgs, mDeps) {
+        var sRootId = mDeps.rootId(mArgs);
+        var bChecks = !mArgs || mArgs.includeChecks !== false;
+        var bBarriers = !mArgs || mArgs.includeBarriers !== false;
+        var pChecks = bChecks
+            ? loadChunkedCollection(
+                ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_CHECK,
+                sRootId,
+                ODataEntityContracts.SELECTS.CHECKLIST_CHECK,
+                ChecklistSnapshotMapper.mapCheckRow
+            )
+            : Promise.resolve([]);
+        var pBarriers = bBarriers
+            ? loadChunkedCollection(
+                ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BARRIER,
+                sRootId,
+                ODataEntityContracts.SELECTS.CHECKLIST_BARRIER,
+                ChecklistSnapshotMapper.mapBarrierRow
+            )
+            : Promise.resolve([]);
+
+        return Promise.all([pChecks, pBarriers]).then(function (aRows) {
+            return {
+                checks: aRows[0] || [],
+                barriers: aRows[1] || []
+            };
         });
     }
 
@@ -77,7 +127,7 @@ sap.ui.define([
         if (!sResolvedRootId || mDeps.isCreateId(sResolvedRootId)) {
             return Promise.resolve(oServerPayload || {});
         }
-        return fetchDetailSnapshot({ rootId: sResolvedRootId }, mDeps).then(function (oSnapshot) {
+        return fetchDetailSnapshot({ rootId: sResolvedRootId, includeChildren: true }, mDeps).then(function (oSnapshot) {
             var oResolvedSnapshot = oSnapshot || {};
             var oMeta = Object.assign({}, oResolvedSnapshot.meta || {});
             var oRoot = Object.assign({}, oResolvedSnapshot.root || {});
@@ -106,6 +156,7 @@ sap.ui.define([
     return {
         enrichServerSnapshot: enrichServerSnapshot,
         buildDetailFilter: buildDetailFilter,
+        loadDetailRows: loadDetailRows,
         loadDetailSnapshot: fetchDetailSnapshot,
         resolveRootId: resolveRootId
     };

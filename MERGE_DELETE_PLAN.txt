@@ -1,0 +1,70 @@
+MERGE DELETE PLAN
+
+1. Component bootstrap cluster
+- Review:
+  - ComponentBootRuntime.js
+  - ComponentBootstrapContracts.js
+  - ComponentBootstrapDependencyBuilder.js
+  - ComponentBootstrapFlowRuntime.js
+  - ComponentCoreInitRuntime.js
+  - ComponentCoreRuntimeBootstrap.js
+  - ComponentLifecycleBootstrap.js
+  - ComponentModelBootstrap.js
+  - ComponentModelInitRuntime.js
+  - ComponentRuntimeOptionsFactory.js
+- Goal:
+  - one main bootstrap owner, one contracts/config owner at most.
+
+2. Component save/navigation guard cluster
+- Review:
+  - ComponentGuardedSaveRuntime.js
+  - ComponentSaveGuardRuntime.js
+  - ComponentSaveGuardPolicy.js
+  - ComponentSaveGuardContracts.js
+  - ComponentNavigationGuardRuntime.js
+  - ComponentNavigationGuardDecisionRuntime.js
+  - ComponentPendingNavigationRuntime.js
+- Goal:
+  - one guard owner, no duplicated decision split.
+
+3. Component lock/session cluster
+- Review:
+  - ComponentLockEventsRuntime.js
+  - ComponentLockReleaseRuntime.js
+  - ComponentCrossTabHandlerRuntime.js
+  - ComponentCrossTabRuntime.js
+  - ComponentSessionRuntime.js
+  - ComponentPollingRuntime.js
+- Goal:
+  - one lock/session lifecycle owner.
+
+4. Attachment cluster
+- Review:
+  - DetailAttachmentStateRuntime.js
+  - DetailAttachmentSaveRuntime.js
+  - DetailAttachmentDeltaRuntime.js
+  - DetailAttachmentOpenRuntime.js
+  - AttachmentUploadRuntime.js
+  - AttachmentUploadCore.js
+  - LoadAttachmentsUseCase.js
+- Goal:
+  - no duplicate state mutation owners, persisted/session split made explicit.
+
+5. App shell cluster
+- Review:
+  - controller/app/*
+- Goal:
+  - collapse clear pass-through behaviors into one app owner.
+
+6. Constants simplification
+- Review:
+  - UiAssetPaths.js
+  - UiControlIds.js
+  - UiSemanticConstants.js
+  - FrontendConfigConstants.js
+  - RequestVerbConstants.js
+  - FacadeCommandConstants.js
+  - FeedbackConstants.js
+  - DialogConstants.js
+- Goal:
+  - fewer, broader semantic constants owners.

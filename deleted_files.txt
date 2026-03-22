@@ -1,0 +1,5 @@
+DELETED FILES
+
+- app/service/domain/detail/DetailService.js
+- app/service/domain/detail/DetailUseCaseRegistry.js
+- app/service/domain/detail/DetailEntryAdapterRuntime.js

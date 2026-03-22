@@ -26,6 +26,12 @@ sap.ui.define([
     var DETAIL_CODES = DetailContracts.CODES;
     var DETAIL_MESSAGE_KEYS = DetailContracts;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
+    var VIEW_BUSY_PATHS = Object.freeze({
+        CHECKS: "/checksBusy",
+        BARRIERS: "/barriersBusy",
+        CHECKS_EXPANDED: "/checksExpandedBusy",
+        BARRIERS_EXPANDED: "/barriersExpandedBusy"
+    });
 
     function cloneSnapshot(oSnapshot) {
         return CloneUtil.clone(oSnapshot || {}, {});
@@ -111,6 +117,18 @@ sap.ui.define([
         return oSnapshot;
     }
 
+    function applyDeferredDetailRows(oSnapshot, oCurrentSelected, oCurrentSnapshot, bPreserveRows) {
+        var oSource = oSnapshot || {};
+        var aCurrentChecks = (oCurrentSelected && oCurrentSelected.checks) || (oCurrentSnapshot && oCurrentSnapshot.checks) || [];
+        var aCurrentBarriers = (oCurrentSelected && oCurrentSelected.barriers) || (oCurrentSnapshot && oCurrentSnapshot.barriers) || [];
+
+        return Object.assign({}, oSource, {
+            checks: bPreserveRows ? aCurrentChecks : [],
+            barriers: bPreserveRows ? aCurrentBarriers : [],
+            attachments: []
+        });
+    }
+
     function OpenDetailUseCase() {
         return {
             execute: execute
@@ -180,6 +198,10 @@ sap.ui.define([
                     Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, oDraftSelected),
                     Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, (oDraftSelected && oDraftSelected.attachments) || []),
                     Effects.modelPatch(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS, (oDraftSelected && oDraftSelected.attachments) || []),
+                    Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.CHECKS, false),
+                    Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.BARRIERS, false),
+                    Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.CHECKS_EXPANDED, false),
+                    Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.BARRIERS_EXPANDED, false),
                     Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false)
                 ]));
             });
@@ -222,7 +244,7 @@ sap.ui.define([
                         rootId: sCanonicalRootId
                     };
                 }
-                return Promise.resolve(oRepo.loadDetailSnapshot({ rootId: sCanonicalRootId })).then(function (oSnapshot) {
+                return Promise.resolve(oRepo.loadDetailSnapshot({ rootId: sCanonicalRootId, includeChildren: false })).then(function (oSnapshot) {
                     var oCacheWrite = mCtx && mCtx.cacheWrite;
                     if (oCacheWrite && typeof oCacheWrite.execute === "function") {
                         return Promise.resolve(oCacheWrite.execute({ rootId: sCanonicalRootId, snapshot: oSnapshot }, mCtx || {})).catch(function () {
@@ -255,12 +277,16 @@ sap.ui.define([
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
             var aEffectiveAttachments = aLoadedAttachments.length ? aLoadedAttachments : [];
             var oEditState = resolveEditableOpenState(oUiState, sCanonicalRootId);
-            var oNormalizedSnapshot = DetailSaveRuntime.normalizeOverallResult(
-                DetailSaveRuntime.preserveBasicFields(oSnapshot, oCurrentSelected, oCurrentSnapshot)
+            var bPreserveCurrentRows = oEditState.autosaveEnabled && (
+                !!((oCurrentSelected && oCurrentSelected.checks && oCurrentSelected.checks.length) || (oCurrentSnapshot && oCurrentSnapshot.checks && oCurrentSnapshot.checks.length))
+                || !!((oCurrentSelected && oCurrentSelected.barriers && oCurrentSelected.barriers.length) || (oCurrentSnapshot && oCurrentSnapshot.barriers && oCurrentSnapshot.barriers.length))
             );
+            var oNormalizedSnapshot = applyDeferredDetailRows(DetailSaveRuntime.normalizeOverallResult(
+                DetailSaveRuntime.preserveBasicFields(oSnapshot, oCurrentSelected, oCurrentSnapshot)
+            ), oCurrentSelected, oCurrentSnapshot, bPreserveCurrentRows);
             var oBaseSnapshot = cloneSnapshot(oNormalizedSnapshot);
             var oSelectedSnapshot = cloneSnapshot(oNormalizedSnapshot);
-            return Result.ok({ snapshot: oBaseSnapshot }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
+            return Result.ok({ snapshot: oBaseSnapshot, deferredRows: !bPreserveCurrentRows }, resetTransientDetailIncidentEffects().concat(DetailAuthorizationRuntime.contentAccessEffects(oPermission)).concat([
                 Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                     status: WorkflowContracts.READINESS_STATUS.READY,
                     ready: true,
@@ -283,6 +309,10 @@ sap.ui.define([
                 Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, aEffectiveAttachments),
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS, aEffectiveAttachments),
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.ATTACHMENTS_LOADED, aLoadedAttachments.length > 0),
+                Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.CHECKS, !bPreserveCurrentRows),
+                Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.BARRIERS, !bPreserveCurrentRows),
+                Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.CHECKS_EXPANDED, false),
+                Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.BARRIERS_EXPANDED, false),
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         }).catch(function (oError) {
@@ -298,6 +328,10 @@ sap.ui.define([
                     lockKnown: false
                 }),
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
+                Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.CHECKS, false),
+                Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.BARRIERS, false),
+                Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.CHECKS_EXPANDED, false),
+                Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.BARRIERS_EXPANDED, false),
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         });

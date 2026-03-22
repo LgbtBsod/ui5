@@ -1,6 +1,6 @@
 LOCK STATE MACHINE
 
-Observed frontend lock states:
+Observed states
 - READ_ONLY
 - ACQUIRING_LOCK
 - EDIT_LOCKED
@@ -8,17 +8,29 @@ Observed frontend lock states:
 - FORCED_READ_ONLY
 - IDLE_TIMEOUT_GRACE
 
-Observed lock operations:
+Observed operations
 - acquire
 - heartbeat
 - status
 - release
-- takeover via one explicit ForceTakeover flag
+- takeover via canonical ForceTakeover flag
 
-Expected flow:
-1. permission check
-2. lock acquire
+Canonical payloads
+- LockAcquire(ObjectUuid, SessionGuid, TabSessionId, ForceTakeover)
+- LockHeartbeat(ObjectUuid, SessionGuid)
+- LockRelease(ObjectUuid, SessionGuid)
+
+Expected flow
+1. integration-origin confirm when required
+2. permission check
 3. cache freshness validation
-4. enter edit mode
-5. heartbeat + status polling while edit lock is active
-6. release on close/leave/save transitions where applicable
+4. lock acquire
+5. enter edit mode
+6. heartbeat and status polling while edit lock is active
+7. release on save/close/navigation where applicable
+8. page-leave release is best-effort only and must stay session-aware
+
+Forbidden behaviors
+- blind unlock without session token
+- parallel canonical takeover flags
+- direct promotion of page-leave release into guaranteed save-on-unload semantics

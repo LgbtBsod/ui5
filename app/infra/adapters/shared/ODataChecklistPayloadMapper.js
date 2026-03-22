@@ -1,7 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ODataKeyNormalizer"
-], function (ODataKeyNormalizer) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ODataKeyNormalizer",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts"
+], function (ODataKeyNormalizer, ODataEntityContracts) {
     "use strict";
+
+    var IDENTITY = ODataEntityContracts.IDENTITY;
 
     function normalizeRootKey(sRootId) {
         return ODataKeyNormalizer.normalizeBinaryKey(sRootId);
@@ -10,12 +13,12 @@ sap.ui.define([
     function resolveServerRootId(oPayload, sFallbackRootId) {
         var oData = oPayload || {};
         return String(
-            oData.RootKey ||
-            oData.rootKey ||
-            oData.Key ||
-            oData.key ||
-            oData.pcct_uuid ||
-            (oData.root && (oData.root.pcct_uuid || oData.root.RootKey || oData.root.Key)) ||
+            oData[IDENTITY.ROOT_CANONICAL_FIELDS[0]] ||
+            oData[IDENTITY.ROOT_ALIAS_FIELDS[0]] ||
+            oData[IDENTITY.ROOT_CANONICAL_FIELDS[1]] ||
+            oData[IDENTITY.ROOT_ALIAS_FIELDS[1]] ||
+            oData[IDENTITY.ROOT_ALIAS_FIELDS[2]] ||
+            (oData.root && (oData.root[IDENTITY.ROOT_ALIAS_FIELDS[2]] || oData.root[IDENTITY.ROOT_CANONICAL_FIELDS[0]] || oData.root[IDENTITY.ROOT_CANONICAL_FIELDS[1]])) ||
             (oData.root && oData.root.id) ||
             sFallbackRootId ||
             ""
@@ -56,7 +59,7 @@ sap.ui.define([
             var aUnifiedAttachments = Array.isArray(oIn.attachments) ? oIn.attachments.slice() : [];
             return Object.assign({}, oIn, {
                 root: Object.assign({}, oIn.root || {}, {
-                    pcct_uuid: normalizeRootKey((oIn.root && oIn.root.pcct_uuid) || sRootId)
+                    pcct_uuid: normalizeRootKey((oIn.root && oIn.root[IDENTITY.ROOT_ALIAS_FIELDS[2]]) || sRootId)
                 }),
                 participants: Array.isArray(oIn.participants) ? oIn.participants.slice() : [],
                 attachments: aUnifiedAttachments.concat(aNormalizedAttachments),

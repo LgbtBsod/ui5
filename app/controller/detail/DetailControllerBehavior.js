@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPageFlow",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailViewStateFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
@@ -8,6 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
@@ -19,7 +20,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (
     ControllerResourceCleanup,
-    DetailService,
+    DetailFacade,
     DetailPageFlow,
     DetailViewStateFactory,
     ControllerRouteRuntime,
@@ -27,6 +28,7 @@ sap.ui.define([
     ControllerModelRuntime,
     ControllerViewStateRuntime,
     SchedulingRuntime,
+    ControllerCommandContextRuntime,
     DetailAttachmentViewState,
     StatusChipClassRuntime,
     SemanticDomRuntime,
@@ -105,10 +107,11 @@ sap.ui.define([
 
     return {
         onInit: function () {
-            this._detailService = new DetailService(this);
+            this._detailService = new DetailFacade();
             this._mLazyDialogs = {};
             this._mDialogReturnFocus = {};
             this._iAttachmentDropZoneBindTimer = null;
+            this._iDetailPhaseLoadTimer = null;
             this._iLocationVhSearchTimer = null;
             this._iLocationVhTableSyncTimer = null;
             this._oDetailScrollHost = null;
@@ -150,6 +153,7 @@ sap.ui.define([
             }
             ControllerRouteRuntime.detachAllMatched(this);
             this._iAttachmentDropZoneBindTimer = SchedulingRuntime.clearTimer(this._iAttachmentDropZoneBindTimer);
+            this._iDetailPhaseLoadTimer = SchedulingRuntime.clearTimer(this._iDetailPhaseLoadTimer);
             this._clearLocationValueHelpSearchTimer();
             this._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(this._iLocationVhTableSyncTimer);
             this._unbindViewportPinnedControlRail();
@@ -191,6 +195,7 @@ sap.ui.define([
         _onDetailMatched: function (oEvent) {
             return Promise.resolve(DetailPageFlow.onMatched(this, oEvent, {
                 applyLayoutState: this._applyLayoutState.bind(this),
+                buildCommandContext: ControllerCommandContextRuntime.buildDefaultCtx.bind(null, this),
                 scheduleAttachmentDropZoneBind: this._scheduleAttachmentDropZoneBind.bind(this),
                 validationSummaryPath: StatePaths.VALIDATION_SUMMARY
             })).then(function (vResult) {

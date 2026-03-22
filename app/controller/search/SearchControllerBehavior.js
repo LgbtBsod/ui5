@@ -1,7 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchActionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchFormatterBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLocationSuggestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchToolbarDialogRuntime",
@@ -11,14 +10,67 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "sap/ui/core/Item"
-], function (SearchActionBehavior, SearchCommandPolicy, SearchFormatterBehavior, SearchLifecycleBehavior, SearchLocationSuggestRuntime, SearchToolbarDialogRuntime, SearchSmartTableBehavior, ControllerViewStateRuntime, SearchToolbarContracts, SearchViewportRuntime, ModelContracts, OperationSourceContracts, Item) {
+], function (SearchActionBehavior, SearchCommandPolicy, SearchLifecycleBehavior, SearchLocationSuggestRuntime, SearchToolbarDialogRuntime, SearchSmartTableBehavior, ControllerViewStateRuntime, SearchToolbarContracts, SearchViewportRuntime, ModelContracts, OperationSourceContracts, SearchContracts, UiSemanticConstants, SearchViewStateRuntime, Item) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
     var STATE_MODEL = MODELS.STATE;
     var PATHS = SearchToolbarContracts.PATHS;
+    var SEARCH_MODE = SearchContracts.SEARCH_MODE;
+
+    function resolveBundleText(oController, sKey) {
+        var oBundle = oController && oController.getResourceBundle && oController.getResourceBundle();
+        if (!sKey || !oBundle || !oBundle.getText) {
+            return "";
+        }
+        return String(oBundle.getText(sKey) || "");
+    }
+
+    function formatSearchModeChipText(oController, sMode) {
+        var sNorm = String(sMode || "").toUpperCase() === SEARCH_MODE.LOOSE ? SEARCH_MODE.LOOSE : SEARCH_MODE.EXACT;
+        var sLabel = resolveBundleText(oController, SearchContracts.SEARCH_MODE_LABEL);
+        var sModeText = sNorm === SEARCH_MODE.LOOSE
+            ? resolveBundleText(oController, SearchContracts.SEARCH_MODE_LOOSE)
+            : resolveBundleText(oController, SearchContracts.SEARCH_MODE_EXACT);
+        return sLabel + ": " + sModeText;
+    }
+
+    function formatWorkflowStageText(oController, sStage) {
+        return SearchViewStateRuntime.formatWorkflowStageText(
+            oController && oController.getResourceBundle && oController.getResourceBundle(),
+            sStage
+        );
+    }
+
+    function formatWorkflowStageState(sStage) {
+        return SearchViewStateRuntime.formatWorkflowStageState(sStage);
+    }
+
+    function formatSearchResultsCompactText(oController, iResultCount, bHasRows) {
+        var iSafeCount = Math.max(0, Number(iResultCount || 0));
+        var sResultsLabel = resolveBundleText(oController, SearchContracts.RESULTS_LABEL);
+        if (!bHasRows || !iSafeCount) {
+            return sResultsLabel;
+        }
+        return sResultsLabel + ": " + iSafeCount;
+    }
+
+    function formatSearchSelectionSummary(oController, iSelectionCount, sSelectedRowDisplayId) {
+        var iSafeCount = Math.max(0, Number(iSelectionCount || 0));
+        var sPrimaryId = String(sSelectedRowDisplayId || "").trim();
+        if (!iSafeCount) {
+            return resolveBundleText(oController, SearchContracts.SEARCH_SELECTION_NONE);
+        }
+        if (iSafeCount === 1 && sPrimaryId) {
+            return resolveBundleText(oController, SearchContracts.SEARCH_SELECTION_PRIMARY_PREFIX) + ": " + sPrimaryId;
+        }
+        return iSafeCount + " " + resolveBundleText(oController, SearchContracts.SEARCH_SELECTION_UNITS);
+    }
 
     function applyAnalyticsDrilldownIntent(oController) {
         return SearchLifecycleBehavior.applyAnalyticsDrilldownIntent(oController, {
@@ -134,27 +186,29 @@ sap.ui.define([
         },
 
         formatSearchModeChipText: function (sMode) {
-            return SearchFormatterBehavior.formatSearchModeChipText(this, sMode);
+            return formatSearchModeChipText(this, sMode);
         },
 
         formatSearchResultsCompactText: function (iResultCount, bHasRows) {
-            return SearchFormatterBehavior.formatSearchResultsCompactText(this, iResultCount, bHasRows);
+            return formatSearchResultsCompactText(this, iResultCount, bHasRows);
         },
 
         formatSearchSelectionSummary: function (iSelectionCount, sSelectedRowDisplayId) {
-            return SearchFormatterBehavior.formatSearchSelectionSummary(this, iSelectionCount, sSelectedRowDisplayId);
+            return formatSearchSelectionSummary(this, iSelectionCount, sSelectedRowDisplayId);
         },
         formatSelectionSummaryState: function () {
-            return SearchFormatterBehavior.formatSelectionSummaryState();
+            return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
         },
         formatLoadErrorType: function () {
-            return SearchFormatterBehavior.formatLoadErrorType();
+            return UiSemanticConstants.MESSAGE_TYPE.ERROR;
         },
         formatSearchModeState: function () {
-            return SearchFormatterBehavior.formatSearchModeState();
+            return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
         },
         formatToolbarSelectionState: function (iSelectionCount) {
-            return SearchFormatterBehavior.formatToolbarSelectionState(iSelectionCount);
+            return Number(iSelectionCount || 0) > 0
+                ? UiSemanticConstants.OBJECT_STATUS_STATE.SUCCESS
+                : UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION;
         },
 
         onOpenSearchSortDialog: function () {
@@ -184,11 +238,11 @@ sap.ui.define([
         },
 
         formatWorkflowStageText: function (sStage) {
-            return SearchFormatterBehavior.formatWorkflowStageText(this, sStage);
+            return formatWorkflowStageText(this, sStage);
         },
 
         formatWorkflowStageState: function (sStage) {
-            return SearchFormatterBehavior.formatWorkflowStageState(sStage);
+            return formatWorkflowStageState(sStage);
         },
 
         onSearchTableSelectionChange: function (oEvent) {

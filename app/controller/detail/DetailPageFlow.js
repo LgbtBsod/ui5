@@ -23,6 +23,10 @@ sap.ui.define([
     var METHODS = JsRuntime.METHODS;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var DETAIL_CODES = DetailUseCaseConstants.CODES;
+    var DETAIL_ROW_BUSY_PATHS = Object.freeze({
+        CHECKS: "/checksBusy",
+        BARRIERS: "/barriersBusy"
+    });
 
     function markDetailReady(oController, mDetails) {
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.DETAIL_READY, mDetails);
@@ -32,6 +36,7 @@ sap.ui.define([
         DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
         ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false);
         ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
+        clearDeferredRowBusy(oController);
         if (oController && typeof oController.showI18nError === TYPE_FUNCTION) {
             oController.showI18nError("unexpectedError");
         }
@@ -48,10 +53,66 @@ sap.ui.define([
             });
         }
         oController._iAttachmentDropZoneBindTimer = SchedulingRuntime.clearTimer(oController._iAttachmentDropZoneBindTimer);
+        oController._iDetailPhaseLoadTimer = SchedulingRuntime.clearTimer(oController._iDetailPhaseLoadTimer);
         if (typeof oController._clearLocationValueHelpSearchTimer === TYPE_FUNCTION) {
             oController._clearLocationValueHelpSearchTimer();
         }
         oController._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(oController._iLocationVhTableSyncTimer);
+    }
+
+    function sameActiveRoot(oController, sRootId) {
+        var sActiveRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        return !!sRootId && sActiveRootId === sRootId;
+    }
+
+    function clearDeferredRowBusy(oController) {
+        var mBusyPatch = {};
+        mBusyPatch[DETAIL_ROW_BUSY_PATHS.CHECKS] = false;
+        mBusyPatch[DETAIL_ROW_BUSY_PATHS.BARRIERS] = false;
+        ControllerViewStateRuntime.setMany(oController, mBusyPatch);
+    }
+
+    function writeDeferredRows(oController, sRootId, oRows) {
+        var oDetailModel;
+        if (!sameActiveRoot(oController, sRootId)) {
+            return false;
+        }
+        oDetailModel = ControllerModelRuntime.detail(oController);
+        if (!oDetailModel) {
+            return false;
+        }
+        ModelStateRuntime.setManyOnModel(oDetailModel, {
+            "/current/checks": (oRows && oRows.checks) || [],
+            "/current/barriers": (oRows && oRows.barriers) || [],
+            "/base/checks": (oRows && oRows.checks) || [],
+            "/base/barriers": (oRows && oRows.barriers) || []
+        });
+        clearDeferredRowBusy(oController);
+        return true;
+    }
+
+    function scheduleDeferredRowHydration(oController, sRootId, mHooks) {
+        var fnBuildContext = mHooks && mHooks.buildCommandContext;
+        if (!sRootId || typeof fnBuildContext !== TYPE_FUNCTION) {
+            clearDeferredRowBusy(oController);
+            return Promise.resolve(null);
+        }
+        oController._iDetailPhaseLoadTimer = SchedulingRuntime.restartTimer(oController._iDetailPhaseLoadTimer, function () {
+            var oCtx = fnBuildContext();
+            var oRepo = oCtx && oCtx.repo;
+            if (!oRepo || typeof oRepo.loadDetailRows !== TYPE_FUNCTION) {
+                clearDeferredRowBusy(oController);
+                return;
+            }
+            Promise.resolve(oRepo.loadDetailRows({ rootId: sRootId })).then(function (oRows) {
+                if (!writeDeferredRows(oController, sRootId, oRows || {})) {
+                    clearDeferredRowBusy(oController);
+                }
+            }).catch(function () {
+                clearDeferredRowBusy(oController);
+            });
+        }, 0);
+        return Promise.resolve(null);
     }
 
     function syncDetailCommandSurface(oController, mOptions) {
@@ -161,8 +222,13 @@ sap.ui.define([
                 },
                 onToggleEdit: oController.onToggleEdit && oController.onToggleEdit.bind(oController)
             }).then(function () {
-                markDetailReady(oController, { mode: "open", rootId: mContext.sId });
-                return oResult;
+                return Promise.resolve((oResult && oResult.data && oResult.data.deferredRows)
+                    ? scheduleDeferredRowHydration(oController, mContext.sId, mOptions)
+                    : null
+                ).then(function () {
+                    markDetailReady(oController, { mode: "open", rootId: mContext.sId });
+                    return oResult;
+                });
             });
         }).catch(function (oError) {
             return handleMatchFailure(oController, oError);

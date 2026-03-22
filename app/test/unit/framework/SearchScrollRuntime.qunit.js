@@ -1,6 +1,6 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchScrollRuntime"
-], function (SearchScrollRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime"
+], function (SearchViewportRuntime) {
     "use strict";
 
     function createStateModel() {
@@ -55,7 +55,7 @@ sap.ui.define([
         };
     }
 
-    QUnit.module("SearchScrollRuntime", {
+    QUnit.module("SearchViewportRuntime scroll methods", {
         afterEach: function () {
             Array.prototype.slice.call(document.querySelectorAll("[data-qunit-search-scroll='true']")).forEach(function (oNode) {
                 oNode.remove();
@@ -77,15 +77,10 @@ sap.ui.define([
         };
 
         oFixture.scrollHost.scrollTop = 180;
-        SearchScrollRuntime.captureSearchScrollPosition(oFixture.controller);
+        SearchViewportRuntime.captureSearchScrollPosition(oFixture.controller);
 
         oFixture.scrollHost.scrollTop = 0;
-        SearchScrollRuntime.restoreSearchScrollPosition(oFixture.controller, {
-            resolveToolbarDom: function () {
-                return null;
-            },
-            syncViewportLayout: function () {}
-        });
+        SearchViewportRuntime.restoreSearchScrollPosition(oFixture.controller);
 
         setTimeout(function () {
             assert.strictEqual(oFixture.scrollHost.scrollTop, 180, "Search scroll position is restored");

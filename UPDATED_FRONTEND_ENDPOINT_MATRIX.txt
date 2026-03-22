@@ -33,7 +33,7 @@ Command endpoints used by frontend
 - AnalyticsRefreshTrigger
 - GetHierarchy
 
-Contract notes
-- Direct entity DELETE is not part of the target frontend contract.
-- Attachment binary retrieval is metadata-first; AttachmentSet is not treated as canonical inline-binary persistence.
-- Integration-origin enter-edit flow is gated by explicit user confirm before lock acquisition.
+Truth notes
+- Direct entity DELETE is not a target frontend contract path.
+- Attachment binary retrieval is not fully metadata-first yet because frontend still keeps Value in active fallback/serialization paths.
+- Integration-origin confirm-before-edit exists in active enter-edit flow but should not be described as proven for every possible entry path without broader route-path verification.

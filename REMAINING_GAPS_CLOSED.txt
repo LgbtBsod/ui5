@@ -1,23 +1,19 @@
-REMAINING TZ 2.1 GAPS CLOSED
+REMAINING GAPS STATUS
 
-Closed in code
-- Removed direct DELETE as a supported Gateway target flow. GatewayClient.deletePath now rejects with DIRECT_DELETE_UNSUPPORTED.
-- Aligned lock payloads with metadata and Gateway MPC: ObjectUuid + SessionGuid, with TabSessionId and optional ForceTakeover only on acquire.
-- Removed frontend lock drift caused by RootId / Force / StealFrom payload variants.
-- Locked release-on-page-leave payload to the same canonical object/session contract.
-- Kept releaseWithTrySave only as a caller-compatibility wrapper name; TrySave is not part of the contract.
-- Preserved attachment architecture: no attachments in initial detail snapshot/cache, metadata-first open/download semantics, direct attachment delete removed from target flow.
-- Preserved search semantics: backend fetch limit separate from visible chunk size; exact=AND, inexact=OR.
-- Preserved runtime settings as backend-driven single source of truth.
-- Preserved analytics split between lightweight operational reads and heavyweight analytical datasets.
+Actually closed in code
+- Direct OData DELETE is not the target frontend delete flow.
+- Lock acquire/heartbeat/release contract is aligned on ObjectUuid + SessionGuid, with ForceTakeover only on acquire.
+- Search exact/loose semantics and backend fetch limit vs visible chunk size are preserved.
+- Runtime settings still project to masterData>/runtime/*.
 
-Closed in artifacts
-- Updated truth matrix to reflect final code truth instead of target speculation.
-- Added updated Gateway entity/function import matrices.
-- Added explicit ArchiveLink attachment contract note.
-- Added runtime settings model rules.
-- Added analytics architecture rules.
+Not actually closed yet
+- Key contract is not fully closed: command payload still centers on pcct_uuid and broad alias fallback chains.
+- Attachment contract is not fully closed: Value remains part of active save/open/select normalization.
+- Attachment dual-table separation is not closed: persisted and session attachments still collapse into view>/sessionAttachments.
 
-Open residuals
-- Integration-origin confirm-before-edit is still not proven for every enter-edit entry path.
-- Productive download stream ownership must remain metadata-first; legacy Value fallback is compatibility only.
+Compatibility tails
+- ObjectUuid remains a justified Gateway boundary field for lock function imports.
+- Value remains a compatibility fallback, but is still too active to call the attachment contract fully metadata-first.
+
+Closed in this pass
+- Detail phased loading is now closed in frontend code: initial open loads root/basic only, checks/barriers hydrate in a deferred second phase with chunk size 20, attachments remain explicit only.

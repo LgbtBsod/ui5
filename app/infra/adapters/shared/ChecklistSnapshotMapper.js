@@ -1,9 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick"
-], function (NullishPick) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts"
+], function (NullishPick, ODataEntityContracts) {
     "use strict";
 
     var firstDefined = NullishPick.firstDefined;
+    var IDENTITY = ODataEntityContracts.IDENTITY;
 
     function mapCheckRow(oItem, iIndex) {
         var o = oItem || {};
@@ -55,15 +57,17 @@ sap.ui.define([
 
     function mapAttachmentRow(oItem) {
         var o = oItem || {};
-        var sKey = String(firstDefined(o.AttachmentKey, o.Key, o.key, "")).trim();
+        var sKey = String(firstDefined.apply(null, IDENTITY.ATTACHMENT_KEY_FIELDS.map(function (sField) {
+            return o[sField];
+        }).concat([""]))).trim();
         return Object.assign({}, o, {
             Key: sKey,
             AttachmentKey: sKey,
             RootKey: String(firstDefined(o.RootKey, o.rootKey, "")).trim(),
             ParentKey: String(firstDefined(o.ParentKey, o.parentKey, o.RootKey, o.rootKey, "")).trim(),
             FolderKey: String(firstDefined(o.FolderKey, o.folderKey, "")).trim(),
-            fileName: String(firstDefined(o.FileName, o.fileName, "")).trim(),
-            FileName: String(firstDefined(o.FileName, o.fileName, "")).trim(),
+            fileName: String(firstDefined(o.FileName, o.fileName, o.Name, o.name, "")).trim(),
+            FileName: String(firstDefined(o.FileName, o.fileName, o.Name, o.name, "")).trim(),
             mimeType: String(firstDefined(o.MimeType, o.mimeType, "application/octet-stream")).trim(),
             MimeType: String(firstDefined(o.MimeType, o.mimeType, "application/octet-stream")).trim(),
             description: String(firstDefined(o.Description, o.description, "")).trim(),

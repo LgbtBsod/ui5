@@ -1,20 +1,20 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentDropZoneBindingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentDropZoneRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailAdaptiveViewportRuntime"
-], function (AttachmentDropZoneBindingRuntime, DetailAdaptiveViewportRuntime) {
+], function (AttachmentDropZoneRuntime, DetailAdaptiveViewportRuntime) {
     "use strict";
 
     return {
         _bindAttachmentDropZone: function () {
-            AttachmentDropZoneBindingRuntime.bindAttachmentDropZone(this);
+            AttachmentDropZoneRuntime.bindAttachmentDropZone(this);
         },
 
         _unbindAttachmentDropZone: function () {
-            AttachmentDropZoneBindingRuntime.unbindAttachmentDropZone(this);
+            AttachmentDropZoneRuntime.unbindAttachmentDropZone(this);
         },
 
         _scheduleAttachmentDropZoneBind: function (iAttempt) {
-            AttachmentDropZoneBindingRuntime.scheduleAttachmentDropZoneBind(this, iAttempt);
+            AttachmentDropZoneRuntime.scheduleAttachmentDropZoneBind(this, iAttempt);
         },
 
         _bindAdaptiveDetailViewport: function () {

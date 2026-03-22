@@ -40,6 +40,21 @@ function moduleName(filePath) {
   return path.relative(DIST_DIR, filePath).split(path.sep).join("/");
 }
 
+function readModuleSource(filePath) {
+  let iAttempt = 0;
+  while (iAttempt < 3) {
+    try {
+      return fs.readFileSync(filePath, "utf8");
+    } catch (oError) {
+      if (!oError || (oError.code !== "ENOENT" && oError.code !== "EPERM")) {
+        throw oError;
+      }
+    }
+    iAttempt += 1;
+  }
+  return null;
+}
+
 function jsString(value) {
   return JSON.stringify(String(value))
     .replace(/\u2028/g, "\\u2028")
@@ -63,7 +78,13 @@ function buildLocalPreload() {
   walk(DIST_DIR, files);
   const modules = files
     .sort()
-    .map((filePath) => `${jsString(moduleName(filePath))}:${jsString(fs.readFileSync(filePath, "utf8"))}`)
+    .map((filePath) => {
+      const sSource = readModuleSource(filePath);
+      return sSource === null
+        ? null
+        : `${jsString(moduleName(filePath))}:${jsString(sSource)}`;
+    })
+    .filter(Boolean)
     .join(",\n");
   const payload = [
     "sap.ui.require.preload({",

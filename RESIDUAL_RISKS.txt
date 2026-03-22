@@ -1,12 +1,30 @@
 RESIDUAL RISKS
 
-1. ArchiveLink production infrastructure
-- Attachment contract is now metadata-first in active frontend flow, but productive ArchiveLink content provider / stream infrastructure is outside this repo boundary.
-- Legacy Value remains compatibility-only and must not become the canonical productive binary contract.
+1. Key contract is not fully canonical yet
+- Command flow still accepts and emits pcct_uuid/id/Key fallback chains.
+- DB_KEY / RootKey / PARENT_KEY are not yet the sole proven command-flow canon in frontend serialization.
 
-2. Compatibility alias tail
-- releaseWithTrySave still exists as a deprecated compatibility alias for callers during transition, even though active architecture now uses releaseActiveLock.
+2. Detail loading depends on a successful second-phase child read
+- Initial detail open is phased now: root/basic first, checks/barriers second.
+- If deferred child hydration fails, the screen remains operable but child sections stay empty until the user refreshes or reopens the detail.
 
-3. SAPUI5 official framework build
-- Local build is reproducible through repo-owned fallback scripts.
-- Official UI5 CLI framework build for 1.71.70 still requires SAPUI5 registry access not available in this environment.
+3. Attachment contract still has Value as a live compatibility tail
+- Value is still part of SELECTS, normalization, staged upload serialization, and open fallback path.
+- Attachment contract must not be described as fully metadata-first while this remains true.
+
+4. Persisted and session attachments are still mixed in view state
+- DetailAttachmentStateRuntime mirrors persisted attachments into view>/sessionAttachments.
+- Current fragment still renders one table from view>/sessionAttachments instead of a finished dual-table split.
+
+5. SAPUI5 internal CSS / DOM debt remains high
+- Multiple stylesheet modules still patch internal sap* classes.
+- Some runtime flows still depend on DOM geometry/query patterns that should be treated as residual exceptions until reduced.
+
+6. Backend proof remains limited
+- Real ABAP mapper to lt_modification is not provable from this frontend repo.
+- Real BOPF modify pipeline and productive ArchiveLink stream/provider are not provable from this repo.
+- Productive analytics persistence/background job topology is not provable from this repo.
+
+7. Official SAPUI5 framework build still requires SAP registry access
+- Local fallback build is reproducible.
+- Official framework-resolved build remains environment-dependent.

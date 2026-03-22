@@ -1,0 +1,5 @@
+UNKNOWN BACKEND ITEMS
+
+- Productive ArchiveLink content provider / media stream implementation is outside this repo.
+- Official SAPUI5 registry-backed preload build for 1.71.70 depends on external SAP registry access.
+- Full backend proof for chunked checks/barriers loading remains repository-dependent; current repo truth still documents lazy attachment separation and cache rules, but not a separately evidenced productive chunk transport contract.

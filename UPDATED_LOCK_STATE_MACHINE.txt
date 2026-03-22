@@ -13,24 +13,15 @@ Observed operations
 - heartbeat
 - status
 - release
-- takeover via canonical ForceTakeover flag
+- takeover via ForceTakeover on acquire
 
-Canonical payloads
+Canonical Gateway payloads
 - LockAcquire(ObjectUuid, SessionGuid, TabSessionId, ForceTakeover)
 - LockHeartbeat(ObjectUuid, SessionGuid)
 - LockRelease(ObjectUuid, SessionGuid)
 
-Expected flow
-1. permission check
-2. lock acquire
-3. cache freshness validation
-4. enter edit mode
-5. heartbeat and status polling while edit lock is active
-6. release on save/close/navigation where applicable
-7. page-leave release is best-effort only and must stay session-aware
-
-Forbidden behaviors
-- blind unlock without session token
-- parallel canonical takeover flags
-- direct promotion of page-leave release into guaranteed save-on-unload semantics
-- lock acquire before integration-origin user confirm
+Truth notes
+- Current lock contract is aligned at the Gateway boundary.
+- This does not prove that overall frontend command-flow canon is fully reduced to DB_KEY / RootKey only, because lock entry still receives rootId aliases upstream.
+- Page-leave release remains best-effort only and session-aware.
+- lock acquire before integration-origin confirm is not the intended flow, but full all-entry-path proof remains outside current frontend-only evidence.

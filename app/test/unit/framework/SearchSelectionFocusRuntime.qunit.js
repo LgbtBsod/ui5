@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionFocusRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "sap/ui/thirdparty/jquery"
-], function (SearchSelectionFocusRuntime, jQuery) {
+], function (SearchSelectionRuntime, jQuery) {
     "use strict";
 
     function attachFocusSpy(oNode) {
@@ -36,7 +36,7 @@ sap.ui.define([
         };
     }
 
-    QUnit.module("SearchSelectionFocusRuntime", {
+    QUnit.module("SearchSelectionRuntime focus methods", {
         afterEach: function () {
             jQuery("div[data-qunit-search-focus='true']").remove();
         }
@@ -70,7 +70,7 @@ sap.ui.define([
             return sId === "backendTopInput" ? oTargetControl : null;
         };
 
-        SearchSelectionFocusRuntime.focusSearchToolbar(oFixture.controller);
+        SearchSelectionRuntime.focusSearchToolbar(oFixture.controller);
 
         assert.strictEqual(oFixture.host.querySelector("#fixture-backendTopInput-inner").dataset.focused, "true", "Focus stayed inside the current search view");
         assert.notStrictEqual(oOutside.dataset.focused, "true", "Outside node was not targeted");
@@ -106,7 +106,7 @@ sap.ui.define([
             return sId === "searchSmartFilterBar" ? oTargetControl : null;
         };
 
-        SearchSelectionFocusRuntime.focusSearchFilters(oFixture.controller);
+        SearchSelectionRuntime.focusSearchFilters(oFixture.controller);
 
         assert.strictEqual(oFixture.host.querySelector("#fixture-searchSmartFilterBar-btnGo").dataset.focused, "true", "Filter focus stayed inside the current search view");
         assert.notStrictEqual(oOutside.dataset.focused, "true", "Outside filter node was not targeted");
@@ -125,9 +125,7 @@ sap.ui.define([
 
         oFixture.host.setAttribute("data-qunit-search-focus", "true");
         attachFocusSpy(oFixture.host.querySelector("#fixture-results-row"));
-        SearchSelectionFocusRuntime.focusSearchResults(oFixture.controller, function () {
-            return null;
-        });
+        SearchSelectionRuntime.focusSearchResults(oFixture.controller);
 
         assert.strictEqual(oFixture.host.querySelector("#fixture-results-row").dataset.focused, "true", "Results focus stayed inside the current search view");
         oFixture.host.remove();

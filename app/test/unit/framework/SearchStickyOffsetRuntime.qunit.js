@@ -1,9 +1,9 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStickyOffsetRuntime"
-], function (SearchStickyOffsetRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime"
+], function (SearchViewportRuntime) {
     "use strict";
 
-    QUnit.module("SearchStickyOffsetRuntime", {
+    QUnit.module("SearchViewportRuntime sticky offset", {
         afterEach: function () {
             Array.prototype.slice.call(document.querySelectorAll("[data-qunit-sticky-offset='true']")).forEach(function (oNode) {
                 oNode.remove();
@@ -31,13 +31,13 @@ sap.ui.define([
         document.body.appendChild(oShellHeader);
         document.body.appendChild(oScrollHost);
 
-        iOffset = SearchStickyOffsetRuntime.resolveShellHeaderOffset(24, 8, oScrollHost);
+        iOffset = SearchViewportRuntime.resolveShellHeaderOffset(null, oScrollHost);
 
         assert.strictEqual(iOffset, 80, "Sticky offset is derived from shell bottom, host top, and padding");
     });
 
     QUnit.test("resolveShellHeaderOffset falls back to minimum when shell geometry is unavailable", function (assert) {
-        var iOffset = SearchStickyOffsetRuntime.resolveShellHeaderOffset(24, 8, null);
+        var iOffset = SearchViewportRuntime.resolveShellHeaderOffset(null, null);
 
         assert.strictEqual(iOffset, 24, "Minimum sticky offset is preserved without shell geometry");
     });

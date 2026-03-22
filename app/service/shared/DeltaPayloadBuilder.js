@@ -2,9 +2,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaCore",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaFieldMappers",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (DeltaCore, DeltaFieldMappers, DeltaContracts, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts"
+], function (DeltaCore, DeltaFieldMappers, DeltaContracts, CreateSentinel, ODataEntityContracts) {
   "use strict";
+
+  var IDENTITY = ODataEntityContracts.IDENTITY;
 
   function parseODataDateMillis(vDate) {
     if (!vDate) { return null; }
@@ -47,10 +50,14 @@ sap.ui.define([
 
   function resolveRootKey(oCurrent, oBase) {
     return String(
-      (((oCurrent || {}).root || {}).id)
-      || (((oCurrent || {}).root || {}).Key)
+      (((oCurrent || {}).root || {})[IDENTITY.ROOT_CANONICAL_FIELDS[0]])
+      || (((oCurrent || {}).root || {}).id)
+      || (((oCurrent || {}).root || {})[IDENTITY.ROOT_CANONICAL_FIELDS[1]])
+      || (((oCurrent || {}).root || {})[IDENTITY.ROOT_ALIAS_FIELDS[2]])
+      || (((oBase || {}).root || {})[IDENTITY.ROOT_CANONICAL_FIELDS[0]])
       || (((oBase || {}).root || {}).id)
-      || (((oBase || {}).root || {}).Key)
+      || (((oBase || {}).root || {})[IDENTITY.ROOT_CANONICAL_FIELDS[1]])
+      || (((oBase || {}).root || {})[IDENTITY.ROOT_ALIAS_FIELDS[2]])
       || ""
     ).trim();
   }

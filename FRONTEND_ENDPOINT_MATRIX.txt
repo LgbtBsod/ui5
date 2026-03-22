@@ -1,9 +1,9 @@
 FRONTEND ENDPOINT MATRIX
 
-Main service:
+Main service
 - /sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/
 
-Frontend read endpoints:
+Read endpoints used by frontend
 - ChecklistSearchSet
 - ChecklistRootSet
 - ChecklistBasicInfoSet
@@ -13,13 +13,15 @@ Frontend read endpoints:
 - ChecklistPermissionSet
 - ChecklistCreatePermissionSet
 - LockStatusSet
+- LastChangeSet
 - DictionaryItemSet
 - PersonVHSet
+- RuntimeSettingsSet
 - SimpleAnalyticalSet
 - WorkflowAnalyticsBreakdownSet
 - AnalyticsRefreshStateSet
 
-Frontend command endpoints:
+Command endpoints used by frontend
 - CreateChecklist
 - SaveChanges
 - AutoSave
@@ -30,3 +32,8 @@ Frontend command endpoints:
 - LockRelease
 - AnalyticsRefreshTrigger
 - GetHierarchy
+
+Contract notes
+- Direct entity DELETE is not part of the target frontend contract.
+- Attachment binary retrieval is metadata-first; AttachmentSet is not treated as canonical inline-binary persistence.
+- Integration-origin enter-edit flow is gated by explicit user confirm before lock acquisition.

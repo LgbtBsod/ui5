@@ -231,4 +231,53 @@ sap.ui.define([
             done();
         });
     });
+
+    QUnit.test("opening detail defers checks and barriers on initial read open", function (assert) {
+        var done = assert.async();
+        var oUseCase = OpenDetailUseCase();
+
+        oUseCase.execute({
+            rootId: "ROOT-PHASE-1"
+        }, {
+            repo: {
+                checkChecklistPermission: function () {
+                    return Promise.resolve({
+                        rootId: "ROOT-PHASE-1",
+                        canView: true,
+                        canEdit: true,
+                        canDelete: true,
+                        reasonCode: "AUTHORIZED"
+                    });
+                },
+                loadDetailSnapshot: function () {
+                    return Promise.resolve({
+                        root: { id: "ROOT-PHASE-1", checklistId: "CHK-PHASE-1" },
+                        basic: { equipment: "Pump" },
+                        checks: [{ Key: "CHECK-1" }],
+                        barriers: [{ Key: "BARRIER-1" }]
+                    });
+                }
+            },
+            uiState: {
+                get: function () {
+                    return null;
+                }
+            }
+        }).then(function (oResult) {
+            var aEffects = oResult.effects || [];
+            function findPatch(sModelName, sPath) {
+                return aEffects.filter(function (oEffect) {
+                    return oEffect.type === "modelPatch" && oEffect.modelName === sModelName && oEffect.path === sPath;
+                }).pop();
+            }
+
+            assert.ok(oResult && oResult.ok, "open detail succeeds");
+            assert.strictEqual(oResult.data.deferredRows, true, "result marks deferred child hydration");
+            assert.deepEqual(findPatch("detail", "/current").value.checks, [], "checks are deferred from initial open snapshot");
+            assert.deepEqual(findPatch("detail", "/current").value.barriers, [], "barriers are deferred from initial open snapshot");
+            assert.strictEqual(findPatch("view", "/checksBusy").value, true, "checks busy stays active until phase 2");
+            assert.strictEqual(findPatch("view", "/barriersBusy").value, true, "barriers busy stays active until phase 2");
+            done();
+        });
+    });
 });

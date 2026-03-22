@@ -1,12 +1,12 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchFilterLifecycleBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchSmartTableBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (JSONModel, SearchFilterLifecycleBehavior, ModelConstants, StatePaths) {
+], function (JSONModel, SearchSmartTableBehavior, ModelConstants, StatePaths) {
     "use strict";
 
-    QUnit.module("framework/SearchFilterLifecycleBehavior");
+    QUnit.module("framework/SearchSmartTableBehavior");
 
     QUnit.test("clear handler resets custom segments via SmartFilterBar event only", function (assert) {
         var done = assert.async();
@@ -37,7 +37,7 @@ sap.ui.define([
             }
         };
 
-        SearchFilterLifecycleBehavior.onSmartFilterInitialise(oController, function () {});
+        SearchSmartTableBehavior.onSmartFilterInitialise(oController, function () {});
         assert.strictEqual(typeof fnClear, "function", "SmartFilterBar clear handler is bound");
 
         fnClear();

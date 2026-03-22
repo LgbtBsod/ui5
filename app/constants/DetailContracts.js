@@ -42,6 +42,12 @@ sap.ui.define([], function () {
             ATTACHMENT_CATEGORY_KEY: "GEN"
         }),
         ATTACHMENTS: Object.freeze({
+            CSS_CLASSES: Object.freeze({
+                DROP_ACTIVE: "isAttachmentDropActive",
+                DROP_PRIMED: "isAttachmentDropPrimed"
+            }),
+            DOM_FILE_TYPE_MOZ: "application/x-moz-file",
+            DOM_FILE_TYPE_STANDARD: "Files",
             HINT_FALLBACK_EMPTY_TOKEN: "-",
             HINT_FALLBACK_SEPARATOR: " - ",
             HINT_TEXT_KEY: "attachmentUploadHint",

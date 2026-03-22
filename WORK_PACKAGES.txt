@@ -1,24 +1,25 @@
 WORK PACKAGES
 
-WP1. Build reproducibility
-- repo-owned local dist fallback
-- local preload generation
-- aligned npm scripts
+WP1. Artifact truth correction
+- rewrite optimistic matched/closed wording
+- create missing txt owner/constants/merge artifacts
 
-WP2. Contract inventory artifacts
-- requirements baseline
-- truth matrix
-- endpoint/entity/function matrices
-- lock/cache/CDS/ABAP summaries
+WP2. Key contract correction
+- reduce alias fallback chains
+- restore RootKey/PARENT_KEY as primary command-flow identifiers
+- keep pcct_uuid/ObjectUuid only as boundary compatibility fields
 
-WP3. Targeted TZ gap closure
-- attachment lazy-load contract
-- centralized constants cleanup
-- ForceTakeover naming alignment
-- detail access illustration fallback without runtime-in-constants bug
+WP3. Detail phased loading
+- closed in code: root/basic on open, deferred checks/barriers chunk loading, attachments still explicit only
+- keep one follow-up only if needed: targeted telemetry or tests for deferred child-load failure path
 
-WP4. Verification
-- lint
-- backend tests
-- build
-- local smoke
+WP4. Attachment contract correction
+- isolate Value to compatibility fallback only
+- separate persisted vs session attachment state
+- finish explicit dual-section rendering and ownership
+
+WP5. Remaining overengineering reduction
+- component bootstrap cluster
+- component guard/lock clusters
+- app shell cluster
+- constants simplification

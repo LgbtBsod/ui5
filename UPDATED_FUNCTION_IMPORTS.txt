@@ -3,10 +3,12 @@ UPDATED FUNCTION IMPORTS
 CreateChecklist
 - Purpose: first persisted save of a local-only draft aggregate.
 - Method: POST body.
+- Truth note: create payload still serializes root identity around pcct_uuid compatibility field.
 
 SaveChanges
 - Purpose: canonical aggregate mutation command for update/delete child changes and root delete.
 - Method: POST body.
+- Truth note: aggregate delta still includes attachment value payload for staged uploads and root pcct_uuid compatibility identity.
 
 AutoSave
 - Purpose: deferred aggregate patch/autosave path.
@@ -22,6 +24,7 @@ LockAcquire
 - Method: POST body.
 - Required parameters: ObjectUuid, SessionGuid.
 - Optional parameters: TabSessionId, ForceTakeover.
+- Truth note: ObjectUuid is currently the active Gateway boundary field, not proof that frontend command-flow canon is fully ObjectUuid-based.
 
 LockHeartbeat
 - Purpose: refresh active lock.

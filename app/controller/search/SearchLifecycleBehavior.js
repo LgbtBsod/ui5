@@ -2,18 +2,20 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchStartupBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchViewLoadBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchAnalyticsIntentBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchAnalyticsRailRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchRateProgress",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStartupRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
@@ -22,18 +24,20 @@ sap.ui.define([
     ControllerResourceCleanup,
     SearchFacade,
     ControllerRouteRuntime,
+    ControllerViewStateRuntime,
     ModelStateRuntime,
     SchedulingRuntime,
-    SearchStartupBehavior,
-    SearchViewLoadBehavior,
     SearchAnalyticsIntentBehavior,
+    ControllerTextRuntime,
+    SearchCommandPolicy,
+    SearchSelectionRuntime,
     SearchViewportRuntime,
     SearchAnalyticsRailRuntime,
     SearchRateProgress,
+    SearchStartupRuntime,
     SearchViewStateRuntime,
     StatusChipClassRuntime,
     SemanticDomRuntime,
-    ControllerTextRuntime,
     ModelContracts,
     NavigationContracts,
     SearchToolbarContracts,
@@ -45,6 +49,11 @@ sap.ui.define([
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var TOKENS = ModelContracts.TOKENS;
     var PATHS = SearchToolbarContracts.PATHS;
+
+    function syncSmartControlAvailability(oController) {
+        SearchSelectionRuntime.syncSearchTableRuntimeState(oController, SearchSelectionRuntime.resolveSearchInnerTable(oController));
+        ControllerViewStateRuntime.set(oController, "/tableBusy", false);
+    }
 
     function syncSemanticRegions(oController) {
         SemanticDomRuntime.syncControllerTarget(oController, "searchAnalyticsRailRegion", {
@@ -101,7 +110,7 @@ sap.ui.define([
             { name: NavigationContracts.ROUTES.DETAIL, handler: oController._onDetailSearchContextMatched },
             { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched }
         ]);
-        SearchStartupBehavior.syncSmartControlAvailability(oController);
+        syncSmartControlAvailability(oController);
         SearchViewportRuntime.bindSearchViewportRuntime(oController);
     }
 
@@ -159,7 +168,43 @@ sap.ui.define([
     function onSearchMatched(oController, fnApplyAnalyticsDrilldownIntent) {
         oController._bSearchInitialRouteHandled = true;
         oController._bSearchRouteActive = true;
-        SearchStartupBehavior.onSearchMatched(oController);
+        SearchStartupRuntime.onSearchMatched(oController, {
+            bindSearchViewportRuntime: function () {
+                SearchViewportRuntime.bindSearchViewportRuntime(oController);
+            },
+            bindSearchWorkingText: function () {
+                oController._resolveSearchWorkingText = function () {
+                    return ControllerTextRuntime.getText(oController, "workingMessageLong", [], "Working...");
+                };
+            },
+            bootstrap: function (mInput) {
+                return SearchCommandPolicy.bootstrap(oController, mInput);
+            },
+            refreshAnalyticsRail: function () {
+                return SearchAnalyticsRailRuntime.refreshAnalyticsRail(oController, {
+                    runAnalytics: function (mInput) {
+                        return SearchCommandPolicy.analytics(oController, mInput);
+                    }
+                });
+            },
+            rebind: function (mInput) {
+                return SearchCommandPolicy.rebind(oController, mInput);
+            },
+            rebindTableDirect: function () {
+                var oSmartTable = oController && oController.byId && oController.byId(UiControlIds.SEARCH.SMART_TABLE);
+                if (!oSmartTable || typeof oSmartTable.rebindTable !== "function") {
+                    return false;
+                }
+                oSmartTable.rebindTable();
+                return true;
+            },
+            restoreSearchScrollPosition: function () {
+                SearchViewportRuntime.restoreSearchScrollPosition(oController);
+            },
+            syncSmartControlAvailability: function () {
+                syncSmartControlAvailability(oController);
+            }
+        });
         fnApplyAnalyticsDrilldownIntent();
     }
 
@@ -172,14 +217,33 @@ sap.ui.define([
         oController._bSearchRouteActive = false;
         SearchAnalyticsRailRuntime.clearAnalyticsRefreshTimer(oController);
         SearchViewportRuntime.captureSearchScrollPosition(oController);
-        SearchStartupBehavior.syncSearchContextForDetailRoute(oController);
+        SearchStartupRuntime.syncSearchContextForDetailRoute(oController, {
+            bindSearchViewportRuntime: function () {
+                SearchViewportRuntime.bindSearchViewportRuntime(oController);
+            },
+            scheduleSearchViewportSync: function (bImmediate) {
+                SearchViewportRuntime.scheduleSearchViewportSync(oController, bImmediate);
+            },
+            syncSmartControlAvailability: function () {
+                syncSmartControlAvailability(oController);
+            }
+        });
     }
 
     function onAnalyticsMatched(oController) {
         oController._bSearchRouteActive = false;
         SearchAnalyticsRailRuntime.clearAnalyticsRefreshTimer(oController);
         SearchViewportRuntime.captureSearchScrollPosition(oController);
-        SearchViewLoadBehavior.resetTransientFeedback(oController);
+        oController._iPendingSearchLoadTimer = SchedulingRuntime.clearTimer(oController._iPendingSearchLoadTimer);
+        oController._oPendingSearchLoad = null;
+        oController._iSearchWorkingHintTimer = SchedulingRuntime.clearTimer(oController._iSearchWorkingHintTimer);
+        ControllerViewStateRuntime.set(oController, "/filterHintVisible", false);
+        ControllerViewStateRuntime.set(oController, "/filterHintText", "");
+        ControllerViewStateRuntime.set(oController, "/filterHintType", "Information");
+        ModelStateRuntime.setMany(oController, STATE_MODEL, {
+            "/loadError": false,
+            "/loadErrorMessage": ""
+        });
     }
 
     return {

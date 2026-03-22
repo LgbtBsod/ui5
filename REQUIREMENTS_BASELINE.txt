@@ -1,26 +1,34 @@
 TZ 2.1 production-ready baseline
 
-Stack:
+Stack
 - SAPUI5 1.71 target
 - SAP Gateway OData V2
 - CDS / SADL read path
 - BOPF modify path
 - Microsoft Edge only, no IE support
 
-Current local validation baseline:
+Validation baseline
 - npm run lint:js
 - npm run lint:css
 - python -m pytest -q
 - npm run build
 - powershell -ExecutionPolicy Bypass -File scripts/local-launch-smoke.ps1
 
-Build prerequisites:
+Build prerequisites
 - Node.js with npm
-- Python available on PATH for backend mock tests
-- Local build uses repo-owned fallback dist + preload generation because public npm does not resolve @sapui5/distribution-metadata@1.71.70
-- Official SAPUI5 preload build remains available through npm run build:preload:sap when SAPUI5 registry access exists
+- Python on PATH for backend mock tests
+- Local build currently relies on repo-owned fallback dist + preload generation because public npm does not resolve @sapui5/distribution-metadata@1.71.70
+- Official SAPUI5 preload build still requires SAPUI5 registry access
 
-Project rules preserved:
-- Existing working behavior must not be changed unless it diverges from TZ or breaks validation
-- JSONModel remains the UI state source
-- DB_KEY / PARENT_KEY stay canonical technical keys in backend contract flow
+Project rules that remain mandatory
+- JSONModel runtime pattern remains the frontend state pattern
+- masterData>/runtime/* remains the runtime settings source of truth
+- search exact = AND, loose/inexact = OR
+- backend fetch limit and visible chunk size stay separate
+- delete target flow stays canonical modification pipeline
+- lock flow stays acquire/status/heartbeat/release with ForceTakeover on acquire only
+
+Truth corrections
+- DB_KEY / PARENT_KEY cannot currently be claimed as fully restored frontend command-flow canon
+- phased detail loading cannot currently be claimed as closed
+- metadata-first attachments cannot currently be claimed as fully closed while Value remains active in serialization/open fallback

@@ -41,6 +41,9 @@ sap.ui.define([
             loadDetailSnapshot: function (mArgs) {
                 return ODataChecklistReadRuntime.loadDetailSnapshot(mArgs, readDeps());
             },
+            loadDetailRows: function (mArgs) {
+                return ODataChecklistReadRuntime.loadDetailRows(mArgs, readDeps());
+            },
             saveChecklist: function (mArgs) {
                 return ODataChecklistMutationRuntime.saveChecklist(mArgs, mutationDeps());
             },

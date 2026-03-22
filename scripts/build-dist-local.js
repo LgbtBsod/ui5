@@ -7,7 +7,21 @@ const APP_DIR = path.join(ROOT, "app");
 const DIST_DIR = path.join(ROOT, "dist");
 
 function rimraf(targetPath) {
-  fs.rmSync(targetPath, { recursive: true, force: true });
+  let iAttempt = 0;
+  let oLastError = null;
+  while (iAttempt < 3) {
+    try {
+      fs.rmSync(targetPath, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
+      return;
+    } catch (oError) {
+      oLastError = oError;
+      if (!oError || oError.code !== "ENOTEMPTY") {
+        throw oError;
+      }
+    }
+    iAttempt += 1;
+  }
+  throw oLastError;
 }
 
 function copyRecursive(sourcePath, targetPath) {

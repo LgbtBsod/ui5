@@ -1,23 +1,24 @@
 GATEWAY ENTITY MODEL
 
-Canonical entity sets:
-- AttachmentSet
-- ChecklistBarrierSet
-- ChecklistBasicInfoSet
-- ChecklistCheckSet
-- ChecklistCreatePermissionSet
-- ChecklistPermissionSet
-- ChecklistRootSet
-- ChecklistSearchSet
-- DictionaryItemSet
-- LastChangeSet
-- LockStatusSet
-- PersonVHSet
-- SimpleAnalyticalSet
-- WorkflowAnalyticsBreakdownSet
-- AnalyticsRefreshStateSet
+Command/read split
+- ChecklistRootSet: aggregate root read model; not directly deletable in target architecture.
+- ChecklistBasicInfoSet: supporting read model for header/basic detail data.
+- ChecklistCheckSet: child read model; child mutations must flow through aggregate save payload, not direct entity delete.
+- ChecklistBarrierSet: child read model; child mutations must flow through aggregate save payload, not direct entity delete.
+- AttachmentSet: attachment metadata read model; not directly deletable in target architecture.
+- ChecklistSearchSet: search/read projection for list page.
+- ChecklistPermissionSet: detail permission/read-only capability projection.
+- ChecklistCreatePermissionSet: create capability projection.
+- DictionaryItemSet: value help / dictionary read model.
+- PersonVHSet: people value help read model.
+- LockStatusSet: lock status read-only projection with explicit owner/session/killed/takeover semantics.
+- LastChangeSet: change tracking / last change projection.
+- RuntimeSettingsSet: backend-driven runtime settings source.
+- SimpleAnalyticalSet: lightweight analytical read.
+- WorkflowAnalyticsBreakdownSet: heavyweight analytical breakdown read.
+- AnalyticsRefreshStateSet: analytics refresh state projection.
 
-Important field truths:
-- AttachmentSet includes RootKey and ParentKey as technical binary ownership fields
-- ChecklistSearchSet exposes SourceKey and IntegrationFlag in local metadata
-- Runtime settings are represented as backend-driven data, not inline frontend truth
+Target rules
+- Entity sets are read models and capability projections.
+- Mutations are command-driven through function imports, not direct DELETE of aggregate or child entities.
+- Attachment binary is not the canonical entity source; attachment metadata is.

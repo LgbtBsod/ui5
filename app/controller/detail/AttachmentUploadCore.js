@@ -1,10 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentUploadRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (AttachmentUploadRuntime, DetailRuntimeContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
+], function (AttachmentUploadRuntime, DetailRuntimeContracts, UiControlIds) {
     "use strict";
 
     var ATTACHMENT_CONSTANTS = DetailRuntimeContracts.ATTACHMENTS;
+    var ATTACHMENT_IDS = UiControlIds.DETAIL;
 
     function clearAttachmentUploader(oUploader) {
         if (oUploader && oUploader.clear) {
@@ -34,7 +36,7 @@ sap.ui.define([
     }
 
     function syncUploaderPolicy(oController) {
-        var oUploader = oController.byId("attachmentUploader");
+        var oUploader = oController.byId(ATTACHMENT_IDS.ATTACHMENT_UPLOADER);
         var oPolicy = AttachmentUploadRuntime.getUploadPolicy(oController);
         if (!oUploader) {
             return;
@@ -48,7 +50,7 @@ sap.ui.define([
     }
 
     function openNativeFilePicker(oController) {
-        var oUploader = oController.byId("attachmentUploader");
+        var oUploader = oController.byId(ATTACHMENT_IDS.ATTACHMENT_UPLOADER);
 
         if (!oUploader) {
             return Promise.resolve(false);
@@ -76,7 +78,7 @@ sap.ui.define([
     }
 
     function onUploaderChange(oController, oEvent) {
-        var oUploader = (oEvent && oEvent.getSource && oEvent.getSource()) || oController.byId("attachmentUploader");
+        var oUploader = (oEvent && oEvent.getSource && oEvent.getSource()) || oController.byId(ATTACHMENT_IDS.ATTACHMENT_UPLOADER);
         var aFiles = normalizeUploaderFiles(oEvent && oEvent.getParameter && oEvent.getParameter("files"));
 
         if (!aFiles.length) {

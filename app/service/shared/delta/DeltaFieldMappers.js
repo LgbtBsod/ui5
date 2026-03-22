@@ -1,7 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts"
-], function (DeltaContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts"
+], function (DeltaContracts, ODataEntityContracts) {
   "use strict";
+
+  var IDENTITY = ODataEntityContracts.IDENTITY;
 
   function assignIfPresent(oTarget, sKey, vValue) {
     if (vValue !== undefined) {
@@ -56,7 +59,7 @@ sap.ui.define([
   }
 
   function toCheckFields(oRow, iIndex, sEditMode) {
-    var sKey = pickValue(oRow, ["id", "Key", "check_uuid"]);
+    var sKey = pickValue(oRow, ["id", IDENTITY.ROOT_CANONICAL_FIELDS[1], "check_uuid"]);
     var bCreate = String(sEditMode || "U").toUpperCase() === "C";
     return {
       check_uuid: bCreate ? "" : String(sKey || "").trim(),
@@ -70,7 +73,7 @@ sap.ui.define([
   }
 
   function toBarrierFields(oRow, iIndex, sEditMode) {
-    var sKey = pickValue(oRow, ["id", "Key", "barrier_uuid"]);
+    var sKey = pickValue(oRow, ["id", IDENTITY.ROOT_CANONICAL_FIELDS[1], "barrier_uuid"]);
     var bCreate = String(sEditMode || "U").toUpperCase() === "C";
     return {
       barrier_uuid: bCreate ? "" : String(sKey || "").trim(),
@@ -84,12 +87,12 @@ sap.ui.define([
   }
 
   function toParticipantFields(oRow, iIndex, sEditMode) {
-    var sKey = pickValue(oRow, ["id", "Key", "part_uuid", "participant_uuid"]);
+    var sKey = pickValue(oRow, ["id", IDENTITY.ROOT_CANONICAL_FIELDS[1], "part_uuid", "participant_uuid"]);
     var sMode = DeltaContracts.normalizeEditMode(sEditMode, DeltaContracts.EDIT_MODE.UPDATE);
     var bCreate = sMode === DeltaContracts.EDIT_MODE.CREATE;
     return {
       part_uuid: bCreate ? "" : String(sKey || "").trim(),
-      client_row_id: String(pickValue(oRow, ["client_row_id", "id", "Key"]) || "").trim(),
+      client_row_id: String(pickValue(oRow, ["client_row_id", "id", IDENTITY.ROOT_CANONICAL_FIELDS[1]]) || "").trim(),
       edit_mode: sMode,
       part_num: Number(oRow.partNum || oRow.PartNum || oRow.position || iIndex + 1),
       role_code: String(pickValue(oRow, ["role_code", "RoleCode", "role", "Role"]) || "").trim(),
@@ -102,21 +105,21 @@ sap.ui.define([
 
   function toAttachmentFields(oRow, iIndex, sEditMode, sRootKey) {
     var sMode = DeltaContracts.normalizeEditMode(sEditMode, DeltaContracts.EDIT_MODE.UPDATE);
-    var sKey = pickValue(oRow, ["attach_uuid", "AttachmentKey", "id", "Key"]);
+    var sKey = pickValue(oRow, IDENTITY.ATTACHMENT_KEY_FIELDS);
     var bCreate = sMode === DeltaContracts.EDIT_MODE.CREATE;
     return {
       attach_uuid: bCreate ? "" : String(sKey || "").trim(),
-      client_row_id: String(pickValue(oRow, ["client_row_id", "AttachmentKey", "id", "Key"]) || "").trim(),
+      client_row_id: String(pickValue(oRow, ["client_row_id"].concat(IDENTITY.ATTACHMENT_KEY_FIELDS)) || "").trim(),
       edit_mode: sMode,
-      root_key: String(pickValue(oRow, ["RootKey", "rootKey"]) || sRootKey || "").trim(),
-      parent_key: String(pickValue(oRow, ["ParentKey", "parentKey", "RootKey", "rootKey"]) || sRootKey || "").trim(),
-      folder_key: String(pickValue(oRow, ["FolderKey", "folderKey", "ParentKey", "parentKey"]) || sRootKey || "").trim(),
+      root_key: String(pickValue(oRow, IDENTITY.ROOT_KEY_FIELDS) || sRootKey || "").trim(),
+      parent_key: String(pickValue(oRow, IDENTITY.PARENT_KEY_FIELDS) || sRootKey || "").trim(),
+      folder_key: String(pickValue(oRow, ["FolderKey", "folderKey"].concat(IDENTITY.PARENT_KEY_FIELDS)) || sRootKey || "").trim(),
       category_key: String(pickValue(oRow, ["CategoryKey", "categoryKey", "Type", "type"]) || "GEN").trim() || "GEN",
-      file_name: String(pickValue(oRow, ["FileName", "fileName", "Name", "name"]) || "").trim(),
-      mime_type: String(pickValue(oRow, ["MimeType", "mimeType"]) || "application/octet-stream").trim() || "application/octet-stream",
+      file_name: String(pickValue(oRow, IDENTITY.FILE_NAME_FIELDS) || "").trim(),
+      mime_type: String(pickValue(oRow, IDENTITY.MIME_TYPE_FIELDS) || "application/octet-stream").trim() || "application/octet-stream",
       description: String(pickValue(oRow, ["Description", "description"]) || "").trim(),
-      file_size: Number(pickValue(oRow, ["FileSize", "fileSize", "FileSizeContent", "fileSizeContent"]) || 0) || 0,
-      value: String(pickValue(oRow, ["Value", "value"]) || "").trim()
+      file_size: Number(pickValue(oRow, IDENTITY.FILE_SIZE_FIELDS) || 0) || 0,
+      value: String(pickValue(oRow, IDENTITY.INLINE_VALUE_FIELDS) || "").trim()
     };
   }
 

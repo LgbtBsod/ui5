@@ -1,0 +1,64 @@
+OWNER MATRIX
+
+1. Key normalization
+- Current owners:
+  - app/infra/adapters/shared/ODataChecklistPayloadMapper.js
+  - app/service/shared/DeltaPayloadBuilder.js
+  - app/service/shared/delta/DeltaFieldMappers.js
+  - app/infra/adapters/shared/ODataEntityContracts.js
+- Duplicate owner:
+  - yes, because alias fallback logic still lives in multiple serializers.
+- Target owner:
+  - ODataEntityContracts for shared field-name truth, plus one narrower command serializer path.
+
+2. Detail loading
+- Current owners:
+  - app/infra/adapters/shared/ODataChecklistReadRuntime.js
+  - app/service/domain/detail/usecases/OpenDetailUseCase.js
+- Duplicate owner:
+  - partial; loading policy and hydration policy are split but still coherent.
+- Target owner:
+  - ODataChecklistReadRuntime for fetch phasing, OpenDetailUseCase for UI hydration only.
+
+3. Attachment state
+- Current owners:
+  - app/service/domain/detail/DetailAttachmentStateRuntime.js
+  - app/service/domain/detail/DetailAttachmentSaveRuntime.js
+  - app/service/domain/detail/DetailAttachmentDeltaRuntime.js
+  - app/service/features/detail/runtime/DetailAttachmentOpenRuntime.js
+  - app/service/domain/detail/usecases/LoadAttachmentsUseCase.js
+- Duplicate owner:
+  - yes; persisted/session state mutation still crosses state runtime and save runtime.
+- Target owner:
+  - StateRuntime for state transitions, DeltaRuntime for serialization, OpenRuntime for download, LoadAttachmentsUseCase for explicit persisted load.
+
+4. Search screen
+- Current owners:
+  - app/controller/search/SearchControllerBehavior.js
+  - app/controller/search/SearchLifecycleBehavior.js
+  - app/controller/search/SearchActionBehavior.js
+  - app/controller/search/SearchSmartTableBehavior.js
+- Duplicate owner:
+  - reduced but still visible.
+- Target owner:
+  - SearchControllerBehavior as entry owner with the current smaller secondary owners only if they keep real decision points.
+
+5. Component bootstrap
+- Current owners:
+  - multiple files in app/service/runtime/component/bootstrap-related cluster
+- Duplicate owner:
+  - yes.
+- Target owner:
+  - one primary bootstrap runtime plus at most one contracts file.
+
+6. App shell
+- Current owners:
+  - app/controller/app/AppLifecycleBehavior.js
+  - app/controller/app/AppOverlayBehavior.js
+  - app/controller/app/AppShellBehavior.js
+  - app/controller/app/AppStateBehavior.js
+  - app/controller/app/AppDomBehavior.js
+- Duplicate owner:
+  - yes.
+- Target owner:
+  - one app controller owner with only essential helpers retained.

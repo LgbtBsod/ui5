@@ -3,6 +3,9 @@ sap.ui.define([], function () {
 
     return Object.freeze({
         DETAIL: Object.freeze({
+            ATTACHMENT_DROP_SCOPE: "attachmentDropScope",
+            ATTACHMENT_DROP_ZONE: "attachmentDropZone",
+            ATTACHMENT_UPLOADER: "attachmentUploader",
             EDIT_SWITCH: "detailEditSwitch"
         }),
         SEARCH: Object.freeze({
