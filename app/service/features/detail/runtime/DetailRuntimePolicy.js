@@ -1,11 +1,14 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes"
-], function (DetailRuntimeConstants, BehaviorScopes) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimeConstants"
+], function (DetailRuntimeConstants) {
     "use strict";
 
+    function detailRuntimeScope() {
+        return sap.ui.requireSync("PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes").detailRuntime;
+    }
+
     function runSyncOperation(sOperation, mContext) {
-        return BehaviorScopes.detailRuntime.executeSync(sOperation, mContext || {});
+        return detailRuntimeScope().executeSync(sOperation, mContext || {});
     }
 
     function analyticsEditRestorePlan(mContext) {
@@ -21,8 +24,14 @@ sap.ui.define([
 
     return {
         analyticsEditRestorePlan: analyticsEditRestorePlan,
-        registerBehaviorOverride: BehaviorScopes.detailRuntime.registerBehaviorOverride,
-        unregisterBehaviorOverride: BehaviorScopes.detailRuntime.unregisterBehaviorOverride,
-        clearBehaviorOverrides: BehaviorScopes.detailRuntime.clearBehaviorOverrides
+        registerBehaviorOverride: function () {
+            return detailRuntimeScope().registerBehaviorOverride.apply(null, arguments);
+        },
+        unregisterBehaviorOverride: function () {
+            return detailRuntimeScope().unregisterBehaviorOverride.apply(null, arguments);
+        },
+        clearBehaviorOverrides: function () {
+            return detailRuntimeScope().clearBehaviorOverrides.apply(null, arguments);
+        }
     };
 });

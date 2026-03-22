@@ -11,7 +11,7 @@ Freshness validation
 
 Attachment note
 - Attachment binaries are not embedded into the base detail cache snapshot.
-- But attachment state is not fully separated because persisted attachments are mirrored into view>/sessionAttachments.
+- Persisted attachment state stays in the detail model and staged session uploads stay in the view model.
 
 Runtime settings
 - Runtime settings are cached with TTL in SettingsManager.

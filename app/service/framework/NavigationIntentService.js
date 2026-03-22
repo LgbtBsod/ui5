@@ -1,10 +1,12 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes"
-], function (BehaviorScopes) {
+sap.ui.define([], function () {
     "use strict";
 
+    function navigationScope() {
+        return sap.ui.requireSync("PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes").navigation;
+    }
+
     function runOperation(sOperation, mContext) {
-        return BehaviorScopes.navigation.executeSync(sOperation, mContext || {});
+        return navigationScope().executeSync(sOperation, mContext || {});
     }
 
     function buildCurrentIntent(oStateModel) {
@@ -107,8 +109,14 @@ sap.ui.define([
         revertPendingIntent: revertPendingIntent,
         resumePendingIntent: resumePendingIntent,
         restorePendingIntent: restorePendingIntent,
-        registerBehaviorOverride: BehaviorScopes.navigation.registerBehaviorOverride,
-        unregisterBehaviorOverride: BehaviorScopes.navigation.unregisterBehaviorOverride,
-        clearBehaviorOverrides: BehaviorScopes.navigation.clearBehaviorOverrides
+        registerBehaviorOverride: function () {
+            return navigationScope().registerBehaviorOverride.apply(null, arguments);
+        },
+        unregisterBehaviorOverride: function () {
+            return navigationScope().unregisterBehaviorOverride.apply(null, arguments);
+        },
+        clearBehaviorOverrides: function () {
+            return navigationScope().clearBehaviorOverrides.apply(null, arguments);
+        }
     };
 });

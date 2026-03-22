@@ -12,9 +12,9 @@ RESIDUAL RISKS
 - Value is still part of SELECTS, normalization, staged upload serialization, and open fallback path.
 - Attachment contract must not be described as fully metadata-first while this remains true.
 
-4. Persisted and session attachments are still mixed in view state
-- DetailAttachmentStateRuntime mirrors persisted attachments into view>/sessionAttachments.
-- Current fragment still renders one table from view>/sessionAttachments instead of a finished dual-table split.
+4. Attachment metadata-first contract is still only partial
+- Persisted/session state split is now closed in frontend state and UI.
+- Remaining gap is strictly the Value-centric compatibility tail in select/open/save normalization.
 
 5. SAPUI5 internal CSS / DOM debt remains high
 - Multiple stylesheet modules still patch internal sap* classes.

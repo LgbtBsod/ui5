@@ -1,10 +1,12 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes"
-], function (BehaviorScopes) {
+sap.ui.define([], function () {
     "use strict";
 
+    function uiDecisionScope() {
+        return sap.ui.requireSync("PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes").uiDecision;
+    }
+
     function runOperation(sOperation, mContext) {
-        return BehaviorScopes.uiDecision.execute(sOperation, mContext || {});
+        return uiDecisionScope().execute(sOperation, mContext || {});
     }
 
     return {
@@ -29,8 +31,14 @@ sap.ui.define([
         notifyCorrelationCopied: function (mContext) {
             return runOperation("notifyCorrelationCopied", mContext);
         },
-        registerBehaviorOverride: BehaviorScopes.uiDecision.registerBehaviorOverride,
-        unregisterBehaviorOverride: BehaviorScopes.uiDecision.unregisterBehaviorOverride,
-        clearBehaviorOverrides: BehaviorScopes.uiDecision.clearBehaviorOverrides
+        registerBehaviorOverride: function () {
+            return uiDecisionScope().registerBehaviorOverride.apply(null, arguments);
+        },
+        unregisterBehaviorOverride: function () {
+            return uiDecisionScope().unregisterBehaviorOverride.apply(null, arguments);
+        },
+        clearBehaviorOverrides: function () {
+            return uiDecisionScope().clearBehaviorOverrides.apply(null, arguments);
+        }
     };
 });

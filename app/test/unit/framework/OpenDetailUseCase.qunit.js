@@ -118,6 +118,7 @@ sap.ui.define([
             assert.strictEqual(findPatch("state", StatePaths.WORKFLOW_DETAIL_LOCK_STATE).value, "EDIT_LOCKED", "lock state is preserved");
             assert.strictEqual(findPatch("state", StatePaths.WORKFLOW_AUTOSAVE_ENABLED).value, true, "autosave stays enabled");
             assert.deepEqual(findPatch("detail", "/current/attachments").value, oSnapshot.attachments, "snapshot attachments are preserved");
+            assert.deepEqual(findPatch("view", "/sessionAttachments").value, [], "persisted attachments are not mirrored into session attachments");
             done();
         });
     });

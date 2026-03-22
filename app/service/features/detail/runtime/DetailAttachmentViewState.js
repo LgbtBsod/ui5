@@ -19,8 +19,14 @@ sap.ui.define([
         var sDetailRootId = String(ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ROOT_ID, "") || "").trim();
         var sCanonicalRootId = RootIdRuntime.resolveFromController(oController);
         var aSessionAttachments = ControllerViewStateRuntime.get(oController, "/sessionAttachments", []);
+        var aPersistedAttachments = ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ATTACHMENTS, []);
 
-        return !!(sDetailRootId || sCanonicalRootId || (Array.isArray(aSessionAttachments) && aSessionAttachments.length));
+        return !!(
+            sDetailRootId
+            || sCanonicalRootId
+            || (Array.isArray(aSessionAttachments) && aSessionAttachments.length)
+            || (Array.isArray(aPersistedAttachments) && aPersistedAttachments.length)
+        );
     }
 
     function sync(oController) {

@@ -105,6 +105,9 @@ sap.ui.define([
             isBarriersVisibleByLpc: function (sLpcKey) {
                 return !!sLpcKey;
             },
+            isAttachmentSectionEmpty: function (aPersisted, aSession) {
+                return !hasRows(aPersisted) && !hasRows(aSession);
+            },
             formatHeaderDate: DetailFormatters.formatHeaderDate,
             formatInfoCardValue: DetailFormatters.formatInfoCardValue,
             formatPersonSuggestion: DetailFormatters.formatPersonSuggestion,
@@ -129,6 +132,8 @@ sap.ui.define([
             formatDeleteChecklistConfirmVisible: DetailFormatters.formatDeleteChecklistConfirmVisible,
             formatAutosaveText: DetailFormatters.formatAutosaveText,
             formatAttachmentsEmptyStateText: DetailFormatters.formatAttachmentsEmptyStateText,
+            formatIntegrationVisible: DetailFormatters.formatIntegrationVisible,
+            formatIntegrationText: DetailFormatters.formatIntegrationText,
             isCheckSectionEmpty: function (sKind, aRows) {
                 return String(sKind || "").trim() === "check" && !hasRows(aRows);
             },

@@ -1,15 +1,18 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
-], function (BehaviorScopes, FeedbackConstants) {
+], function (FeedbackConstants) {
     "use strict";
 
+    function feedbackScope() {
+        return sap.ui.requireSync("PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes").feedback;
+    }
+
     function runOperation(sOperation, mContext) {
-        return BehaviorScopes.feedback.execute(sOperation, mContext || {});
+        return feedbackScope().execute(sOperation, mContext || {});
     }
 
     function runSyncOperation(sOperation, mContext) {
-        return BehaviorScopes.feedback.executeSync(sOperation, mContext || {});
+        return feedbackScope().executeSync(sOperation, mContext || {});
     }
 
     function resolveText(oController, sKey, aArgs, sFallback) {
@@ -64,8 +67,14 @@ sap.ui.define([
         showGlobalMessage: showGlobalMessage,
         showRouteMessage: showRouteMessage,
         showToast: showToast,
-        registerBehaviorOverride: BehaviorScopes.feedback.registerBehaviorOverride,
-        unregisterBehaviorOverride: BehaviorScopes.feedback.unregisterBehaviorOverride,
-        clearBehaviorOverrides: BehaviorScopes.feedback.clearBehaviorOverrides
+        registerBehaviorOverride: function () {
+            return feedbackScope().registerBehaviorOverride.apply(null, arguments);
+        },
+        unregisterBehaviorOverride: function () {
+            return feedbackScope().unregisterBehaviorOverride.apply(null, arguments);
+        },
+        clearBehaviorOverrides: function () {
+            return feedbackScope().clearBehaviorOverrides.apply(null, arguments);
+        }
     };
 });

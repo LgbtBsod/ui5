@@ -37,9 +37,7 @@ sap.ui.define([], function () {
         "FrontendRuntimeSettings",
         "capabilities",
         "ChecklistRoots",
-        "SearchRows",
-        ENTITY_SETS.CHECKLIST_CHECK,
-        ENTITY_SETS.CHECKLIST_BARRIER
+        "SearchRows"
     ]);
 
     return {

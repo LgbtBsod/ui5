@@ -1,11 +1,14 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectApplier"
-], function (BehaviorScopes, EffectApplier) {
+], function (EffectApplier) {
     "use strict";
 
+    function dialogScope() {
+        return sap.ui.requireSync("PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes").dialog;
+    }
+
     function runOperation(sOperation, mContext) {
-        return BehaviorScopes.dialog.execute(sOperation, mContext || {});
+        return dialogScope().execute(sOperation, mContext || {});
     }
 
     function ensure(oController, sKey, mConfig) {
@@ -54,9 +57,15 @@ sap.ui.define([
         open: open,
         close: close,
         runEffect: runEffect,
-        registerBehaviorOverride: BehaviorScopes.dialog.registerBehaviorOverride,
-        unregisterBehaviorOverride: BehaviorScopes.dialog.unregisterBehaviorOverride,
-        clearBehaviorOverrides: BehaviorScopes.dialog.clearBehaviorOverrides,
+        registerBehaviorOverride: function () {
+            return dialogScope().registerBehaviorOverride.apply(null, arguments);
+        },
+        unregisterBehaviorOverride: function () {
+            return dialogScope().unregisterBehaviorOverride.apply(null, arguments);
+        },
+        clearBehaviorOverrides: function () {
+            return dialogScope().clearBehaviorOverrides.apply(null, arguments);
+        },
         promptWarning: EffectApplier.promptWarning,
         promptConfirm: EffectApplier.promptConfirm,
         promptError: EffectApplier.promptError,

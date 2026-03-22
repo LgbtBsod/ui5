@@ -1,14 +1,16 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes"
-], function (BehaviorScopes) {
+sap.ui.define([], function () {
     "use strict";
 
+    function workflowScope() {
+        return sap.ui.requireSync("PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes").workflow;
+    }
+
     function runOperation(sOperation, mContext) {
-        return BehaviorScopes.workflow.execute(sOperation, mContext || {});
+        return workflowScope().execute(sOperation, mContext || {});
     }
 
     function runSyncOperation(sOperation, mContext) {
-        return BehaviorScopes.workflow.executeSync(sOperation, mContext || {});
+        return workflowScope().executeSync(sOperation, mContext || {});
     }
 
     return {
@@ -53,8 +55,14 @@ sap.ui.define([
                 controller: oController
             });
         },
-        registerBehaviorOverride: BehaviorScopes.workflow.registerBehaviorOverride,
-        unregisterBehaviorOverride: BehaviorScopes.workflow.unregisterBehaviorOverride,
-        clearBehaviorOverrides: BehaviorScopes.workflow.clearBehaviorOverrides
+        registerBehaviorOverride: function () {
+            return workflowScope().registerBehaviorOverride.apply(null, arguments);
+        },
+        unregisterBehaviorOverride: function () {
+            return workflowScope().unregisterBehaviorOverride.apply(null, arguments);
+        },
+        clearBehaviorOverrides: function () {
+            return workflowScope().clearBehaviorOverrides.apply(null, arguments);
+        }
     };
 });

@@ -18,10 +18,9 @@ sap.ui.define([
     }
 
     function buildAttachmentLoadEffects(aAttachments, sToastKey, sToastLevel) {
-        var aSafeAttachments = Array.isArray(aAttachments) ? aAttachments : [];
+        var aPersistedAttachments = Array.isArray(aAttachments) ? aAttachments : [];
         var aEffects = [
-            Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ATTACHMENTS, aSafeAttachments),
-            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSafeAttachments),
+            Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ATTACHMENTS, aPersistedAttachments),
             Effects.modelPatch(MODELS.VIEW, ViewPathContracts.ATTACHMENTS_LOADED, true)
         ].concat(buildAttachmentBusyResetEffects());
         if (sToastKey) {
@@ -45,38 +44,35 @@ sap.ui.define([
     }
 
     function readWorkingAttachments(mCtx) {
-        var aCurrentAll = DetailStateAccess.readCurrentAttachments(mCtx);
-        var aSession = readSessionAttachments(mCtx);
-        return aSession.length ? aSession : aCurrentAll;
+        return DetailStateAccess.readWorkingAttachments(mCtx);
     }
 
     function syncEffects(mCtx, aAttachments, sToastKey, sSeverity, bDirty) {
         var aPersisted = Array.isArray(aAttachments) ? aAttachments.slice() : [];
         return buildAttachmentSyncEffects(aPersisted, sToastKey || "", sSeverity || "info").concat([
             Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ATTACHMENTS, aPersisted),
-            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aPersisted),
             Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DIRTY, !!bDirty)
         ]);
     }
 
     function appendSessionAttachment(mCtx, oAttachment, sToastKey) {
-        var aCurrentAll = readWorkingAttachments(mCtx);
         var aSession = readSessionAttachments(mCtx);
-        var aAllNext = AttachmentIdentity.appendUnique(aCurrentAll, oAttachment);
         var aSessionNext = AttachmentIdentity.appendUnique(aSession, Object.assign({}, oAttachment, { _sessionUpload: true }));
-        return buildAttachmentSyncEffects(aAllNext, sToastKey || DETAIL_MESSAGE_KEYS.ATTACHMENT_UPLOADED, "success").concat([
+        return buildAttachmentSyncEffects([], sToastKey || DETAIL_MESSAGE_KEYS.ATTACHMENT_UPLOADED, "success").concat([
             Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext),
             Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DIRTY, true)
         ]);
     }
 
     function removeAttachment(mCtx, sAttachmentId, oAttachment, sToastKey) {
-        var aCurrentAll = readWorkingAttachments(mCtx);
+        var aPersisted = DetailStateAccess.readCurrentAttachments(mCtx);
         var aSession = readSessionAttachments(mCtx);
-        var aAllNext = AttachmentIdentity.removeByAttachment(aCurrentAll, sAttachmentId, oAttachment);
+        var aPersistedNext = AttachmentIdentity.removeByAttachment(aPersisted, sAttachmentId, oAttachment);
         var aSessionNext = AttachmentIdentity.removeByAttachment(aSession, sAttachmentId, oAttachment);
-        return buildAttachmentSyncEffects(aAllNext, sToastKey || DETAIL_MESSAGE_KEYS.ATTACHMENT_DELETED, "info").concat([
-            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext)
+        return buildAttachmentSyncEffects([], sToastKey || DETAIL_MESSAGE_KEYS.ATTACHMENT_DELETED, "info").concat([
+            Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ATTACHMENTS, aPersistedNext),
+            Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSessionNext),
+            Effects.modelPatch(MODELS.STATE, StatePaths.WORKFLOW_DIRTY, true)
         ]);
     }
 

@@ -36,8 +36,8 @@ TRUTH MATRIX
   - ODataEntityContracts.SELECTS.ATTACHMENT and SELECTS.ATTACHMENT_CONTENT still include Value.
   - ODataChecklistPayloadMapper.normalizeAttachmentRows filters rows by FileName && Value, making Value part of normal attachment normalization.
   - DetailAttachmentDeltaRuntime serializes staged attachments into value base64.
-  - DetailAttachmentStateRuntime mirrors persisted attachments into view>/sessionAttachments.
-  - DetailAttachmentsBody.fragment.xml renders one table bound to view>/sessionAttachments, so dual-table dual-owner UX is not completed.
+  - Persisted attachments now stay in detail>/current/attachments and session uploads stay in view>/sessionAttachments.
+  - DetailAttachmentsBody.fragment.xml now renders session and persisted sections separately.
 - Status:
   - Partial / compatibility-tail-heavy.
 
@@ -48,9 +48,9 @@ TRUTH MATRIX
 - Actual in code:
   - OpenDetailUseCase excludes attachments from initial snapshot fetch.
   - LoadAttachmentsUseCase is explicit.
-  - But OpenDetailUseCase hydrates view>/sessionAttachments from current detail attachments when reopening same root.
+  - OpenDetailUseCase no longer hydrates persisted attachments into view>/sessionAttachments on normal reopen.
 - Status:
-  - Partial.
+  - Match.
 
 5. Delete pipeline
 - Expected by TZ:

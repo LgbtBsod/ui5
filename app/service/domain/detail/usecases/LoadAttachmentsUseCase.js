@@ -4,9 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (ModelContracts, Result, DetailAttachmentStateRuntime, UseCaseValue, CreateSentinel, DetailStateAccess, ViewPathContracts) {
+], function (ModelContracts, Result, DetailAttachmentStateRuntime, UseCaseValue, CreateSentinel, ViewPathContracts) {
     "use strict";
 
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
@@ -21,18 +20,16 @@ sap.ui.define([
         var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oUiState = mCtx && mCtx.uiState;
-        var aCurrentAttachments;
         var aSessionAttachments;
         var aWorkingAttachments;
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
-            aCurrentAttachments = DetailStateAccess.readCurrentAttachments(mCtx);
             aSessionAttachments = (oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS)) || [];
-            aWorkingAttachments = aSessionAttachments.length ? aSessionAttachments : aCurrentAttachments;
+            aWorkingAttachments = Array.isArray(aSessionAttachments) ? aSessionAttachments : [];
             return Promise.resolve(Result.ok({
                 attachments: aWorkingAttachments
             }, DetailAttachmentStateRuntime.buildAttachmentLoadEffects(
-                aWorkingAttachments,
+                [],
                 "",
                 "info"
             )));

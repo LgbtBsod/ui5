@@ -9,7 +9,6 @@ Actually closed in code
 Not actually closed yet
 - Key contract is not fully closed: command payload still centers on pcct_uuid and broad alias fallback chains.
 - Attachment contract is not fully closed: Value remains part of active save/open/select normalization.
-- Attachment dual-table separation is not closed: persisted and session attachments still collapse into view>/sessionAttachments.
 
 Compatibility tails
 - ObjectUuid remains a justified Gateway boundary field for lock function imports.
@@ -17,3 +16,4 @@ Compatibility tails
 
 Closed in this pass
 - Detail phased loading is now closed in frontend code: initial open loads root/basic only, checks/barriers hydrate in a deferred second phase with chunk size 20, attachments remain explicit only.
+- Attachment split is now closed in frontend code: persisted attachments stay in detail model, session uploads stay in view model, and the fragment renders them as separate sections.

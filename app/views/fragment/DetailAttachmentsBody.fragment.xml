@@ -51,7 +51,7 @@
             <HBox
                 class="detailEmptyStateCard workflowEmptyStateCard detailAttachmentsEmptyState"
                 renderType="Bare"
-                visible="{path:'view>/sessionAttachments', formatter:'.isEmptyRows'}">
+                visible="{parts:[{path:'detail>/current/attachments'},{path:'view>/sessionAttachments'}], formatter:'.isAttachmentSectionEmpty'}">
                 <core:Icon src="sap-icon://attachment" class="detailEmptyStateIcon workflowEmptyStateIcon"/>
                 <Title text="{i18n>detailEmptyAttachmentsTitle}" level="H6" class="detailEmptyStateTitle workflowEmptyStateTitle"/>
                 <Text
@@ -110,5 +110,59 @@
                 </ColumnListItem>
             </items>
         </Table>
+
+        <VBox renderType="Bare" width="100%" visible="{view>/attachmentsExpanded}">
+            <Title text="{i18n>attachmentsTitle}" level="H6" visible="{path:'detail>/current/attachments', formatter:'.hasRows'}" class="detailAttachmentPersistedTitle"/>
+            <Table
+                items="{detail>/current/attachments}"
+                class="flatEditorTable detailAttachmentTable"
+                visible="{path:'detail>/current/attachments', formatter:'.hasRows'}"
+                noDataText="{i18n>noAttachmentsData}">
+                <columns>
+                    <Column>
+                        <Text text="{i18n>attachmentFileName}"/>
+                    </Column>
+                    <Column minScreenWidth="Tablet" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
+                        <Text text="{i18n>attachmentCategoryLabel}"/>
+                    </Column>
+                    <Column width="7rem" hAlign="End">
+                        <Text text="{i18n>attachmentSize}"/>
+                    </Column>
+                    <Column minScreenWidth="Desktop" demandPopin="true" visible="{view>/attachmentDesktopColumnsVisible}">
+                        <Text text="{i18n>attachmentChangedOn}"/>
+                    </Column>
+                    <Column width="{view>/attachmentActionsColumnWidth}" hAlign="Center">
+                        <Label text="{i18n>rowActionsLabel}" class="tableActionHeaderLabel"/>
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem class="detailAttachmentRow detailAttachmentExpandedRow">
+                        <cells>
+                            <ObjectIdentifier title="{detail>FileName}" text="{detail>MimeType}" class="detailAttachmentNameCell"/>
+                            <Text
+                                text="{parts:[{path:'detail>CategoryKey'},{path:'masterData>/attachmentTypes'},{path:'detail>CategoryText'}], formatter:'.formatAttachmentCategoryText'}"
+                                class="detailAttachmentCategoryCell"/>
+                            <Text text="{path:'detail>FileSize', formatter:'.formatAttachmentSize'}" textAlign="End" class="detailAttachmentSizeCell"/>
+                            <Text text="{detail>ChangedOn}" class="detailAttachmentChangedCell"/>
+                            <HBox renderType="Bare" class="tableRowActionBar detailAttachmentActions detailAttachmentActionCell" wrap="Wrap">
+                                <Button
+                                    icon="sap-icon://download"
+                                    text="{i18n>rowActionDownload}"
+                                    type="Transparent"
+                                    press=".onOpenAttachment"
+                                    class="tableRowActionBtn"/>
+                                <Button
+                                    icon="sap-icon://delete"
+                                    text="{i18n>rowActionDelete}"
+                                    type="Transparent"
+                                    press=".onDeleteAttachment"
+                                    visible="{view>/attachmentMetaEditable}"
+                                    class="tableRowActionBtn tableRowActionBtnDanger"/>
+                            </HBox>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </VBox>
     </VBox>
 </core:FragmentDefinition>

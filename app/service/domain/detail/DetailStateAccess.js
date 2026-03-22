@@ -26,13 +26,14 @@ sap.ui.define([
         return (oChecklist && oChecklist.attachments) || [];
     }
 
-    function readWorkingAttachments(mCtx) {
+    function readSessionAttachments(mCtx) {
         var oUiState = uiState(mCtx);
         var aSession = oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS);
-        if (Array.isArray(aSession)) {
-            return aSession;
-        }
-        return readCurrentAttachments(mCtx);
+        return Array.isArray(aSession) ? aSession : [];
+    }
+
+    function readWorkingAttachments(mCtx) {
+        return readCurrentAttachments(mCtx).concat(readSessionAttachments(mCtx));
     }
 
     function readDetailSnapshot(mCtx) {
@@ -61,6 +62,7 @@ sap.ui.define([
         readCurrentChecklist: readCurrentChecklist,
         readDetailSnapshot: readDetailSnapshot,
         readRequiredFields: readRequiredFields,
+        readSessionAttachments: readSessionAttachments,
         readWorkingAttachments: readWorkingAttachments,
         resolveDateCheck: resolveDateCheck
     };

@@ -14,9 +14,8 @@ WP3. Detail phased loading
 - keep one follow-up only if needed: targeted telemetry or tests for deferred child-load failure path
 
 WP4. Attachment contract correction
-- isolate Value to compatibility fallback only
-- separate persisted vs session attachment state
-- finish explicit dual-section rendering and ownership
+- partially closed in code: persisted vs session attachment state separated, dual-section rendering added
+- remaining work: isolate Value to compatibility fallback only and remove Value-centric normalization/open tails
 
 WP5. Remaining overengineering reduction
 - component bootstrap cluster

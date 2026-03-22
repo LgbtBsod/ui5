@@ -93,6 +93,11 @@ sap.ui.define([
         return aAttachments;
     }
 
+    function resolveSessionAttachments(oUiState) {
+        var aSessionAttachments = (oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS)) || [];
+        return Array.isArray(aSessionAttachments) ? aSessionAttachments : [];
+    }
+
     function resolveEditableOpenState(oUiState, sRootId) {
         var sHydratedRootId = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID)) || "").trim();
         var sActiveRootId = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
@@ -275,6 +280,7 @@ sap.ui.define([
             var oCurrentSelected = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.ROOT);
             var oCurrentSnapshot = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.BASE);
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
+            var aSessionAttachments = resolveSessionAttachments(oUiState);
             var aEffectiveAttachments = aLoadedAttachments.length ? aLoadedAttachments : [];
             var oEditState = resolveEditableOpenState(oUiState, sCanonicalRootId);
             var bPreserveCurrentRows = oEditState.autosaveEnabled && (
@@ -307,7 +313,7 @@ sap.ui.define([
                 Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, oBaseSnapshot),
                 Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
                 Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, aEffectiveAttachments),
-                Effects.modelPatch(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS, aEffectiveAttachments),
+                Effects.modelPatch(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS, aSessionAttachments),
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.ATTACHMENTS_LOADED, aLoadedAttachments.length > 0),
                 Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.CHECKS, !bPreserveCurrentRows),
                 Effects.modelPatch(VIEW_MODEL, VIEW_BUSY_PATHS.BARRIERS, !bPreserveCurrentRows),

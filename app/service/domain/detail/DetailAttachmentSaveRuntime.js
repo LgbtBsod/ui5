@@ -34,7 +34,7 @@ sap.ui.define([
             var aEffects = [
                 Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
                 Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.ATTACHMENTS, aSyncedAttachments),
-                Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, aSyncedAttachments)
+                Effects.modelPatch(MODELS.VIEW, ViewPathContracts.SESSION_ATTACHMENTS, [])
             ];
 
             if (!bHasPendingAttachments) {
