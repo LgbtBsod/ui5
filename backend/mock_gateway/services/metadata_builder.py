@@ -64,7 +64,7 @@ def build_metadata() -> str:
    <EntityContainer Name="{ODATA_NS}_Entities" m:IsDefaultEntityContainer="true">
     <EntitySet Name="ChecklistSearchSet" EntityType="{ODATA_NS}.ChecklistSearch" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="true" sap:requires-filter="false" sap:addressable="true"/>
     <EntitySet Name="ChecklistRootSet" EntityType="{ODATA_NS}.ChecklistRoot" sap:creatable="false" sap:updatable="false" sap:deletable="true" sap:searchable="false" sap:requires-filter="false" sap:addressable="true"/>
-    <EntitySet Name="ChecklistBasicInfoSet" EntityType="{ODATA_NS}.ChecklistBasicInfo" sap:creatable="false" sap:updatable="true" sap:deletable="false" sap:searchable="false" sap:requires-filter="true" sap:addressable="true"/>
+     <EntitySet Name="ChecklistBasicInfoSet" EntityType="{ODATA_NS}.ChecklistBasicInfo" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="false" sap:requires-filter="true" sap:addressable="true"/>
     <EntitySet Name="ChecklistCheckSet" EntityType="{ODATA_NS}.ChecklistCheck" sap:creatable="false" sap:updatable="true" sap:deletable="false" sap:searchable="false" sap:requires-filter="true" sap:addressable="true"/>
     <EntitySet Name="ChecklistBarrierSet" EntityType="{ODATA_NS}.ChecklistBarrier" sap:creatable="false" sap:updatable="true" sap:deletable="false" sap:searchable="false" sap:requires-filter="true" sap:addressable="true"/>
     <EntitySet Name="DictionaryItemSet" EntityType="{ODATA_NS}.DictionaryItem" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="false" sap:requires-filter="true" sap:addressable="true"/>

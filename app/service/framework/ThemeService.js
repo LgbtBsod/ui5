@@ -1,18 +1,15 @@
 sap.ui.define([
     "sap/ui/core/Core",
     "sap/ui/core/theming/Parameters",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemePhilosophy",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ValueTokenParser",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeTokenRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade"
-], function (Core, Parameters, JsRuntime, ThemeContracts, ThemePhilosophy, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime, Ui5RuntimeFacade) {
+], function (Core, Parameters, ThemeContracts, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime, Ui5RuntimeFacade) {
     "use strict";
 
-    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var SWITCH_CLASS = ThemeContracts.CLASSES.SWITCHING;
     var MOTION_DISABLED_CLASS = ThemeContracts.CLASSES.MOTION_DISABLED;
     var MOTION_ENABLED_CLASS = ThemeContracts.CLASSES.MOTION_ENABLED;
@@ -26,6 +23,11 @@ sap.ui.define([
     var iSwitchTimer = 0;
     var fnThemeChangedCleanup = null;
     var sPendingMode = "";
+    var THEME_META = Object.freeze({
+        lifestyleClass: "themeLifestyleClarity",
+        platformClass: "platformPrecisionEnterprise",
+        horizonClass: "themeHorizonMorning"
+    });
 
     function normalizeMode(sModeOrTheme) {
         return DEFAULT_MODE;
@@ -145,7 +147,6 @@ sap.ui.define([
     function applyBodyClasses(sTheme) {
         var oBody = document && document.body;
         var oRoot = document && document.documentElement;
-        var oMeta = ThemePhilosophy.getMeta(sTheme);
         var aBodyNodes;
         if (!oBody || !oRoot) {
             return;
@@ -167,14 +168,14 @@ sap.ui.define([
         ].forEach(function (sClassName) {
             ThemeDomRuntime.removeClass(aBodyNodes, sClassName);
         });
-        if (oMeta.lifestyleClass) {
-            ThemeDomRuntime.addClass(aBodyNodes, oMeta.lifestyleClass);
+        if (THEME_META.lifestyleClass) {
+            ThemeDomRuntime.addClass(aBodyNodes, THEME_META.lifestyleClass);
         }
-        if (oMeta.platformClass) {
-            ThemeDomRuntime.addClass(aBodyNodes, oMeta.platformClass);
+        if (THEME_META.platformClass) {
+            ThemeDomRuntime.addClass(aBodyNodes, THEME_META.platformClass);
         }
-        if (oMeta.horizonClass) {
-            ThemeDomRuntime.addClass(aBodyNodes, oMeta.horizonClass);
+        if (THEME_META.horizonClass) {
+            ThemeDomRuntime.addClass(aBodyNodes, THEME_META.horizonClass);
         }
     }
 
@@ -228,7 +229,7 @@ sap.ui.define([
         );
         var sResolvedMode = DEFAULT_MODE;
         var sTheme = themeForMode(sResolvedMode);
-        var sCurrentTheme = Core && typeof Core.getConfiguration === TYPE_FUNCTION && Core.getConfiguration() && Core.getConfiguration().getTheme
+        var sCurrentTheme = Core && typeof Core.getConfiguration === "function" && Core.getConfiguration() && Core.getConfiguration().getTheme
             ? Core.getConfiguration().getTheme()
             : "";
         var sCurrentMode = modeForTheme(sCurrentTheme);

@@ -1,6 +1,6 @@
 ﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 

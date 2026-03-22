@@ -7,7 +7,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
@@ -15,8 +15,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
     "use strict";
 

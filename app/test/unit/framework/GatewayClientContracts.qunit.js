@@ -5,9 +5,8 @@
  */
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (Contracts, Support, GatewayContractConstants) {
+], function (Contracts, GatewayContractConstants) {
     "use strict";
 
     QUnit.module("service/backend/GatewayClientContracts");
@@ -32,7 +31,7 @@ sap.ui.define([
     QUnit.test("all FunctionImports covered by exactly one allowlist", function (assert) {
         ALL_IMPORTS.forEach(function (name) {
             var hits = [BODY, QUERY, GET].filter(function (list) {
-                return Support.allowlisted(name, list);
+                return Contracts.allowlisted(name, list);
             }).length;
             assert.strictEqual(hits, 1, name + " must appear in exactly one allowlist (found " + hits + ")");
         });
@@ -44,8 +43,8 @@ sap.ui.define([
             GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT,
             GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE
         ].forEach(function (name) {
-            assert.ok(Support.allowlisted(name, BODY),  name + " in BODY");
-            assert.notOk(Support.allowlisted(name, QUERY), name + " NOT in QUERY");
+            assert.ok(Contracts.allowlisted(name, BODY),  name + " in BODY");
+            assert.notOk(Contracts.allowlisted(name, QUERY), name + " NOT in QUERY");
         });
     });
 

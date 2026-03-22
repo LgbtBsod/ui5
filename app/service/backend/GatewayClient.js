@@ -3,11 +3,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestResiliencePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientRequestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RequestVerbConstants"
-], function (GatewayErrorNormalizer, RequestCoordinator, RequestResiliencePolicy, GatewayClientContracts, GatewayClientSupport, GatewayClientRequestRuntime, SecurityTokenRefresh, RequestVerbConstants) {
+], function (GatewayErrorNormalizer, RequestCoordinator, RequestResiliencePolicy, GatewayClientContracts, GatewayClientRequestRuntime, SecurityTokenRefresh, RequestVerbConstants) {
     "use strict";
 
     var _oModel = null;
@@ -133,18 +132,18 @@ sap.ui.define([
             return this.rawRead("/" + entitySet + "(" + key + ")", mParams || {}, mOptions || {});
         },
         rawRead: function (path, mParams, mOptions) {
-            var sPath = GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(path));
+            var sPath = GatewayClientContracts.assertCanonicalPath(GatewayClientContracts.normalizePath(path));
             var oOptions = mOptions || {};
             return executeRequest({
                 method: REQUEST.GET,
-                dedupeKey: DEDUPE.GET + sPath + "|" + GatewayClientSupport.encodeUrlParameters(mParams || {}),
+                dedupeKey: DEDUPE.GET + sPath + "|" + GatewayClientContracts.encodeUrlParameters(mParams || {}),
                 responseGuardKey: oOptions.responseGuardKey,
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: oOptions.retryCount,
                 correlationId: oOptions.correlationId,
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withReadRequest(sPath, mParams || {}, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
+                    return withReadRequest(sPath, mParams || {}, GatewayClientContracts.buildHeaders(oOptions.headers, sCorrelationId));
                 }
             });
         },
@@ -169,7 +168,7 @@ sap.ui.define([
                     return withDirectFunctionImportRequest(
                         name,
                         oPayload || {},
-                        GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId),
+                        GatewayClientContracts.buildHeaders(oOptions.headers, sCorrelationId),
                         { async: oOptions.async }
                     );
                 }
@@ -179,20 +178,20 @@ sap.ui.define([
             var oOptions = mOptions || {};
             return executeRequest({
                 method: REQUEST.GET_FUNCTION,
-                dedupeKey: DEDUPE.GET_FUNCTION + String(name || "") + "|" + GatewayClientSupport.encodeUrlParameters(mParams || {}),
+                dedupeKey: DEDUPE.GET_FUNCTION + String(name || "") + "|" + GatewayClientContracts.encodeUrlParameters(mParams || {}),
                 responseGuardKey: oOptions.responseGuardKey,
                 timeoutMs: oOptions.timeoutMs,
                 retryCount: oOptions.retryCount,
                 correlationId: oOptions.correlationId,
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectGetFunctionImportRequest(name, mParams || {}, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
+                    return withDirectGetFunctionImportRequest(name, mParams || {}, GatewayClientContracts.buildHeaders(oOptions.headers, sCorrelationId));
                 }
             });
         },
         deletePath: function (path, mOptions) {
-            var sPath = GatewayClientSupport.assertAllowedPath(
-                GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(path)),
+            var sPath = GatewayClientContracts.assertAllowedPath(
+                GatewayClientContracts.assertCanonicalPath(GatewayClientContracts.normalizePath(path)),
                 GatewayClientContracts.DIRECT_DELETE_ALLOWLIST,
                 REQUEST.DELETE
             );
@@ -204,7 +203,7 @@ sap.ui.define([
                 correlationId: oOptions.correlationId,
                 requestFactory: function (mRuntime) {
                     var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectDeleteRequest(sPath, GatewayClientSupport.buildHeaders(oOptions.headers, sCorrelationId));
+                    return withDirectDeleteRequest(sPath, GatewayClientContracts.buildHeaders(oOptions.headers, sCorrelationId));
                 }
             });
         },

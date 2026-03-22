@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (DetailPersistenceRuntime, DetailMessageKeyConstants) {
     "use strict";
 
@@ -44,5 +44,19 @@ sap.ui.define([
 
         assert.strictEqual(oResult.taxonomy, DetailPersistenceRuntime.TAXONOMY.LOCK_NOT_OWNED_BY_SESSION, "backend machine code is authoritative");
         assert.strictEqual(oResult.persistenceState, DetailPersistenceRuntime.STATES.LOCK_LOST, "lock ownership mismatch forces lock-lost state");
+    });
+
+    QUnit.test("classifyError maps network and permission scenarios explicitly", function (assert) {
+        var oNetwork = DetailPersistenceRuntime.classifyError({
+            statusCode: 0,
+            message: "offline timeout"
+        });
+        var oPermission = DetailPersistenceRuntime.classifyError({
+            statusCode: 403,
+            message: "permission denied"
+        });
+
+        assert.strictEqual(oNetwork.taxonomy, DetailPersistenceRuntime.TAXONOMY.NETWORK_ERROR, "network errors are classified explicitly");
+        assert.strictEqual(oPermission.taxonomy, DetailPersistenceRuntime.TAXONOMY.PERMISSION_DENIED, "permission errors are classified explicitly");
     });
 });

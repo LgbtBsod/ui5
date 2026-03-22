@@ -50,12 +50,16 @@ INTERFACE zif_zodata_lock_manager PUBLIC.
     RAISING
       zcx_zodata_error.
 
+  "! Legacy wrapper kept for compatibility with older callers.
+  "! Prefer ACQUIRE in new code.
   METHODS lock
     IMPORTING
       !is_key TYPE ty_key
     RAISING
       zcx_zodata_error.
 
+  "! Legacy wrapper kept for compatibility with older callers.
+  "! Prefer RELEASE in new code.
   METHODS unlock
   IMPORTING
       !is_key TYPE ty_key

@@ -322,6 +322,8 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         assert stale.status_code == 200
 
         metadata = client.get(f"{SERVICE_ROOT}/$metadata").text
+        assert 'EntitySet Name="ChecklistBasicInfoSet"' in metadata
+        assert 'EntitySet Name="ChecklistBasicInfoSet" EntityType="' + ODATA_NS + '.ChecklistBasicInfo" sap:creatable="false" sap:updatable="false" sap:deletable="false" sap:searchable="false" sap:requires-filter="true" sap:addressable="true"' in metadata
         assert 'EntitySet Name="ChecklistCheckSet"' in metadata
         assert 'EntitySet Name="ChecklistBarrierSet"' in metadata
         assert 'EntitySet Name="PersonVHSet"' in metadata

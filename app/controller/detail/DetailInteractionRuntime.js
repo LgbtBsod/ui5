@@ -4,7 +4,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentOpenRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailValueHelpRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInputAssistRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
@@ -15,7 +15,7 @@ sap.ui.define([
     DetailPersonInputRuntime,
     DetailAttachmentRuntime,
     DetailAttachmentOpenRuntime,
-    DetailValueHelpRuntime,
+    DetailInputAssistRuntime,
     ControllerViewStateRuntime,
     NavigationIntentService,
     RootIdRuntime,
@@ -147,49 +147,49 @@ sap.ui.define([
             return DetailAttachmentRuntime.toggleAttachmentsSection(this, attachmentSectionHooks(this));
         },
         onBarriersNumberChange: function (oEvent) {
-            return DetailValueHelpRuntime.onBarriersNumberChange(this, oEvent, numberValueHelpHooks(this));
+            return DetailInputAssistRuntime.onBarriersNumberChange(this, oEvent, numberValueHelpHooks(this));
         },
         onChecksNumberChange: function (oEvent) {
-            return DetailValueHelpRuntime.onChecksNumberChange(this, oEvent, numberValueHelpHooks(this));
+            return DetailInputAssistRuntime.onChecksNumberChange(this, oEvent, numberValueHelpHooks(this));
         },
         onCloseLocationValueHelp: function () {
-            return DetailValueHelpRuntime.closeLocationValueHelp(this, locationValueHelpHooks(this));
+            return DetailInputAssistRuntime.closeLocationValueHelp(this, locationValueHelpHooks(this));
         },
         onConfirmLocationValueHelp: function () {
-            return DetailValueHelpRuntime.confirmLocationValueHelp(this, locationValueHelpHooks(this));
+            return DetailInputAssistRuntime.confirmLocationValueHelp(this, locationValueHelpHooks(this));
         },
         onLpcChange: function (oEvent) {
-            return DetailValueHelpRuntime.onLpcChange(this, oEvent, numberValueHelpHooks(this));
+            return DetailInputAssistRuntime.onLpcChange(this, oEvent, numberValueHelpHooks(this));
         },
         onLocationTreeSelectionChange: function (oEvent) {
-            return DetailValueHelpRuntime.onLocationTreeSelectionChange(this, oEvent, locationValueHelpHooks(this));
+            return DetailInputAssistRuntime.onLocationTreeSelectionChange(this, oEvent, locationValueHelpHooks(this));
         },
         onLocationValueHelpSearch: function (oEvent) {
-            return DetailValueHelpRuntime.onLocationValueHelpSearch(this, oEvent, locationValueHelpHooks(this));
+            return DetailInputAssistRuntime.onLocationValueHelpSearch(this, oEvent, locationValueHelpHooks(this));
         },
         onLocationValueHelpSearchSubmit: function (oEvent) {
-            return DetailValueHelpRuntime.onLocationValueHelpSearchSubmit(this, oEvent, locationValueHelpHooks(this));
+            return DetailInputAssistRuntime.onLocationValueHelpSearchSubmit(this, oEvent, locationValueHelpHooks(this));
         },
         onOpenBarriersNumberValueHelp: function (oEvent) {
-            return DetailValueHelpRuntime.onOpenBarriersNumberValueHelp(this, oEvent, numberValueHelpHooks(this));
+            return DetailInputAssistRuntime.onOpenBarriersNumberValueHelp(this, oEvent, numberValueHelpHooks(this));
         },
         onOpenChecksNumberValueHelp: function (oEvent) {
-            return DetailValueHelpRuntime.onOpenChecksNumberValueHelp(this, oEvent, numberValueHelpHooks(this));
+            return DetailInputAssistRuntime.onOpenChecksNumberValueHelp(this, oEvent, numberValueHelpHooks(this));
         },
         onOpenLocationValueHelp: function (oEvent) {
-            return DetailValueHelpRuntime.onOpenLocationValueHelp(this, oEvent, locationValueHelpHooks(this));
+            return DetailInputAssistRuntime.onOpenLocationValueHelp(this, oEvent, locationValueHelpHooks(this));
         },
         onPersonInputChange: function (oEvent) {
-            return DetailValueHelpRuntime.onPersonInputChange(this, oEvent, personSuggestHooks(this));
+            return DetailInputAssistRuntime.onPersonInputChange(this, oEvent, personSuggestHooks(this));
         },
         onPersonSuggest: function (oEvent) {
-            return DetailValueHelpRuntime.onPersonSuggest(this, oEvent, personSuggestHooks(this));
+            return DetailInputAssistRuntime.onPersonSuggest(this, oEvent, personSuggestHooks(this));
         },
         onPersonSuggestionSelected: function (oEvent) {
-            return DetailValueHelpRuntime.onPersonSuggestionSelected(this, oEvent, personSuggestHooks(this));
+            return DetailInputAssistRuntime.onPersonSuggestionSelected(this, oEvent, personSuggestHooks(this));
         },
         onProfessionChange: function (oEvent) {
-            return DetailValueHelpRuntime.onProfessionChange(this, oEvent, numberValueHelpHooks(this));
+            return DetailInputAssistRuntime.onProfessionChange(this, oEvent, numberValueHelpHooks(this));
         }
     };
 });

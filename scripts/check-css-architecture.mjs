@@ -21,12 +21,11 @@ const expectedImports = [
   '@import url("./modules/21_controls.css");',
   '@import url("./modules/22_skeleton.css");',
   '@import url("./modules/23_dialogs.css");',
+  '@import url("./modules/24_table_common.css");',
   '@import url("./modules/40_page_search.css");',
   '@import url("./modules/41_page_detail.css");',
   '@import url("./modules/42_page_analytics.css");',
-  '@import url("./modules/90_ui5_patches.css");',
-  '@import url("./modules/91_ui5_layout_patches.css");',
-  '@import url("./modules/92_ui5_surface_tuning.css");'
+  '@import url("./modules/90_ui5_overrides.css");'
 ];
 const modules = [
   path.join(runtimeRoot, "styles/modules/00_tokens.css").replace(/\\/g, "/"),
@@ -37,17 +36,14 @@ const modules = [
   path.join(runtimeRoot, "styles/modules/21_controls.css").replace(/\\/g, "/"),
   path.join(runtimeRoot, "styles/modules/22_skeleton.css").replace(/\\/g, "/"),
   path.join(runtimeRoot, "styles/modules/23_dialogs.css").replace(/\\/g, "/"),
+  path.join(runtimeRoot, "styles/modules/24_table_common.css").replace(/\\/g, "/"),
   path.join(runtimeRoot, "styles/modules/40_page_search.css").replace(/\\/g, "/"),
   path.join(runtimeRoot, "styles/modules/41_page_detail.css").replace(/\\/g, "/"),
   path.join(runtimeRoot, "styles/modules/42_page_analytics.css").replace(/\\/g, "/"),
-  path.join(runtimeRoot, "styles/modules/90_ui5_patches.css").replace(/\\/g, "/"),
-  path.join(runtimeRoot, "styles/modules/91_ui5_layout_patches.css").replace(/\\/g, "/"),
-  path.join(runtimeRoot, "styles/modules/92_ui5_surface_tuning.css").replace(/\\/g, "/")
+  path.join(runtimeRoot, "styles/modules/90_ui5_overrides.css").replace(/\\/g, "/")
 ];
 const patchFiles = new Set([
-  path.join(runtimeRoot, "styles/modules/90_ui5_patches.css").replace(/\\/g, "/"),
-  path.join(runtimeRoot, "styles/modules/91_ui5_layout_patches.css").replace(/\\/g, "/"),
-  path.join(runtimeRoot, "styles/modules/92_ui5_surface_tuning.css").replace(/\\/g, "/")
+  path.join(runtimeRoot, "styles/modules/90_ui5_overrides.css").replace(/\\/g, "/")
 ]);
 
 function fail(message) {
@@ -99,7 +95,7 @@ for (const file of modules) {
   if (patchFiles.has(file)) {
     assertPatchDiscipline(file, css);
   } else if (css.includes("!important")) {
-    fail(`${file} contains !important outside 90_ui5_patches.css.`);
+    fail(`${file} contains !important outside 90_ui5_overrides.css.`);
   }
   if (/outline\s*:\s*none/i.test(css) && !patchFiles.has(file)) {
     fail(`${file} contains outline:none outside patches.`);

@@ -1,8 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchMessageKeyConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
 ], function (SearchViewStateRuntime, SearchRuntimeContracts, UiSemanticConstants, SearchMessageKeyConstants) {
     "use strict";
 

@@ -10,6 +10,4 @@
 @import url("./modules/40_page_search.css");
 @import url("./modules/41_page_detail.css");
 @import url("./modules/42_page_analytics.css");
-@import url("./modules/90_ui5_patches.css");
-@import url("./modules/91_ui5_layout_patches.css");
-@import url("./modules/92_ui5_surface_tuning.css");
+@import url("./modules/90_ui5_overrides.css");

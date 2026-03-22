@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
 ], function (StatePaths, SearchRuntimeConstants) {
     "use strict";
 

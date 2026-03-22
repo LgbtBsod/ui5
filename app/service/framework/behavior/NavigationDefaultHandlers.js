@@ -47,10 +47,10 @@
         if (sRouteName === NavigationContracts.ROUTES.ANALYTICS) {
             return HASH_ROUTE_PREFIX + NavigationContracts.ROUTES.ANALYTICS;
         }
-        if (sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT && oRouteArgs.id && oRouteArgs.layout) {
-            return "#/checklist/" + encodeURIComponent(String(oRouteArgs.id)) + "/" + encodeURIComponent(String(oRouteArgs.layout));
-        }
         if (sRouteName === NavigationContracts.ROUTES.DETAIL && oRouteArgs.id) {
+            if (oRouteArgs.layout) {
+                return "#/checklist/" + encodeURIComponent(String(oRouteArgs.id)) + "/" + encodeURIComponent(String(oRouteArgs.layout));
+            }
             return "#/checklist/" + encodeURIComponent(String(oRouteArgs.id));
         }
         return "";

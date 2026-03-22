@@ -333,8 +333,8 @@ def test_lock_and_persistence_message_keys_are_centralized_in_constants():
     lock_adapter = _read(APP_ROOT / "infra" / "adapters" / "LockAdapter.js")
     component_lock_events = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentLockEventsRuntime.js")
     default_handlers = _read(APP_ROOT / "service" / "framework" / "behavior" / "WorkflowDefaultHandlers.js")
-    detail_constants = _read(APP_ROOT / "constants" / "DetailUseCaseConstants.js")
-    detail_message_keys = _read(APP_ROOT / "constants" / "DetailMessageKeyConstants.js")
+    detail_constants = _read(APP_ROOT / "constants" / "DetailContracts.js")
+    detail_message_keys = detail_constants
 
     assert 'messageKey: "persistence' not in detail_persistence
     assert 'messageKey: "lock' not in lock_adapter
@@ -454,7 +454,7 @@ def test_export_source_separates_selected_and_all_found_contracts():
 
 def test_create_permission_contract_is_current_identity_only():
     source = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistPermissionRuntime.js")
-    key_contracts = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataKeyContracts.js")
+    key_contracts = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataEntityContracts.js")
     readme = _read(BACKEND_ROOT / "README_ODATA.md")
 
     assert 'buildEntityPath("ChecklistCreatePermissionSet", "CURRENT"' in source
@@ -734,8 +734,7 @@ def test_detail_save_runtime_preserves_partial_basic_snapshots_after_backend_sav
 
 
 def test_patch_css_prefers_semantic_host_classes_over_broad_renderer_selectors():
-    patch_css = _read(APP_ROOT / "styles" / "modules" / "90_ui5_patches.css")
-    layout_patch_css = _read(APP_ROOT / "styles" / "modules" / "91_ui5_layout_patches.css")
+    patch_css = _read(APP_ROOT / "styles" / "modules" / "90_ui5_overrides.css")
     search_sticky_runtime = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchStickyLayoutRuntime.js")
     shell_dom_runtime = _read(APP_ROOT / "service" / "features" / "shell" / "runtime" / "AppShellDomRuntime.js")
 
@@ -743,13 +742,13 @@ def test_patch_css_prefers_semantic_host_classes_over_broad_renderer_selectors()
     assert ".appFeedbackCorrelation .sapMInputBaseContentWrapper" not in patch_css
     assert ".appShellHeader .sapMBtnContent" not in patch_css
     assert ".shellActionBtn .sapMBtnContent" in patch_css
-    assert ".pageTransparent .sapMScrollCont" in layout_patch_css
-    assert ".chkApp .sapMScrollCont," not in layout_patch_css
-    assert ".appRootFclTransparent .sapMNav" in layout_patch_css
-    assert ".appRootFcl .sapMNav" not in layout_patch_css
-    assert ".searchPage.sapMPage > .sapUiXMLView" in layout_patch_css
-    assert ".detailGridTable .sapUiTableCtrlScr" in layout_patch_css
-    assert ".flatEditorTable .sapMListTblCnt" in layout_patch_css
+    assert ".pageTransparent .sapMScrollCont" in patch_css
+    assert ".chkApp .sapMScrollCont," not in patch_css
+    assert ".appRootFclTransparent .sapMNav" in patch_css
+    assert ".appRootFcl .sapMNav" not in patch_css
+    assert ".searchPage.sapMPage > .sapUiXMLView" in patch_css
+    assert ".detailGridTable .sapUiTableCtrlScr" in patch_css
+    assert ".flatEditorTable .sapMListTblCnt" in patch_css
     assert "AppShellDomRuntime.resolveShellHeaderHostDom" in search_sticky_runtime
     assert "function resolveShellHeaderHostDom" in shell_dom_runtime
 

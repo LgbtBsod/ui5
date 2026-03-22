@@ -7,8 +7,8 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerActionBusyRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts"
 ], function (SearchCommandPolicy, SearchFilterLifecycleBehavior, SearchViewLoadBehavior, SearchSelectionRuntime, ControlStyleRuntime, SearchLoadRuntime, ControllerActionBusyRuntime, ReadinessTelemetryRuntime, OperationSourceContracts, ReadinessTelemetryContracts) {
     "use strict";
 

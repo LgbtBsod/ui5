@@ -33,6 +33,9 @@ ENDCLASS.
 CLASS zcl_zodata_mpc_ext IMPLEMENTATION.
 
   METHOD define.
+    " ChecklistBasicInfoSet remains part of the service contract.
+    " In productive SAP it is backed by a dedicated CDS/read model and must not be
+    " folded into ChecklistRootSet unless that backend contract is redesigned.
     super->define( ).
     configure_etag( ).
     define_deep_types( ).

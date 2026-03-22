@@ -112,9 +112,9 @@ sap.ui.define([
         );
     });
 
-    QUnit.test("detail layout route forces fullscreen layout", function (assert) {
+    QUnit.test("analytics route forces fullscreen layout", function (assert) {
         var oController = createController({
-            currentRouteName: NavigationContracts.ROUTES.DETAIL_LAYOUT,
+            currentRouteName: NavigationContracts.ROUTES.ANALYTICS,
             selectedId: "CHK-200",
             activeObjectId: "CHK-200"
         }, {
@@ -126,7 +126,7 @@ sap.ui.define([
         assert.strictEqual(
             oController.getModel(ModelContracts.MODELS.SHELL).getProperty(ModelContracts.MODEL_PATHS.SHELL_LAYOUT),
             NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN,
-            "detail fullscreen route owns fullscreen layout"
+            "analytics route owns fullscreen layout"
         );
     });
 });

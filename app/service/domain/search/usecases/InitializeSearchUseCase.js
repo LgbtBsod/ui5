@@ -2,10 +2,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FacadeCommandConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
 ], function (Result, Effects, StatePaths, AnalyticsStateConstants, FacadeCommandConstants, ModelContracts, SearchRuntimeConstants) {
     "use strict";
 

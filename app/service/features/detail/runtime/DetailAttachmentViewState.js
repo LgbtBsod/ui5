@@ -5,8 +5,8 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (ModelContracts, StatePaths, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, RootIdRuntime, WorkflowContracts, DetailUseCaseConstants) {
     "use strict";
 

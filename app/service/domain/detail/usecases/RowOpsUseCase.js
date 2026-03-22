@@ -5,9 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, DetailPersistenceConstants, ModelContracts, DetailMessageKeyConstants) {
     "use strict";
 

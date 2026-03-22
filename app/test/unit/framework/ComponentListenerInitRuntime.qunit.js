@@ -92,4 +92,64 @@ sap.ui.define([
         window.addEventListener = fnOriginalAdd;
         window.removeEventListener = fnOriginalRemove;
     });
+
+    QUnit.test("initializeListeners rebinds dirty listener without duplicate change handlers", function (assert) {
+        var iDetachCalls = 0;
+        var iAttachCalls = 0;
+        var oDirtyBinding = {
+            attachChange: function () { iAttachCalls += 1; },
+            detachChange: function () { iDetachCalls += 1; }
+        };
+        var oStateModel = new JSONModel({
+            workflow: {
+                detail: {
+                    editMode: "READ",
+                    lockState: "READ_ONLY"
+                }
+            },
+            isDirty: false
+        });
+        var oShellModel = new JSONModel({
+            smartFilter: {},
+            smartTable: {}
+        });
+        var oComponent = {
+            setModel: function () {},
+            _oAutoSave: {
+                touch: function () {}
+            },
+            _syncLockScopedManagers: function () {}
+        };
+        var fnOriginalBindProperty = oStateModel.bindProperty.bind(oStateModel);
+        oStateModel.bindProperty = function (sPath) {
+            if (sPath === "/isDirty") {
+                return oDirtyBinding;
+            }
+            return fnOriginalBindProperty(sPath);
+        };
+
+        ComponentListenerInitRuntime.initializeListeners({
+            component: oComponent,
+            stateModel: oStateModel,
+            shellModel: oShellModel,
+            masterDataModel: new JSONModel({}),
+            statePaths: {
+                WORKFLOW_DETAIL_EDIT_MODE: "/workflow/detail/editMode",
+                WORKFLOW_DETAIL_LOCK_STATE: "/workflow/detail/lockState"
+            }
+        });
+        ComponentListenerInitRuntime.initializeListeners({
+            component: oComponent,
+            stateModel: oStateModel,
+            shellModel: oShellModel,
+            masterDataModel: new JSONModel({}),
+            statePaths: {
+                WORKFLOW_DETAIL_EDIT_MODE: "/workflow/detail/editMode",
+                WORKFLOW_DETAIL_LOCK_STATE: "/workflow/detail/lockState"
+            }
+        });
+
+        assert.strictEqual(iAttachCalls, 2, "listener is attached for each fresh binding");
+        assert.strictEqual(iDetachCalls, 1, "previous dirty binding listener is detached before rebind");
+    });
 });

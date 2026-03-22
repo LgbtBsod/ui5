@@ -2,10 +2,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistSnapshotRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataKeyContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataKeyContracts, ChecklistSnapshotMapper, GatewayContractConstants) {
+], function (GatewayODataClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataEntityContracts, ChecklistSnapshotMapper, GatewayContractConstants) {
     "use strict";
 
     /*
@@ -22,8 +22,8 @@ sap.ui.define([
         return ODataAdapterUtils.buildEqFilter(sProperty, sRootId);
     }
 
-    function buildBinaryEqFilter(sProperty, sRootId) {
-        return ODataAdapterUtils.buildEqFilter(sProperty, sRootId, ODataKeyContracts.TYPES.ROOT_KEY);
+    function buildDetailFilter(oFilterContract, sRootId) {
+        return ODataAdapterUtils.buildEqFilter(oFilterContract.property, sRootId, oFilterContract.type);
     }
 
     function resolveRootId(mArgs, mDeps) {
@@ -45,23 +45,29 @@ sap.ui.define([
 
     function fetchDetailSnapshot(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
+        var oBasicFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BASIC_INFO;
+        var oCheckFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_CHECK;
+        var oBarrierFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BARRIER;
+        var oAttachmentFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.ATTACHMENT;
         var pRoot = GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
-            type: ODataKeyContracts.TYPES.ROOT_KEY
+            type: ODataEntityContracts.TYPES.ROOT_KEY
         }).replace(/^\//, ""));
-        var pBasic = GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BASIC_INFO, {
-            "$filter": buildBinaryEqFilter("RootKey", sRootId),
+        // ChecklistBasicInfoSet is a separate CDS-backed read model.
+        // Keep it independent from ChecklistRootSet and read it via its own entity set.
+        var pBasic = GatewayODataClient.get(oBasicFilter.entitySet, {
+            "$filter": buildDetailFilter(oBasicFilter, sRootId),
             "$select": "RootKey,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverFullname,ObservedPernr,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName"
         });
-        var pChecks = GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK, {
-            "$filter": buildStringEqFilter("RootId", sRootId),
+        var pChecks = GatewayODataClient.get(oCheckFilter.entitySet, {
+            "$filter": buildDetailFilter(oCheckFilter, sRootId),
             "$select": "Key,RootKey,ChecksNum,Text,Comment,Result,ChangedOn"
         });
-        var pBarriers = GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER, {
-            "$filter": buildStringEqFilter("RootId", sRootId),
+        var pBarriers = GatewayODataClient.get(oBarrierFilter.entitySet, {
+            "$filter": buildDetailFilter(oBarrierFilter, sRootId),
             "$select": "Key,RootKey,BarriersNum,Text,Comment,Result,ChangedOn"
         });
-        var pAttachments = GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
-            "$filter": buildBinaryEqFilter("RootKey", sRootId),
+        var pAttachments = GatewayODataClient.get(oAttachmentFilter.entitySet, {
+            "$filter": buildDetailFilter(oAttachmentFilter, sRootId),
             "$select": "AttachmentKey,Key,RootKey,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,Value,ScanStatus,ScannedOn,CreatedOn,ChangedOn"
         });
         return Promise.all([pRoot, pBasic, pChecks, pBarriers, pAttachments]).then(function (aResult) {
@@ -104,6 +110,7 @@ sap.ui.define([
 
     return {
         enrichServerSnapshot: enrichServerSnapshot,
+        buildDetailFilter: buildDetailFilter,
         loadDetailSnapshot: fetchDetailSnapshot,
         resolveRootId: resolveRootId
     };

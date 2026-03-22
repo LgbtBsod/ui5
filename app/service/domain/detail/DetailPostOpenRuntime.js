@@ -3,9 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (Effects, CloneUtil, StatePaths, ModelPathContracts, WorkflowContracts, ModelContracts, DetailUseCaseConstants) {
     "use strict";
 

@@ -57,12 +57,8 @@ rootModules.forEach((moduleName) => {
     }
 });
 
-[
-    { rootModule: "21_controls.css", childDir: "controls" },
-    { rootModule: "23_dialogs.css", childDir: "dialogs" },
-    { rootModule: "40_page_search.css", childDir: "search" },
-    { rootModule: "41_page_detail.css", childDir: "detail" },
-    { rootModule: "42_page_analytics.css", childDir: "analytics" }
+[ 
+    { rootModule: "21_controls.css", childDir: "controls" }
 ].forEach((entry) => {
     const modulePath = path.join(MODULES_ROOT, entry.rootModule);
     if (!fs.existsSync(modulePath)) {

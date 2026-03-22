@@ -11,26 +11,25 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants, NavigationContracts) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, NavigationContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
-    var DETAIL_REASONS = DetailUseCaseConstants.REASONS;
+    var DETAIL_CODES = DetailContracts.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
+    var DETAIL_REASONS = DetailContracts.REASONS;
 
     function SaveDetailUseCase() {
         return {

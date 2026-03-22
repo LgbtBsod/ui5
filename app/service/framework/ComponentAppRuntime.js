@@ -8,7 +8,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter"
 ], function (RuntimeTimerSanitizer, TimeConfigService, ComponentLockReleaseRuntime, SchedulingRuntime, ComponentSessionRuntime, ComponentFormattingRuntime, ComponentDetailStateRuntime, GatewayClient, StatePaths, WorkflowContracts, LockAdapter) {
     "use strict";

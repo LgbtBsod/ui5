@@ -10,7 +10,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
     "sap/ui/core/Item"
 ], function (SearchActionBehavior, SearchCommandPolicy, SearchFormatterBehavior, SearchLifecycleBehavior, SearchLocationSuggestRuntime, SearchToolbarDialogRuntime, SearchSmartTableBehavior, ControllerViewStateRuntime, SearchToolbarContracts, SearchViewportRuntime, ModelContracts, OperationSourceContracts, Item) {
     "use strict";

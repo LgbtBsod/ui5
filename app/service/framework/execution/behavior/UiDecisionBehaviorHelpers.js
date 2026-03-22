@@ -1,7 +1,7 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorHelpers",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (DialogOrchestrator, FeedbackBehaviorHelpers, DetailMessageKeyConstants) {
     "use strict";
 

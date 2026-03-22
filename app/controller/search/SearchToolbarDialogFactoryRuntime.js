@@ -3,9 +3,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchMessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "sap/m/ViewSettingsDialog",
     "sap/m/ViewSettingsItem"
 ], function (JsRuntime, SearchToolbarContracts, ModelStateRuntime, ModelContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, SearchMessageKeyConstants, ViewSettingsDialog, ViewSettingsItem) {

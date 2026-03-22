@@ -1,6 +1,6 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStickyLayoutRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchUiConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
 ], function (SearchStickyLayoutRuntime, SearchUiContracts) {
     "use strict";
     var VIEWPORT = SearchUiContracts.VIEWPORT;

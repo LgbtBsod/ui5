@@ -1,7 +1,7 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
 ], function (ModelStateRuntime, NavigationContracts, WorkflowContracts, ComponentListenerContracts, JsRuntime) {
@@ -21,7 +21,7 @@
     }
 
     function isDetailRoute(sRouteName) {
-        return sRouteName === NavigationContracts.ROUTES.DETAIL || sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT;
+        return sRouteName === NavigationContracts.ROUTES.DETAIL;
     }
 
     function resolveCurrentRootId(oStateModel) {
@@ -62,6 +62,89 @@
         return WorkflowContracts.isEditableMode(sMode) || sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
     }
 
+    function consumeNavGuardBypass(oStateModel) {
+        if (!ModelStateRuntime.readOnModel(oStateModel, PATHS.NAV_GUARD_BYPASS, false)) {
+            return false;
+        }
+        ModelStateRuntime.writeOnModel(oStateModel, PATHS.NAV_GUARD_BYPASS, false);
+        return true;
+    }
+
+    function preventAndQueueNavigation(oEvent, mOptions) {
+        oEvent.preventDefault();
+        mOptions.queuePendingNavigationIntent(oEvent);
+        if (typeof mOptions.revertPendingNavigationIntent === TYPE_FUNCTION) {
+            mOptions.revertPendingNavigationIntent();
+        }
+    }
+
+    function handleSaveInFlightNavigation(oEvent, mOptions, oStateModel, StatePaths) {
+        if (!ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false)) {
+            return false;
+        }
+        preventAndQueueNavigation(oEvent, mOptions);
+        return true;
+    }
+
+    function handleDirtyNavigation(oComponent, oEvent, mOptions, oStateModel, StatePaths) {
+        var oBlockedIntent;
+        if (!ModelStateRuntime.readOnModel(oStateModel, PATHS.IS_DIRTY, false) || !shouldGuardDetailNavigation(oStateModel, oEvent)) {
+            return false;
+        }
+        oBlockedIntent = resolveNextRouteIntent(oEvent);
+        preventAndQueueNavigation(oEvent, mOptions);
+        mOptions.workflowCoordinator.confirmUnsavedAndHandle({
+            getModel: oComponent.getModel.bind(oComponent),
+            getResourceBundle: function () { return oComponent.getModel(ComponentListenerContracts.MODEL_NAMES.I18N).getResourceBundle(); }
+        }, function () {
+            return mOptions.runGuardedSave({ resumePendingNavigation: true });
+        }, {
+            onCancel: function () {
+                if (typeof mOptions.restorePendingNavigationIntent === TYPE_FUNCTION) {
+                    return mOptions.restorePendingNavigationIntent();
+                }
+                if (typeof mOptions.clearPendingNavigationIntent === TYPE_FUNCTION) {
+                    return mOptions.clearPendingNavigationIntent();
+                }
+                return null;
+            }
+        }).then(function (sDecision) {
+            if (sDecision === VALUES.DISCARD) {
+                var oPending = ModelStateRuntime.readOnModel(oStateModel, StatePaths.PENDING_NAVIGATION_INTENT, {}) || {};
+                mOptions.clearPendingNavigationIntent();
+                mOptions.resetDetailNavigationState(oComponent);
+                ModelStateRuntime.writeOnModel(oStateModel, PATHS.NAV_GUARD_BYPASS, true);
+                oComponent.getRouter()[METHODS.NAV_TO](
+                    oPending.routeName || oBlockedIntent.routeName,
+                    oPending.routeArgs || oBlockedIntent.routeArgs || {},
+                    false
+                );
+                return;
+            }
+            if (sDecision === VALUES.NO_CHANGES) {
+                mOptions.resumePendingNavigationIntent();
+                return;
+            }
+            if (sDecision === "SAVE_FAILED" && typeof mOptions.clearPendingNavigationIntent === TYPE_FUNCTION) {
+                mOptions.clearPendingNavigationIntent();
+            }
+        });
+        return true;
+    }
+
+    function handleLockReleaseNavigation(oComponent, oEvent, mOptions, oStateModel, StatePaths) {
+        if (!shouldReleaseDetailLock(oStateModel, oEvent, StatePaths)) {
+            return false;
+        }
+        oEvent.preventDefault();
+        mOptions.queuePendingNavigationIntent(oEvent);
+        Promise.resolve(mOptions.workflowCoordinator.releaseWithTrySave({ getModel: oComponent.getModel.bind(oComponent) })).finally(function () {
+            mOptions.resetDetailNavigationState(oComponent);
+            mOptions.resumePendingNavigationIntent();
+        });
+        return true;
+    }
+
     function bindBeforeRouteMatched(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
@@ -73,76 +156,21 @@
         }
         oComponent._oLifecycleRouter = oRouter;
         oComponent._fnBeforeRouteMatched = function (oEvent) {
-            if (ModelStateRuntime.readOnModel(oStateModel, PATHS.NAV_GUARD_BYPASS, false)) {
-                ModelStateRuntime.writeOnModel(oStateModel, PATHS.NAV_GUARD_BYPASS, false);
+            if (consumeNavGuardBypass(oStateModel)) {
                 return;
             }
-            if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false)) {
-                oEvent.preventDefault();
-                mOptions.queuePendingNavigationIntent(oEvent);
-                if (typeof mOptions.revertPendingNavigationIntent === TYPE_FUNCTION) {
-                    mOptions.revertPendingNavigationIntent();
-                }
+            if (handleSaveInFlightNavigation(oEvent, mOptions, oStateModel, StatePaths)) {
                 return;
             }
-            if (ModelStateRuntime.readOnModel(oStateModel, PATHS.IS_DIRTY, false) && shouldGuardDetailNavigation(oStateModel, oEvent)) {
-                var oBlockedIntent = resolveNextRouteIntent(oEvent);
-                oEvent.preventDefault();
-                mOptions.queuePendingNavigationIntent(oEvent);
-                if (typeof mOptions.revertPendingNavigationIntent === TYPE_FUNCTION) {
-                    mOptions.revertPendingNavigationIntent();
-                }
-                mOptions.workflowCoordinator.confirmUnsavedAndHandle({
-                    getModel: oComponent.getModel.bind(oComponent),
-                    getResourceBundle: function () { return oComponent.getModel(ComponentListenerContracts.MODEL_NAMES.I18N).getResourceBundle(); }
-                }, function () {
-                    return mOptions.runGuardedSave();
-                }, {
-                    onCancel: function () {
-                        if (typeof mOptions.restorePendingNavigationIntent === TYPE_FUNCTION) {
-                            return mOptions.restorePendingNavigationIntent();
-                        }
-                        if (typeof mOptions.clearPendingNavigationIntent === TYPE_FUNCTION) {
-                            return mOptions.clearPendingNavigationIntent();
-                        }
-                        return null;
-                    }
-                }).then(function (sDecision) {
-                    if (sDecision === VALUES.DISCARD) {
-                        var oPending = ModelStateRuntime.readOnModel(oStateModel, StatePaths.PENDING_NAVIGATION_INTENT, {}) || {};
-                        mOptions.clearPendingNavigationIntent();
-                        mOptions.resetDetailNavigationState(oComponent);
-                        ModelStateRuntime.writeOnModel(oStateModel, PATHS.NAV_GUARD_BYPASS, true);
-                        oComponent.getRouter()[METHODS.NAV_TO](
-                            oPending.routeName || oBlockedIntent.routeName,
-                            oPending.routeArgs || oBlockedIntent.routeArgs || {},
-                            false
-                        );
-                        return;
-                    }
-                    if (sDecision === VALUES.NO_CHANGES) {
-                        mOptions.resumePendingNavigationIntent();
-                        return;
-                    }
-                    if (sDecision === "SAVE_FAILED" && typeof mOptions.clearPendingNavigationIntent === TYPE_FUNCTION) {
-                        mOptions.clearPendingNavigationIntent();
-                    }
-                });
+            if (handleDirtyNavigation(oComponent, oEvent, mOptions, oStateModel, StatePaths)) {
                 return;
             }
-            if (shouldReleaseDetailLock(oStateModel, oEvent, StatePaths)) {
-                oEvent.preventDefault();
-                mOptions.queuePendingNavigationIntent(oEvent);
-                Promise.resolve(mOptions.workflowCoordinator.releaseWithTrySave({ getModel: oComponent.getModel.bind(oComponent) })).finally(function () {
-                    mOptions.resetDetailNavigationState(oComponent);
-                    mOptions.resumePendingNavigationIntent();
-                });
+            if (handleLockReleaseNavigation(oComponent, oEvent, mOptions, oStateModel, StatePaths)) {
                 return;
             }
             mOptions.resetDetailAccessGuard(oStateModel);
         };
         oRouter.attachBeforeRouteMatched(oComponent._fnBeforeRouteMatched, oComponent);
-        oRouter.initialize();
     }
 
     return {

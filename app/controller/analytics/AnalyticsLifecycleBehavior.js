@@ -50,8 +50,7 @@
         ControllerRouteRuntime.attachMatched(oController, [
             { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched },
             { name: NavigationContracts.ROUTES.SEARCH, handler: oController._onAnalyticsRouteLeave },
-            { name: NavigationContracts.ROUTES.DETAIL, handler: oController._onAnalyticsRouteLeave },
-            { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: oController._onAnalyticsRouteLeave }
+            { name: NavigationContracts.ROUTES.DETAIL, handler: oController._onAnalyticsRouteLeave }
         ]);
     }
 

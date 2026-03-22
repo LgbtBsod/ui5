@@ -1,12 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (ModelContracts, Result, AttachmentEffectRuntime, UseCaseValue, CreateSentinel, DetailStateAccess, ViewPathContracts) {
+], function (ModelContracts, Result, DetailAttachmentStateRuntime, UseCaseValue, CreateSentinel, DetailStateAccess, ViewPathContracts) {
     "use strict";
 
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
@@ -17,7 +17,7 @@ sap.ui.define([
         };
     }
 
-function execute(mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sRootId = UseCaseValue.rootId(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oUiState = mCtx && mCtx.uiState;
@@ -31,7 +31,7 @@ function execute(mInput, mCtx) {
             aWorkingAttachments = aSessionAttachments.length ? aSessionAttachments : aCurrentAttachments;
             return Promise.resolve(Result.ok({
                 attachments: aWorkingAttachments
-            }, AttachmentEffectRuntime.buildAttachmentLoadEffects(
+            }, DetailAttachmentStateRuntime.buildAttachmentLoadEffects(
                 aWorkingAttachments,
                 "",
                 "info"
@@ -41,13 +41,13 @@ function execute(mInput, mCtx) {
             return Promise.resolve(Result.fail({
                 message: "Attachment loader unavailable",
                 code: "ATTACHMENT_LOAD_UNAVAILABLE"
-            }, AttachmentEffectRuntime.buildAttachmentBusyResetEffects()));
+            }, DetailAttachmentStateRuntime.buildAttachmentBusyResetEffects()));
         }
 
         return Promise.resolve(oRepo.loadAttachments({ rootId: sRootId })).then(function (oResult) {
-            return Result.ok(oResult || {}, AttachmentEffectRuntime.buildAttachmentLoadEffects((oResult && oResult.attachments) || [], "", "info"));
+            return Result.ok(oResult || {}, DetailAttachmentStateRuntime.buildAttachmentLoadEffects((oResult && oResult.attachments) || [], "", "info"));
         }).catch(function (oError) {
-            return Result.fail(oError, AttachmentEffectRuntime.buildAttachmentBusyResetEffects());
+            return Result.fail(oError, DetailAttachmentStateRuntime.buildAttachmentBusyResetEffects());
         });
     }
 

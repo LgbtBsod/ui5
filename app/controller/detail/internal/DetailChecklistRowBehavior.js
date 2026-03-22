@@ -3,7 +3,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBehaviorRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts"
 ], function (BindingContextReader, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailRowBehaviorRuntime, OperationSourceContracts) {
     "use strict";
 

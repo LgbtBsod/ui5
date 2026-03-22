@@ -3,7 +3,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ProgressiveReadinessConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
 ], function (ComponentFormattingRuntime, ControllerViewStateRuntime, ModelStateRuntime, StatePaths, ProgressiveReadinessContracts, ModelContracts) {
     "use strict";

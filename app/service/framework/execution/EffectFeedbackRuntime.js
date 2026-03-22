@@ -1,5 +1,5 @@
 sap.ui.define([
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectToastRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectBannerRouter",
@@ -17,6 +17,10 @@ sap.ui.define([
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
     var HASH_CHANGER = JsRuntime.HASH_CHANGER;
+
+    function resolveEffectText(oController, oEffect, oOptions, sFallbackKey) {
+        return resolveTextKey(oController, oEffect, oOptions, sFallbackKey || "");
+    }
 
     function withOptionalHandler(oController, oEffect, oOptions, sHandlerName, fnDefault) {
         var oHandlers = oOptions && oOptions.handlers;
@@ -81,7 +85,7 @@ sap.ui.define([
             return EffectBannerRouter.handleEffect(oController, oEffect, oOptions, {
                 fallbackTextKey: FALLBACK_TEXT_KEYS.LOAD_ERROR,
                 resolveTextKey: function (sTextKey) {
-                    return resolveTextKey(oController, { textKey: sTextKey }, oOptions, "");
+                    return resolveEffectText(oController, { textKey: sTextKey }, oOptions);
                 }
             });
         });
@@ -91,28 +95,30 @@ sap.ui.define([
         return withOptionalHandler(oController, oEffect, oOptions, HANDLER_NAMES.DIALOG, function () {
             return EffectDialogFeedbackRuntime.dialog(oController, oEffect, {
                 resolveText: function (sFallbackKey) {
-                    return resolveTextKey(oController, oEffect, oOptions, sFallbackKey || FALLBACK_TEXT_KEYS.CONFLICT_DIALOG);
+                    return resolveEffectText(oController, oEffect, oOptions, sFallbackKey || FALLBACK_TEXT_KEYS.CONFLICT_DIALOG);
                 }
             });
         });
     }
 
+    function dispatchConfirmAction(oController, oOptions, oPayload, sAction, sConfirm, sCancel) {
+        var sActionName = "";
+        var oDispatchPayload = EffectActionRouting.resolveActionPayload({ payload: oPayload });
+        if (sAction === sConfirm) {
+            sActionName = oPayload.confirmAction;
+        } else if (sAction === sCancel) {
+            sActionName = oPayload.cancelAction;
+        }
+        EffectActionRouting.dispatchByName(oController, oOptions, sActionName, oDispatchPayload);
+    }
+
     function confirm(oController, oEffect, oOptions) {
-        var sText = resolveTextKey(oController, oEffect, oOptions);
+        var sText = resolveEffectText(oController, oEffect, oOptions);
         var oPayload = oEffect.payload || {};
         var sConfirm = oPayload.confirmText || EffectDialogFeedbackRuntime.actions.YES;
         var sCancel = oPayload.cancelText || EffectDialogFeedbackRuntime.actions.NO;
         return EffectDialogFeedbackRuntime.promptConfirm(String(sText || ""), [sConfirm, sCancel], sConfirm).then(function (sAction) {
-            var sYes = oPayload.confirmAction;
-            var sNo = oPayload.cancelAction;
-            var oDispatchPayload = EffectActionRouting.resolveActionPayload({ payload: oPayload });
-            var sActionName = "";
-            if (sAction === sConfirm) {
-                sActionName = sYes;
-            } else if (sAction === sCancel) {
-                sActionName = sNo;
-            }
-            EffectActionRouting.dispatchByName(oController, oOptions, sActionName, oDispatchPayload);
+            dispatchConfirmAction(oController, oOptions, oPayload, sAction, sConfirm, sCancel);
         });
     }
 

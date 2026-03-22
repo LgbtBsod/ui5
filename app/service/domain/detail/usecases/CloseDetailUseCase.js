@@ -7,11 +7,11 @@ sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelContracts, DetailMessageKeyConstants) {
     "use strict";
 

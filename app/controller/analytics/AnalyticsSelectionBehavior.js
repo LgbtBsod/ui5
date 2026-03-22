@@ -1,7 +1,7 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsUiConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts"
 ], function (AnalyticsBuilderRuntime, ControllerViewStateRuntime, AnalyticsUiContracts) {
     "use strict";
 

@@ -16,9 +16,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts"
 ], function (DialogOrchestrator, DetailViewBehavior, DetailActionConstants, DetailCommandPolicy, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, ModelPathContracts, StatePaths, FeedbackCoordinator, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
     "use strict";
 

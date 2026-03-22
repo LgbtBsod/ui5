@@ -2,14 +2,14 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsUiConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts"
 ], function (
     ControllerViewStateRuntime,
     ModelStateRuntime,

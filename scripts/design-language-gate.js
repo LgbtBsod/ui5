@@ -17,8 +17,7 @@ const styleCss = [
   read('styles/modules/21_controls.css'),
   read('styles/modules/23_dialogs.css'),
   read('styles/modules/90_ui5_patches.css'),
-  read('styles/modules/controls/24_switches_and_toggles.css'),
-  read('styles/modules/dialogs/23_dialog_shell.css')
+  read('styles/modules/controls/24_switches_and_toggles.css')
 ].join('\n');
 const themeMixin = read('controller/base/ThemeMixin.js');
 const themeService = read('service/framework/ThemeService.js');

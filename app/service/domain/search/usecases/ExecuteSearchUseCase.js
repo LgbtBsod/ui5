@@ -4,7 +4,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchSelectionEffects",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
 ], function (Result, Effects, SearchSelectionEffects, StatePaths, ModelContracts, SearchRuntimeConstants) {
     "use strict";
 

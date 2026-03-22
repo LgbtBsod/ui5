@@ -8,8 +8,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts"
 ], function (
     ControllerViewStateRuntime,

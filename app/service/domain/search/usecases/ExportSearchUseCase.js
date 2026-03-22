@@ -6,7 +6,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
 ], function (Result, Effects, SpreadsheetExport, ChecklistIdentity, NullishPick, SearchMaxResults, WorkflowTelemetry, SearchRuntimeConstants) {
     "use strict";
 

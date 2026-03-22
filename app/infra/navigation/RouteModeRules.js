@@ -30,9 +30,6 @@
         if (sRouteName === NavigationContracts.ROUTES.DETAIL) {
             return NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
         }
-        if (sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT) {
-            return normalizeDetailLayout(mArgs && mArgs.layout);
-        }
         return null;
     }
 

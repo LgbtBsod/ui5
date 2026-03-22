@@ -1,11 +1,11 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (EffectTextResolver, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade, DetailPersistenceConstants, UiSemanticConstants, DetailMessageKeyConstants) {
     "use strict";
 

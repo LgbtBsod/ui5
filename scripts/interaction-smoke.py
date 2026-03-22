@@ -156,7 +156,7 @@ def wait_for_create_detail_ready(page, delay: int = 1400) -> None:
           return !!view
             && !!objectPage
             && !!state
-            && ['detail', 'detailLayout'].indexOf(String(state.getProperty('/currentRouteName') || '')) >= 0;
+            && String(state.getProperty('/currentRouteName') || '') === 'detail';
         }
         """,
         arg={"viewId": DETAIL_VIEW_ID, "objectPageId": DETAIL_OBJECT_PAGE_ID},
@@ -701,7 +701,7 @@ def main() -> int:
             invoke_controller_method(page, ANALYTICS_VIEW_ID, "onCloseAnalytics")
             wait_for_detail_ready(page, DETAIL_ROOT, 1200)
             detail_return_state = route_state(page)
-            ensure(detail_return_state["routeName"] in ("detail", "detailLayout"), "analytics close did not return to detail route")
+            ensure(detail_return_state["routeName"] == "detail", "analytics close did not return to detail route")
             ensure(detail_return_state["selectedId"] == DETAIL_ROOT, "detail return lost selected root after analytics")
             report["detailAnalytics"] = {
                 "opened": detail_analytics_state,

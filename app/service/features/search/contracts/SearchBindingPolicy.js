@@ -4,7 +4,7 @@ sap.ui.define([
     "sap/ui/model/Sorter",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchFilterBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
 ], function (Filter, FilterOperator, Sorter, SearchFilterBuilder, SearchMaxResults, SearchRuntimeConstants) {
     "use strict";
 

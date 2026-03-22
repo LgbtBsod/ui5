@@ -1,0 +1,181 @@
+/*
+ * Consolidated UI5 compatibility and renderer-level overrides.
+ * This replaces 90_ui5_patches.css, 91_ui5_layout_patches.css and 92_ui5_surface_tuning.css.
+ */
+
+/* UI5 OverflowToolbar renders the custom header as sapMIBar/sapMTB and strips host skin. */
+.chkApp .appShellHeader.sapMIBar.sapMTB {
+  border-width: 1px;
+  border-style: solid;
+  border-color: var(--shell-border);
+  background:
+    radial-gradient(circle at top right, rgba(var(--accent-rgb), 0.08), transparent 24%),
+    var(--shell-surface);
+  box-shadow: var(--shell-shadow);
+}
+
+.chkApp .appShellHeader .shellEyebrow:empty,
+.chkApp .appShellHeader .shellContextSubtitle:empty {
+  display: none;
+}
+
+.chkApp .shellContextChip .sapMObjStatusText,
+.chkApp .shellContextChip .sapUiIcon,
+.chkApp .shellActionBtn .sapUiIcon,
+.chkApp .detailSectionCountChip .sapMObjStatusText {
+  color: var(--text-main);
+  font-weight: 600;
+  font-size: 0.72rem;
+}
+
+.chkApp .appFeedbackCorrelationInput .sapMInputBaseContentWrapper {
+  border-radius: 999px;
+}
+
+.chkApp .shellActionBtn .sapMBtnInner,
+.chkApp .shellUserBtn .sapMBtnInner,
+.chkApp .shellThemeToggle .sapMBtnInner,
+.chkApp .shellUserActionBtn .sapMBtnInner {
+  border-radius: 999px;
+}
+
+.chkApp .shellActionBtn:hover .sapMBtnInner,
+.chkApp .shellUserBtn:hover .sapMBtnInner,
+.chkApp .shellActionBtn:not(.sapMBtnDisabled):hover .sapMBtnInner {
+  background: color-mix(in srgb, rgba(var(--accent-rgb), 0.1) 84%, transparent);
+}
+
+.chkApp .shellActionBtn:active .sapMBtnInner,
+.chkApp .shellActionBtn:not(.sapMBtnDisabled):active .sapMBtnInner {
+  transform: translateY(0);
+}
+
+.chkApp .appShellHeader .sapMOverflowToolbarMenuButton {
+  flex: 0 0 auto;
+}
+
+.chkApp .shellUserBtn .sapMBtnContent,
+.chkApp .appShellHeader .shellProductTitle,
+.chkApp .shellActionBtn .sapMBtnContent,
+.chkApp .shellUserActionBtn .sapMBtnContent {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.chkApp .shellUserBtn .sapMBtnContent {
+  max-width: clamp(10ch, 18vw, 20ch);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--theme-shell-action-label-size);
+  font-weight: var(--theme-shell-action-label-weight);
+  letter-spacing: 0.01em;
+}
+
+/* UI5 1.71 FCL still needs renderer containers for full-height pages. */
+.chkApp .appRootFclTransparent .sapMNav,
+.chkApp .appRootFclTransparent .sapMNavItem,
+.chkApp .appRootFclTransparent .sapUiView,
+.chkApp .searchPage.sapMPage > .sapUiXMLView,
+.chkApp .detailPage.sapMPage > .sapUiXMLView,
+.chkApp .analyticsPage.sapMPage > .sapUiXMLView,
+.chkApp .searchPage.sapMPage > .sapUiXMLView > .sapMPage,
+.chkApp .searchPage.sapMPage > .sapUiXMLView > .sapMPage > section,
+.chkApp .pageTransparent .sapMPageEnableScrolling,
+.chkApp .pageTransparent .sapMPageScroll {
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+}
+
+.chkApp .searchPage.sapMPage > .sapUiXMLView > .sapMPage > section {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.chkApp .pageTransparent .sapMScrollCont,
+.chkApp .sapMDialogScrollCont,
+.chkApp .sapMDialogScroll,
+.chkApp .detailGridTable .sapUiTableCtrlScr,
+.chkApp .detailGridTable .sapUiTableVSb,
+.chkApp .detailGridTable .sapUiTableHSb,
+.chkApp .flatEditorTable .sapMListTblCnt,
+.chkApp .analyticsMatrixTable .sapMListTblCnt {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--accent-rgb), 0.34) rgba(160, 184, 220, 0.12);
+}
+
+.chkApp .appFeedbackCorrelation {
+  padding: 0.35rem var(--app-content-inline-pad);
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 0;
+  overflow: hidden;
+  padding-block: 0;
+}
+
+.chkApp .detailControlBar > .chkFeedbackStrip.workflowMessageSurface {
+  margin-block: 0.18rem;
+  flex-shrink: 0;
+}
+
+.chkApp .detailSectionCountChip {
+  min-height: 1.5rem;
+  padding: 0.1rem 0.52rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.chkApp .searchResultsSummaryRail.workbenchToolbarSurface {
+  align-items: center;
+  padding: 0.42rem 0.65rem;
+  gap: 0.6rem;
+  margin-bottom: 0.18rem;
+  border-radius: calc(var(--radius-lg) - 0.16rem);
+}
+
+.chkApp .searchAnalyticsRailGrid {
+  align-items: start;
+}
+
+.chkApp .searchAnalyticsRailGrid .kpiCard {
+  height: 100%;
+  min-height: 5.8rem;
+}
+
+.chkApp .analyticsHeroContextRail {
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.chkApp .detailControlRowActions .detailRailActionBtn,
+.chkApp .detailControlRowTop .detailSectionToolbarButton {
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.chkApp .detailAttachmentsEmptyState {
+  align-self: start;
+  width: 100%;
+}
+
+.chkApp .detailControlPinnedDock {
+  transition: opacity 160ms ease;
+}
+
+.chkApp .detailControlSkeletonSpacing {
+  margin-bottom: 0.5rem;
+}
+
+.chkApp .analyticsToplineSection,
+.chkApp .analyticsToplineMetaGrid {
+  margin-top: 1rem;
+}
+
+.chkApp .detailAttachmentToolbarAction {
+  margin-inline-end: 0;
+}

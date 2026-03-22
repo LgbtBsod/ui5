@@ -6,7 +6,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/constants/LocationValueHelpConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts"
 ], function (StatePaths, Result, Effects, DetailStateAccess, UseCaseValue, LocationValueHelpConstants, ModelContracts, OperationSourceContracts) {
     "use strict";
 

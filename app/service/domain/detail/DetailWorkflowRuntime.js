@@ -2,18 +2,17 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
-], function (Effects, ActionContract, StatePaths, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
+], function (Effects, ActionContract, StatePaths, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
+    var DETAIL_CODES = DetailContracts.CODES;
+    var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
 
     function buildDiscardEffects(oUiState) {
         var oSnapshot = (oUiState && oUiState.get(MODELS.DETAIL, DETAIL_MODEL_PATHS.BASE)) || {};

@@ -6,8 +6,7 @@ sap.ui.define([
     var ROUTES = Object.freeze({
         SEARCH: "search",
         ANALYTICS: "analytics",
-        DETAIL: "detail",
-        DETAIL_LAYOUT: "detailLayout"
+        DETAIL: "detail"
     });
 
     var LAYOUTS = Object.freeze({
@@ -23,7 +22,7 @@ sap.ui.define([
     });
 
     function isDetailRoute(sRouteName) {
-        return sRouteName === ROUTES.DETAIL || sRouteName === ROUTES.DETAIL_LAYOUT;
+        return sRouteName === ROUTES.DETAIL;
     }
 
     function resolveMidColumnPageId(sRouteName) {

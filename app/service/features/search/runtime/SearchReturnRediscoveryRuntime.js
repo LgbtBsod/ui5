@@ -4,8 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionMutationRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, ModelPathContracts, ChecklistIdentity, SearchSelectionMutationRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionStateRuntime"
+], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, ModelPathContracts, ChecklistIdentity, SearchSelectionStateRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -99,7 +99,7 @@ sap.ui.define([
     }
 
     function applySelectionState(oController, oOptions) {
-        var mSelectionState = SearchSelectionMutationRuntime.buildSelectionStatePayload(
+        var mSelectionState = SearchSelectionStateRuntime.buildSelectionStatePayload(
             oOptions && oOptions.selectedRowId ? [oOptions.selectedRowId] : [],
             oOptions && oOptions.selectedRowDisplayId
         );

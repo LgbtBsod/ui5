@@ -25,6 +25,7 @@ const bootstrapRuntime = read("app/ui5-bootstrap-runtime.js");
 const evidenceMatrix = read("backend/sap_backend/EVIDENCE_ACCEPTANCE_MATRIX.md");
 const signoffTracker = read("backend/sap_backend/OWNER_SIGNOFF_TRACKER.md");
 const remediationPlan = read("docs/audit/ERROR_REMEDIATION_PLAN.md");
+const productiveUi5Runtime = read("docs/audit/PRODUCTIVE_UI5_RUNTIME.md");
 
 assert(
   bootstrapRuntime.includes("https://ui5.sap.com/1.71.70/resources/sap-ui-core.js") ||
@@ -35,6 +36,15 @@ assert(
 assert(
   remediationPlan.includes("## P1") && remediationPlan.includes("## P2") && remediationPlan.includes("## P3"),
   "Error remediation plan must keep P1/P2/P3 sections"
+);
+
+assert(
+  productiveUi5Runtime.includes("Status: CONFIRMED"),
+  "Productive UI5 runtime baseline must be confirmed before release validation"
+);
+assert(
+  !productiveUi5Runtime.includes("Confirmed SAPUI5 version: `TBD`"),
+  "Productive UI5 runtime document must contain the real confirmed SAPUI5 version"
 );
 
 ["EV-003", "EV-004", "EV-005", "EV-006"].forEach((evidenceId) => {

@@ -1,6 +1,6 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",

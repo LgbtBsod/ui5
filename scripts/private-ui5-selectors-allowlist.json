@@ -3,14 +3,9 @@
   "app/styles/modules/10_base.css": "Legacy root compatibility while app-owned wrappers replace old UI5 height chains.",
   "app/styles/modules/22_skeleton.css": "Busy/list skeleton state still anchored to table row renderer in UI5 1.71.",
   "app/styles/modules/controls/25_table_actions.css": "Shared row action styling for sap.m/sap.ui.table hybrid tables.",
-  "app/styles/modules/92_ui5_surface_tuning.css": "Dark theme header contrast uses narrowly-scoped table header renderer hooks.",
-  "app/styles/modules/analytics/44_analytics_panels.css": "Analytics shell still needs SmartTable renderer alignment.",
-  "app/styles/modules/detail/44_detail_attachments.css": "Attachment tables need scoped sap.m table renderer overrides.",
-  "app/styles/modules/dialogs/24_dialog_tables.css": "Dialog-hosted tables still rely on table renderer wrappers.",
-  "app/styles/modules/detail/43_detail_tables.css": "Detail tables use scoped table renderer compatibility hooks.",
-  "app/styles/modules/dialogs/25_dialog_runtime_skin.css": "Dialog list/table shells need renderer-level compatibility in UI5 1.71.",
-  "app/styles/modules/search/43_search_results_table.css": "Search results tables use scoped table renderer compatibility hooks.",
-  "app/styles/modules/90_ui5_patches.css": "Sanctioned compatibility layer for narrow UI5 renderer patches only.",
-  "app/styles/modules/91_ui5_layout_patches.css": "Sanctioned compatibility layer for layout-only renderer patches.",
-  "app/styles/modules/detail/52_detail_info_cards.css": "ObjectPage bridge styling still requires narrow host-level renderer compatibility."
+  "app/styles/modules/23_dialogs.css": "Dialog bundle still contains narrow UI5 renderer compatibility selectors for UI5 1.71.",
+  "app/styles/modules/40_page_search.css": "Search bundle still contains scoped search/table renderer compatibility hooks.",
+  "app/styles/modules/41_page_detail.css": "Detail bundle still contains scoped attachment/table/object-page compatibility hooks.",
+  "app/styles/modules/42_page_analytics.css": "Analytics bundle still contains SmartTable and renderer-level alignment hooks.",
+  "app/styles/modules/90_ui5_overrides.css": "Sanctioned compatibility layer for narrow UI5 renderer patches only."
 }

@@ -5,8 +5,8 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsYearRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsUiConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsDrilldownRuntime",
@@ -17,7 +17,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts"
 ], function (
     Core,
     Fragment,

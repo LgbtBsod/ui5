@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/schema/uiSchema",
     "PRODUCTION_CONTROL_CHECKLIST/model/schema/workflowSchema",
     "PRODUCTION_CONTROL_CHECKLIST/model/schema/navigationSchema",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeTimingConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts"
 ], function (uiSchema, workflowSchema, navigationSchema, RuntimeTimingConstants) {
     "use strict";
 

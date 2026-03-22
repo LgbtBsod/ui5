@@ -56,8 +56,9 @@
         });
         var oIntent = WorkspaceRouteNavigation.buildCurrentIntent(oStateModel, createShellModel(NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN));
 
-        assert.strictEqual(oIntent.routeName, NavigationContracts.ROUTES.DETAIL_LAYOUT, "analytics route resolves to current active detail");
+        assert.strictEqual(oIntent.routeName, NavigationContracts.ROUTES.DETAIL, "analytics route resolves to current active detail");
         assert.strictEqual(oIntent.routeArgs.id, "CHK-ACTIVE-2", "active detail id stays canonical");
+        assert.strictEqual(oIntent.routeArgs.layout, NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN, "fullscreen layout is preserved as route argument");
     });
 
     QUnit.test("setAnalyticsReturnIntent does not preserve stale detail restore state when opened from search", function (assert) {

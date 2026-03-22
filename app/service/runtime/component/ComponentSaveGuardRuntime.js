@@ -7,7 +7,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (SecurityTokenRefresh, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, DetailPersistenceRuntime, WorkflowContracts) {
     "use strict";
 
@@ -46,7 +46,8 @@
             ModelStateRuntime.writeOnModel(oStateModel, oStatePaths.PERSISTENCE_NEXT_HEARTBEAT_AT, sNextHeartbeatAt);
         }
 
-        return function () {
+        return function (mRunOptions) {
+            var bResumePendingNavigation = !!(mRunOptions && mRunOptions.resumePendingNavigation);
             var sRootId;
             if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SAVE_IN_FLIGHT, false)) {
                 return oComponent._pGuardedSavePromise || Promise.resolve(false);
@@ -87,7 +88,9 @@
                     rescheduleHeartbeat();
                 }
                 fnEmitTelemetry(TELEMETRY_EVENT.GUARDED_SUCCESS, { rootId: sRootId });
-                fnResumePendingNavigationIntent();
+                if (bResumePendingNavigation && ModelStateRuntime.readOnModel(oStateModel, oStatePaths.PENDING_NAVIGATION_INTENT, null)) {
+                    fnResumePendingNavigationIntent();
+                }
                 return true;
             }).catch(function (oError) {
                 var oClassification = DetailPersistenceRuntime.classifyError(oError);

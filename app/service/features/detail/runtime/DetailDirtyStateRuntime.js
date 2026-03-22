@@ -2,8 +2,8 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (ModelPathContracts, ModelStateRuntime, ModelContracts, DetailMessageKeyConstants, DetailPersistenceConstants) {
     "use strict";
 

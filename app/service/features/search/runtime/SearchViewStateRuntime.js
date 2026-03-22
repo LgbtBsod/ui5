@@ -4,11 +4,11 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchMessageKeyConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
 ], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchRuntimeContracts, UiSemanticConstants, JsRuntime, SearchMessageKeyConstants) {
     "use strict";
 

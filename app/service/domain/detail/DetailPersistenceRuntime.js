@@ -1,17 +1,16 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailPersistenceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
-], function (Effects, StatePaths, WorkflowContracts, DetailPersistenceConstants, ModelContracts, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (Effects, StatePaths, WorkflowContracts, DetailContracts, ModelContracts) {
     "use strict";
 
-    var STATES = DetailPersistenceConstants.STATES;
-    var TAXONOMY = DetailPersistenceConstants.TAXONOMY;
+    var STATES = DetailContracts.STATES;
+    var TAXONOMY = DetailContracts.TAXONOMY;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
 
     function upper(vValue) {
         return String(vValue || "").trim().toUpperCase();
@@ -257,6 +256,7 @@
         buildWriteId: buildWriteId,
         classifyError: classifyError,
         dirtyEffects: dirtyEffects,
+        extractSignal: extractSignal,
         failureEffects: failureEffects,
         isLockFailure: isLockFailure,
         startEffects: startEffects,

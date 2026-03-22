@@ -15,7 +15,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (
     ControllerResourceCleanup,
@@ -126,7 +126,6 @@
             this._fnAdaptiveViewportSync = null;
             ControllerRouteRuntime.attachMatched(this, [
                 { name: NavigationContracts.ROUTES.DETAIL, handler: this._onDetailMatched },
-                { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: this._onDetailMatched },
                 { name: NavigationContracts.ROUTES.SEARCH, handler: this._onDetailRouteLeave },
                 { name: NavigationContracts.ROUTES.ANALYTICS, handler: this._onDetailRouteLeave }
             ]);

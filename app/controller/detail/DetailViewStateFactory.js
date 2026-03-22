@@ -2,9 +2,9 @@
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailAccessViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (ControllerTextRuntime, DetailAccessViewState, DetailInfoCardLayoutRuntime, DetailRuntimeContracts, DetailRowEntityConfig, WorkflowContracts) {
     "use strict";
 

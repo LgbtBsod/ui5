@@ -15,6 +15,10 @@
     var CONFIG_SOURCE = ComponentBootContracts.FRONTEND_CONFIG_SOURCE;
     var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
 
+    function hasServerDataSnapshot(aCheckLists, oServerState) {
+        return !!((Array.isArray(aCheckLists) && aCheckLists.length > 0) || oServerState);
+    }
+
     function initializeBootState(oStateModel) {
         ModelStateRuntime.setManyOnModel(oStateModel, {
             [PATHS.IS_LOADING]: true,
@@ -59,7 +63,7 @@
         var oServerState = mOptions.serverState;
         var aCheckLists = mOptions.checkLists || [];
 
-        if (oCacheState) {
+        if (oCacheState && hasServerDataSnapshot(aCheckLists, oServerState)) {
             oCacheState.pristineSnapshot = CloneUtil.clone(aCheckLists, []);
             oCacheState.lastServerState = oServerState || {
                 fetchedAt: sCacheAt,
@@ -207,8 +211,8 @@
                     cacheAt: sCacheAt,
                     readyAt: sReadyAt,
                     tabSessionId: sTabSessionId,
-                    serverState: null,
-                    checkLists: []
+                    serverState: oCacheState && oCacheState.lastServerState ? oCacheState.lastServerState : null,
+                    checkLists: oCacheState && Array.isArray(oCacheState.pristineSnapshot) ? oCacheState.pristineSnapshot : null
                 });
                 bBootCompleted = true;
             })

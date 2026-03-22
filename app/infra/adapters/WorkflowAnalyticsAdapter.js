@@ -1,7 +1,7 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
 ], function (GatewayODataClient, ODataAdapterUtils, AnalyticsContracts, NullishPick, GatewayContractConstants) {

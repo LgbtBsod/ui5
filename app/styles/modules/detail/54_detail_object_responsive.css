@@ -1,9 +1,0 @@
-@media (max-width: 768px) {
-  .chkApp .detailContent input,
-  .chkApp .detailContent textarea,
-  .chkApp .detailContent .sapMInputBase,
-  .chkApp .detailContent .sapMTextArea {
-    scroll-margin-top: calc(var(--app-shell-offset) + 4rem);
-    scroll-margin-bottom: calc(env(safe-area-inset-bottom, 0px) + 8rem);
-  }
-}

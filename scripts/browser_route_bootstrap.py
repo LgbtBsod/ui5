@@ -308,7 +308,7 @@ def navigate_to_detail(page, root_id: str, layout: str | None = None) -> dict[st
               }
               if (router && typeof router.navTo === 'function') {
                 if (layout) {
-                  router.navTo('detailLayout', { id: String(rootId || ''), layout: String(layout) }, false);
+                  router.navTo('detail', { id: String(rootId || ''), layout: String(layout) }, false);
                 } else {
                   router.navTo('detail', { id: String(rootId || '') }, false);
                 }

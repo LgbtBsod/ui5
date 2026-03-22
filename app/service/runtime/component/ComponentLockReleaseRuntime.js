@@ -5,7 +5,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
 ], function (StatePaths, CreateSentinel, GatewayClient, RootIdRuntime, LayoutStateRuntime, ModelStateRuntime, WorkflowContracts, GatewayContractConstants) {
     "use strict";

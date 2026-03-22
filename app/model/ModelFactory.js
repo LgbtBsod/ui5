@@ -5,7 +5,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutPersonalizationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (JSONModel, StateSchema, AttachmentUploadPolicy, CloneUtil, LayoutPersonalizationRuntime, ThemeContracts, WorkflowContracts) {
     "use strict";
 

@@ -7,7 +7,7 @@
     "sap/m/ObjectStatus",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (VBox, Text, Input, CoreListItem, CustomData, ObjectStatus, ControlStyleRuntime, ControllerTextRuntime, WorkflowContracts) {
     "use strict";
 

@@ -17,16 +17,11 @@
 
             <VBox
                 id="detailControlPinnedDock"
-                class="detailControlPinnedDock detailControlStickyBlock"
+                class="detailControlPinnedDock detailControlStickyBlock appSurfaceCard appInlineSurface detailControlExperienceCard"
                 renderType="Bare"
                 width="100%"
                 visible="{= !${view>/accessState/denied} &amp;&amp; !${view>/detailSkeletonBusy} }">
-                <VBox
-                    class="appSurfaceCard appInlineSurface detailControlExperienceCard"
-                    renderType="Bare"
-                    width="100%">
-                    <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailControlRail" type="XML"/>
-                </VBox>
+                <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailControlRail" type="XML"/>
             </VBox>
 
             <VBox
@@ -55,7 +50,6 @@
                 upperCaseAnchorBar="false"
                 enableLazyLoading="true"
                 alwaysShowContentHeader="false"
-                showTitleInHeaderContent="false"
                 showHeaderContent="false">
                 <uxap:layoutData>
                     <FlexItemData growFactor="1" shrinkFactor="1" baseSize="0%"/>

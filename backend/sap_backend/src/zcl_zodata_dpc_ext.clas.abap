@@ -1,9 +1,8 @@
 CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE PUBLIC.
   PUBLIC SECTION.
+    METHODS constructor REDEFINITION.
     METHODS checklistrootset_get_entity REDEFINITION.
     METHODS checklistrootset_get_entityset REDEFINITION.
-    METHODS checklistbasicinfos_get_entity REDEFINITION.
-    METHODS checklistbasicinfos_get_entityset REDEFINITION.
     METHODS checklistcheckset_get_entityset REDEFINITION.
     METHODS checklistbarriers_get_entityset REDEFINITION.
     METHODS checklistpermissions_get_entity REDEFINITION.
@@ -33,8 +32,27 @@ CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE
     DATA mo_read_service TYPE REF TO zcl_zodata_read_service.
     DATA mo_save_service TYPE REF TO zcl_zodata_save_service.
 
+    METHODS init_deps.
     METHODS ensure_deps.
     METHODS get_srv_mgr RETURNING VALUE(ro_srv_mgr) TYPE REF TO /bobf/if_tra_service_manager.
+    METHODS has_checklist_authority
+      IMPORTING
+        iv_activity          TYPE string
+        iv_bukrs             TYPE bukrs
+      RETURNING
+        VALUE(rv_authorized) TYPE abap_bool.
+    METHODS require_checklist_authority
+      IMPORTING
+        iv_activity TYPE string
+        iv_bukrs    TYPE bukrs
+        iv_text     TYPE string
+        iv_code     TYPE string
+      RAISING /iwbep/cx_mgw_busi_exception.
+    METHODS filter_view_authorized_root_rows
+      IMPORTING
+        it_rows           TYPE zcl_zodata_read_service=>tt_root_row
+      RETURNING
+        VALUE(rt_allowed) TYPE zcl_zodata_read_service=>tt_root_row.
     METHODS read_save_request
       IMPORTING io_data_provider TYPE REF TO /iwbep/if_mgw_entry_provider
       RETURNING VALUE(rs_request) TYPE zstr_pcct_savechanges_rq.
@@ -74,6 +92,28 @@ CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE
 ENDCLASS.
 
 CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
+  METHOD constructor.
+    " mo_context is injected by the /IWBEP framework after construction.
+    " Only initialize context-free collaborators here.
+    super->constructor( ).
+    mo_mapper = zcl_zodata_bopf_mapper=>create( ).
+    mo_lock_manager = NEW zcl_zodata_lock_manager( ).
+    mo_contract = NEW zcl_zodata_contract_service( ).
+    mo_frontend_context = NEW zcl_zodata_frontend_context_svc( mo_contract ).
+    mo_mpl_service = NEW zcl_zodata_mpl_service( ).
+    mo_runtime_settings = NEW zcl_zodata_runtime_settings_svc( ).
+  ENDMETHOD.
+
+  METHOD init_deps.
+    " Called from ensure_deps when mo_context is already live.
+    mo_read_service = NEW zcl_zodata_read_service( mo_context ).
+    mo_save_service = NEW zcl_zodata_save_service(
+      io_mapper       = mo_mapper
+      io_lock_manager = mo_lock_manager
+      io_contract     = mo_contract
+      io_srv_mgr      = get_srv_mgr( ) ).
+  ENDMETHOD.
+
   METHOD ensure_deps.
     IF mo_mapper IS INITIAL. mo_mapper = zcl_zodata_bopf_mapper=>create( ). ENDIF.
     IF mo_lock_manager IS INITIAL. mo_lock_manager = NEW zcl_zodata_lock_manager( ). ENDIF.
@@ -81,12 +121,40 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     IF mo_frontend_context IS INITIAL. mo_frontend_context = NEW zcl_zodata_frontend_context_svc( mo_contract ). ENDIF.
     IF mo_mpl_service IS INITIAL. mo_mpl_service = NEW zcl_zodata_mpl_service( ). ENDIF.
     IF mo_runtime_settings IS INITIAL. mo_runtime_settings = NEW zcl_zodata_runtime_settings_svc( ). ENDIF.
-    IF mo_read_service IS INITIAL. mo_read_service = NEW zcl_zodata_read_service( mo_context ). ENDIF.
-    IF mo_save_service IS INITIAL. mo_save_service = NEW zcl_zodata_save_service( io_mapper = mo_mapper io_lock_manager = mo_lock_manager io_contract = mo_contract io_srv_mgr = get_srv_mgr( ) ). ENDIF.
+    IF mo_read_service IS INITIAL OR mo_save_service IS INITIAL.
+      init_deps( ).
+    ENDIF.
   ENDMETHOD.
 
   METHOD get_srv_mgr.
     ro_srv_mgr = /bobf/cl_tra_serv_mgr_factory=>get_service_manager( zif_i_bo_c=>sc_bo_key ).
+  ENDMETHOD.
+
+  METHOD has_checklist_authority.
+    AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
+      ID 'ACTVT' FIELD iv_activity
+      ID 'BUKRS' FIELD iv_bukrs.
+    rv_authorized = xsdbool( sy-subrc = 0 ).
+  ENDMETHOD.
+
+  METHOD require_checklist_authority.
+    IF has_checklist_authority(
+         iv_activity = iv_activity
+         iv_bukrs    = iv_bukrs ) = abap_false.
+      raise_busi_exception(
+        iv_text = iv_text
+        iv_code = iv_code ).
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD filter_view_authorized_root_rows.
+    LOOP AT it_rows ASSIGNING FIELD-SYMBOL(<ls_root_row>).
+      IF has_checklist_authority(
+           iv_activity = zif_zodata_contract_constants=>c_op_view
+           iv_bukrs    = <ls_root_row>-bukrs ) = abap_true.
+        APPEND <ls_root_row> TO rt_allowed.
+      ENDIF.
+    ENDLOOP.
   ENDMETHOD.
 
   METHOD read_save_request.
@@ -109,12 +177,11 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   METHOD build_copy_request.
     ensure_deps( ).
     DATA(ls_source_root) = mo_read_service->read_root_row( is_request-root-pcct_uuid ).
-    AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
-      ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_create
-      ID 'BUKRS' FIELD ls_source_root-bukrs.
-    IF sy-subrc <> 0.
-      raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_no_create_auth_copy iv_code = zif_zodata_contract_constants=>c_code_no_create_auth ).
-    ENDIF.
+    require_checklist_authority(
+      iv_activity = zif_zodata_contract_constants=>c_op_create
+      iv_bukrs    = ls_source_root-bukrs
+      iv_text     = zif_zodata_contract_constants=>c_msg_no_create_auth_copy
+      iv_code     = zif_zodata_contract_constants=>c_code_no_create_auth ).
     rs_request = mo_save_service->build_copy_request(
       is_request     = is_request
       is_source_root = ls_source_root
@@ -204,11 +271,8 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD analyticsrefreshtrigger_create_entity.
-    DATA lv_now TYPE timestampl.
-    GET TIME STAMP FIELD lv_now.
-    UPDATE ztodata_hdr SET last_touch_at = lv_now last_touch_by = sy-uname
-      WHERE bo_key = zif_i_bo_c=>sc_bo_key AND object_id = sy-uname.
     DATA ls_result TYPE zstr_pcct_savechanges_rs.
+    GET TIME STAMP FIELD ls_result-changed_on.
     ls_result-ok = abap_true.
     ls_result-success = abap_true.
     ls_result-reason_code = zif_zodata_contract_constants=>c_msg_analytics_triggered.
@@ -224,12 +288,11 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_lock_acquire_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
     ENDIF.
     DATA(ls_auth_lock) = mo_read_service->read_root_row( ls_req-object_uuid ).
-    AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
-      ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_change
-      ID 'BUKRS' FIELD ls_auth_lock-bukrs.
-    IF sy-subrc <> 0.
-      raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_no_edit_auth iv_code = zif_zodata_contract_constants=>c_code_no_edit_auth ).
-    ENDIF.
+    require_checklist_authority(
+      iv_activity = zif_zodata_contract_constants=>c_op_change
+      iv_bukrs    = ls_auth_lock-bukrs
+      iv_text     = zif_zodata_contract_constants=>c_msg_no_edit_auth
+      iv_code     = zif_zodata_contract_constants=>c_code_no_edit_auth ).
     TRY.
         mo_lock_manager->acquire(
           EXPORTING
@@ -322,61 +385,23 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA ls_row TYPE zcl_zodata_read_service=>ty_root_row.
     ensure_deps( ).
     ls_row = mo_read_service->read_root_row( read_root_key( it_key_tab ) ).
-    AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
-      ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_view
-      ID 'BUKRS' FIELD ls_row-bukrs.
-    IF sy-subrc <> 0.
-      raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_permission_no_view iv_code = zif_zodata_contract_constants=>c_code_no_view_auth ).
-    ENDIF.
+    require_checklist_authority(
+      iv_activity = zif_zodata_contract_constants=>c_op_view
+      iv_bukrs    = ls_row-bukrs
+      iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
+      iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
     copy_data_to_ref( EXPORTING is_data = ls_row CHANGING cr_data = er_entity ).
   ENDMETHOD.
 
   METHOD checklistrootset_get_entityset.
     DATA lt_rows TYPE zcl_zodata_read_service=>tt_root_row.
-    DATA lt_allowed TYPE zcl_zodata_read_service=>tt_root_row.
     ensure_deps( ).
     lt_rows = mo_read_service->read_root_rows( ).
-    LOOP AT lt_rows ASSIGNING FIELD-SYMBOL(<ls_root_row>).
-      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
-        ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_view
-        ID 'BUKRS' FIELD <ls_root_row>-bukrs.
-      IF sy-subrc = 0.
-        APPEND <ls_root_row> TO lt_allowed.
-      ENDIF.
-    ENDLOOP.
-    copy_data_to_ref( EXPORTING is_data = lt_allowed CHANGING cr_data = er_entityset ).
-  ENDMETHOD.
-
-  METHOD checklistbasicinfos_get_entity.
-    checklistrootset_get_entity(
+    copy_data_to_ref(
       EXPORTING
-        iv_entity_name          = iv_entity_name
-        iv_entity_set_name      = iv_entity_set_name
-        iv_source_name          = iv_source_name
-        it_key_tab              = it_key_tab
-        it_navigation_path      = it_navigation_path
-      IMPORTING
-        er_entity               = er_entity
-        es_response_context     = es_response_context ).
-  ENDMETHOD.
-
-  METHOD checklistbasicinfos_get_entityset.
-    checklistrootset_get_entityset(
-      EXPORTING
-        iv_entity_name           = iv_entity_name
-        iv_entity_set_name       = iv_entity_set_name
-        iv_source_name           = iv_source_name
-        it_filter_select_options = it_filter_select_options
-        is_paging                = is_paging
-        it_key_tab               = it_key_tab
-        it_navigation_path       = it_navigation_path
-        it_order                 = it_order
-        iv_filter_string         = iv_filter_string
-        iv_search_string         = iv_search_string
-        io_tech_request_context  = io_tech_request_context
-      IMPORTING
-        er_entityset             = er_entityset
-        es_response_context      = es_response_context ).
+        is_data = filter_view_authorized_root_rows( lt_rows )
+      CHANGING
+        cr_data = er_entityset ).
   ENDMETHOD.
 
   METHOD checklistcheckset_get_entityset.
@@ -387,12 +412,11 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     TRY. lv_rootkey = read_root_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_rootkey. ENDTRY.
     IF lv_rootkey IS NOT INITIAL.
       ls_root_auth = mo_read_service->read_root_row( lv_rootkey ).
-      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
-        ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_view
-        ID 'BUKRS' FIELD ls_root_auth-bukrs.
-      IF sy-subrc <> 0.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_permission_no_view iv_code = zif_zodata_contract_constants=>c_code_no_view_auth ).
-      ENDIF.
+      require_checklist_authority(
+        iv_activity = zif_zodata_contract_constants=>c_op_view
+        iv_bukrs    = ls_root_auth-bukrs
+        iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
+        iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
     ENDIF.
     lt_rows = mo_read_service->read_check_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
@@ -406,12 +430,11 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     TRY. lv_rootkey = read_root_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_rootkey. ENDTRY.
     IF lv_rootkey IS NOT INITIAL.
       ls_root_auth = mo_read_service->read_root_row( lv_rootkey ).
-      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
-        ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_view
-        ID 'BUKRS' FIELD ls_root_auth-bukrs.
-      IF sy-subrc <> 0.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_permission_no_view iv_code = zif_zodata_contract_constants=>c_code_no_view_auth ).
-      ENDIF.
+      require_checklist_authority(
+        iv_activity = zif_zodata_contract_constants=>c_op_view
+        iv_bukrs    = ls_root_auth-bukrs
+        iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
+        iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
     ENDIF.
     lt_rows = mo_read_service->read_barrier_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).

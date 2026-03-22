@@ -1,8 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/UiDecisionBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchMessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ShellMessageKeyConstants"
 ], function (UiDecisionBehaviorHelpers, BehaviorRegistry, DetailMessageKeyConstants, SearchMessageKeyConstants, ShellMessageKeyConstants) {
     "use strict";

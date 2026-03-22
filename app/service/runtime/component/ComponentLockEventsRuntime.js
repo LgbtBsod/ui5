@@ -4,16 +4,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
-], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts, DetailUseCaseConstants, DetailMessageKeyConstants, ShellStateRuntime) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts, DetailContracts, ShellStateRuntime) {
     "use strict";
 
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_CODES = DetailContracts.CODES;
 
     function readCurrentLockScope(oStateModel, oStatePaths) {
         return {
@@ -43,6 +42,34 @@ sap.ui.define([
             return true;
         }
         return false;
+    }
+
+    function updateCacheValidation(oCacheState, oStateModel, ComponentRuntimeSupport, oPayload) {
+        var sCheckedAt = ComponentRuntimeSupport.formatHumanDateTime(new Date());
+        if (oCacheState) {
+            oCacheState.lastServerState = {
+                lastChangeSet: oPayload.last_change_set || null,
+                serverChangedOn: oPayload.server_changed_on || null,
+                checkedAt: sCheckedAt
+            };
+        }
+        ModelStateRuntime.writeOnModel(oStateModel, "/cacheValidationAt", sCheckedAt);
+    }
+
+    function invalidateProbeLockHealth(oStateModel, oShellModel, oStatePaths, ModelPaths) {
+        ModelStateRuntime.setManyOnModel(oStateModel, (function () {
+            var mPatch = {
+                "/hasConflict": true
+            };
+            mPatch[oStatePaths.PERSISTENCE_HAS_VALID_LOCK] = false;
+            mPatch[oStatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES] = false;
+            return mPatch;
+        }()));
+        ModelStateRuntime.writeOnModel(oShellModel, ModelPaths.SHELL_LOCK, {
+            ok: false,
+            reason: WorkflowContracts.REASONS.UNKNOWN,
+            isKilled: false
+        });
     }
 
     function attachLockRuntime(mOptions) {
@@ -123,28 +150,20 @@ sap.ui.define([
             var oPayload = ComponentRuntimeSupport.eventPayload(oEvent);
             DebugLogger.info("Component", "lock heartbeat", oPayload);
             onLockProbePayload(oPayload, false);
-            var sCheckedAt = ComponentRuntimeSupport.formatHumanDateTime(new Date());
-            if (oCacheState) {
-                oCacheState.lastServerState = {
-                    lastChangeSet: oPayload.last_change_set || null,
-                    serverChangedOn: oPayload.server_changed_on || null,
-                    checkedAt: sCheckedAt
-                };
-            }
-            ModelStateRuntime.writeOnModel(oStateModel, "/cacheValidationAt", sCheckedAt);
+            updateCacheValidation(oCacheState, oStateModel, ComponentRuntimeSupport, oPayload);
         });
         oComponent._oHeartbeat.attachEvent("heartbeatError", function (oEvent) {
-            ModelStateRuntime.writeOnModel(oStateModel, "/hasConflict", true);
+            invalidateProbeLockHealth(oStateModel, oShellModel, oStatePaths, MODEL_PATHS);
             DebugLogger.info("Component", "lock heartbeat error", ComponentRuntimeSupport.eventPayload(oEvent));
         });
         oComponent._oGcd.attachEvent("gcdExpired", function () {
-            ModelStateRuntime.writeOnModel(oStateModel, "/hasConflict", true);
+            invalidateProbeLockHealth(oStateModel, oShellModel, oStatePaths, MODEL_PATHS);
         });
         oComponent._oLockStatus.attachEvent("status", function (oEvent) {
             onLockProbePayload(ComponentRuntimeSupport.eventPayload(oEvent), true);
         });
         oComponent._oLockStatus.attachEvent("statusError", function () {
-            ModelStateRuntime.writeOnModel(oStateModel, "/hasConflict", true);
+            invalidateProbeLockHealth(oStateModel, oShellModel, oStatePaths, MODEL_PATHS);
         });
         oComponent._oActivity.attachEvent("idleTimeout", function () {
             ModelStateRuntime.writeOnModel(oStateModel, "/idleExpires", new Date().toISOString());
@@ -164,6 +183,7 @@ sap.ui.define([
     }
 
     return {
-        attachLockRuntime: attachLockRuntime
+        attachLockRuntime: attachLockRuntime,
+        invalidateProbeLockHealth: invalidateProbeLockHealth
     };
 });

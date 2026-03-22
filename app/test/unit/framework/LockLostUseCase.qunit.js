@@ -1,7 +1,7 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/LockLostUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (LockLostUseCase, StatePaths, WorkflowContracts) {
     "use strict";
 

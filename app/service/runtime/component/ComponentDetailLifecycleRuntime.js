@@ -2,8 +2,8 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (ModelStateRuntime, RootIdRuntime, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants) {
     "use strict";
 
@@ -16,7 +16,7 @@
     }
 
     function isDetailRoute(sRouteName) {
-        return sRouteName === NavigationContracts.ROUTES.DETAIL || sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT;
+        return sRouteName === NavigationContracts.ROUTES.DETAIL;
     }
 
     function resolveCurrentRootId(oStateModel) {

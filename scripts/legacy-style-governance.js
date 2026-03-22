@@ -7,12 +7,11 @@ const ROOT = process.cwd();
 const APP_ROOT = path.join(ROOT, "app");
 const ALLOWED_LEGACY_PATHS = [
     path.normalize("app/styles/modules/20_surface.css"),
-    path.normalize("app/styles/modules/controls/26_control_skin.css"),
     path.normalize("app/styles/modules/controls/30_action_and_shell_buttons.css"),
-    path.normalize("app/styles/modules/detail/46_detail_rail_shell.css"),
-    path.normalize("app/styles/modules/detail/50_detail_object_shell.css"),
-    path.normalize("app/styles/modules/detail/52_detail_info_cards.css"),
-    path.normalize("app/styles/modules/search/42_search_action_toolbar.css")
+    path.normalize("app/styles/modules/23_dialogs.css"),
+    path.normalize("app/styles/modules/40_page_search.css"),
+    path.normalize("app/styles/modules/41_page_detail.css"),
+    path.normalize("app/styles/modules/42_page_analytics.css")
 ];
 const SCAN_EXTENSIONS = new Set([".css", ".xml", ".js"]);
 const LEGACY_TOKENS = [

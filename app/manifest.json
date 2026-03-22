@@ -75,8 +75,7 @@
         "sap.ui.table": {},
         "sap.viz": {},
         "sap.uxap": {},
-        "sap.ui.export": {},
-        "sap.ui.fl": {}
+        "sap.ui.export": {}
       }
     },
     "contentDensities": {
@@ -180,15 +179,6 @@
             "detail"
           ],
           "layout": "TwoColumnsMidExpanded"
-        },
-        {
-          "pattern": "checklist/{id}/{layout}",
-          "name": "detailLayout",
-          "target": [
-            "search",
-            "detail"
-          ],
-          "layout": "{layout}"
         }
       ],
       "targets": {
@@ -218,6 +208,6 @@
     "config": {
       "uiContractVersion": "1.0.0"
     },
-    "flexEnabled": true
+    "flexEnabled": false
   }
 }

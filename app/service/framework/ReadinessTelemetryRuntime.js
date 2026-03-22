@@ -1,6 +1,6 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ReadinessTelemetryConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts"
 ], function (ModelStateRuntime, ReadinessTelemetryContracts) {
     "use strict";
 

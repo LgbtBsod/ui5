@@ -1,10 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientSupport",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RequestVerbConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
-], function (GatewayErrorNormalizer, GatewayClientContracts, GatewayClientSupport, RequestVerbConstants, JsRuntimeStringConstants) {
+], function (GatewayErrorNormalizer, GatewayClientContracts, RequestVerbConstants, JsRuntimeStringConstants) {
     "use strict";
 
     var REQUEST = RequestVerbConstants.REQUEST;
@@ -36,7 +35,7 @@ sap.ui.define([
 
     function withReadRequest(oModel, sPath, mParams, mHeaders) {
         return toRequestHandle(function (resolve, reject) {
-            return oModel.read(GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(sPath)), {
+            return oModel.read(GatewayClientContracts.assertCanonicalPath(GatewayClientContracts.normalizePath(sPath)), {
                 urlParameters: mParams || {},
                 headers: mHeaders || {},
                 success: function (oData) { resolve(oData || {}); },
@@ -46,7 +45,7 @@ sap.ui.define([
     }
 
     function withDirectDeleteRequest(oModel, sPath, mHeaders) {
-        var sNormalizedPath = GatewayClientSupport.assertCanonicalPath(GatewayClientSupport.normalizePath(sPath));
+        var sNormalizedPath = GatewayClientContracts.assertCanonicalPath(GatewayClientContracts.normalizePath(sPath));
         return toRequestHandle(function (resolve, reject) {
             return oModel.remove(sNormalizedPath, {
                 headers: mHeaders || {},
@@ -57,11 +56,11 @@ sap.ui.define([
     }
 
     function withDirectFunctionImportRequest(oModel, sName, oPayload, mHeaders, mOptions) {
-        var sFunctionName = GatewayClientSupport.assertAllowedFunctionName(sName);
+        var sFunctionName = GatewayClientContracts.assertAllowedFunctionName(sName);
         if (mOptions && mOptions.async === false) {
             throw new Error("Synchronous function imports are not supported");
         }
-        if (GatewayClientSupport.allowlisted(sFunctionName, GatewayClientContracts.DIRECT_FUNCTION_QUERY_ALLOWLIST)) {
+        if (GatewayClientContracts.allowlisted(sFunctionName, GatewayClientContracts.DIRECT_FUNCTION_QUERY_ALLOWLIST)) {
             return toRequestHandle(function (resolve, reject) {
                 return oModel.callFunction("/" + sFunctionName, {
                     method: REQUEST.POST,
@@ -72,7 +71,7 @@ sap.ui.define([
                 });
             });
         }
-        if (GatewayClientSupport.allowlisted(sFunctionName, GatewayClientContracts.DIRECT_FUNCTION_BODY_ALLOWLIST)) {
+        if (GatewayClientContracts.allowlisted(sFunctionName, GatewayClientContracts.DIRECT_FUNCTION_BODY_ALLOWLIST)) {
             return toRequestHandle(function (resolve, reject) {
                 return oModel.create("/" + sFunctionName, oPayload || {}, {
                     headers: mHeaders || {},
@@ -85,8 +84,8 @@ sap.ui.define([
     }
 
     function withDirectGetFunctionImportRequest(oModel, sName, mParams, mHeaders) {
-        var sFunctionName = GatewayClientSupport.assertAllowedFunctionName(sName);
-        if (!GatewayClientSupport.allowlisted(sFunctionName, GatewayClientContracts.DIRECT_GET_FUNCTION_ALLOWLIST)) {
+        var sFunctionName = GatewayClientContracts.assertAllowedFunctionName(sName);
+        if (!GatewayClientContracts.allowlisted(sFunctionName, GatewayClientContracts.DIRECT_GET_FUNCTION_ALLOWLIST)) {
             throw new Error("Unsupported GET function import: " + sFunctionName);
         }
         return toRequestHandle(function (resolve, reject) {

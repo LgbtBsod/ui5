@@ -3,14 +3,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/AttachmentEffectRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (ModelContracts, Result, Effects, JsRuntime, AttachmentEffectRuntime, AttachmentValueCodec, DetailAttachmentStateRuntime, DetailStateAccess, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
+], function (ModelContracts, Result, Effects, JsRuntime, DetailAttachmentStateRuntime, AttachmentValueCodec, DetailStateAccess, CreateSentinel, DraftChecklistFactory, ViewPathContracts) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -75,13 +74,13 @@ sap.ui.define([
         };
     }
 
-function execute(mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sRootId = String((mInput && mInput.rootId) || "").trim();
         if (!sRootId && !CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(Result.fail({
                 message: "Attachment target root is missing",
                 code: "ATTACHMENT_TARGET_MISSING"
-            }, AttachmentEffectRuntime.buildAttachmentBusyResetEffects()));
+            }, DetailAttachmentStateRuntime.buildAttachmentBusyResetEffects()));
         }
         return Promise.resolve(stageLocalAttachment(mInput, mCtx)).then(function (oRes) {
             return Result.ok(
@@ -89,7 +88,7 @@ function execute(mInput, mCtx) {
                 buildUploadEffects(mCtx, (oRes && oRes.attachment) || null, "attachmentUploaded")
             );
         }).catch(function (oError) {
-            return Result.fail(oError, AttachmentEffectRuntime.buildAttachmentBusyResetEffects());
+            return Result.fail(oError, DetailAttachmentStateRuntime.buildAttachmentBusyResetEffects());
         });
     }
 

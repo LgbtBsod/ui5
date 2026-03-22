@@ -23,7 +23,7 @@
         if (sRouteName === NavigationContracts.ROUTES.SEARCH) {
             return NavigationContracts.LAYOUTS.ONE_COLUMN;
         }
-        if (sRouteName === NavigationContracts.ROUTES.ANALYTICS || sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT) {
+        if (sRouteName === NavigationContracts.ROUTES.ANALYTICS) {
             return NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
         }
         if (sRouteName === NavigationContracts.ROUTES.DETAIL) {

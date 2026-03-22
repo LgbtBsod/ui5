@@ -1,7 +1,7 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationGuardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (ComponentNavigationGuardRuntime, StatePaths, WorkflowContracts) {
     "use strict";
 
@@ -54,11 +54,14 @@
             "/saveInFlight": false
         }, (mOverrides && mOverrides.state) || {}));
         var oRouter = {
+            initializeCalls: 0,
             attachBeforeRouteMatched: function (fnHandler, oListener) {
                 this._fnHandler = fnHandler;
                 this._oListener = oListener;
             },
-            initialize: function () {},
+            initialize: function () {
+                this.initializeCalls += 1;
+            },
             navTo: function () {}
         };
         var oComponent = {
@@ -128,6 +131,7 @@
 
         return {
             counts: mCounts,
+            router: oRouter,
             routeEvent: createRouteEvent("analytics", {}),
             fire: function () {
                 oRouter._fnHandler.call(oRouter._oListener, this.routeEvent);
@@ -198,5 +202,11 @@
         assert.notOk(oHarness.routeEvent.wasPrevented(), "navigation continues without guard");
         assert.strictEqual(oHarness.counts.released, 0, "lock release guard is not invoked");
         assert.strictEqual(oHarness.counts.queued, 0, "pending intent is not queued");
+    });
+
+    QUnit.test("attachBeforeRouteMatched does not initialize router", function (assert) {
+        var oHarness = createHarness();
+
+        assert.strictEqual(oHarness.router.initializeCalls, 0, "navigation guard does not initialize router");
     });
 });

@@ -101,7 +101,6 @@
         ControllerRouteRuntime.attachMatched(oController, [
             { name: NavigationContracts.ROUTES.SEARCH, handler: oController._onSearchMatched },
             { name: NavigationContracts.ROUTES.DETAIL, handler: oController._onDetailSearchContextMatched },
-            { name: NavigationContracts.ROUTES.DETAIL_LAYOUT, handler: oController._onDetailSearchContextMatched },
             { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched }
         ]);
         SearchStartupBehavior.syncSmartControlAvailability(oController);
@@ -120,7 +119,7 @@
             oController._onSearchMatched();
             return;
         }
-        if (sCurrentRouteName === NavigationContracts.ROUTES.DETAIL || sCurrentRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT) {
+        if (sCurrentRouteName === NavigationContracts.ROUTES.DETAIL) {
             oController._onDetailSearchContextMatched({
                 getParameter: function (sName) {
                     if (sName === "arguments") {

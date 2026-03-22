@@ -4,16 +4,22 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, WorkflowRuntimeConstants, ModelPathContracts, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, ModelPathContracts, DetailMessageKeyConstants) {
     "use strict";
 
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
     var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
+
+    function hasHealthyAutosaveLockState(oStateModel, StatePaths) {
+        return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED &&
+            !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.PERSISTENCE_HAS_VALID_LOCK, false) &&
+            !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false) &&
+            !ModelStateRuntime.readOnModel(oStateModel, "/hasConflict", false);
+    }
 
     function createAutoSaveManager(mOptions) {
         var oComponent = mOptions.component;
@@ -50,19 +56,18 @@
             intervalMs: Number(mTimerDefaults.autoSaveIntervalMs),
             debounceMs: Number(mTimerDefaults.autoSaveDebounceMs),
             lockGuardFn: function () {
-                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
+                return hasHealthyAutosaveLockState(oStateModel, StatePaths);
             },
             guardFn: function () {
                 return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
-                    ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED &&
+                    hasHealthyAutosaveLockState(oStateModel, StatePaths) &&
                     !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
                     !ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false);
             },
             shouldSave: function () {
-                var bIsLocked = ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
                 var sActiveId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
                 return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
-                    bIsLocked &&
+                    hasHealthyAutosaveLockState(oStateModel, StatePaths) &&
                     !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
                     !!sActiveId &&
                     !CreateSentinel.isCreateId(sActiveId) &&
@@ -121,7 +126,7 @@
                 oComponent._handleForceReadOnly({
                     reason: oClassification.taxonomy,
                     messageKey: oClassification.messageKey,
-                    source: WorkflowRuntimeConstants.SOURCES.AUTOSAVE
+                    source: WorkflowContracts.SOURCES.AUTOSAVE
                 });
                 return;
             }
@@ -140,6 +145,7 @@
     }
 
     return {
-        createAutoSaveManager: createAutoSaveManager
+        createAutoSaveManager: createAutoSaveManager,
+        hasHealthyAutosaveLockState: hasHealthyAutosaveLockState
     };
 });

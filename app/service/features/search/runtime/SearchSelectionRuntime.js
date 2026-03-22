@@ -1,9 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionIdentityRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionTableRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionFocusRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionMutationRuntime"
-], function (SearchSelectionIdentityRuntime, SearchSelectionTableRuntime, SearchSelectionFocusRuntime, SearchSelectionMutationRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionFocusRuntime"
+], function (SearchSelectionStateRuntime, SearchSelectionTableRuntime, SearchSelectionFocusRuntime) {
     "use strict";
 
     function resolveSearchInnerTable(oController) {
@@ -35,12 +34,12 @@ sap.ui.define([
                 oInnerTable.setSelectedItem(oItem, true);
             });
         }
-        aSelectedRowIds = SearchSelectionIdentityRuntime.resolveSelectedRowIdsFromInnerTable(oInnerTable);
-        return SearchSelectionMutationRuntime.selectVisibleRows(
+        aSelectedRowIds = SearchSelectionStateRuntime.resolveSelectedRowIdsFromInnerTable(oInnerTable);
+        return SearchSelectionStateRuntime.selectVisibleRows(
             oController,
             oInnerTable,
             aSelectedRowIds,
-            SearchSelectionIdentityRuntime.resolveSelectedRowDisplayIdFromInnerTable(oInnerTable),
+            SearchSelectionStateRuntime.resolveSelectedRowDisplayIdFromInnerTable(oInnerTable),
             fnSelectionChanged
         );
     }
@@ -50,16 +49,16 @@ sap.ui.define([
         if (oInnerTable && oInnerTable.removeSelections) {
             oInnerTable.removeSelections(true);
         }
-        return SearchSelectionMutationRuntime.clearSelection(oController, fnSelectionChanged);
+        return SearchSelectionStateRuntime.clearSelection(oController, fnSelectionChanged);
     }
 
     return {
         bindSearchTableRuntime: SearchSelectionTableRuntime.bindSearchTableRuntime,
         clearSelection: clearSelection,
         configureSearchResultTable: SearchSelectionTableRuntime.configureSearchResultTable,
-        extractSelectedRowDisplayId: SearchSelectionIdentityRuntime.extractSelectedRowDisplayId,
-        extractSelectedRowId: SearchSelectionIdentityRuntime.extractSelectedRowId,
-        extractSelectedRowIds: SearchSelectionIdentityRuntime.extractSelectedRowIds,
+        extractSelectedRowDisplayId: SearchSelectionStateRuntime.extractSelectedRowDisplayId,
+        extractSelectedRowId: SearchSelectionStateRuntime.extractSelectedRowId,
+        extractSelectedRowIds: SearchSelectionStateRuntime.extractSelectedRowIds,
         focusSearchFilters: function (oController) {
             return SearchSelectionFocusRuntime.focusSearchFilters(oController);
         },

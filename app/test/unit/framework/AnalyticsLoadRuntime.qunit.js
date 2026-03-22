@@ -2,7 +2,7 @@
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsStateConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts"
 ], function (JSONModel, AnalyticsLoadRuntime, ModelContracts, AnalyticsStateConstants) {
     "use strict";
 

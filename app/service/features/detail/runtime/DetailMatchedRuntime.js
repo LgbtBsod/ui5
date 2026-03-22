@@ -7,10 +7,10 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailUseCaseConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
 ], function (DraftChecklistFactory, ModelPathContracts, ViewPathContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, CreateSentinel, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts, DetailUseCaseConstants) {
     "use strict";
 
@@ -77,7 +77,7 @@
 
     function prepareMatchedContext(oController, oEvent) {
         var mArgs = oEvent.getParameter("arguments") || {};
-        var sRouteName = String((oEvent.getParameter("name") || (mArgs.layout ? NavigationContracts.ROUTES.DETAIL_LAYOUT : NavigationContracts.ROUTES.DETAIL)) || NavigationContracts.ROUTES.DETAIL).trim() || NavigationContracts.ROUTES.DETAIL;
+        var sRouteName = String((oEvent.getParameter("name") || NavigationContracts.ROUTES.DETAIL) || NavigationContracts.ROUTES.DETAIL).trim() || NavigationContracts.ROUTES.DETAIL;
         var sId = mArgs.id;
         var sLayoutArg = String(mArgs.layout || "").toLowerCase();
         var bCreate = CreateSentinel.isCreateId(sId);

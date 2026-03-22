@@ -7,7 +7,7 @@
     "sap/m/Select",
     "sap/ui/core/Item",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControlStyleRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (VBox, Text, Input, DatePicker, TimePicker, Select, CoreItem, ControlStyleRuntime, WorkflowContracts) {
     "use strict";
 

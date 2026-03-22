@@ -1,11 +1,11 @@
 ﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowRuntimeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailMessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
 ], function (CloneUtil, StatePaths, WorkflowContracts, WorkflowRuntimeConstants, ModelPathContracts, JsRuntime, DetailMessageKeyConstants, ModelContracts) {
     "use strict";

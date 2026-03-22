@@ -6,7 +6,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "sap/ui/core/routing/HashChanger",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
 ], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, RootIdRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger, JsRuntimeStringConstants) {
@@ -34,8 +34,7 @@
     function isDetailIntent(oIntent) {
         var sRouteName = String(oIntent && oIntent.routeName || "").trim();
 
-        return sRouteName === NavigationContracts.ROUTES.DETAIL
-            || sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT;
+        return sRouteName === NavigationContracts.ROUTES.DETAIL;
     }
 
     function readHashChanger() {
@@ -76,11 +75,10 @@
         var sActiveId = RootIdRuntime.resolveActiveFromStateModel(oStateModel);
         var sLayout = LayoutStateRuntime.readLayout(oShellModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
 
-        if ((sRouteName === NavigationContracts.ROUTES.DETAIL_LAYOUT
-            || (sRouteName === NavigationContracts.ROUTES.ANALYTICS && sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN))
+        if (sRouteName === NavigationContracts.ROUTES.ANALYTICS && sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN
             && sActiveId) {
             return {
-                routeName: NavigationContracts.ROUTES.DETAIL_LAYOUT,
+                routeName: NavigationContracts.ROUTES.DETAIL,
                 routeArgs: {
                     id: sActiveId,
                     layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN
@@ -178,7 +176,7 @@
             return;
         }
         if (sResolvedLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN) {
-            oRouter[METHODS.NAV_TO](NavigationContracts.ROUTES.DETAIL_LAYOUT, { id: sId, layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN }, false);
+            oRouter[METHODS.NAV_TO](NavigationContracts.ROUTES.DETAIL, { id: sId, layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN }, false);
             return;
         }
         oRouter[METHODS.NAV_TO](NavigationContracts.ROUTES.DETAIL, { id: sId }, false);
