@@ -67,7 +67,52 @@ sap.ui.define([], function () {
         var mTelemetry = oRuntimeContext.telemetry;
         var oRuntimeSupport = mServices.componentRuntimeSupport;
 
-        mDeps.ComponentManagerOrchestrationRuntime.attachManagerRuntime({
+        mDeps.ComponentPollingRuntime.createHeartbeatManager({
+            component: oComponent,
+            stateModel: mModels.stateModel,
+            shellModel: mModels.shellModel,
+            detailModel: mModels.detailModel,
+            timerDefaults: mTelemetry.timerDefaults,
+            managers: mDeps.managers,
+            statePaths: mDeps.StatePaths,
+            deltaPayloadBuilder: mDeps.DeltaPayloadBuilder,
+            buildLatestCtx: mHandlers.buildLatestCtx,
+            resolveDetailCurrent: mHandlers.resolveDetailCurrent,
+            applyFacadeResult: mHandlers.applyFacadeResult,
+            setGlobalBanner: mHandlers.setGlobalBanner,
+            emitTelemetry: mTelemetry.emitTelemetry,
+            debugLogger: mDeps.DebugLogger,
+            actionContract: mDeps.ActionContract,
+            bundleText: mTelemetry.bundleText,
+            componentRuntimeSupport: oRuntimeSupport,
+            telemetryRuntime: mDeps.TelemetryRuntime
+        });
+        mDeps.ComponentPollingRuntime.createSupportManagers({
+            component: oComponent,
+            timerDefaults: mTelemetry.timerDefaults,
+            managers: mDeps.managers
+        });
+        mDeps.ComponentAutosaveRuntime.createAutoSaveManager({
+            component: oComponent,
+            stateModel: mModels.stateModel,
+            shellModel: mModels.shellModel,
+            detailModel: mModels.detailModel,
+            timerDefaults: mTelemetry.timerDefaults,
+            managers: mDeps.managers,
+            statePaths: mDeps.StatePaths,
+            deltaPayloadBuilder: mDeps.DeltaPayloadBuilder,
+            buildLatestCtx: mHandlers.buildLatestCtx,
+            resolveDetailCurrent: mHandlers.resolveDetailCurrent,
+            applyFacadeResult: mHandlers.applyFacadeResult,
+            setGlobalBanner: mHandlers.setGlobalBanner,
+            emitTelemetry: mTelemetry.emitTelemetry,
+            debugLogger: mDeps.DebugLogger,
+            actionContract: mDeps.ActionContract,
+            bundleText: mTelemetry.bundleText,
+            componentRuntimeSupport: oRuntimeSupport,
+            telemetryRuntime: mDeps.TelemetryRuntime
+        });
+        mDeps.ComponentPollingRuntime.createLockStatusManager({
             component: oComponent,
             stateModel: mModels.stateModel,
             shellModel: mModels.shellModel,

@@ -1,14 +1,13 @@
 sap.ui.define([
     "sap/ui/base/EventProvider",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/ManagerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime"
-], function (EventProvider, ManagerRuntime, TimerRuntime) {
+], function (EventProvider, TimerRuntime) {
     "use strict";
 
     return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.GCDManager", {
         constructor: function (mOptions) {
-            ManagerRuntime.initEventProvider(EventProvider, this, arguments);
-            this._iIntervalMs = ManagerRuntime.readNumberOption(mOptions, "intervalMs");
+            EventProvider.apply(this, arguments);
+            this._iIntervalMs = Number(mOptions && mOptions.intervalMs);
             this._iTimer = null;
             this._bRunning = false;
         },

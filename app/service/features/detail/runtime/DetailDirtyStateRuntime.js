@@ -1,20 +1,30 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (ModelPathContracts, ModelStateRuntime, ModelContracts, DetailMessageKeyConstants, DetailPersistenceConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
+], function (ModelPathContracts, ModelStateRuntime, ModelContracts, DetailContracts, DetailPersistenceRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var PERSISTENCE_STATES = DetailPersistenceConstants.STATES;
 
     function markDirty(oController) {
+        var oPersistencePatch;
+        var aEffects = DetailPersistenceRuntime.dirtyEffects(true);
+
         ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.IS_DIRTY, true);
-        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/state", PERSISTENCE_STATES.DIRTY);
-        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/messageKey", DETAIL_MESSAGE_KEYS.PERSISTENCE_DIRTY);
+        oPersistencePatch = (aEffects || []).filter(function (oEffect) {
+            return oEffect && oEffect.type === "modelPatch" && oEffect.path === "/persistence";
+        })[0];
+
+        if (oPersistencePatch) {
+            ModelStateRuntime.write(oController, STATE_MODEL, "/persistence", oPersistencePatch.value);
+            return;
+        }
+
+        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/state", DetailContracts.STATES.DIRTY);
+        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/messageKey", DetailContracts.PERSISTENCE_DIRTY);
     }
 
     return {

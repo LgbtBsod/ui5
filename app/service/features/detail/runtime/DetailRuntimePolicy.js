@@ -1,11 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/DetailRuntimeBehaviorRuntime"
-], function (DetailRuntimeConstants, DetailRuntimeBehaviorRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes"
+], function (DetailRuntimeConstants, BehaviorScopes) {
     "use strict";
 
     function runSyncOperation(sOperation, mContext) {
-        return DetailRuntimeBehaviorRuntime.executeSync(sOperation, mContext || {});
+        return BehaviorScopes.detailRuntime.executeSync(sOperation, mContext || {});
     }
 
     function analyticsEditRestorePlan(mContext) {
@@ -21,8 +21,8 @@ sap.ui.define([
 
     return {
         analyticsEditRestorePlan: analyticsEditRestorePlan,
-        registerBehaviorOverride: DetailRuntimeBehaviorRuntime.registerBehaviorOverride,
-        unregisterBehaviorOverride: DetailRuntimeBehaviorRuntime.unregisterBehaviorOverride,
-        clearBehaviorOverrides: DetailRuntimeBehaviorRuntime.clearBehaviorOverrides
+        registerBehaviorOverride: BehaviorScopes.detailRuntime.registerBehaviorOverride,
+        unregisterBehaviorOverride: BehaviorScopes.detailRuntime.unregisterBehaviorOverride,
+        clearBehaviorOverrides: BehaviorScopes.detailRuntime.clearBehaviorOverrides
     };
 });

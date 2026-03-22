@@ -29,7 +29,7 @@ CLASS zcl_zodata_save_service DEFINITION
       IMPORTING
         is_request TYPE zstr_pcct_savechanges_rq
       RAISING
-        /iwbep/cx_mgw_busi_exception.
+        zcx_zodata_error.
 
     METHODS build_copy_request
       IMPORTING
@@ -51,14 +51,14 @@ CLASS zcl_zodata_save_service DEFINITION
         iv_text TYPE string
         iv_code TYPE string
       RAISING
-        /iwbep/cx_mgw_busi_exception.
+        zcx_zodata_error.
     METHODS validate_edit_mode
       IMPORTING
         iv_edit_mode TYPE csequence
         iv_required_text TYPE string
         iv_invalid_text TYPE string
       RAISING
-        /iwbep/cx_mgw_busi_exception.
+        zcx_zodata_error.
 ENDCLASS.
 
 CLASS zcl_zodata_save_service IMPLEMENTATION.
@@ -70,14 +70,10 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD raise_busi_exception.
-    DATA lo_container TYPE REF TO /iwbep/if_message_container.
-    lo_container = /iwbep/cl_mgw_msg_container=>get_mgw_msg_container( ).
-    lo_container->add_message_text_only(
-      iv_msg_type = /iwbep/if_mgw_defines=>gcs_msg_type-error
-      iv_msg_text = |{ iv_code }: { iv_text }| ).
-    RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception
+    RAISE EXCEPTION TYPE zcx_zodata_error
       EXPORTING
-        message_container = lo_container.
+        iv_code = iv_code
+        iv_msg  = iv_text.
   ENDMETHOD.
 
   METHOD validate_edit_mode.
@@ -190,7 +186,9 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
     mo_srv_mgr->modify( EXPORTING it_modification = lt_mod IMPORTING et_failed_key = lt_failed et_message = lt_msg ).
     zcl_zodata_bopf_msg_helper=>raise_on_failed_keys( it_failed_key = lt_failed it_message = lt_msg ).
 
-    IF iv_is_autosave <> abap_true.
+    IF iv_is_autosave = abap_true.
+      COMMIT WORK.
+    ELSE.
       COMMIT WORK AND WAIT.
     ENDIF.
 

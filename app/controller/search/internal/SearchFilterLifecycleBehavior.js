@@ -46,28 +46,6 @@ sap.ui.define([
         resetCustomSegments(oController);
     }
 
-    function bindClearButtonPress(oController) {
-        var oClearButton;
-        var sClearButtonId;
-        if (!oController || oController._bSearchClearButtonPressBound) {
-            return;
-        }
-        sClearButtonId = oController.getView() && oController.getView().createId("searchSmartFilterBar-btnClear");
-        oClearButton = sClearButtonId && sap.ui.getCore().byId(sClearButtonId);
-        if (!oClearButton || typeof oClearButton.attachPress !== "function") {
-            return;
-        }
-        oClearButton.attachPress(function () {
-            deferCustomSegmentReset(oController);
-        });
-        if (typeof oClearButton.attachBrowserEvent === "function") {
-            oClearButton.attachBrowserEvent("click", function () {
-                deferCustomSegmentReset(oController);
-            });
-        }
-        oController._bSearchClearButtonPressBound = true;
-    }
-
     function resetCustomSegments(oController) {
         var oChecksSegment;
         var oBarriersSegment;
@@ -97,20 +75,6 @@ sap.ui.define([
         oSmartFilterBar.attachClear(function () {
             deferCustomSegmentReset(oController);
         });
-        bindClearButtonPress(oController);
-        if (!oController._bSearchClearDelegateBound) {
-            oSmartFilterBar.addEventDelegate({
-                onAfterRendering: function () {
-                    bindClearButtonPress(oController);
-                }
-            });
-            oController._bSearchClearDelegateBound = true;
-        }
-        if (typeof setTimeout === "function") {
-            setTimeout(function () {
-                bindClearButtonPress(oController);
-            });
-        }
         oController._bSearchClearHandlerBound = true;
     }
 

@@ -108,10 +108,18 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD raise_busi_exception.
-    DATA(lo_container) = /iwbep/cl_mgw_msg_container=>get_mgw_msg_container( ).
+    DATA lo_container TYPE REF TO /iwbep/if_message_container.
+
+    IF mo_context IS BOUND.
+      lo_container = mo_context->get_message_container( ).
+    ELSE.
+      lo_container = /iwbep/cl_mgw_msg_container=>get_mgw_msg_container( ).
+    ENDIF.
+
     lo_container->add_message_text_only(
       iv_msg_type = /iwbep/if_mgw_defines=>gcs_msg_type-error
       iv_msg_text = |{ iv_code }: { iv_text }| ).
+
     RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception
       EXPORTING
         message_container = lo_container.

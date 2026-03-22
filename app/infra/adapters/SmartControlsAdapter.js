@@ -1,6 +1,6 @@
 sap.ui.define([
 "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartControlCoordinator",
-"PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
+"PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
 ], function (SearchSmartControlCoordinator, JsRuntime) {
     "use strict";
 

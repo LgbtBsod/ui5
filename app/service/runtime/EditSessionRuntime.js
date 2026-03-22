@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
 ], function (JsRuntime) {
     "use strict";
 

@@ -1,7 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailControllerBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailValidationSummaryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionViewportBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionPinnedRailRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionDialogRuntime",
@@ -14,7 +13,6 @@ sap.ui.define([
 ], function (
     DetailControllerBehavior,
     DetailValidationSummaryRuntime,
-    DetailActionConstants,
     DetailActionViewportBehavior,
     DetailActionPinnedRailRuntime,
     DetailActionDialogRuntime,
@@ -27,7 +25,10 @@ sap.ui.define([
 ) {
     "use strict";
 
-    var STATE_PATHS = DetailActionConstants.STATE_PATHS;
+    var STATE_PATHS = Object.freeze({
+        SAVE_IN_FLIGHT: "/saveInFlight",
+        VALIDATION_SUMMARY: "/validationSummary"
+    });
 
     function hasRows(aRows) {
         return Array.isArray(aRows) && aRows.length > 0;

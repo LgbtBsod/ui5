@@ -9,12 +9,14 @@
     "build:dist": "ui5 build --config ui5.yaml --clean-dest --dest dist",
     "build:preload": "node scripts/build-preload-local.js",
     "build:preload:sap": "ui5 build preload --config ui5.yaml --clean-dest --dest dist",
-    "validate:local": "npm run check:eol && npm run lint:css && node scripts/css-import-order-gate.js && node scripts/css-duplicate-selector-gate.js && node scripts/verify-i18n-completeness.js && npm run build:preload",
-    "validate:release": "npm run check:eol && npm run lint:css && node scripts/css-import-order-gate.js && node scripts/css-duplicate-selector-gate.js && node scripts/verify-i18n-completeness.js && npm run build:preload:sap && npm run verify:preload && npm run gate:release",
+    "validate:local": "npm run lint:js && npm run check:bom && npm run check:eol && npm run lint:css && node scripts/css-import-order-gate.js && node scripts/css-duplicate-selector-gate.js && node scripts/verify-i18n-completeness.js && npm run build:preload",
+    "validate:release": "npm run lint:js && npm run check:bom && npm run check:eol && npm run lint:css && node scripts/css-import-order-gate.js && node scripts/css-duplicate-selector-gate.js && node scripts/verify-i18n-completeness.js && npm run build:preload:sap && npm run verify:preload && npm run gate:release",
     "test:unit": "ui5 serve --config ui5.yaml --open test/unit/unitTests.qunit.html",
     "test:opa": "ui5 serve --config ui5.yaml --open test/integration/opaTests.qunit.html",
+    "lint:js": "eslint \"app/**/*.js\"",
     "lint:css": "node scripts/lint-css-local.js",
     "validate": "npm run validate:local",
+    "check:bom": "node -e \"const fs=require('fs');const walk=(dir)=>fs.readdirSync(dir,{withFileTypes:true}).flatMap((entry)=>{const full=dir+'/'+entry.name;if(entry.isDirectory())return walk(full);return /\\.js$/i.test(entry.name)?[full]:[];});const files=walk('app');const bom=Buffer.from([0xef,0xbb,0xbf]);const bad=files.filter((f)=>fs.readFileSync(f).slice(0,3).equals(bom));if(bad.length){console.error('BOM found in:', bad.join(', '));process.exit(1);}console.log('BOM check: OK');\"",
     "check:eol": "node scripts/check-eol.js",
     "gate:persistence-i18n": "node scripts/persistence-i18n-gate.js",
     "gate:release": "node scripts/release-readiness-gate.js",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@ui5/cli": "^3.11.6",
+    "eslint": "^8.57.1",
     "stylelint": "^16.24.0",
     "stylelint-config-standard": "^38.0.0"
   }

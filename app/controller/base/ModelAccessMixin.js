@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
 ], function (LockAdapter, ModelContracts, ControllerModelRuntime, JsRuntime) {
     "use strict";
 

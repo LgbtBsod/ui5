@@ -1,11 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/UiBehaviorRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiBehaviorConstants"
-], function (UiBehaviorRuntime, UiBehaviorConstants) {
+], function (BehaviorScopes, UiBehaviorConstants) {
     "use strict";
 
     function runSyncOperation(sOperation, mContext) {
-        return UiBehaviorRuntime.executeSync(sOperation, mContext || {});
+        return BehaviorScopes.ui.executeSync(sOperation, mContext || {});
     }
 
     function create(mOptions) {
@@ -49,8 +49,8 @@ sap.ui.define([
 
     return {
         create: create,
-        registerBehaviorOverride: UiBehaviorRuntime.registerBehaviorOverride,
-        unregisterBehaviorOverride: UiBehaviorRuntime.unregisterBehaviorOverride,
-        clearBehaviorOverrides: UiBehaviorRuntime.clearBehaviorOverrides
+        registerBehaviorOverride: BehaviorScopes.ui.registerBehaviorOverride,
+        unregisterBehaviorOverride: BehaviorScopes.ui.unregisterBehaviorOverride,
+        clearBehaviorOverrides: BehaviorScopes.ui.clearBehaviorOverrides
     };
 });

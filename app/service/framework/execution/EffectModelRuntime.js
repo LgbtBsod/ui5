@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/Ui5StyleAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/service/ui/StyleTokens",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",

@@ -1,20 +1,20 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "sap/ui/core/routing/HashChanger",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, RootIdRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger, JsRuntimeStringConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, RootIdRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger, JsRuntime) {
     "use strict";
 
-    var TYPEOF = JsRuntimeStringConstants.TYPEOF;
-    var METHODS = JsRuntimeStringConstants.METHODS;
-    var HASH_CHANGER = JsRuntimeStringConstants.HASH_CHANGER;
+    var TYPEOF = JsRuntime.TYPEOF;
+    var METHODS = JsRuntime.METHODS;
+    var HASH_CHANGER = JsRuntime.HASH_CHANGER;
 
     function cloneArgs(oArgs) {
         return CloneUtil.clone(oArgs, {});

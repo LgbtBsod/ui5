@@ -1,15 +1,15 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
-], function (FeedbackBehaviorRuntime, FeedbackConstants) {
+], function (BehaviorScopes, FeedbackConstants) {
     "use strict";
 
     function runOperation(sOperation, mContext) {
-        return FeedbackBehaviorRuntime.execute(sOperation, mContext || {});
+        return BehaviorScopes.feedback.execute(sOperation, mContext || {});
     }
 
     function runSyncOperation(sOperation, mContext) {
-        return FeedbackBehaviorRuntime.executeSync(sOperation, mContext || {});
+        return BehaviorScopes.feedback.executeSync(sOperation, mContext || {});
     }
 
     function resolveText(oController, sKey, aArgs, sFallback) {
@@ -64,8 +64,8 @@ sap.ui.define([
         showGlobalMessage: showGlobalMessage,
         showRouteMessage: showRouteMessage,
         showToast: showToast,
-        registerBehaviorOverride: FeedbackBehaviorRuntime.registerBehaviorOverride,
-        unregisterBehaviorOverride: FeedbackBehaviorRuntime.unregisterBehaviorOverride,
-        clearBehaviorOverrides: FeedbackBehaviorRuntime.clearBehaviorOverrides
+        registerBehaviorOverride: BehaviorScopes.feedback.registerBehaviorOverride,
+        unregisterBehaviorOverride: BehaviorScopes.feedback.unregisterBehaviorOverride,
+        clearBehaviorOverrides: BehaviorScopes.feedback.clearBehaviorOverrides
     };
 });

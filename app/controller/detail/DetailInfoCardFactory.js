@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "sap/f/GridListItem",
     "sap/m/VBox",
     "sap/m/HBox",

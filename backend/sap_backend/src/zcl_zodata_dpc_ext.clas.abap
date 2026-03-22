@@ -206,7 +206,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA ls_resp TYPE zstr_pcct_savechanges_rs.
     AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
       ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_create
-      ID 'BUKRS' FIELD ''.
+      ID 'BUKRS' FIELD '*'.
     IF sy-subrc <> 0.
       raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_no_create_auth iv_code = zif_zodata_contract_constants=>c_code_no_create_auth ).
     ENDIF.
@@ -410,14 +410,15 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA ls_root_auth TYPE zcl_zodata_read_service=>ty_root_row.
     ensure_deps( ).
     TRY. lv_rootkey = read_root_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_rootkey. ENDTRY.
-    IF lv_rootkey IS NOT INITIAL.
-      ls_root_auth = mo_read_service->read_root_row( lv_rootkey ).
-      require_checklist_authority(
-        iv_activity = zif_zodata_contract_constants=>c_op_view
-        iv_bukrs    = ls_root_auth-bukrs
-        iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
-        iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
+    IF lv_rootkey IS INITIAL.
+      RETURN.
     ENDIF.
+    ls_root_auth = mo_read_service->read_root_row( lv_rootkey ).
+    require_checklist_authority(
+      iv_activity = zif_zodata_contract_constants=>c_op_view
+      iv_bukrs    = ls_root_auth-bukrs
+      iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
+      iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
     lt_rows = mo_read_service->read_check_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
   ENDMETHOD.
@@ -428,14 +429,15 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA ls_root_auth TYPE zcl_zodata_read_service=>ty_root_row.
     ensure_deps( ).
     TRY. lv_rootkey = read_root_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_rootkey. ENDTRY.
-    IF lv_rootkey IS NOT INITIAL.
-      ls_root_auth = mo_read_service->read_root_row( lv_rootkey ).
-      require_checklist_authority(
-        iv_activity = zif_zodata_contract_constants=>c_op_view
-        iv_bukrs    = ls_root_auth-bukrs
-        iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
-        iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
+    IF lv_rootkey IS INITIAL.
+      RETURN.
     ENDIF.
+    ls_root_auth = mo_read_service->read_root_row( lv_rootkey ).
+    require_checklist_authority(
+      iv_activity = zif_zodata_contract_constants=>c_op_view
+      iv_bukrs    = ls_root_auth-bukrs
+      iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
+      iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
     lt_rows = mo_read_service->read_barrier_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
   ENDMETHOD.

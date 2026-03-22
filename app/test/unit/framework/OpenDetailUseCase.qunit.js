@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/OpenDetailUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
 ], function (OpenDetailUseCase, StatePaths) {

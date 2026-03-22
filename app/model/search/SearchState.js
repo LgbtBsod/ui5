@@ -9,16 +9,19 @@ sap.ui.define([
 
     return {
         applyDefaults: function (oStateModel) {
+            if (!oStateModel || typeof oStateModel.getProperty !== "function") {
+                return;
+            }
             if (!oStateModel.getProperty("/search") || typeof oStateModel.getProperty("/search") !== "object") {
                 oStateModel.setProperty("/search", {});
             }
-            if (!oStateModel.getProperty(StatePaths.SEARCH_CHECKS_FAIL_SEGMENT)) {
+            if (oStateModel.getProperty(StatePaths.SEARCH_CHECKS_FAIL_SEGMENT) === undefined) {
                 oStateModel.setProperty(StatePaths.SEARCH_CHECKS_FAIL_SEGMENT, SEARCH_SEGMENTS.ALL);
             }
-            if (!oStateModel.getProperty(StatePaths.SEARCH_BARRIERS_FAIL_SEGMENT)) {
+            if (oStateModel.getProperty(StatePaths.SEARCH_BARRIERS_FAIL_SEGMENT) === undefined) {
                 oStateModel.setProperty(StatePaths.SEARCH_BARRIERS_FAIL_SEGMENT, SEARCH_SEGMENTS.ALL);
             }
-            if (!oStateModel.getProperty(StatePaths.SEARCH_MODE)) {
+            if (oStateModel.getProperty(StatePaths.SEARCH_MODE) === undefined) {
                 oStateModel.setProperty(StatePaths.SEARCH_MODE, SEARCH_MODE.EXACT);
             }
         }

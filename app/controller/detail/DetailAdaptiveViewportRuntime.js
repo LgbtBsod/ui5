@@ -1,11 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
-], function (DetailActionConstants, ControllerViewStateRuntime, DetailAttachmentViewState, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
+], function (ControllerViewStateRuntime, DetailAttachmentViewState, JsRuntime) {
     "use strict";
 
+    var DETAIL_NARROW_VIEWPORT_REM = 70;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
 
@@ -25,7 +25,7 @@ sap.ui.define([
             return;
         }
         iWidth = Math.round((oDom.getBoundingClientRect && oDom.getBoundingClientRect().width) || 0);
-        bNarrow = iWidth > 0 && iWidth <= remToPx(DetailActionConstants.DETAIL_NARROW_VIEWPORT_REM);
+        bNarrow = iWidth > 0 && iWidth <= remToPx(DETAIL_NARROW_VIEWPORT_REM);
         ControllerViewStateRuntime.setFlag(oController, "/narrowDetailViewport", bNarrow);
         DetailAttachmentViewState.sync(oController);
         if (oView && typeof oView.toggleStyleClass === TYPE_FUNCTION) {

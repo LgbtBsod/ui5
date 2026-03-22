@@ -32,6 +32,9 @@ sap.ui.define([
     return Object.freeze({
         ROUTES: ROUTES,
         LAYOUTS: LAYOUTS,
+        PANES: ShellPaneConstants.PANES,
+        PAGE_IDS: ShellPaneConstants.PAGE_IDS,
+        READINESS_PATHS: ShellPaneConstants.READINESS_PATHS,
         MID_COLUMN_PAGE_IDS: MID_COLUMN_PAGE_IDS,
         isDetailRoute: isDetailRoute,
         resolveMidColumnPageId: resolveMidColumnPageId

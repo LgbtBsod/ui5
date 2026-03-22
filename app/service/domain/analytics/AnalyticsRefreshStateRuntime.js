@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts"
 ], function (AnalyticsContracts) {
     "use strict";

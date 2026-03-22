@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/usecases/ExportSearchUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport"
 ], function (ExportSearchUseCase, SpreadsheetExport) {

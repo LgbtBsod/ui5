@@ -1,11 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/DialogBehaviorRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectApplier"
-], function (DialogBehaviorRuntime, EffectApplier) {
+], function (BehaviorScopes, EffectApplier) {
     "use strict";
 
     function runOperation(sOperation, mContext) {
-        return DialogBehaviorRuntime.execute(sOperation, mContext || {});
+        return BehaviorScopes.dialog.execute(sOperation, mContext || {});
     }
 
     function ensure(oController, sKey, mConfig) {
@@ -54,9 +54,9 @@ sap.ui.define([
         open: open,
         close: close,
         runEffect: runEffect,
-        registerBehaviorOverride: DialogBehaviorRuntime.registerBehaviorOverride,
-        unregisterBehaviorOverride: DialogBehaviorRuntime.unregisterBehaviorOverride,
-        clearBehaviorOverrides: DialogBehaviorRuntime.clearBehaviorOverrides,
+        registerBehaviorOverride: BehaviorScopes.dialog.registerBehaviorOverride,
+        unregisterBehaviorOverride: BehaviorScopes.dialog.unregisterBehaviorOverride,
+        clearBehaviorOverrides: BehaviorScopes.dialog.clearBehaviorOverrides,
         promptWarning: EffectApplier.promptWarning,
         promptConfirm: EffectApplier.promptConfirm,
         promptError: EffectApplier.promptError,

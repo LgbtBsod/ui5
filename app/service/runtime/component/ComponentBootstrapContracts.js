@@ -45,9 +45,7 @@ sap.ui.define([], function () {
         MANAGER_KEYS: Object.freeze({
             ACTIVITY_MONITOR: "ActivityMonitor",
             AUTOSAVE_COORDINATOR: "AutoSaveCoordinator",
-            GCD_MANAGER: "GCDManager",
-            HEARTBEAT_MANAGER: "HeartbeatManager",
-            LOCK_STATUS_MONITOR: "LockStatusMonitor"
+            GCD_MANAGER: "GCDManager"
         })
     });
 });

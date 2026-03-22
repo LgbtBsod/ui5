@@ -17,7 +17,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/AnalyticsLoadRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/AnalyticsDrilldownRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/NavigationIntentService.qunit",
-    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/FacadeCommandContracts.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/FeedbackBannerState.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchAnalyticsIntentBehavior.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchSelectionFocusRuntime.qunit",
@@ -50,7 +49,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/GatewayClient.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ActionDispatcher.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SmartControlsAdapter.qunit",
-    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ODataKeyNormalizer.qunit"
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ODataKeyNormalizer.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/EffectMixin.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchFilterLifecycleBehavior.qunit"
 ], function () {
     "use strict";
 });

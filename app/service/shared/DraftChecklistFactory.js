@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ClientKeyGenerator",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (ClientKeyGenerator, WorkflowContracts) {

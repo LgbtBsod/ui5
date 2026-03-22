@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchStickyLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
 ], function (SearchStickyLayoutRuntime, SearchUiContracts) {

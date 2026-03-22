@@ -1,8 +1,9 @@
-﻿sap.ui.define([
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/PollingManager",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (ModelStateRuntime, WorkflowContracts, ModelPathContracts) {
+], function (PollingManager, ModelStateRuntime, WorkflowContracts, ModelPathContracts) {
     "use strict";
 
     function createHeartbeatManager(mOptions) {
@@ -10,9 +11,9 @@
         var oStateModel = mOptions.stateModel;
         var StatePaths = mOptions.statePaths;
 
-        oComponent._oHeartbeat = new mOptions.managers.HeartbeatManager({
+        oComponent._oHeartbeat = new PollingManager({
             intervalMs: Number(mOptions.timerDefaults.heartbeatMs),
-            heartbeatFn: function () {
+            checkFn: function () {
                 if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") !== WorkflowContracts.EDIT_MODES.EDIT ||
                     ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                     return Promise.resolve({ success: true, is_killed: false, skipped: true });
@@ -25,7 +26,9 @@
                 return oComponent._ctx.lock.heartbeat({ rootId: sRootId, sessionGuid: sSessionGuid }).then(function (oRes) {
                     return Object.assign({ rootId: sRootId, sessionGuid: sSessionGuid }, oRes || {});
                 });
-            }
+            },
+            eventName: "heartbeat",
+            errorEventName: "heartbeatError"
         });
         return oComponent._oHeartbeat;
     }
@@ -35,7 +38,7 @@
         var oStateModel = mOptions.stateModel;
         var StatePaths = mOptions.statePaths;
 
-        oComponent._oLockStatus = new mOptions.managers.LockStatusMonitor({
+        oComponent._oLockStatus = new PollingManager({
             intervalMs: Number(mOptions.timerDefaults.lockStatusMs),
             checkFn: function () {
                 if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") !== WorkflowContracts.EDIT_MODES.EDIT ||
@@ -50,7 +53,9 @@
                 return oComponent._ctx.lock.status({ rootId: sRootId, sessionGuid: sSessionGuid }).then(function (oRes) {
                     return Object.assign({ rootId: sRootId, sessionGuid: sSessionGuid }, oRes || {});
                 });
-            }
+            },
+            eventName: "status",
+            errorEventName: "statusError"
         });
         return oComponent._oLockStatus;
     }

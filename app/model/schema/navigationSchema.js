@@ -1,5 +1,5 @@
-﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants"
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts"
 ], function (NavigationContracts) {
     "use strict";
 

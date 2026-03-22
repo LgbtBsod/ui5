@@ -1,11 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/RetryBehaviorRuntime"
-], function (ActionContract, RetryBehaviorRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes"
+], function (ActionContract, BehaviorScopes) {
     "use strict";
 
     function runOperation(sOperation, mContext) {
-        return RetryBehaviorRuntime.execute(sOperation, mContext || {});
+        return BehaviorScopes.retry.execute(sOperation, mContext || {});
     }
 
     function runRetry(oController, vRetryAction) {
@@ -21,8 +21,8 @@ sap.ui.define([
 
     return {
         runRetry: runRetry,
-        registerBehaviorOverride: RetryBehaviorRuntime.registerBehaviorOverride,
-        unregisterBehaviorOverride: RetryBehaviorRuntime.unregisterBehaviorOverride,
-        clearBehaviorOverrides: RetryBehaviorRuntime.clearBehaviorOverrides
+        registerBehaviorOverride: BehaviorScopes.retry.registerBehaviorOverride,
+        unregisterBehaviorOverride: BehaviorScopes.retry.unregisterBehaviorOverride,
+        clearBehaviorOverrides: BehaviorScopes.retry.clearBehaviorOverrides
     };
 });

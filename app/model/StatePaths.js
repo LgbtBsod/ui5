@@ -1,10 +1,19 @@
 sap.ui.define([], function () {
     "use strict";
 
+    var ROOT_PREFIX = "/";
+    var ACTIVE_OBJECT_SEGMENT = "activeObjectId";
+    var SELECTED_ID_SEGMENT = "selectedId";
+
     return {
+        ACTIVE_OBJECT_ID: ROOT_PREFIX + ACTIVE_OBJECT_SEGMENT,
+        ANALYTICS_RETURN_RESTORE_EDIT: "/analyticsReturnRestoreEdit",
+        BACKEND_MODE: "/backendMode",
+        CURRENT_ROUTE_NAME: "/currentRouteName",
         DETAIL_ACCESS_GUARD: "/detailAccessGuard",
         DETAIL_META: "/detailMeta",
         IS_LOADING: "/isLoading",
+        LAYOUT: "/layout",
         PENDING_NAVIGATION_INTENT: "/pendingNavigationIntent",
         PERSISTENCE: "/persistence",
         PERSISTENCE_CURRENT_WRITE_REQUEST_ID: "/persistence/currentWriteRequestId",
@@ -24,11 +33,14 @@ sap.ui.define([], function () {
         READINESS_APP_READY: "/readiness/app/ready",
         READINESS_DETAIL: "/readiness/detail",
         READINESS_SEARCH: "/readiness/search",
+        REQUIRED_FIELDS: "/requiredFields",
         SEARCH_BARRIERS_FAIL_SEGMENT: "/search/barriersFailSegment",
         SEARCH_CHECKS_FAIL_SEGMENT: "/search/checksFailSegment",
+        SEARCH_FORCE_REFRESH_ON_RETURN: "/searchForceRefreshOnReturn",
         SEARCH_MODE: "/searchMode",
         SEARCH_RETURN_CONTEXT: "/searchReturnContext",
         SAVE_IN_FLIGHT: "/saveInFlight",
+        SELECTED_ID: ROOT_PREFIX + SELECTED_ID_SEGMENT,
         SESSION_ID: "/sessionId",
         TAB_SESSION_ID: "/tabSessionId",
         TAB_CONFLICT_STATE: "/tabConflictState",
@@ -45,6 +57,9 @@ sap.ui.define([], function () {
         WORKFLOW_DETAIL_AUTOSAVE_STATE: "/workflow/detail/autosave/state",
         WORKFLOW_DETAIL_EDIT_MODE: "/workflow/detail/editMode",
         WORKFLOW_DETAIL_LOCK_STATE: "/workflow/detail/lock/state",
+        LOCK_EXPIRES: "/lockExpires",
+        LOCK_OPERATION_PENDING: "/lockOperationPending",
+        POST_OPEN_HYDRATED_ROOT_ID: "/postOpenHydratedRootId",
         WORKFLOW_DIRTY: "/isDirty",
         WORKFLOW_LOCK_LOST_REASON: "/lockLostReason"
     };

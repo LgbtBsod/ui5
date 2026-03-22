@@ -248,7 +248,8 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     assert 'BackendModeContracts.PATHS.BACKEND_MODE' in bootstrap_source
     assert "withManagerRuntime" in bootstrap_builder
     assert "MANAGER_KEYS" in bootstrap_builder
-    assert "HeartbeatManager" in bootstrap_source
+    assert "PollingManager" in bootstrap_source
+    assert "HeartbeatManager" not in bootstrap_source
     assert "AutoSaveCoordinator" in bootstrap_source
     assert "Object.freeze({" in bootstrap_builder
     assert 'REAL: "real"' in backend_mode_contracts

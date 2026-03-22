@@ -1,5 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentAutosaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentModelInitRuntime",
@@ -11,14 +12,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentCoreInitRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentActionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFeedbackInitRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFeedbackRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeSettingsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentPollingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeHandlerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentCrossTabRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentInitListenersRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentManagerOrchestrationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockEventsRuntime"
 ], function (
     ComponentBootstrapContracts,
+    ComponentAutosaveRuntime,
     ComponentLockReleaseRuntime,
     ComponentSaveGuardRuntime,
     ComponentModelInitRuntime,
@@ -30,11 +33,12 @@ sap.ui.define([
     ComponentBootRuntime,
     ComponentCoreInitRuntime,
     ComponentActionRuntime,
-    ComponentFeedbackInitRuntime,
+    ComponentFeedbackRuntime,
+    ComponentRuntimeSettingsRuntime,
+    ComponentPollingRuntime,
     ComponentRuntimeHandlerRuntime,
     ComponentCrossTabRuntime,
     ComponentInitListenersRuntime,
-    ComponentManagerOrchestrationRuntime,
     ComponentLockEventsRuntime
 ) {
     "use strict";
@@ -71,17 +75,17 @@ sap.ui.define([
             },
             managers: {
                 Managers: Object.freeze({
-                    HeartbeatManager: mStaticDeps.HeartbeatManager,
+                    PollingManager: mStaticDeps.PollingManager,
                     GCDManager: mStaticDeps.GCDManager,
                     ActivityMonitor: mStaticDeps.ActivityMonitor,
                     AutoSaveCoordinator: mStaticDeps.AutoSaveCoordinator,
                     ConnectivityCoordinator: mStaticDeps.ConnectivityCoordinator,
-                    LockStatusMonitor: mStaticDeps.LockStatusMonitor,
                     SettingsManager: mStaticDeps.SettingsManager
                 }),
                 managers: {}
             },
             runtime: {
+                ComponentAutosaveRuntime: ComponentAutosaveRuntime,
                 ComponentLockReleaseRuntime: ComponentLockReleaseRuntime,
                 ComponentSaveGuardRuntime: ComponentSaveGuardRuntime,
                 ComponentModelInitRuntime: ComponentModelInitRuntime,
@@ -89,11 +93,12 @@ sap.ui.define([
                 ComponentCoreInitRuntime: ComponentCoreInitRuntime,
                 ComponentStateSeedRuntime: ComponentStateSeedRuntime,
                 ComponentActionRuntime: ComponentActionRuntime,
-                ComponentFeedbackInitRuntime: ComponentFeedbackInitRuntime,
+                ComponentFeedbackRuntime: ComponentFeedbackRuntime,
+                ComponentRuntimeSettingsRuntime: ComponentRuntimeSettingsRuntime,
+                ComponentPollingRuntime: ComponentPollingRuntime,
                 ComponentRuntimeHandlerRuntime: ComponentRuntimeHandlerRuntime,
                 ComponentCrossTabRuntime: ComponentCrossTabRuntime,
                 ComponentInitListenersRuntime: ComponentInitListenersRuntime,
-                ComponentManagerOrchestrationRuntime: ComponentManagerOrchestrationRuntime,
                 ComponentLockEventsRuntime: ComponentLockEventsRuntime,
                 ComponentModelBootstrap: ComponentModelBootstrap,
                 ComponentCoreRuntimeBootstrap: ComponentCoreRuntimeBootstrap,
@@ -117,11 +122,9 @@ sap.ui.define([
         var mResolved = Object.assign({}, mDeps);
         var oManagers = (mResolved.Managers || (mResolved.groups && mResolved.groups.managers && mResolved.groups.managers.Managers)) || {};
         mResolved.managers = {};
-        mResolved.managers[MANAGER_KEYS.HEARTBEAT_MANAGER] = oManagers.HeartbeatManager;
         mResolved.managers[MANAGER_KEYS.GCD_MANAGER] = oManagers.GCDManager;
         mResolved.managers[MANAGER_KEYS.ACTIVITY_MONITOR] = oManagers.ActivityMonitor;
         mResolved.managers[MANAGER_KEYS.AUTOSAVE_COORDINATOR] = oManagers.AutoSaveCoordinator;
-        mResolved.managers[MANAGER_KEYS.LOCK_STATUS_MONITOR] = oManagers.LockStatusMonitor;
         return mResolved;
     }
 

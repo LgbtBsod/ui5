@@ -24,6 +24,21 @@ sap.ui.define([
             }
             return Promise.resolve(fn.call(oFacade, mInput || {}, mCtx || {})).then(function (oResult) {
                 return this.applyUseCaseEffects(oResult);
+            }.bind(this)).catch(function (oRawError) {
+                return this.applyUseCaseEffects({
+                    ok: false,
+                    error: oRawError || {},
+                    effects: [],
+                    isOk: function () {
+                        return false;
+                    },
+                    getValue: function () {
+                        return null;
+                    },
+                    getError: function () {
+                        return oRawError || {};
+                    }
+                });
             }.bind(this));
         }
     };

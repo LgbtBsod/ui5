@@ -1,17 +1,20 @@
-﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionConstants",
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailStateActionRuntime",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailDirtyStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (DetailActionConstants, DetailCommandPolicy, DetailPersonInputRuntime, ModelStateRuntime, RootIdRuntime, DetailStateActionRuntime, CreateSentinel, ModelContracts) {
+], function (DetailCommandPolicy, DetailPersonInputRuntime, ModelStateRuntime, RootIdRuntime, DetailStateActionRuntime, CreateSentinel, DetailDirtyStateRuntime, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var STATE_PATHS = DetailActionConstants.STATE_PATHS;
+    var STATE_PATHS = Object.freeze({
+        SAVE_IN_FLIGHT: "/saveInFlight",
+        VALIDATION_SUMMARY: "/validationSummary"
+    });
 
     return {
         onToggleEdit: function (oEvent) {
@@ -125,7 +128,7 @@
                 if (sCurrentStatus !== sStatus) {
                     ModelStateRuntime.writeOnModel(oDetailModel, "/current/root/status", sStatus);
                     ModelStateRuntime.writeOnModel(oDetailModel, "/current/root/Status", sStatus);
-                    ModelStateRuntime.write(this, STATE_MODEL, "/isDirty", true);
+                    DetailDirtyStateRuntime.markDirty(this);
                 }
                 return DetailStateActionRuntime.save(this, {
                     saveDetail: function () {

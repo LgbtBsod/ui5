@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ShellPaneConstants"
-], function (NavigationConstants, ShellPaneConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults"
+], function (NavigationContracts, TimerDefaults) {
     "use strict";
 
     return Object.freeze({
@@ -31,24 +31,18 @@ sap.ui.define([
             })
         }),
         PANES: Object.freeze({
-            SEARCH_LOADED_PATH: ShellPaneConstants.READINESS_PATHS.SEARCH,
-            DETAIL_LOADED_PATH: ShellPaneConstants.READINESS_PATHS.DETAIL,
-            ANALYTICS_LOADED_PATH: ShellPaneConstants.READINESS_PATHS.ANALYTICS
+            SEARCH_LOADED_PATH: NavigationContracts.READINESS_PATHS.SEARCH,
+            DETAIL_LOADED_PATH: NavigationContracts.READINESS_PATHS.DETAIL,
+            ANALYTICS_LOADED_PATH: NavigationContracts.READINESS_PATHS.ANALYTICS
         }),
-        LAYOUTS: NavigationConstants.LAYOUTS,
-        STATE_TIMERS: Object.freeze({
-            heartbeatMs: 270000,
-            lockStatusMs: 60000,
-            gcdMs: 300000,
-            idleMs: 570000,
-            autoSaveIntervalMs: 150000,
-            autoSaveDebounceMs: 1200,
-            networkGraceMs: 60000,
-            lockRefreshCooldownMs: 150000,
-            analyticsRefreshMs: 900000,
-            retryBaseDelayMs: 500,
-            retryMaxDelayMs: 10000,
-            cacheToleranceMs: 5500
-        })
+        LAYOUTS: NavigationContracts.LAYOUTS,
+        STATE_TIMERS: Object.freeze(
+            Object.keys(TimerDefaults).reduce(function (acc, sKey) {
+                if (TimerDefaults[sKey] && TimerDefaults[sKey].defaultValue !== undefined) {
+                    acc[sKey] = TimerDefaults[sKey].defaultValue;
+                }
+                return acc;
+            }, {})
+        )
     });
 });

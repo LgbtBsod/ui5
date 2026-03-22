@@ -1,17 +1,8 @@
 sap.ui.define([], function () {
     "use strict";
 
-    function bootstrap(oComponent, mDeps, mModels) {
-        var oCoreRuntime = mDeps.ComponentCoreInitRuntime.initializeComponentRuntime(oComponent, mDeps, mModels, {
-            buildActionValidators: mDeps.ComponentActionRuntime.buildActionValidators,
-            createApplyFacadeResult: mDeps.ComponentActionRuntime.createApplyFacadeResult
-        });
-        var oFeedbackRuntime = mDeps.ComponentFeedbackInitRuntime.createFeedbackRuntime({
-            stateModel: mModels.stateModel,
-            feedbackPolicy: mDeps.FeedbackPolicy,
-            bundleText: mDeps.bundleText
-        });
-        var oRuntimeSettingsRuntime = mDeps.ComponentFeedbackInitRuntime.initializeRuntimeSettings(oComponent, {
+    function initializeRuntimeSettings(oComponent, mDeps, mModels) {
+        var oRuntime = mDeps.ComponentRuntimeSettingsRuntime.initializeRuntimeSettings(oComponent, {
             stateModel: mModels.stateModel,
             envState: mModels.envState,
             masterDataModel: mModels.masterDataModel,
@@ -20,7 +11,50 @@ sap.ui.define([], function () {
             telemetryRuntime: mDeps.TelemetryRuntime,
             emitTelemetry: mDeps.emitTelemetry
         });
-        var oPendingNavigationRuntime = mDeps.ComponentFeedbackInitRuntime.createPendingNavigationRuntime(
+
+        return {
+            applyRuntimeSettings: oRuntime.applyRuntimeSettings,
+            loadRuntimeSettings: function (mLoadOptions) {
+                return oRuntime.loadRuntimeSettings(mLoadOptions).catch(function (oError) {
+                    throw oError || new Error("runtime_settings_load_failed");
+                });
+            }
+        };
+    }
+
+    function createPendingNavigationRuntime(mDeps, oComponent, oStateModel, StatePaths, resumePendingNavigationIntent) {
+        return {
+            queuePendingNavigationIntent: function (oRouteEvent, mIntentOptions) {
+                return mDeps.ComponentActionRuntime.queuePendingNavigationIntent(oComponent, oStateModel, StatePaths, oRouteEvent, mIntentOptions);
+            },
+            clearPendingNavigationIntent: function () {
+                return mDeps.ComponentActionRuntime.clearPendingNavigationIntent(oStateModel, StatePaths);
+            },
+            revertPendingNavigationIntent: function () {
+                return mDeps.ComponentActionRuntime.revertPendingNavigationIntent(oComponent, oStateModel, StatePaths);
+            },
+            restorePendingNavigationIntent: function () {
+                return mDeps.ComponentActionRuntime.restorePendingNavigationIntent(oComponent, oStateModel, StatePaths);
+            },
+            resumePendingNavigationIntent: function () {
+                return resumePendingNavigationIntent(oComponent, oStateModel, StatePaths);
+            }
+        };
+    }
+
+    function bootstrap(oComponent, mDeps, mModels) {
+        var oCoreRuntime = mDeps.ComponentCoreInitRuntime.initializeComponentRuntime(oComponent, mDeps, mModels, {
+            buildActionValidators: mDeps.ComponentActionRuntime.buildActionValidators,
+            createApplyFacadeResult: mDeps.ComponentActionRuntime.createApplyFacadeResult
+        });
+        var oFeedbackRuntime = mDeps.ComponentFeedbackRuntime.createFeedbackRuntime({
+            stateModel: mModels.stateModel,
+            feedbackPolicy: mDeps.FeedbackPolicy,
+            bundleText: mDeps.bundleText
+        });
+        var oRuntimeSettingsRuntime = initializeRuntimeSettings(oComponent, mDeps, mModels);
+        var oPendingNavigationRuntime = createPendingNavigationRuntime(
+            mDeps,
             oComponent,
             mModels.stateModel,
             mDeps.StatePaths,

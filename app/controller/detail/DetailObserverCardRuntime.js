@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "sap/m/VBox",
     "sap/m/Text",
     "sap/m/Input",
