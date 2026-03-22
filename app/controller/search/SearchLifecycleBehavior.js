@@ -16,7 +16,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
 ], function (
     ControllerResourceCleanup,
     SearchFacade,
@@ -35,7 +36,8 @@ sap.ui.define([
     ControllerTextRuntime,
     ModelContracts,
     NavigationContracts,
-    SearchToolbarContracts
+    SearchToolbarContracts,
+    UiControlIds
 ) {
     "use strict";
 
@@ -49,11 +51,11 @@ sap.ui.define([
             role: "region",
             "aria-label": ControllerTextRuntime.getText(oController, "kpiRailAriaLabel", [], "")
         });
-        SemanticDomRuntime.syncControllerTarget(oController, "searchFilterCard", {
+        SemanticDomRuntime.syncControllerTarget(oController, UiControlIds.SEARCH.FILTER_CARD, {
             role: "search",
             "aria-label": ControllerTextRuntime.getText(oController, "filtersAriaLabel", [], "")
         });
-        SemanticDomRuntime.syncControllerTarget(oController, "searchResultsShell", {
+        SemanticDomRuntime.syncControllerTarget(oController, UiControlIds.SEARCH.RESULTS_SHELL, {
             role: "region",
             "aria-label": ControllerTextRuntime.getText(oController, "searchResultsAriaLabel", [], "")
         });

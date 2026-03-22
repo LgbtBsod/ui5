@@ -1,0 +1,10 @@
+CACHE POLICY
+
+Current policy from repo truth:
+- Search/detail runtime uses JSONModel state plus cache validation/write use cases
+- Attachments are excluded from base detail cache truth and loaded lazily
+- LastChangeSet participates in freshness validation
+- Cache invalidation is checked before entering edit and before save-sensitive flows
+
+Important constraint:
+- Attachment binaries are not the source of truth in cached detail snapshots

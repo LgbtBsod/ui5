@@ -26,7 +26,11 @@ function execute(mInput, mCtx) {
             return Promise.resolve(Result.fail({ code: "TAKEOVER_UNAVAILABLE" }));
         }
 
-        return Promise.resolve(oLock.acquire({ rootId: sRootId, sessionGuid: sSessionGuid, force: true })).then(function (oRes) {
+        return Promise.resolve(oLock.acquire({
+            rootId: sRootId,
+            sessionGuid: sSessionGuid,
+            forceTakeover: true
+        })).then(function (oRes) {
             if (!(oRes && oRes.ok)) {
                 return Result.fail({ code: "TAKEOVER_FAILED", lock: oRes || {} });
             }

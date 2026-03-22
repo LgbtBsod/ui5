@@ -1,18 +1,19 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionTableRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionFocusRuntime"
-], function (SearchSelectionStateRuntime, SearchSelectionTableRuntime, SearchSelectionFocusRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionFocusRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
+], function (SearchSelectionStateRuntime, SearchSelectionTableRuntime, SearchSelectionFocusRuntime, UiControlIds) {
     "use strict";
 
     function resolveSearchInnerTable(oController) {
-        var oSmartTable = oController.byId("searchSmartTable");
+        var oSmartTable = oController.byId(UiControlIds.SEARCH.SMART_TABLE);
         return oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
     }
 
     function resolveSmartSearchButton(oController) {
         return oController && oController.byId
-            ? oController.byId("searchSmartFilterBar-btnGo")
+            ? oController.byId(UiControlIds.SEARCH.SMART_FILTER_BAR + UiControlIds.SEARCH.GO_BUTTON_SUFFIX)
             : null;
     }
 

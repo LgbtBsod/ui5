@@ -1,0 +1,26 @@
+TZ 2.1 production-ready baseline
+
+Stack:
+- SAPUI5 1.71 target
+- SAP Gateway OData V2
+- CDS / SADL read path
+- BOPF modify path
+- Microsoft Edge only, no IE support
+
+Current local validation baseline:
+- npm run lint:js
+- npm run lint:css
+- python -m pytest -q
+- npm run build
+- powershell -ExecutionPolicy Bypass -File scripts/local-launch-smoke.ps1
+
+Build prerequisites:
+- Node.js with npm
+- Python available on PATH for backend mock tests
+- Local build uses repo-owned fallback dist + preload generation because public npm does not resolve @sapui5/distribution-metadata@1.71.70
+- Official SAPUI5 preload build remains available through npm run build:preload:sap when SAPUI5 registry access exists
+
+Project rules preserved:
+- Existing working behavior must not be changed unless it diverges from TZ or breaks validation
+- JSONModel remains the UI state source
+- DB_KEY / PARENT_KEY stay canonical technical keys in backend contract flow

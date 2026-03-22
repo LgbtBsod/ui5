@@ -1,0 +1,11 @@
+RESIDUAL RISKS
+
+1. Integration-origin UX
+- Search metadata exposes IntegrationFlag and SourceKey, but the repo does not yet provide a fully evidenced end-to-end integration confirm-before-edit implementation path.
+
+2. ArchiveLink
+- Attachment contract is kept ArchiveLink-compatible at interface level, but productive ArchiveLink infrastructure and backend content provider behavior are outside this repo.
+
+3. SAPUI5 official framework build
+- Local build is now reproducible through repo-owned fallback scripts.
+- Official UI5 CLI framework build for 1.71.70 still requires SAPUI5 registry access not available in this environment.

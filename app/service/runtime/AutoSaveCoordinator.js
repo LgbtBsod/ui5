@@ -1,8 +1,9 @@
 sap.ui.define([
   "sap/ui/base/EventProvider",
   "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime",
-  "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger"
-], function (EventProvider, TimerRuntime, DebugLogger) {
+  "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
+  "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
+], function (EventProvider, TimerRuntime, DebugLogger, RuntimeEventContracts) {
   "use strict";
 
   return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.AutoSaveCoordinator", {
@@ -82,12 +83,12 @@ sap.ui.define([
         DebugLogger.info("AutoSaveCoordinator", "autosave_inflight_skip", {});
         return this._pActiveRun;
       }
-      this.fireEvent("autosaveStart", { payload: oPayload });
+      this.fireEvent(RuntimeEventContracts.AUTOSAVE_START, { payload: oPayload });
       this._pActiveRun = this._fnSave(oPayload).then(function (oResult) {
-        this.fireEvent("autosaveDone", { result: oResult || null });
+        this.fireEvent(RuntimeEventContracts.AUTOSAVE_DONE, { result: oResult || null });
         return oResult || null;
       }.bind(this)).catch(function (oError) {
-        this.fireEvent("autosaveError", { error: oError });
+        this.fireEvent(RuntimeEventContracts.AUTOSAVE_ERROR, { error: oError });
         throw oError;
       }.bind(this)).finally(function () {
         this._pActiveRun = null;

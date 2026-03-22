@@ -1,0 +1,24 @@
+WORK PACKAGES
+
+WP1. Build reproducibility
+- repo-owned local dist fallback
+- local preload generation
+- aligned npm scripts
+
+WP2. Contract inventory artifacts
+- requirements baseline
+- truth matrix
+- endpoint/entity/function matrices
+- lock/cache/CDS/ABAP summaries
+
+WP3. Targeted TZ gap closure
+- attachment lazy-load contract
+- centralized constants cleanup
+- ForceTakeover naming alignment
+- detail access illustration fallback without runtime-in-constants bug
+
+WP4. Verification
+- lint
+- backend tests
+- build
+- local smoke

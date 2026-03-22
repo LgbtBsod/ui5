@@ -70,7 +70,7 @@ sap.ui.define([
         }
         return GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_PERMISSION, sRootId, {
             type: ODataKeyContracts.TYPES.ROOT_KEY,
-            "$select": "RootKey,CanCreate,CanView,CanEdit,CanDelete,ReasonCode,Message"}).replace(/^\//, ""), {
+            "$select": ODataKeyContracts.SELECTS.CHECKLIST_PERMISSION}).replace(/^\//, ""), {
             ACTVT: sActivity
         }).then(function (oResponse) {
             return normalizePermissionResponse(firstRow(oResponse), sRootId, sActivity);

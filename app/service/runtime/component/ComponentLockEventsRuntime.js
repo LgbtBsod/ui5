@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
-], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts, DetailContracts, ShellStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
+], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts, DetailContracts, ShellStateRuntime, RuntimeEventContracts) {
     "use strict";
 
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
@@ -146,26 +147,26 @@ sap.ui.define([
             applyOwnedLockState(oLockState, bResetConflict);
         }
 
-        oComponent._oHeartbeat.attachEvent("heartbeat", function (oEvent) {
+        oComponent._oHeartbeat.attachEvent(RuntimeEventContracts.HEARTBEAT, function (oEvent) {
             var oPayload = ComponentRuntimeSupport.eventPayload(oEvent);
             DebugLogger.info("Component", "lock heartbeat", oPayload);
             onLockProbePayload(oPayload, false);
             updateCacheValidation(oCacheState, oStateModel, ComponentRuntimeSupport, oPayload);
         });
-        oComponent._oHeartbeat.attachEvent("heartbeatError", function (oEvent) {
+        oComponent._oHeartbeat.attachEvent(RuntimeEventContracts.HEARTBEAT_ERROR, function (oEvent) {
             invalidateProbeLockHealth(oStateModel, oShellModel, oStatePaths, MODEL_PATHS);
             DebugLogger.info("Component", "lock heartbeat error", ComponentRuntimeSupport.eventPayload(oEvent));
         });
-        oComponent._oGcd.attachEvent("gcdExpired", function () {
+        oComponent._oGcd.attachEvent(RuntimeEventContracts.GCD_EXPIRED, function () {
             invalidateProbeLockHealth(oStateModel, oShellModel, oStatePaths, MODEL_PATHS);
         });
-        oComponent._oLockStatus.attachEvent("status", function (oEvent) {
+        oComponent._oLockStatus.attachEvent(RuntimeEventContracts.STATUS, function (oEvent) {
             onLockProbePayload(ComponentRuntimeSupport.eventPayload(oEvent), true);
         });
-        oComponent._oLockStatus.attachEvent("statusError", function () {
+        oComponent._oLockStatus.attachEvent(RuntimeEventContracts.STATUS_ERROR, function () {
             invalidateProbeLockHealth(oStateModel, oShellModel, oStatePaths, MODEL_PATHS);
         });
-        oComponent._oActivity.attachEvent("idleTimeout", function () {
+        oComponent._oActivity.attachEvent(RuntimeEventContracts.IDLE_TIMEOUT, function () {
             ModelStateRuntime.writeOnModel(oStateModel, "/idleExpires", new Date().toISOString());
             fnHandleForceReadOnly({
                 reason: "IDLE_TIMEOUT",
@@ -173,7 +174,7 @@ sap.ui.define([
                 source: "activityMonitor"
             });
         });
-        oComponent._oActivity.attachEvent("activity", function (oEvent) {
+        oComponent._oActivity.attachEvent(RuntimeEventContracts.ACTIVITY, function (oEvent) {
             var sAt = (ComponentRuntimeSupport.eventPayload(oEvent) || {}).at || new Date().toISOString();
             ModelStateRuntime.setManyOnModel(oShellModel, {
                 [MODEL_PATHS.SHELL_ACTIVITY_LAST_ACTIVE_AT]: sAt,

@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
-], function (ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, AnalyticsMonthRuntime, JsRuntime, ModelContracts, StatePaths) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
+], function (ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, AnalyticsMonthRuntime, JsRuntime, ModelContracts, StatePaths, UiControlIds) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -126,7 +127,7 @@ sap.ui.define([
         var oCommandPolicy = (mOptions && mOptions.commandPolicy) || SearchCommandPolicy;
         var sFilterKey = normalizeText(oIntent.filterKey);
         var sFilterValue = normalizeText(oIntent.filterValue);
-        var oSmartFilterBar = oController.byId("searchSmartFilterBar");
+        var oSmartFilterBar = oController.byId(UiControlIds.SEARCH.SMART_FILTER_BAR);
         var oControl;
         var mFilterData;
         var sSource = normalizeText(oIntent.analyticsSource).toUpperCase();

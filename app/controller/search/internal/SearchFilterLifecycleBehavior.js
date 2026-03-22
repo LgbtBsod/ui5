@@ -10,7 +10,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
 ], function (
     ControllerViewStateRuntime,
     ModelStateRuntime,
@@ -23,7 +24,8 @@ sap.ui.define([
     ModelContracts,
     OperationSourceContracts,
     SearchRuntimeContracts,
-    SearchToolbarContracts
+    SearchToolbarContracts,
+    UiControlIds
 ) {
     "use strict";
 
@@ -68,7 +70,7 @@ sap.ui.define([
         if (!oController || oController._bSearchClearHandlerBound) {
             return;
         }
-        oSmartFilterBar = oController.byId("searchSmartFilterBar");
+        oSmartFilterBar = oController.byId(UiControlIds.SEARCH.SMART_FILTER_BAR);
         if (!oSmartFilterBar || typeof oSmartFilterBar.attachClear !== "function") {
             return;
         }
@@ -88,7 +90,7 @@ sap.ui.define([
     }
 
     function onSmartFilterChanged(oController) {
-        var oSmartFilterBar = oController.byId("searchSmartFilterBar");
+        var oSmartFilterBar = oController.byId(UiControlIds.SEARCH.SMART_FILTER_BAR);
         if (!oSmartFilterBar || (typeof oSmartFilterBar.isInitialised === "function" && !oSmartFilterBar.isInitialised())) {
             return;
         }

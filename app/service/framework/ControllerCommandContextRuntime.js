@@ -1,6 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxRuntimeFactory"
-], function (CtxRuntimeFactory) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxRuntimeFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
+], function (CtxRuntimeFactory, UiControlIds) {
     "use strict";
 
     function buildDefaultCtx(oController) {
@@ -9,8 +10,8 @@ sap.ui.define([
 
     function buildSearchCtx(oController) {
         return CtxRuntimeFactory.build(oController, {
-            smartFilterBar: oController && oController.byId && oController.byId("searchSmartFilterBar"),
-            smartTable: oController && oController.byId && oController.byId("searchSmartTable")
+            smartFilterBar: oController && oController.byId && oController.byId(UiControlIds.SEARCH.SMART_FILTER_BAR),
+            smartTable: oController && oController.byId && oController.byId(UiControlIds.SEARCH.SMART_TABLE)
         });
     }
 

@@ -64,6 +64,7 @@ FUNCTION zodata_lock_control.
       IF sy-subrc <> 0.
         RAISE update_error.
       ENDIF.
+      COMMIT WORK AND WAIT.
 
     WHEN 'R'. " release
       IF iv_session_guid IS INITIAL.
@@ -98,6 +99,7 @@ FUNCTION zodata_lock_control.
       IF sy-subrc <> 0.
         RAISE update_error.
       ENDIF.
+      COMMIT WORK AND WAIT.
 
     WHEN 'H' OR 'T'. " heartbeat / technical touch
       IF iv_mode = 'H' AND iv_session_guid IS INITIAL.
@@ -116,6 +118,7 @@ FUNCTION zodata_lock_control.
       IF sy-subrc <> 0.
         RAISE update_error.
       ENDIF.
+      COMMIT WORK AND WAIT.
 
     WHEN 'S' OR 'V'. " status / validate
       " Canonical runtime truth must be checked against:

@@ -32,6 +32,15 @@ sap.ui.define([
         })
     });
 
+    var SELECTS = Object.freeze({
+        ATTACHMENT: "AttachmentKey,Key,RootKey,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,Value,ScanStatus,ScannedOn,CreatedOn,ChangedOn",
+        ATTACHMENT_CONTENT: "AttachmentKey,FileName,MimeType,Value",
+        CHECKLIST_BASIC_INFO: "RootKey,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverFullname,ObservedPernr,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName",
+        CHECKLIST_BARRIER: "Key,RootKey,BarriersNum,Text,Comment,Result,ChangedOn",
+        CHECKLIST_CHECK: "Key,RootKey,ChecksNum,Text,Comment,Result,ChangedOn",
+        CHECKLIST_PERMISSION: "RootKey,CanCreate,CanView,CanEdit,CanDelete,ReasonCode,Message"
+    });
+
     function byEntitySet(sEntitySet) {
         var aKeys = Object.keys(DETAIL_ENTITY_FILTERS);
         var i;
@@ -48,6 +57,7 @@ sap.ui.define([
     return {
         TYPES: TYPES,
         DETAIL_ENTITY_FILTERS: DETAIL_ENTITY_FILTERS,
+        SELECTS: SELECTS,
         byEntitySet: byEntitySet
     };
 });

@@ -1,7 +1,8 @@
 sap.ui.define([
     "sap/ui/base/EventProvider",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime"
-], function (EventProvider, TimerRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
+], function (EventProvider, TimerRuntime, RuntimeEventContracts) {
     "use strict";
 
     return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.GCDManager", {
@@ -22,7 +23,7 @@ sap.ui.define([
                 return;
             }
             this._iTimer = TimerRuntime.restartTimeout(this._iTimer, function () {
-                this.fireEvent("gcdExpired");
+                this.fireEvent(RuntimeEventContracts.GCD_EXPIRED);
             }.bind(this), this._iIntervalMs);
         },
 

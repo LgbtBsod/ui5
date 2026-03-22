@@ -51,7 +51,7 @@ sap.ui.define([
         return new Promise(function (resolve) {
             oMainService.read(sEntityPath, {
                 urlParameters: {
-                    "$select": "AttachmentKey,FileName,MimeType,Value"
+                    "$select": ODataKeyContracts.SELECTS.ATTACHMENT_CONTENT
                 },
                 success: function (oData) {
                     var sValue = String((oData && oData.Value) || "").trim();

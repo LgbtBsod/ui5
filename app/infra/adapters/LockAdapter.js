@@ -75,8 +75,9 @@ sap.ui.define([
             RootId: sRootId,
             SessionGuid: sSession,
             TabSessionId: sTabSessionId,
-            Force: !!(mArgs && mArgs.force),
-            StealFrom: (mArgs && mArgs.stealFrom) || (mArgs && mArgs.force ? sSession : "")
+            ForceTakeover: !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force)),
+            Force: !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force)),
+            StealFrom: (mArgs && mArgs.stealFrom) || ((mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force)) ? sSession : "")
         }).then(function (oResult) {
             return normalizeResult(oResult, sSession);
         }).catch(function (oError) {

@@ -114,7 +114,7 @@ sap.ui.define([
             message: oResolved.message,
             titleKey: bDenied ? "detailAccessDeniedTitle" : "",
             messageKey: bDenied ? "detailAccessDeniedText" : "",
-            illustrationSrc: UiAssetPaths.resolveDetailAccessDeniedIllustration()
+            illustrationSrc: UiAssetPaths.DETAIL_ACCESS_DENIED_LIGHT
         };
     }
 

@@ -1,0 +1,20 @@
+TRUTH MATRIX
+
+Frontend truth:
+- Routes, models, adapters, constants and runtime orchestration live under app/
+- Search/detail UI state is JSONModel-driven
+- Attachments are lazy-loaded and opened through metadata-first fetch of Value on demand
+
+Gateway truth:
+- Entity set names come from app/constants/GatewayContractConstants.js
+- Command scenarios use function imports: CreateChecklist, SaveChanges, AutoSave, CopyChecklist, LockAcquire, LockHeartbeat, LockRelease, ReportExport
+- Read scenarios use Checklist* entity sets plus supporting sets such as LockStatusSet and RuntimeSettings
+
+Backend truth:
+- Read path is split into read service / runtime settings service / DPC_EXT integration seam
+- Save path is split into save service + BOPF mapper
+- DB_KEY/PARENT_KEY remain in metadata/backend contract as Edm.Binary technical fields
+
+Known current gaps documented, not invented:
+- Integration-origin confirm-before-edit is not fully evidenced by the current repo truth
+- ArchiveLink productive implementation is represented by attachment contract shape and compatibility notes, but productive ArchiveLink infrastructure is outside this repo

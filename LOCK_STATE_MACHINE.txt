@@ -1,0 +1,24 @@
+LOCK STATE MACHINE
+
+Observed frontend lock states:
+- READ_ONLY
+- ACQUIRING_LOCK
+- EDIT_LOCKED
+- LOCK_LOST
+- FORCED_READ_ONLY
+- IDLE_TIMEOUT_GRACE
+
+Observed lock operations:
+- acquire
+- heartbeat
+- status
+- release
+- takeover via one explicit ForceTakeover flag
+
+Expected flow:
+1. permission check
+2. lock acquire
+3. cache freshness validation
+4. enter edit mode
+5. heartbeat + status polling while edit lock is active
+6. release on close/leave/save transitions where applicable

@@ -7,6 +7,7 @@ Architectural baseline for the current production-grade baseline.
 Use `scripts/start-local-env.ps1` to launch the local UI and mock Gateway stack.
 Use `scripts/stop-local-env.ps1` to stop the local environment cleanly.
 For live Gateway verification use `node scripts/gateway-live-smoke-runner.js`.
+Run `npm run build` before smoke. In this local environment the build uses a repo-owned dist/preload fallback because public npm does not resolve SAPUI5 `1.71.70` framework metadata.
 
 ## Browser And Platform
 

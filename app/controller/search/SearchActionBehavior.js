@@ -9,8 +9,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (ControllerActionBusyRuntime, ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchFlowBehavior, SearchViewNavigationBehavior, SearchViewSelectionBehavior, SearchSelectionRuntime, SearchViewportRuntime, OperationSourceContracts, CreateSentinel) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
+], function (ControllerActionBusyRuntime, ControllerViewStateRuntime, UiDecisionCoordinator, NavigationIntentService, SearchFlowBehavior, SearchViewNavigationBehavior, SearchViewSelectionBehavior, SearchSelectionRuntime, SearchViewportRuntime, OperationSourceContracts, CreateSentinel, UiControlIds) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -71,7 +72,7 @@ sap.ui.define([
     }
 
     function onTableSelectionChange(oController, oEvent) {
-        var oSmartTable = oController.byId("searchSmartTable");
+        var oSmartTable = oController.byId(UiControlIds.SEARCH.SMART_TABLE);
         var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
         var aSelectedRowIds = SearchSelectionRuntime.extractSelectedRowIds(oEvent, oInnerTable);
         var sSelectedRowId = aSelectedRowIds[0] || "";

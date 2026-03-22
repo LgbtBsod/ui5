@@ -39,7 +39,7 @@ sap.ui.define([
         var oPayload = RuntimeInput.asObject(vPayload);
         return {
             rootId: RuntimeInput.asString(oPayload.rootId || "").trim(),
-            force: RuntimeInput.asBoolean(oPayload.force, false)
+            forceTakeover: RuntimeInput.asBoolean(oPayload.forceTakeover !== undefined ? oPayload.forceTakeover : oPayload.force, false)
         };
     }
 

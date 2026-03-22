@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/PollingManager",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (PollingManager, ModelStateRuntime, WorkflowContracts, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
+], function (PollingManager, ModelStateRuntime, WorkflowContracts, ModelPathContracts, RuntimeEventContracts) {
     "use strict";
 
     function isLockActive(oStateModel, StatePaths) {
@@ -39,14 +40,14 @@ sap.ui.define([
     function createHeartbeatManager(mOptions) {
         var oComponent = mOptions.component;
 
-        oComponent._oHeartbeat = createLockPollingManager(mOptions, "heartbeat", "heartbeat", "heartbeatError", "heartbeatMs");
+        oComponent._oHeartbeat = createLockPollingManager(mOptions, "heartbeat", RuntimeEventContracts.HEARTBEAT, RuntimeEventContracts.HEARTBEAT_ERROR, "heartbeatMs");
         return oComponent._oHeartbeat;
     }
 
     function createLockStatusManager(mOptions) {
         var oComponent = mOptions.component;
 
-        oComponent._oLockStatus = createLockPollingManager(mOptions, "status", "status", "statusError", "lockStatusMs");
+        oComponent._oLockStatus = createLockPollingManager(mOptions, "status", RuntimeEventContracts.STATUS, RuntimeEventContracts.STATUS_ERROR, "lockStatusMs");
         return oComponent._oLockStatus;
     }
 

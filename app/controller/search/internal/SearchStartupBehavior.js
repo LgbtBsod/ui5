@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime"
-], function (SearchStartupRuntime, SearchViewportRuntime, SearchAnalyticsRailRuntime, ControllerTextRuntime, ControllerViewStateRuntime, SearchCommandPolicy, SearchSelectionRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
+], function (SearchStartupRuntime, SearchViewportRuntime, SearchAnalyticsRailRuntime, ControllerTextRuntime, ControllerViewStateRuntime, SearchCommandPolicy, SearchSelectionRuntime, UiControlIds) {
     "use strict";
 
     function syncSmartControlAvailability(oController) {
@@ -38,7 +39,7 @@ sap.ui.define([
                 return SearchCommandPolicy.rebind(oController, mInput);
             },
             rebindTableDirect: function () {
-                var oSmartTable = oController && oController.byId && oController.byId("searchSmartTable");
+                var oSmartTable = oController && oController.byId && oController.byId(UiControlIds.SEARCH.SMART_TABLE);
                 if (!oSmartTable || typeof oSmartTable.rebindTable !== "function") {
                     return false;
                 }

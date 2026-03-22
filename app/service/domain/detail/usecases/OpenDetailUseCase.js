@@ -160,7 +160,7 @@ sap.ui.define([
                         reasonCode: DETAIL_ACCESS_REASON_CODES.CREATE_DRAFT,
                         titleKey: "",
                         messageKey: "",
-                        illustrationSrc: UiAssetPaths.resolveDetailAccessDeniedIllustration()
+                        illustrationSrc: UiAssetPaths.DETAIL_ACCESS_DENIED_LIGHT
                     }),
                     Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                         status: WorkflowContracts.READINESS_STATUS.READY,

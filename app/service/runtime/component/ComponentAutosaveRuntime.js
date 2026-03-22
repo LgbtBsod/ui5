@@ -7,8 +7,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, ModelPathContracts, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, ModelPathContracts, DetailMessageKeyConstants, RuntimeEventContracts) {
     "use strict";
 
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
@@ -111,7 +112,7 @@ sap.ui.define([
                 });
             }
         });
-        oComponent._oAutoSave.attachEvent("autosaveStart", function () {
+        oComponent._oAutoSave.attachEvent(RuntimeEventContracts.AUTOSAVE_START, function () {
             var mStart = {};
             DetailPersistenceRuntime.startEffects("auto").forEach(function (oEffect) {
                 if (oEffect && oEffect.type === "modelPatch" && oEffect.modelName === "state") {
@@ -122,7 +123,7 @@ sap.ui.define([
             DebugLogger.info("Component", "autosave start", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
             fnEmitTelemetry("autosave.triggered", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
-        oComponent._oAutoSave.attachEvent("autosaveDone", function () {
+        oComponent._oAutoSave.attachEvent(RuntimeEventContracts.AUTOSAVE_DONE, function () {
             ModelStateRuntime.writeOnModel(oStateModel, "/autosaveAt", new Date().toISOString());
             if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
                 ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
@@ -130,7 +131,7 @@ sap.ui.define([
             }
             DebugLogger.info("Component", "autosave done", mOptions.telemetryRuntime.objectRefFromStateModel(oStateModel));
         });
-        oComponent._oAutoSave.attachEvent("autosaveError", function (oEvent) {
+        oComponent._oAutoSave.attachEvent(RuntimeEventContracts.AUTOSAVE_ERROR, function (oEvent) {
             var oPayload = ComponentRuntimeSupport.eventPayload(oEvent);
             var oClassification = DetailPersistenceRuntime.classifyError(oPayload && oPayload.error);
             if (DetailPersistenceRuntime.isLockFailure(oClassification.taxonomy) && typeof oComponent._handleForceReadOnly === "function") {

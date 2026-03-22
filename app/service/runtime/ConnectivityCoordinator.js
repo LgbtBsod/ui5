@@ -1,7 +1,8 @@
 sap.ui.define([
   "sap/ui/base/EventProvider",
-  "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime"
-], function (EventProvider, TimerRuntime) {
+  "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime",
+  "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
+], function (EventProvider, TimerRuntime, RuntimeEventContracts) {
   "use strict";
 
   return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.ConnectivityCoordinator", {
@@ -16,7 +17,7 @@ sap.ui.define([
     start: function () {
       window.addEventListener("online", this._fnOnline);
       window.addEventListener("offline", this._fnOffline);
-      this.fireEvent("state", { online: navigator.onLine !== false, isGrace: false, graceExpiresAt: null });
+      this.fireEvent(RuntimeEventContracts.STATE, { online: navigator.onLine !== false, isGrace: false, graceExpiresAt: null });
     },
 
     stop: function () {
@@ -35,19 +36,19 @@ sap.ui.define([
     },
     _onOffline: function () {
       if (!Number.isFinite(this._iGraceMs) || this._iGraceMs < 1000) {
-        this.fireEvent("graceExpired", { online: false });
+        this.fireEvent(RuntimeEventContracts.GRACE_EXPIRED, { online: false });
         return;
       }
       var sGraceUntil = new Date(Date.now() + this._iGraceMs).toISOString();
-      this.fireEvent("state", { online: false, isGrace: true, graceExpiresAt: sGraceUntil });
+      this.fireEvent(RuntimeEventContracts.STATE, { online: false, isGrace: true, graceExpiresAt: sGraceUntil });
       this._iGraceTimer = TimerRuntime.restartTimeout(this._iGraceTimer, function () {
-        this.fireEvent("graceExpired", { online: false });
+        this.fireEvent(RuntimeEventContracts.GRACE_EXPIRED, { online: false });
       }.bind(this), this._iGraceMs);
     },
 
     _onOnline: function () {
       this._iGraceTimer = TimerRuntime.clearTimer(this._iGraceTimer, clearTimeout);
-      this.fireEvent("state", { online: true, isGrace: false, graceExpiresAt: null });
+      this.fireEvent(RuntimeEventContracts.STATE, { online: true, isGrace: false, graceExpiresAt: null });
     }
   });
 });

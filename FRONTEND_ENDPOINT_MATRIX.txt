@@ -1,0 +1,32 @@
+FRONTEND ENDPOINT MATRIX
+
+Main service:
+- /sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/
+
+Frontend read endpoints:
+- ChecklistSearchSet
+- ChecklistRootSet
+- ChecklistBasicInfoSet
+- ChecklistCheckSet
+- ChecklistBarrierSet
+- AttachmentSet
+- ChecklistPermissionSet
+- ChecklistCreatePermissionSet
+- LockStatusSet
+- DictionaryItemSet
+- PersonVHSet
+- SimpleAnalyticalSet
+- WorkflowAnalyticsBreakdownSet
+- AnalyticsRefreshStateSet
+
+Frontend command endpoints:
+- CreateChecklist
+- SaveChanges
+- AutoSave
+- CopyChecklist
+- ReportExport
+- LockAcquire
+- LockHeartbeat
+- LockRelease
+- AnalyticsRefreshTrigger
+- GetHierarchy

@@ -1,0 +1,17 @@
+FUNCTION IMPORTS
+
+Canonical function imports:
+- CreateChecklist
+- SaveChanges
+- AutoSave
+- CopyChecklist
+- ReportExport
+- LockAcquire
+- LockHeartbeat
+- LockRelease
+- AnalyticsRefreshTrigger
+- GetHierarchy
+
+Rules:
+- Command flow uses function imports instead of direct create/update business writes
+- Delete remains restricted to explicit allowlisted entity delete paths only where contract already supports it

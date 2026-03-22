@@ -5,8 +5,8 @@
   "description": "Production Control Checklists UI5 application",
   "scripts": {
     "start": "ui5 serve --config ui5.yaml --open index.html",
-    "build": "npm run build:dist && npm run verify:preload",
-    "build:dist": "ui5 build --config ui5.yaml --clean-dest --dest dist",
+    "build": "npm run build:dist && npm run build:preload && npm run verify:preload",
+    "build:dist": "node scripts/build-dist-local.js",
     "build:preload": "node scripts/build-preload-local.js",
     "build:preload:sap": "ui5 build preload --config ui5.yaml --clean-dest --dest dist",
     "validate:local": "npm run lint:js && npm run check:bom && npm run check:eol && npm run lint:css && node scripts/css-import-order-gate.js && node scripts/css-duplicate-selector-gate.js && node scripts/verify-i18n-completeness.js && npm run build:preload",

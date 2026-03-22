@@ -5,6 +5,8 @@ sap.ui.define([
 ], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants) {
     "use strict";
 
+    var DOMAIN_FETCH_LIMIT = 500;
+
     var DOMAIN_KEYS = {
         LPC: "LPC",
         PROFESSION: "PROFESSION",
@@ -49,7 +51,7 @@ sap.ui.define([
         return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.DICTIONARY_ITEM, {
             "$filter": "Domain eq '" + String(sDomain || "").replace(/'/g, "''") + "'",
             "$orderby": "Key asc",
-            "$top": 500
+            "$top": DOMAIN_FETCH_LIMIT
         }).then(function (oData) {
             return normalizeRowsForDomain(ODataAdapterUtils.asArray(oData));
         });

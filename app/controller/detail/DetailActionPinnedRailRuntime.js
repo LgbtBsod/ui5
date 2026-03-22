@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EventDelegateRuntime"
-], function (ThemeDomRuntime, EventDelegateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EventDelegateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
+], function (ThemeDomRuntime, EventDelegateRuntime, UiControlIds) {
     "use strict";
 
     function resolveStickyHost(oController) {
@@ -28,7 +29,7 @@ sap.ui.define([
         },
 
         _bindDetailEditSwitchKeyboardFallback: function () {
-            var oSwitch = this.byId("detailEditSwitch");
+            var oSwitch = this.byId(UiControlIds.DETAIL.EDIT_SWITCH);
             if (!oSwitch || !oSwitch.addEventDelegate) {
                 return;
             }
@@ -42,7 +43,7 @@ sap.ui.define([
         },
 
         _unbindViewportPinnedControlRail: function () {
-            var oSwitch = this.byId && this.byId("detailEditSwitch");
+            var oSwitch = this.byId && this.byId(UiControlIds.DETAIL.EDIT_SWITCH);
             EventDelegateRuntime.remove(this, "_oDetailEditSwitchDelegate", oSwitch);
             clearPinnedClasses(this);
         },
@@ -56,7 +57,7 @@ sap.ui.define([
         },
 
         _onDetailEditSwitchKeyboardActivate: function (oEvent) {
-            var oSwitch = this.byId("detailEditSwitch");
+            var oSwitch = this.byId(UiControlIds.DETAIL.EDIT_SWITCH);
             if (!oSwitch || !oSwitch.getEnabled || !oSwitch.getEnabled()) {
                 return;
             }

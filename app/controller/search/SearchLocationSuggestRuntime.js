@@ -1,13 +1,14 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (JsRuntime, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
+], function (JsRuntime, SchedulingRuntime, UiControlIds) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function bindLocationSuggest(oController) {
-        var oSmartFilterBar = oController.byId("searchSmartFilterBar");
+        var oSmartFilterBar = oController.byId(UiControlIds.SEARCH.SMART_FILTER_BAR);
         var oLocationControl;
         if (!oSmartFilterBar || typeof oSmartFilterBar.getControlByKey !== TYPE_FUNCTION) {
             return;

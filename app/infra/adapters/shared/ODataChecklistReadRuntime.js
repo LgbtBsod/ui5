@@ -56,19 +56,19 @@ sap.ui.define([
         // Keep it independent from ChecklistRootSet and read it via its own entity set.
         var pBasic = GatewayODataClient.get(oBasicFilter.entitySet, {
             "$filter": buildDetailFilter(oBasicFilter, sRootId),
-            "$select": "RootKey,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverFullname,ObservedPernr,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName"
+            "$select": ODataEntityContracts.SELECTS.CHECKLIST_BASIC_INFO
         });
         var pChecks = GatewayODataClient.get(oCheckFilter.entitySet, {
             "$filter": buildDetailFilter(oCheckFilter, sRootId),
-            "$select": "Key,RootKey,ChecksNum,Text,Comment,Result,ChangedOn"
+            "$select": ODataEntityContracts.SELECTS.CHECKLIST_CHECK
         });
         var pBarriers = GatewayODataClient.get(oBarrierFilter.entitySet, {
             "$filter": buildDetailFilter(oBarrierFilter, sRootId),
-            "$select": "Key,RootKey,BarriersNum,Text,Comment,Result,ChangedOn"
+            "$select": ODataEntityContracts.SELECTS.CHECKLIST_BARRIER
         });
         var pAttachments = GatewayODataClient.get(oAttachmentFilter.entitySet, {
             "$filter": buildDetailFilter(oAttachmentFilter, sRootId),
-            "$select": "AttachmentKey,Key,RootKey,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,Value,ScanStatus,ScannedOn,CreatedOn,ChangedOn"
+            "$select": ODataEntityContracts.SELECTS.ATTACHMENT
         });
         return Promise.all([pRoot, pBasic, pChecks, pBarriers, pAttachments]).then(function (aResult) {
             var oSnapshot = ODataChecklistSnapshotRuntime.mapResult(aResult[0], aResult[1], aResult[2], aResult[3]);

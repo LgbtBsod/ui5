@@ -176,10 +176,13 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
     tt_barrier_agg TYPE HASHED TABLE OF ty_barrier_agg WITH UNIQUE KEY pcct_uuid.
     DATA lt_check_agg TYPE tt_check_agg.
     DATA lt_barrier_agg TYPE tt_barrier_agg.
+    CONSTANTS lc_root_read_limit TYPE i VALUE 500.
 
     SELECT pcct_uuid checklist_id lpc lpc_text status integration_flag date_check time_check time_zone equipment bukrs observer_fullname observer_perner observer_position observer_orgunit observed_fullname observed_perner observed_position observed_orgunit location_key location_name location_text changed_on changed_by created_on created_by version_number lock_owner lock_session tab_session_id lock_expires_at
       FROM ztodata_hdr
-      INTO CORRESPONDING FIELDS OF TABLE @rt_root.
+      INTO CORRESPONDING FIELDS OF TABLE @rt_root
+      ORDER BY changed_on DESCENDING
+      UP TO @lc_root_read_limit ROWS.
     IF rt_root IS INITIAL.
       RETURN.
     ENDIF.
