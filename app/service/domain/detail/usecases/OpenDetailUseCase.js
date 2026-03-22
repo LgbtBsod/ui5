@@ -9,15 +9,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiAssetPaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, DetailContracts, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -25,10 +22,10 @@ sap.ui.define([
     var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
-    var DETAIL_ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
+    var DETAIL_ACCESS_REASON_CODES = DetailContracts.ACCESS_REASON_CODES;
+    var DETAIL_CODES = DetailContracts.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
 
     function cloneSnapshot(oSnapshot) {
         return CloneUtil.clone(oSnapshot || {}, {});
@@ -54,7 +51,7 @@ sap.ui.define([
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
             Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE, {
-                state: DetailPersistenceConstants.STATES.IDLE,
+                state: DetailContracts.STATES.IDLE,
                 messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE,
                 lastSavedAt: null,
                 lastSaveError: null,
@@ -136,7 +133,7 @@ sap.ui.define([
                 if (!oPermission.allowed) {
                     return Result.fail({ message: "No permission to create checklist", code: DETAIL_CODES.NO_CREATE_PERMISSION }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, DETAIL_MESSAGE_KEYS.DETAIL_CREATE_PERMISSION_DENIED, [
                         Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
-                            status: WorkflowRuntimeConstants.READINESS_STATUS.DENIED,
+                            status: WorkflowContracts.READINESS_STATUS.DENIED,
                             ready: false,
                             readyAt: "",
                             error: DETAIL_CODES.NO_CREATE_PERMISSION,
@@ -166,7 +163,7 @@ sap.ui.define([
                         illustrationSrc: UiAssetPaths.resolveDetailAccessDeniedIllustration()
                     }),
                     Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
-                        status: WorkflowRuntimeConstants.READINESS_STATUS.READY,
+                        status: WorkflowContracts.READINESS_STATUS.READY,
                         ready: true,
                         readyAt: sReadyAt,
                         error: "",

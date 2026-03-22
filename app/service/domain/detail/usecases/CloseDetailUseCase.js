@@ -8,18 +8,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, DetailPersistenceConstants, ModelContracts, DetailMessageKeyConstants) {
+], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, ModelContracts, DetailContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var STATE_MODEL = MODELS.STATE;
     var SHELL_MODEL = MODELS.SHELL;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
 
     function CloseDetailUseCase() {
         return {
@@ -76,7 +74,7 @@ function execute(mInput, mCtx) {
             }
             aEffects = [
                 Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
-                    status: WorkflowRuntimeConstants.READINESS_STATUS.IDLE,
+                    status: WorkflowContracts.READINESS_STATUS.IDLE,
                     ready: false,
                     readyAt: "",
                     error: "",
@@ -92,7 +90,7 @@ function execute(mInput, mCtx) {
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.SAVE_IN_FLIGHT, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, false),
-                Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_STATE, DetailPersistenceConstants.STATES.IDLE),
+                Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_STATE, DetailContracts.STATES.IDLE),
                 Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_NEXT_HEARTBEAT_AT, null),
                 Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_HAS_VALID_LOCK, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false),

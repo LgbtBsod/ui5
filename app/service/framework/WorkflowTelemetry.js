@@ -1,12 +1,19 @@
-﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/CorrelationId",
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/MemoryTelemetryBuffer",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/DebugTelemetryAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (CorrelationId, ModelStateRuntime, TelemetryRuntime, MemoryTelemetryBuffer, DebugTelemetryAdapter, WorkflowContracts) {
+], function (ModelStateRuntime, TelemetryRuntime, MemoryTelemetryBuffer, DebugTelemetryAdapter, WorkflowContracts) {
     "use strict";
+
+    function nextCorrelationId() {
+        return [
+            "tel",
+            Date.now().toString(36),
+            Math.random().toString(36).slice(2, 10)
+        ].join("-");
+    }
 
     function buildEvent(sEventName, mOptions) {
         var oOptions = mOptions || {};
@@ -21,7 +28,7 @@
 
         return {
             event: String(sEventName || "telemetry.event"),
-            correlationId: String(oPayload.correlationId || CorrelationId.next("tel")).trim(),
+            correlationId: String(oPayload.correlationId || nextCorrelationId()).trim(),
             timestamp: String(oPayload.timestamp || new Date().toISOString()),
             payload: oPayload
         };

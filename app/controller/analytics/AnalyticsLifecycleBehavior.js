@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
@@ -7,7 +7,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
 ], function (ControllerRouteRuntime, ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime, StatusChipClassRuntime, JsRuntime) {
     "use strict";
 

@@ -250,10 +250,38 @@
         }, mExtra || {}));
     }
 
+    function canAutosaveFromState(oUiState, mOptions) {
+        var STATE_MODEL_NAME = (mOptions && mOptions.stateModelName) || STATE_MODEL;
+        var sRootId = String((mOptions && mOptions.rootId) || "").trim();
+        var bIsCreateDraft = !!(mOptions && mOptions.isCreateDraft);
+        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL_NAME, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
+        var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL_NAME, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
+        var bDirty = !!(oUiState && oUiState.get(STATE_MODEL_NAME, StatePaths.WORKFLOW_DIRTY));
+        var bHasValidLock = !!(oUiState && oUiState.get(STATE_MODEL_NAME, StatePaths.PERSISTENCE_HAS_VALID_LOCK));
+        var bLockOwnerSessionMatches = !!(oUiState && oUiState.get(STATE_MODEL_NAME, StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES));
+        var bHasConflict = !!(oUiState && oUiState.get(STATE_MODEL_NAME, "/hasConflict"));
+
+        return WorkflowContracts.isEditLocked(sEditMode, sLockState) &&
+            bDirty &&
+            bHasValidLock &&
+            bLockOwnerSessionMatches &&
+            !bHasConflict &&
+            !!sRootId &&
+            !bIsCreateDraft;
+    }
+
+    function canScheduleAutosave(oUiState, mOptions) {
+        var STATE_MODEL_NAME = (mOptions && mOptions.stateModelName) || STATE_MODEL;
+        return canAutosaveFromState(oUiState, mOptions) &&
+            !(oUiState && oUiState.get(STATE_MODEL_NAME, StatePaths.SAVE_IN_FLIGHT));
+    }
+
     return {
         STATES: STATES,
         TAXONOMY: TAXONOMY,
         buildWriteId: buildWriteId,
+        canAutosaveFromState: canAutosaveFromState,
+        canScheduleAutosave: canScheduleAutosave,
         classifyError: classifyError,
         dirtyEffects: dirtyEffects,
         extractSignal: extractSignal,

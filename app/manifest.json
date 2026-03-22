@@ -125,6 +125,7 @@
         "settings": {
           "bundleName": "PRODUCTION_CONTROL_CHECKLIST.i18n.i18n",
           "supportedLocales": [
+            "",
             "ru"
           ],
           "fallbackLocale": ""

@@ -44,6 +44,15 @@
                     if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DIRTY) {
                         return true;
                     }
+                    if (sModelName === "state" && sPath === StatePaths.PERSISTENCE_HAS_VALID_LOCK) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === "/hasConflict") {
+                        return false;
+                    }
                     if (sModelName === "detail" && sPath === "/current") {
                         return oCurrent;
                     }
@@ -110,6 +119,15 @@
                     if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DIRTY) {
                         return true;
                     }
+                    if (sModelName === "state" && sPath === StatePaths.PERSISTENCE_HAS_VALID_LOCK) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === "/hasConflict") {
+                        return false;
+                    }
                     if (sModelName === "state" && sPath === StatePaths.SESSION_ID) {
                         return "SESSION-2";
                     }
@@ -151,6 +169,49 @@
             assert.strictEqual(oRefreshPatch, undefined, "autosave does not arm search return rediscovery");
             assert.strictEqual(aCacheWrites.length, 1, "autosave refreshes cache snapshot");
             assert.strictEqual(aCacheWrites[0].rootId, "CHK-2", "autosave cache write keeps persisted root id");
+            done();
+        });
+    });
+
+    QUnit.test("autosave skips when lock health is invalid", function (assert) {
+        var done = assert.async();
+        var oUseCase = AutosaveDetailUseCase();
+        var bCalled = false;
+
+        oUseCase.execute({ rootId: "CHK-3" }, {
+            repo: {
+                autosaveChecklist: function () {
+                    bCalled = true;
+                    return Promise.resolve({});
+                }
+            },
+            uiState: {
+                get: function (sModelName, sPath) {
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
+                        return WorkflowContracts.EDIT_MODES.EDIT;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
+                        return WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DIRTY) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.PERSISTENCE_HAS_VALID_LOCK) {
+                        return false;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === "/hasConflict") {
+                        return false;
+                    }
+                    return null;
+                }
+            }
+        }).then(function (oResult) {
+            assert.notOk(bCalled, "autosave request is skipped");
+            assert.ok(oResult && oResult.ok, "result stays successful");
+            assert.strictEqual(!!(oResult.data && oResult.data.reason), true, "skip reason is returned");
             done();
         });
     });

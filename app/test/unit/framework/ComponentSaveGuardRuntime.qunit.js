@@ -24,7 +24,7 @@ sap.ui.define([
         var iResumeCalls = 0;
         var oStateModel = createStateModel({
             "/activeObjectId": "CHK-1",
-            "/pendingNavigationIntent": { routeName: "analytics", routeArgs: {} },
+            "/pendingNavigationIntent": { routeName: "analytics", routeArgs: {}, owner: "navigationGuard", resumeMode: "afterGuardedSave" },
             "/workflow/detail/editMode": WorkflowContracts.EDIT_MODES.EDIT,
             "/workflow/detail/lock/state": WorkflowContracts.LOCK_STATES.EDIT_LOCKED
         });
@@ -59,7 +59,7 @@ sap.ui.define([
         var iResumeCalls = 0;
         var oStateModel = createStateModel({
             "/activeObjectId": "CHK-1",
-            "/pendingNavigationIntent": { routeName: "analytics", routeArgs: {} },
+            "/pendingNavigationIntent": { routeName: "analytics", routeArgs: {}, owner: "navigationGuard", resumeMode: "afterGuardedSave" },
             "/workflow/detail/editMode": WorkflowContracts.EDIT_MODES.EDIT,
             "/workflow/detail/lock/state": WorkflowContracts.LOCK_STATES.EDIT_LOCKED
         });

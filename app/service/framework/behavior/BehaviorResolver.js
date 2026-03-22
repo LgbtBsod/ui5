@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
 ], function (BehaviorRegistry, JsRuntime) {
     "use strict";
 

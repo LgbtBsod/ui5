@@ -1,10 +1,10 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/NavigationBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "sap/ui/core/routing/HashChanger",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
 ], function (NavigationBehaviorHelpers, BehaviorRegistry, ModelStateRuntime, HashChanger, NavigationContracts, JsRuntime) {
     "use strict";
 
@@ -15,6 +15,9 @@
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
     var HASH_CHANGER = JsRuntime.HASH_CHANGER;
+    var DEFAULT_INTENT_OWNER = "unknown";
+    var OWNER_NAVIGATION_GUARD = "navigationGuard";
+    var RESUME_MODE_AFTER_GUARDED_SAVE = "afterGuardedSave";
 
     function normalizeRouteName(vRouteName) {
         return String(vRouteName || "").trim();
@@ -22,6 +25,23 @@
 
     function cloneRouteArgs(oRouteArgs) {
         return oRouteArgs ? Object.assign({}, oRouteArgs) : {};
+    }
+
+    function normalizePendingIntent(oIntent, mDefaults) {
+        var oResolved = Object.assign({
+            routeName: "",
+            routeArgs: {},
+            owner: DEFAULT_INTENT_OWNER,
+            resumeMode: "",
+            createdAt: ""
+        }, oIntent || {}, mDefaults || {});
+
+        oResolved.routeName = normalizeRouteName(oResolved.routeName);
+        oResolved.routeArgs = cloneRouteArgs(oResolved.routeArgs);
+        oResolved.owner = String(oResolved.owner || DEFAULT_INTENT_OWNER).trim() || DEFAULT_INTENT_OWNER;
+        oResolved.resumeMode = String(oResolved.resumeMode || "").trim();
+        oResolved.createdAt = String(oResolved.createdAt || "").trim();
+        return oResolved;
     }
 
     function buildIntentHash(mContext, oIntent) {
@@ -58,7 +78,7 @@
 
     function queuePendingIntent(mContext) {
         var oCurrentIntent = NavigationBehaviorHelpers.buildCurrentIntent(mContext.stateModel) || {};
-        ModelStateRuntime.writeOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, {
+        ModelStateRuntime.writeOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, normalizePendingIntent({
             routeName: mContext.routeEvent && typeof mContext.routeEvent.getParameter === TYPE_FUNCTION && mContext.routeEvent.getParameter("name"),
             routeArgs: (mContext.routeEvent && typeof mContext.routeEvent.getParameter === TYPE_FUNCTION && mContext.routeEvent.getParameter("arguments")) || {},
             currentIntent: {
@@ -66,8 +86,11 @@
                 routeArgs: cloneRouteArgs(oCurrentIntent.routeArgs)
             },
             currentHash: buildIntentHash(mContext, oCurrentIntent),
-            queuedAt: new Date().toISOString()
-        });
+            owner: mContext.owner || OWNER_NAVIGATION_GUARD,
+            resumeMode: mContext.resumeMode || RESUME_MODE_AFTER_GUARDED_SAVE,
+            queuedAt: new Date().toISOString(),
+            createdAt: new Date().toISOString()
+        }));
     }
 
     function clearPendingIntent(mContext) {
@@ -75,7 +98,7 @@
     }
 
     function revertPendingIntent(mContext) {
-        var oIntent = ModelStateRuntime.readOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, null);
+        var oIntent = normalizePendingIntent(ModelStateRuntime.readOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, null));
         var sTargetHash = String((oIntent && oIntent.currentHash) || "").trim();
         var oHashChanger;
         if (!sTargetHash) {
@@ -91,7 +114,7 @@
     }
 
     function resumePendingIntent(mContext) {
-        var oIntent = ModelStateRuntime.readOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, null);
+        var oIntent = normalizePendingIntent(ModelStateRuntime.readOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, null));
         if (!oIntent || !oIntent.routeName) {
             return false;
         }
@@ -102,7 +125,7 @@
     }
 
     function restorePendingIntent(mContext) {
-        var oIntent = ModelStateRuntime.readOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, null);
+        var oIntent = normalizePendingIntent(ModelStateRuntime.readOnModel(mContext.stateModel, mContext.statePaths.PENDING_NAVIGATION_INTENT, null));
         var oCurrentIntent;
         var oComponent = mContext && mContext.component;
         var oRouter = oComponent && typeof oComponent.getRouter === TYPE_FUNCTION ? oComponent.getRouter() : null;
@@ -171,6 +194,9 @@
 
     return {
         handlers: mHandlers,
-        ensureRegistered: ensureRegistered
+        ensureRegistered: ensureRegistered,
+        normalizePendingIntent: normalizePendingIntent,
+        OWNER_NAVIGATION_GUARD: OWNER_NAVIGATION_GUARD,
+        RESUME_MODE_AFTER_GUARDED_SAVE: RESUME_MODE_AFTER_GUARDED_SAVE
     };
 });

@@ -1,6 +1,5 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/InFlightRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailService",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPageFlow",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailViewStateFactory",
@@ -19,7 +18,6 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (
     ControllerResourceCleanup,
-    InFlightRegistry,
     DetailService,
     DetailPageFlow,
     DetailViewStateFactory,
@@ -92,8 +90,6 @@
                 syncComputedEditFlags(oController);
                 return;
             }
-            /* D-03 FIX: sync view>/isEditMode and view>/isCreateMode computed properties.
-             * Avoids scattered inline expression bindings across XML fragments. */
             if (sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
                 syncComputedEditFlags(oController);
             }
@@ -197,9 +193,6 @@
         },
 
         _onDetailMatched: function (oEvent) {
-            /* C-01 FIX: clear in-flight dedup registry to prevent stale promise
-             * re-use when navigating between different detail objects in FCL.     */
-            InFlightRegistry.clear();
             return Promise.resolve(DetailPageFlow.onMatched(this, oEvent, {
                 applyLayoutState: this._applyLayoutState.bind(this),
                 scheduleAttachmentDropZoneBind: this._scheduleAttachmentDropZoneBind.bind(this),

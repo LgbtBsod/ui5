@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LazyDialogRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
 ], function (LazyDialogRuntime, EffectActionRouting, DialogContracts, JsRuntime) {
     "use strict";
 

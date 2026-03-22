@@ -1,5 +1,5 @@
-﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime",
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",

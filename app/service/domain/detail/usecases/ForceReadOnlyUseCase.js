@@ -9,17 +9,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
+], function (Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
 
     function ForceReadOnlyUseCase() {
         return {

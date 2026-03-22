@@ -52,6 +52,13 @@ CLASS zcl_zodata_save_service DEFINITION
         iv_code TYPE string
       RAISING
         /iwbep/cx_mgw_busi_exception.
+    METHODS validate_edit_mode
+      IMPORTING
+        iv_edit_mode TYPE csequence
+        iv_required_text TYPE string
+        iv_invalid_text TYPE string
+      RAISING
+        /iwbep/cx_mgw_busi_exception.
 ENDCLASS.
 
 CLASS zcl_zodata_save_service IMPLEMENTATION.
@@ -73,6 +80,20 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
         message_container = lo_container.
   ENDMETHOD.
 
+  METHOD validate_edit_mode.
+    IF iv_edit_mode IS INITIAL.
+      raise_busi_exception(
+        iv_text = iv_required_text
+        iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
+    ENDIF.
+
+    IF iv_edit_mode <> 'C' AND iv_edit_mode <> 'U' AND iv_edit_mode <> 'D'.
+      raise_busi_exception(
+        iv_text = iv_invalid_text
+        iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
+    ENDIF.
+  ENDMETHOD.
+
   METHOD validate_save_request.
     IF is_request-root-pcct_uuid IS INITIAL.
       raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_root_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
@@ -84,36 +105,28 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
       raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_root_mode_invalid iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
     ENDIF.
     LOOP AT is_request-checks ASSIGNING FIELD-SYMBOL(<ls_check>).
-      IF <ls_check>-edit_mode IS INITIAL.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_checks_mode_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
-      ENDIF.
-      IF <ls_check>-edit_mode <> 'C' AND <ls_check>-edit_mode <> 'U' AND <ls_check>-edit_mode <> 'D'.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_checks_mode_invalid iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
-      ENDIF.
+      validate_edit_mode(
+        iv_edit_mode = <ls_check>-edit_mode
+        iv_required_text = zif_zodata_contract_constants=>c_msg_save_checks_mode_required
+        iv_invalid_text = zif_zodata_contract_constants=>c_msg_save_checks_mode_invalid ).
     ENDLOOP.
     LOOP AT is_request-barriers ASSIGNING FIELD-SYMBOL(<ls_barrier>).
-      IF <ls_barrier>-edit_mode IS INITIAL.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_barriers_mode_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
-      ENDIF.
-      IF <ls_barrier>-edit_mode <> 'C' AND <ls_barrier>-edit_mode <> 'U' AND <ls_barrier>-edit_mode <> 'D'.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_barriers_mode_invalid iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
-      ENDIF.
+      validate_edit_mode(
+        iv_edit_mode = <ls_barrier>-edit_mode
+        iv_required_text = zif_zodata_contract_constants=>c_msg_save_barriers_mode_required
+        iv_invalid_text = zif_zodata_contract_constants=>c_msg_save_barriers_mode_invalid ).
     ENDLOOP.
     LOOP AT is_request-participants ASSIGNING FIELD-SYMBOL(<ls_participant>).
-      IF <ls_participant>-edit_mode IS INITIAL.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_participants_mode_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
-      ENDIF.
-      IF <ls_participant>-edit_mode <> 'C' AND <ls_participant>-edit_mode <> 'U' AND <ls_participant>-edit_mode <> 'D'.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_participants_mode_invalid iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
-      ENDIF.
+      validate_edit_mode(
+        iv_edit_mode = <ls_participant>-edit_mode
+        iv_required_text = zif_zodata_contract_constants=>c_msg_save_participants_mode_required
+        iv_invalid_text = zif_zodata_contract_constants=>c_msg_save_participants_mode_invalid ).
     ENDLOOP.
     LOOP AT is_request-attachments ASSIGNING FIELD-SYMBOL(<ls_attachment>).
-      IF <ls_attachment>-edit_mode IS INITIAL.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_attachments_mode_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
-      ENDIF.
-      IF <ls_attachment>-edit_mode <> 'C' AND <ls_attachment>-edit_mode <> 'U' AND <ls_attachment>-edit_mode <> 'D'.
-        raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_save_attachments_mode_invalid iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
-      ENDIF.
+      validate_edit_mode(
+        iv_edit_mode = <ls_attachment>-edit_mode
+        iv_required_text = zif_zodata_contract_constants=>c_msg_save_attachments_mode_required
+        iv_invalid_text = zif_zodata_contract_constants=>c_msg_save_attachments_mode_invalid ).
     ENDLOOP.
   ENDMETHOD.
 

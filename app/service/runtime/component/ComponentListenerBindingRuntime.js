@@ -37,12 +37,6 @@
             if (sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
                 fnEmitTelemetry(TELEMETRY_EVENT.LOCK_STATE_CHANGED, mOptions.telemetryRuntime.stateValue(oEvent.getParameter("value")));
             }
-            if ([StatePaths.SAVE_IN_FLIGHT, StatePaths.WORKFLOW_DIRTY].indexOf(sPath) >= 0 &&
-                !ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false) &&
-                !ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
-                ModelStateRuntime.readOnModel(oStateModel, StatePaths.PENDING_NAVIGATION_INTENT, null)) {
-                mOptions.resumePendingNavigationIntent();
-            }
             if ([StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, PATHS.ACTIVE_OBJECT_ID].indexOf(sPath) >= 0) {
                 sCurrentRootId = String(ModelStateRuntime.readOnModel(oStateModel, PATHS.ACTIVE_OBJECT_ID, "") || "").trim();
                 sCurrentMode = mOptions.layoutStateRuntime.readMode(oStateModel, "");

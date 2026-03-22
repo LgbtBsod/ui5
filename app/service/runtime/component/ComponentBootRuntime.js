@@ -1,18 +1,18 @@
-﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootContracts",
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
-], function (ComponentBootContracts, ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants, EffectFeedbackContracts, ShellStateRuntime) {
+], function (ComponentBootstrapContracts, ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants, EffectFeedbackContracts, ShellStateRuntime) {
     "use strict";
 
-    var PATHS = ComponentBootContracts.PATHS;
-    var STAGE_ERRORS = ComponentBootContracts.STAGE_ERRORS;
-    var READINESS_STATUS = ComponentBootContracts.READINESS_STATUS;
-    var CONFIG_SOURCE = ComponentBootContracts.FRONTEND_CONFIG_SOURCE;
+    var PATHS = ComponentBootstrapContracts.PATHS;
+    var STAGE_ERRORS = ComponentBootstrapContracts.STAGE_ERRORS;
+    var READINESS_STATUS = ComponentBootstrapContracts.READINESS_STATUS;
+    var CONFIG_SOURCE = ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE;
     var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
 
     function hasServerDataSnapshot(aCheckLists, oServerState) {

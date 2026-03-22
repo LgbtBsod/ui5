@@ -71,8 +71,8 @@ sap.ui.define([
         };
     }
 
-    function queuePendingNavigationIntent(component, oStateModel, StatePaths, oRouteEvent) {
-        NavigationIntentService.queuePendingIntent(component, oStateModel, StatePaths, oRouteEvent);
+    function queuePendingNavigationIntent(component, oStateModel, StatePaths, oRouteEvent, mIntentOptions) {
+        NavigationIntentService.queuePendingIntent(component, oStateModel, StatePaths, oRouteEvent, mIntentOptions);
     }
 
     function clearPendingNavigationIntent(oStateModel, StatePaths) {

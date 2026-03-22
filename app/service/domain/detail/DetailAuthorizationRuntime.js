@@ -7,16 +7,15 @@
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiAssetPaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, WorkflowContracts, UiAssetPaths, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
+], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, WorkflowContracts, UiAssetPaths, ModelContracts, DetailContracts) {
     "use strict";
 
-    var OPERATIONS = DetailUseCaseConstants.ACCESS_OPERATIONS;
-    var ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
+    var OPERATIONS = DetailContracts.ACCESS_OPERATIONS;
+    var ACCESS_REASON_CODES = DetailContracts.ACCESS_REASON_CODES;
+    var DETAIL_CODES = DetailContracts.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
     var MODELS = ModelContracts.MODELS;
 
     function resolveRequestedActivity(mOptions) {

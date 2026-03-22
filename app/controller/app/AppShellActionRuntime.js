@@ -1,13 +1,12 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/LoadCurrentUserUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/RetryCoordinator",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/UiDecisionCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (LoadCurrentUserUseCase, FeedbackBannerRuntime, ControllerModelRuntime, ModelStateRuntime, RetryCoordinator, SecurityTokenRefresh, UiDecisionCoordinator, ModelContracts) {
+], function (LoadCurrentUserUseCase, FeedbackBannerRuntime, ControllerModelRuntime, ModelStateRuntime, RetryCoordinator, UiDecisionCoordinator, ModelContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -67,13 +66,22 @@
         return runRetry(oController, sAction);
     }
 
+    function refreshSecurityToken(oModel) {
+        if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
+            return Promise.reject(new Error("security_token_refresh_unavailable"));
+        }
+        return new Promise(function (resolve, reject) {
+            oModel.refreshSecurityToken(function () { resolve(true); }, reject, true);
+        });
+    }
+
     function refreshShellUserContext(oController) {
         var oModel = ControllerModelRuntime.defaultModel(oController);
         function syncShellUi() {
             oController._syncShellState();
             oController._syncShellMetrics();
         }
-        return SecurityTokenRefresh.refresh(oModel).then(function () {
+        return refreshSecurityToken(oModel).then(function () {
             return refreshCurrentUser(oController);
         }).then(function (bRefreshed) {
             if (bRefreshed) {

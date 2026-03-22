@@ -52,12 +52,14 @@ sap.ui.define([
         });
     }
 
-    function queuePendingIntent(oComponent, oStateModel, StatePaths, oRouteEvent) {
+    function queuePendingIntent(oComponent, oStateModel, StatePaths, oRouteEvent, mIntentOptions) {
         return runOperation("queuePendingIntent", {
             component: oComponent,
             stateModel: oStateModel,
             statePaths: StatePaths,
-            routeEvent: oRouteEvent
+            routeEvent: oRouteEvent,
+            owner: mIntentOptions && mIntentOptions.owner,
+            resumeMode: mIntentOptions && mIntentOptions.resumeMode
         });
     }
 

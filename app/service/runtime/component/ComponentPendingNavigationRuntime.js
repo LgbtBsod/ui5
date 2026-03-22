@@ -5,8 +5,8 @@ sap.ui.define([
 
     function createPendingNavigationRuntime(oComponent, oStateModel, StatePaths, resumePendingNavigationIntent) {
         return {
-            queuePendingNavigationIntent: function (oRouteEvent) {
-                return ComponentActionRuntime.queuePendingNavigationIntent(oStateModel, StatePaths, oRouteEvent);
+            queuePendingNavigationIntent: function (oRouteEvent, mIntentOptions) {
+                return ComponentActionRuntime.queuePendingNavigationIntent(oComponent, oStateModel, StatePaths, oRouteEvent, mIntentOptions);
             },
             clearPendingNavigationIntent: function () {
                 return ComponentActionRuntime.clearPendingNavigationIntent(oStateModel, StatePaths);

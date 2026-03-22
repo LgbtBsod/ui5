@@ -1,7 +1,6 @@
-﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (WorkflowContracts, WorkflowRuntimeConstants) {
+], function (WorkflowContracts) {
     "use strict";
 
     return Object.freeze({
@@ -12,7 +11,7 @@
             SAVE_FAILED: "save_failed"
         }),
         BANNER_LEVEL: Object.freeze({
-            ERROR: WorkflowRuntimeConstants.READINESS_STATUS.ERROR,
+            ERROR: WorkflowContracts.READINESS_STATUS.ERROR,
             INFO: "info",
             WARNING: "warning"
         }),

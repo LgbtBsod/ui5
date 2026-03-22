@@ -27,7 +27,6 @@ sap.ui.define([
     var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
     var DETAIL_CODES = DetailContracts.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
     var DETAIL_REASONS = DetailContracts.REASONS;
 
@@ -105,7 +104,7 @@ sap.ui.define([
             return Promise.resolve(Result.ok({ saved: false, skipped: true, reason: DETAIL_CODES.NO_CHANGES }, [
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false)
             ].concat(DetailPersistenceRuntime.dirtyEffects(false, {
-                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_NO_CHANGES,
+                messageKey: DetailContracts.PERSISTENCE_NO_CHANGES,
                 isManualSaveInFlight: false,
                 isAutoSaveInFlight: false,
                 currentWriteRequestId: ""
@@ -179,7 +178,7 @@ sap.ui.define([
                     var oSelectedSnapshot = CloneUtil.clone(oAttachmentSync.selectedSnapshot, {});
                     return writeDetailCache(oCacheWrite, sServerRootId, oSavedSnapshot, mCtx).then(function () {
                         var aEffects = [
-                            Effects.toast(DETAIL_MESSAGE_KEYS.OBJECT_SAVED, "success"),
+                            Effects.toast(DetailContracts.OBJECT_SAVED, "success"),
                             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, false),
                             Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
                             Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, CloneUtil.clone(oSavedSnapshot, {}))

@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReader",
     "sap/m/ProgressIndicator",
     "sap/m/Text",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
 ], function (BindingContextReader, ProgressIndicator, Text, JsRuntime) {
     "use strict";
 

@@ -9,17 +9,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry, WorkflowContracts, WorkflowRuntimeConstants, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry, WorkflowContracts, ModelContracts, DetailContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
+    var DETAIL_CODES = DetailContracts.CODES;
+    var ACCESS_REASON_CODES = DetailContracts.ACCESS_REASON_CODES;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
 
     function EnterEditUseCase() {
         return {
@@ -63,7 +61,7 @@ function readCode(oLock) {
                             stateModel: mCtx && mCtx.stateModel,
                             payload: {
                                 rootId: sRootId,
-                                source: WorkflowRuntimeConstants.SOURCES.ENTER_EDIT
+                                source: WorkflowContracts.SOURCES.ENTER_EDIT
                             }
                         }
                     );
@@ -125,7 +123,7 @@ function readCode(oLock) {
                     stateModel: mCtx && mCtx.stateModel,
                     payload: {
                         rootId: sRootId,
-                            source: WorkflowRuntimeConstants.SOURCES.ENTER_EDIT
+                            source: WorkflowContracts.SOURCES.ENTER_EDIT
                     }
                 });
                 return Result.ok({ code: DETAIL_CODES.OK, lock: oLock }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat([
@@ -137,33 +135,33 @@ function readCode(oLock) {
             if (sCode === DETAIL_CODES.LOCKED_OWN_SESSION) {
                 WorkflowTelemetry.emit("lock.acquire.failed", {
                     stateModel: mCtx && mCtx.stateModel,
-                    payload: { rootId: sRootId, source: WorkflowRuntimeConstants.SOURCES.ENTER_EDIT, code: sCode }
+                    payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
                 });
             return Result.fail({ message: "Lock held by own session", code: DETAIL_CODES.LOCKED_OWN_SESSION, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
             }
             if (sCode === DETAIL_CODES.EXPIRED) {
                 WorkflowTelemetry.emit("lock.acquire.failed", {
                     stateModel: mCtx && mCtx.stateModel,
-                    payload: { rootId: sRootId, source: WorkflowRuntimeConstants.SOURCES.ENTER_EDIT, code: sCode }
+                    payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
                 });
             return Result.fail({ message: "Lock expired", code: DETAIL_CODES.EXPIRED, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
             }
             if (sCode === DETAIL_CODES.KILLED) {
                 WorkflowTelemetry.emit("lock.acquire.failed", {
                     stateModel: mCtx && mCtx.stateModel,
-                    payload: { rootId: sRootId, source: WorkflowRuntimeConstants.SOURCES.ENTER_EDIT, code: sCode }
+                    payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
                 });
             return Result.fail({ message: "Lock killed", code: DETAIL_CODES.KILLED, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_KILLED)]));
             }
             WorkflowTelemetry.emit("lock.acquire.failed", {
                 stateModel: mCtx && mCtx.stateModel,
-                payload: { rootId: sRootId, source: WorkflowRuntimeConstants.SOURCES.ENTER_EDIT, code: sCode || DETAIL_CODES.LOCKED }
+                payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode || DETAIL_CODES.LOCKED }
             });
             return Result.fail({ message: "Lock acquire failed", code: DETAIL_CODES.LOCKED, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED)]));
         }).catch(function (oError) {
             WorkflowTelemetry.emit("lock.acquire.failed", {
                 stateModel: mCtx && mCtx.stateModel,
-                payload: { rootId: sRootId, source: WorkflowRuntimeConstants.SOURCES.ENTER_EDIT, code: String((oError && oError.code) || DETAIL_CODES.TECHNICAL_ERROR) }
+                payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: String((oError && oError.code) || DETAIL_CODES.TECHNICAL_ERROR) }
             });
             return Result.fail(oError, readOnlyEffects());
         });

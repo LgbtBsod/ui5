@@ -1,5 +1,4 @@
-﻿sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
@@ -8,7 +7,7 @@
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (SecurityTokenRefresh, ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, DetailPersistenceRuntime, WorkflowContracts) {
+], function (ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, DetailPersistenceRuntime, WorkflowContracts) {
     "use strict";
 
     var BANNER_DETAIL = ComponentSaveGuardContracts.BANNER_DETAIL;
@@ -16,6 +15,15 @@
     var ERROR_MESSAGE = ComponentSaveGuardContracts.ERROR_MESSAGE;
     var PATHS = ComponentSaveGuardContracts.PATHS;
     var TELEMETRY_EVENT = ComponentSaveGuardContracts.TELEMETRY_EVENT;
+
+    function refreshSecurityToken(oModel) {
+        if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
+            return Promise.reject(new Error("security_token_refresh_unavailable"));
+        }
+        return new Promise(function (resolve, reject) {
+            oModel.refreshSecurityToken(function () { resolve(true); }, reject, true);
+        });
+    }
 
     function createRunGuardedSave(mOptions) {
         var oComponent = mOptions.component;
@@ -31,6 +39,7 @@
         var fnIsSessionExpiredError = mOptions.isSessionExpiredError;
         var fnSetGlobalBanner = mOptions.setGlobalBanner;
         var fnClearGlobalBanner = mOptions.clearGlobalBanner;
+
         function rescheduleHeartbeat() {
             var iIntervalMs;
             var sNextHeartbeatAt;
@@ -113,7 +122,7 @@
                         if (!oMainServiceModel) {
                             oComponent._bSessionRefreshInFlight = false;
                         } else {
-                            Promise.resolve(SecurityTokenRefresh.refresh(oMainServiceModel)).finally(function () {
+                            Promise.resolve(refreshSecurityToken(oMainServiceModel)).finally(function () {
                                 oComponent._bSessionRefreshInFlight = false;
                             });
                         }

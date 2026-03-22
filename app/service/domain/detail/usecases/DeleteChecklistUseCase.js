@@ -9,12 +9,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, WorkflowRuntimeConstants, SearchReturnRediscoveryRuntime, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -23,11 +21,11 @@ sap.ui.define([
     var SHELL_MODEL = MODELS.SHELL;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
-    var DETAIL_ACCESS_REASON_CODES = DetailUseCaseConstants.ACCESS_REASON_CODES;
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
-    var DETAIL_REASONS = DetailUseCaseConstants.REASONS;
+    var DETAIL_ACCESS_REASON_CODES = DetailContracts.ACCESS_REASON_CODES;
+    var DETAIL_CODES = DetailContracts.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
+    var DETAIL_REASONS = DetailContracts.REASONS;
 
     function DeleteChecklistUseCase() {
         return {
@@ -65,7 +63,7 @@ sap.ui.define([
                     Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
                     Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, {}),
                     Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
-                        status: WorkflowRuntimeConstants.READINESS_STATUS.IDLE,
+                        status: WorkflowContracts.READINESS_STATUS.IDLE,
                         ready: false,
                         readyAt: "",
                         error: "",

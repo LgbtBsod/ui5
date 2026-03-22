@@ -14,11 +14,21 @@
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
     var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
 
+    function createUiStateAdapter(oStateModel) {
+        return {
+            get: function (_sModelName, sPath) {
+                return ModelStateRuntime.readOnModel(oStateModel, sPath, null);
+            }
+        };
+    }
+
     function hasHealthyAutosaveLockState(oStateModel, StatePaths) {
-        return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED &&
-            !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.PERSISTENCE_HAS_VALID_LOCK, false) &&
-            !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false) &&
-            !ModelStateRuntime.readOnModel(oStateModel, "/hasConflict", false);
+        var oUiState = createUiStateAdapter(oStateModel);
+        var sActiveId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        return DetailPersistenceRuntime.canAutosaveFromState(oUiState, {
+            rootId: sActiveId,
+            isCreateDraft: CreateSentinel.isCreateId(sActiveId)
+        });
     }
 
     function createAutoSaveManager(mOptions) {
@@ -59,19 +69,20 @@
                 return hasHealthyAutosaveLockState(oStateModel, StatePaths);
             },
             guardFn: function () {
-                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
-                    hasHealthyAutosaveLockState(oStateModel, StatePaths) &&
-                    !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
-                    !ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false);
+                var oUiState = createUiStateAdapter(oStateModel);
+                var sActiveId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+                return DetailPersistenceRuntime.canScheduleAutosave(oUiState, {
+                    rootId: sActiveId,
+                    isCreateDraft: CreateSentinel.isCreateId(sActiveId)
+                });
             },
             shouldSave: function () {
+                var oUiState = createUiStateAdapter(oStateModel);
                 var sActiveId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
-                return ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") === WorkflowContracts.EDIT_MODES.EDIT &&
-                    hasHealthyAutosaveLockState(oStateModel, StatePaths) &&
-                    !!ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DIRTY, false) &&
-                    !!sActiveId &&
-                    !CreateSentinel.isCreateId(sActiveId) &&
-                    !ModelStateRuntime.readOnModel(oStateModel, StatePaths.SAVE_IN_FLIGHT, false);
+                return DetailPersistenceRuntime.canScheduleAutosave(oUiState, {
+                    rootId: sActiveId,
+                    isCreateDraft: CreateSentinel.isCreateId(sActiveId)
+                });
             },
             buildPayload: function () {
                 var sId = ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "");

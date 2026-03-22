@@ -15,18 +15,17 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ModelContracts, DetailContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
-    var DETAIL_REASONS = DetailUseCaseConstants.REASONS;
+    var DETAIL_CODES = DetailContracts.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
+    var DETAIL_REASONS = DetailContracts.REASONS;
 
     function AutosaveDetailUseCase() {
         return {
@@ -68,12 +67,12 @@ function mapFieldDelta(mInput, oCurrent) {
         return DeltaPayloadBuilder.buildDeltaPayload(oMappedCurrent, oSnapshot) || null;
     }
 
-    function isAutosaveAllowed(mCtx) {
+    function isAutosaveAllowed(sRootId, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
-        var sLockStatus = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
-        var bDirty = !!(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DIRTY));
-        return WorkflowContracts.isEditLocked(sEditMode, sLockStatus) && bDirty;
+        return DetailPersistenceRuntime.canAutosaveFromState(oUiState, {
+            rootId: sRootId,
+            isCreateDraft: CreateSentinel.isCreateId(sRootId)
+        });
     }
 
     function resolveClientVersion(oDelta, mCtx) {
@@ -108,7 +107,7 @@ function execute(mInput, mCtx) {
         if (CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(Result.ok({ skipped: true, reason: DETAIL_REASONS.CREATE_DRAFT_PENDING }, []));
         }
-        if (!isAutosaveAllowed(mCtx)) {
+        if (!isAutosaveAllowed(sRootId, mCtx)) {
             return Promise.resolve(Result.ok({ skipped: true, reason: DETAIL_REASONS.AUTOSAVE_GUARD }, []));
         }
         if (!sRootId || !oRepo || typeof oRepo.autosaveChecklist !== "function") {

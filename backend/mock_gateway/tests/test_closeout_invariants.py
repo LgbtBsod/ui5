@@ -200,7 +200,7 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     boot_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootRuntime.js")
     init_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreInitRuntime.js")
     feedback_bootstrap_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentFeedbackInitRuntime.js")
-    boot_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootContracts.js")
+    boot_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootstrapContracts.js")
     feedback_contracts = _read(APP_ROOT / "service" / "framework" / "EffectFeedbackContracts.js")
     listener_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentListenerContracts.js")
     save_guard_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentSaveGuardContracts.js")
@@ -625,7 +625,6 @@ def test_active_frontend_mutations_use_hybrid_aggregate_function_import_contract
     mutation_runtime = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistMutationRuntime.js")
     gateway_client = _read(APP_ROOT / "service" / "backend" / "GatewayClient.js")
     gateway_odata_client = _read(APP_ROOT / "infra" / "odata" / "GatewayODataClient.js")
-    gateway_contracts = _read(APP_ROOT / "service" / "backend" / "GatewayClientContracts.js")
     canonical_api = _read(BACKEND_ROOT / "api" / "gateway_canonical_api.py")
 
     assert "FUNCTION_IMPORTS.SAVE_CHANGES" in mutation_runtime
@@ -639,8 +638,9 @@ def test_active_frontend_mutations_use_hybrid_aggregate_function_import_contract
     assert "updatePath: function" not in gateway_client
     assert "patch: patch," not in gateway_odata_client
     assert "post: post," not in gateway_odata_client
-    assert 'entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK' in gateway_contracts
-    assert 'entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER' in gateway_contracts
+    assert "var DIRECT_DELETE_ALLOWLIST = [" in gateway_client
+    assert 'entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK' in gateway_client
+    assert 'entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER' in gateway_client
     assert '@router.post(f"{SERVICE_ROOT}/SaveChanges")' in canonical_api
     assert '@router.post(f"{SERVICE_ROOT}/AutoSave")' in canonical_api
     assert '@router.post(f"{SERVICE_ROOT}/CreateChecklist")' in canonical_api

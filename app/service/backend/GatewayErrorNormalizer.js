@@ -1,7 +1,109 @@
-sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestResiliencePolicy"
-], function (RequestResiliencePolicy) {
+sap.ui.define([], function () {
     "use strict";
+
+    function normalizeMethod(vMethod) {
+        return String(vMethod || "").trim().toUpperCase();
+    }
+
+    function normalizeStatusCode(oError) {
+        return Number((oError && (oError.statusCode || oError.status)) || 0) || 0;
+    }
+
+    function normalizeCode(oError) {
+        return String((oError && oError.code) || "").trim().toUpperCase();
+    }
+
+    function normalizeMessage(oError) {
+        return String((oError && oError.message) || "").trim().toUpperCase();
+    }
+
+    function normalizeDetails(oError) {
+        return Array.isArray(oError && oError.details) ? oError.details : [];
+    }
+
+    function normalizeHeaders(oError) {
+        var mHeaders = oError && oError.responseHeaders;
+        return mHeaders && typeof mHeaders === "object" ? mHeaders : {};
+    }
+
+    function isCsrfError(oError) {
+        var iStatusCode = normalizeStatusCode(oError);
+        var sCode = normalizeCode(oError);
+        var sMessage = normalizeMessage(oError);
+        var aDetails = normalizeDetails(oError);
+        var mHeaders = normalizeHeaders(oError);
+        if (iStatusCode !== 403) {
+            return false;
+        }
+        if (/CSRF|X-CSRF-TOKEN/.test(sCode) || /CSRF|X-CSRF-TOKEN/.test(sMessage)) {
+            return true;
+        }
+        if (String(mHeaders["x-csrf-token"] || "").trim().toLowerCase() === "required") {
+            return true;
+        }
+        return aDetails.some(function (oDetail) {
+            return /CSRF|X-CSRF-TOKEN/.test(normalizeCode(oDetail)) || /CSRF|X-CSRF-TOKEN/.test(normalizeMessage(oDetail));
+        });
+    }
+
+    function isTimeoutError(oError) {
+        return normalizeCode(oError) === "REQUEST_TIMEOUT" || /TIMEOUT/.test(normalizeMessage(oError));
+    }
+
+    function isNetworkError(oError) {
+        var sCode = normalizeCode(oError);
+        var sMessage = normalizeMessage(oError);
+        var iStatusCode = normalizeStatusCode(oError);
+        if (isTimeoutError(oError)) {
+            return true;
+        }
+        if (sCode === "OUTDATED_RESPONSE") {
+            return false;
+        }
+        return iStatusCode === 0 || /NETWORK|OFFLINE|FAILED TO FETCH/.test(sMessage);
+    }
+
+    function classify(vMethod, oError) {
+        var sMethod = normalizeMethod(vMethod);
+        var iStatusCode = normalizeStatusCode(oError);
+        var sCode = normalizeCode(oError);
+        var bSafeRead = sMethod === "GET" || sMethod === "GET_FUNCTION";
+
+        if (sCode === "OUTDATED_RESPONSE") {
+            return {
+                kind: "OUTDATED",
+                retryable: false
+            };
+        }
+        if (isNetworkError(oError)) {
+            return {
+                kind: isTimeoutError(oError) ? "TIMEOUT" : "NETWORK",
+                retryable: bSafeRead
+            };
+        }
+        if (iStatusCode === 401) {
+            return { kind: "AUTH", retryable: false };
+        }
+        if (iStatusCode === 403) {
+            if (isCsrfError(oError)) {
+                return { kind: "CSRF", retryable: false };
+            }
+            return { kind: "PERMISSION", retryable: false };
+        }
+        if (iStatusCode === 404) {
+            return { kind: "NOT_FOUND", retryable: false };
+        }
+        if (iStatusCode === 409) {
+            return { kind: "CONFLICT", retryable: false };
+        }
+        if (iStatusCode >= 500) {
+            return { kind: "SERVER", retryable: bSafeRead };
+        }
+        return {
+            kind: "UNKNOWN",
+            retryable: false
+        };
+    }
 
     function parseJsonSafe(vRaw) {
         if (!vRaw || typeof vRaw !== "string") {
@@ -117,7 +219,7 @@ sap.ui.define([
                 || ""
             ).trim()
         };
-        var oPolicy = RequestResiliencePolicy.classify((oError && oError.requestMethod) || "", oNormalized);
+        var oPolicy = classify((oError && oError.requestMethod) || "", oNormalized);
         oNormalized.kind = oPolicy.kind;
         oNormalized.retryable = !!oPolicy.retryable;
         return oNormalized;

@@ -1,18 +1,14 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestCoordinator",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/RequestResiliencePolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClientRequestRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RequestVerbConstants"
-], function (GatewayErrorNormalizer, RequestCoordinator, RequestResiliencePolicy, GatewayClientContracts, GatewayClientRequestRuntime, SecurityTokenRefresh, RequestVerbConstants) {
+], function (GatewayErrorNormalizer, GatewayContractConstants, RequestVerbConstants) {
     "use strict";
 
     var _oModel = null;
     var _sServiceUrl = "";
+    var mResponseGuardTokens = {};
     var REQUEST = RequestVerbConstants.REQUEST;
-    var DEDUPE = RequestVerbConstants.DEDUPE;
 
     function createModelError() {
         var oError = new Error("GatewayClient model is not initialized");
@@ -27,14 +23,153 @@ sap.ui.define([
         return _oModel;
     }
 
-    function toPromise(fnExecutor) {
-        return new Promise(function (resolve, reject) {
-            fnExecutor(resolve, reject);
+    function nextCorrelationId() {
+        return [
+            "req",
+            Date.now().toString(36),
+            Math.random().toString(36).slice(2, 10)
+        ].join("-");
+    }
+
+    function escapeRegExp(sValue) {
+        return String(sValue || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    function exactPattern(sValue) {
+        return new RegExp("^" + escapeRegExp(sValue) + "$", "i");
+    }
+
+    function entityDeletePattern(sEntitySet, sKeyPattern) {
+        return new RegExp("^\\/" + escapeRegExp(sEntitySet) + "\\(" + sKeyPattern + "\\)$", "i");
+    }
+
+    function disallowedPathPattern(sTail) {
+        return new RegExp("^\\/+" + sTail + "(?:$|[/?(])", "i");
+    }
+
+    var DIRECT_DELETE_ALLOWLIST = [
+        entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, "(?:[^)]+)"),
+        entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK, "(?:Key=)?[^)]+"),
+        entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER, "(?:Key=)?[^)]+"),
+        entityDeletePattern(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, "(?:AttachmentKey=)?[^)]+")
+    ];
+
+    var DIRECT_FUNCTION_BODY_ALLOWLIST = [
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES),
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.AUTO_SAVE),
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.CREATE_CHECKLIST),
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.REPORT_EXPORT),
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE),
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT),
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE)
+    ];
+
+    var DIRECT_FUNCTION_QUERY_ALLOWLIST = [
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST),
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.ANALYTICS_REFRESH_TRIGGER)
+    ];
+
+    var DIRECT_GET_FUNCTION_ALLOWLIST = [
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.GET_HIERARCHY)
+    ];
+
+    var FORBIDDEN_PATH_PATTERNS = [
+        /^\/actions\//i,
+        /^\/lock\//i,
+        /^\/config\/frontend(?:$|[/?])/i,
+        disallowedPathPattern("FrontendRuntimeSettings"),
+        disallowedPathPattern("capabilities"),
+        disallowedPathPattern("ChecklistRoots"),
+        disallowedPathPattern("SearchRows"),
+        disallowedPathPattern("ChecklistChecksSet"),
+        disallowedPathPattern("ChecklistBarriersSet")
+    ];
+
+    function normalizePath(sPath) {
+        var sNormalized = String(sPath || "");
+        return sNormalized.charAt(0) === "/" ? sNormalized : ("/" + sNormalized);
+    }
+
+    function allowlisted(sValue, aAllowed) {
+        return (aAllowed || []).some(function (oPattern) {
+            return oPattern.test(sValue);
         });
     }
 
+    function assertCanonicalPath(sPath) {
+        FORBIDDEN_PATH_PATTERNS.forEach(function (oPattern) {
+            if (oPattern.test(sPath)) {
+                throw new Error("Forbidden non-canonical OData path: " + sPath);
+            }
+        });
+        return sPath;
+    }
+
+    function assertAllowedPath(sPath, aAllowed, sOperation) {
+        if (!allowlisted(sPath, aAllowed || [])) {
+            throw new Error("Unsupported " + sOperation + " OData path: " + sPath);
+        }
+        return sPath;
+    }
+
+    function assertAllowedFunctionName(sName) {
+        var sResolved = String(sName || "").trim();
+        if (!sResolved) {
+            throw new Error("Function import name is required");
+        }
+        if (FORBIDDEN_PATH_PATTERNS.some(function (oPattern) { return oPattern.test("/" + sResolved); })) {
+            throw new Error("Forbidden non-canonical function import: " + sResolved);
+        }
+        return sResolved;
+    }
+
+    function buildHeaders(mHeaders, sCorrelationId) {
+        var mResolved = Object.assign({}, mHeaders || {});
+        if (sCorrelationId) {
+            mResolved["X-Correlation-ID"] = sCorrelationId;
+            mResolved["X-Request-ID"] = sCorrelationId;
+        }
+        return mResolved;
+    }
+
     function normalizeError(oError, sMethod, sCorrelationId) {
-        return GatewayClientRequestRuntime.normalizeError(oError, sMethod, sCorrelationId);
+        var oNormalized = GatewayErrorNormalizer.normalizeError(Object.assign({}, oError || {}, {
+            requestMethod: sMethod,
+            correlationId: (oError && oError.correlationId) || sCorrelationId || ""
+        }));
+        if (!oNormalized.correlationId && sCorrelationId) {
+            oNormalized.correlationId = sCorrelationId;
+        }
+        return oNormalized;
+    }
+
+    function markResponseGuard(sGuardKey) {
+        var sKey = String(sGuardKey || "").trim();
+        if (!sKey) {
+            return 0;
+        }
+        mResponseGuardTokens[sKey] = Number(mResponseGuardTokens[sKey] || 0) + 1;
+        return mResponseGuardTokens[sKey];
+    }
+
+    function isCurrentGuard(sGuardKey, iToken) {
+        var sKey = String(sGuardKey || "").trim();
+        if (!sKey || !iToken) {
+            return true;
+        }
+        return Number(mResponseGuardTokens[sKey] || 0) === Number(iToken || 0);
+    }
+
+    function createOutdatedError(sCorrelationId, sGuardKey) {
+        return {
+            code: "OUTDATED_RESPONSE",
+            message: "Outdated response ignored",
+            statusCode: 0,
+            correlationId: sCorrelationId,
+            responseGuardKey: String(sGuardKey || ""),
+            ignored: true,
+            silent: true
+        };
     }
 
     function serviceUrl() {
@@ -45,60 +180,35 @@ sap.ui.define([
         return String((oModel && oModel.sServiceUrl) || "").replace(/\/+$/, "");
     }
 
-    function withReadRequest(sPath, mParams, mHeaders) {
-        return GatewayClientRequestRuntime.withReadRequest(ensureModel(), sPath, mParams, mHeaders);
-    }
+    function executeReadRequest(sMethod, mOptions, fnRequest) {
+        var oOptions = mOptions || {};
+        var sCorrelationId = String(oOptions.correlationId || nextCorrelationId()).trim();
+        var sGuardKey = String(oOptions.responseGuardKey || "").trim();
+        var iGuardToken = markResponseGuard(sGuardKey);
 
-    function withDirectDeleteRequest(sPath, mHeaders) {
-        return GatewayClientRequestRuntime.withDirectDeleteRequest(ensureModel(), sPath, mHeaders);
-    }
-
-    function withDirectFunctionImportRequest(sName, oPayload, mHeaders) {
-        return GatewayClientRequestRuntime.withDirectFunctionImportRequest(ensureModel(), sName, oPayload, mHeaders);
-    }
-
-    function withDirectGetFunctionImportRequest(sName, mParams, mHeaders) {
-        return GatewayClientRequestRuntime.withDirectGetFunctionImportRequest(ensureModel(), sName, mParams, mHeaders);
-    }
-
-    function executeRequest(mRequest) {
-        var oRequest = mRequest || {};
-        return RequestCoordinator.execute(oRequest).catch(function (oError) {
-            throw normalizeError(oError, oRequest.method, oRequest.correlationId);
+        return new Promise(function (resolve, reject) {
+            fnRequest(resolve, reject, buildHeaders(oOptions.headers, sCorrelationId));
+        }).then(function (oData) {
+            if (sGuardKey && !isCurrentGuard(sGuardKey, iGuardToken)) {
+                throw createOutdatedError(sCorrelationId, sGuardKey);
+            }
+            return oData || {};
+        }).catch(function (oError) {
+            if (sGuardKey && !isCurrentGuard(sGuardKey, iGuardToken)) {
+                throw createOutdatedError(sCorrelationId, sGuardKey);
+            }
+            throw normalizeError(oError, sMethod, sCorrelationId);
         });
     }
 
-    function hasSecurityToken() {
-        var oModel = ensureModel();
-        var sToken = "";
-        try {
-            sToken = String((oModel && oModel.getSecurityToken && oModel.getSecurityToken()) || "").trim();
-        } catch (_error) {
-            sToken = "";
-        }
-        return !!sToken;
-    }
+    function executeMutatingRequest(sMethod, fnRequest, mOptions) {
+        var oOptions = mOptions || {};
+        var sCorrelationId = String(oOptions.correlationId || nextCorrelationId()).trim();
 
-    function ensureSecurityTokenReady(bForceRefresh) {
-        if (!bForceRefresh && hasSecurityToken()) {
-            return Promise.resolve(true);
-        }
-        return SecurityTokenRefresh.refresh(ensureModel());
-    }
-
-    function executeMutatingRequest(mRequest) {
-        var oRequest = mRequest || {};
-        return ensureSecurityTokenReady(false).catch(function () {
-            return ensureSecurityTokenReady(true);
-        }).then(function () {
-            return executeRequest(oRequest);
+        return new Promise(function (resolve, reject) {
+            fnRequest(resolve, reject, buildHeaders(oOptions.headers, sCorrelationId));
         }).catch(function (oError) {
-            if (!RequestResiliencePolicy.isCsrfError(oError)) {
-                throw oError;
-            }
-            return ensureSecurityTokenReady(true).then(function () {
-                return executeRequest(oRequest);
-            });
+            throw normalizeError(oError, sMethod, sCorrelationId);
         });
     }
 
@@ -110,6 +220,7 @@ sap.ui.define([
         reset: function () {
             _oModel = null;
             _sServiceUrl = "";
+            mResponseGuardTokens = {};
         },
         hasModel: function () {
             return !!_oModel;
@@ -132,19 +243,14 @@ sap.ui.define([
             return this.rawRead("/" + entitySet + "(" + key + ")", mParams || {}, mOptions || {});
         },
         rawRead: function (path, mParams, mOptions) {
-            var sPath = GatewayClientContracts.assertCanonicalPath(GatewayClientContracts.normalizePath(path));
-            var oOptions = mOptions || {};
-            return executeRequest({
-                method: REQUEST.GET,
-                dedupeKey: DEDUPE.GET + sPath + "|" + GatewayClientContracts.encodeUrlParameters(mParams || {}),
-                responseGuardKey: oOptions.responseGuardKey,
-                timeoutMs: oOptions.timeoutMs,
-                retryCount: oOptions.retryCount,
-                correlationId: oOptions.correlationId,
-                requestFactory: function (mRuntime) {
-                    var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withReadRequest(sPath, mParams || {}, GatewayClientContracts.buildHeaders(oOptions.headers, sCorrelationId));
-                }
+            var sPath = assertCanonicalPath(normalizePath(path));
+            return executeReadRequest(REQUEST.GET, mOptions, function (resolve, reject, mHeaders) {
+                ensureModel().read(sPath, {
+                    urlParameters: mParams || {},
+                    headers: mHeaders,
+                    success: function (oData) { resolve(oData || {}); },
+                    error: function (oError) { reject(oError); }
+                });
             });
         },
         readSet: function (entitySet, mParams, mOptions) {
@@ -157,77 +263,83 @@ sap.ui.define([
             return ensureModel();
         },
         callFunctionImport: function (name, oPayload, mOptions) {
+            var sFunctionName = assertAllowedFunctionName(name);
             var oOptions = mOptions || {};
-            return executeMutatingRequest({
-                method: REQUEST.POST_FUNCTION,
-                timeoutMs: oOptions.timeoutMs,
-                retryCount: 0,
-                correlationId: oOptions.correlationId,
-                requestFactory: function (mRuntime) {
-                    var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectFunctionImportRequest(
-                        name,
-                        oPayload || {},
-                        GatewayClientContracts.buildHeaders(oOptions.headers, sCorrelationId),
-                        { async: oOptions.async }
-                    );
+            if (oOptions.async === false) {
+                return Promise.reject(new Error("Synchronous function imports are not supported"));
+            }
+            return executeMutatingRequest(REQUEST.POST_FUNCTION, function (resolve, reject, mHeaders) {
+                if (allowlisted(sFunctionName, DIRECT_FUNCTION_QUERY_ALLOWLIST)) {
+                    ensureModel().callFunction("/" + sFunctionName, {
+                        method: REQUEST.POST,
+                        urlParameters: oPayload || {},
+                        headers: mHeaders,
+                        success: function (oData) { resolve(oData || {}); },
+                        error: function (oError) { reject(oError); }
+                    });
+                    return;
                 }
-            });
+                if (allowlisted(sFunctionName, DIRECT_FUNCTION_BODY_ALLOWLIST)) {
+                    ensureModel().create("/" + sFunctionName, oPayload || {}, {
+                        headers: mHeaders,
+                        success: function (oData) { resolve(oData || {}); },
+                        error: function (oError) { reject(oError); }
+                    });
+                    return;
+                }
+                reject(new Error("Unsupported function import: " + sFunctionName));
+            }, oOptions);
         },
         callGetFunctionImport: function (name, mParams, mOptions) {
-            var oOptions = mOptions || {};
-            return executeRequest({
-                method: REQUEST.GET_FUNCTION,
-                dedupeKey: DEDUPE.GET_FUNCTION + String(name || "") + "|" + GatewayClientContracts.encodeUrlParameters(mParams || {}),
-                responseGuardKey: oOptions.responseGuardKey,
-                timeoutMs: oOptions.timeoutMs,
-                retryCount: oOptions.retryCount,
-                correlationId: oOptions.correlationId,
-                requestFactory: function (mRuntime) {
-                    var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectGetFunctionImportRequest(name, mParams || {}, GatewayClientContracts.buildHeaders(oOptions.headers, sCorrelationId));
-                }
+            var sFunctionName = assertAllowedFunctionName(name);
+            if (!allowlisted(sFunctionName, DIRECT_GET_FUNCTION_ALLOWLIST)) {
+                return Promise.reject(new Error("Unsupported GET function import: " + sFunctionName));
+            }
+            return executeReadRequest(REQUEST.GET_FUNCTION, mOptions, function (resolve, reject, mHeaders) {
+                ensureModel().callFunction("/" + sFunctionName, {
+                    method: REQUEST.GET,
+                    urlParameters: mParams || {},
+                    headers: mHeaders,
+                    success: function (oData) { resolve(oData || {}); },
+                    error: function (oError) { reject(oError); }
+                });
             });
         },
         deletePath: function (path, mOptions) {
-            var sPath = GatewayClientContracts.assertAllowedPath(
-                GatewayClientContracts.assertCanonicalPath(GatewayClientContracts.normalizePath(path)),
-                GatewayClientContracts.DIRECT_DELETE_ALLOWLIST,
-                REQUEST.DELETE
-            );
-            var oOptions = mOptions || {};
-            return executeMutatingRequest({
-                method: REQUEST.DELETE,
-                timeoutMs: oOptions.timeoutMs,
-                retryCount: 0,
-                correlationId: oOptions.correlationId,
-                requestFactory: function (mRuntime) {
-                    var sCorrelationId = mRuntime && mRuntime.correlationId;
-                    return withDirectDeleteRequest(sPath, GatewayClientContracts.buildHeaders(oOptions.headers, sCorrelationId));
-                }
-            });
+            var sPath = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_DELETE_ALLOWLIST, REQUEST.DELETE);
+            return executeMutatingRequest(REQUEST.DELETE, function (resolve, reject, mHeaders) {
+                ensureModel().remove(sPath, {
+                    headers: mHeaders,
+                    success: function (oData) { resolve(oData || {}); },
+                    error: function (oError) { reject(oError); }
+                });
+            }, mOptions || {});
         },
         batch: function (groupId) {
-            return executeMutatingRequest({
-                method: REQUEST.BATCH,
-                requestFactory: function () {
-                    return toPromise(function (resolve, reject) {
-                        ensureModel().submitChanges({
-                            groupId: groupId || undefined,
-                            success: function (oData) {
-                                resolve((oData && (oData.__batchResponses || oData.__changeResponses)) || []);
-                            },
-                            error: function (e) {
-                                reject(GatewayErrorNormalizer.normalizeError(e));
-                            }
-                        });
-                    });
-                }
-            });
+            return executeMutatingRequest(REQUEST.BATCH, function (resolve, reject) {
+                ensureModel().submitChanges({
+                    groupId: groupId || undefined,
+                    success: function (oData) {
+                        resolve((oData && (oData.__batchResponses || oData.__changeResponses)) || []);
+                    },
+                    error: function (oError) {
+                        reject(oError);
+                    }
+                });
+            }, {});
         },
         fetchCsrfToken: function () {
-            return SecurityTokenRefresh.refresh(ensureModel()).catch(function (oError) {
-                throw GatewayErrorNormalizer.normalizeError(oError);
+            return new Promise(function (resolve, reject) {
+                var oModel = ensureModel();
+                if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
+                    reject(new Error("security_token_refresh_unavailable"));
+                    return;
+                }
+                oModel.refreshSecurityToken(function () {
+                    resolve(true);
+                }, function (oError) {
+                    reject(normalizeError(oError, REQUEST.POST_FUNCTION, ""));
+                }, true);
             });
         },
         refreshSecurityToken: function () {

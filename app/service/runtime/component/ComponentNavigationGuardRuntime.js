@@ -1,9 +1,9 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/JsRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntimeStringConstants"
 ], function (ModelStateRuntime, NavigationContracts, WorkflowContracts, ComponentListenerContracts, JsRuntime) {
     "use strict";
 
@@ -72,7 +72,10 @@
 
     function preventAndQueueNavigation(oEvent, mOptions) {
         oEvent.preventDefault();
-        mOptions.queuePendingNavigationIntent(oEvent);
+        mOptions.queuePendingNavigationIntent(oEvent, {
+            owner: "navigationGuard",
+            resumeMode: "afterGuardedSave"
+        });
         if (typeof mOptions.revertPendingNavigationIntent === TYPE_FUNCTION) {
             mOptions.revertPendingNavigationIntent();
         }

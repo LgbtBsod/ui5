@@ -1,9 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SecurityTokenRefresh",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (ActionContract, EffectActionRouting, SecurityTokenRefresh, BehaviorRegistry) {
+], function (ActionContract, EffectActionRouting, BehaviorRegistry) {
     "use strict";
 
     var RETRY_SCOPE = "retry";
@@ -28,10 +27,19 @@ sap.ui.define([
         return Promise.resolve();
     }
 
+    function refreshSecurityToken(oModel) {
+        if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
+            return Promise.reject(new Error("security_token_refresh_unavailable"));
+        }
+        return new Promise(function (resolve, reject) {
+            oModel.refreshSecurityToken(function () { resolve(true); }, reject, true);
+        });
+    }
+
     function runSessionRetry(mContext) {
         var oOwner = mContext.controller && mContext.controller.getOwnerComponent && mContext.controller.getOwnerComponent();
         var oModel = oOwner && oOwner.getModel && oOwner.getModel();
-        return SecurityTokenRefresh.refresh(oModel);
+        return refreshSecurityToken(oModel);
     }
 
     var mHandlers = {
