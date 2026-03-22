@@ -68,7 +68,9 @@ sap.ui.define([
         }
         return Promise.resolve(oCacheWrite.execute({
             rootId: sRootId,
-            snapshot: oSnapshot
+            snapshot: Object.assign({}, oSnapshot, {
+                attachments: []
+            })
         }, mCtx || {})).catch(function () {
             return null;
         });

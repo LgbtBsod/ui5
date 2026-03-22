@@ -56,6 +56,14 @@ sap.ui.define([
                 return fnRunGuardedSave();
             });
         }
+        if (mActions.DETAIL_CONFIRM_ENTER_EDIT) {
+            oActionDispatcher.register(mActions.DETAIL_CONFIRM_ENTER_EDIT, function (mPayload) {
+                return oDetailFacade.enterEdit(
+                    normalizeActionPayload(oActionContract, mActions.DETAIL_CONFIRM_ENTER_EDIT, mPayload || {}),
+                    fnBuildLatestCtx()
+                ).then(fnApplyFacadeResult);
+            });
+        }
         if (mActions.DETAIL_TAKEOVER_LOCK) {
             oActionDispatcher.register(mActions.DETAIL_TAKEOVER_LOCK, function (mPayload) {
                 return oDetailFacade.confirmTakeover(

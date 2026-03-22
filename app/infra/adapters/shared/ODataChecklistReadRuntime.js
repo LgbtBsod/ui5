@@ -48,7 +48,6 @@ sap.ui.define([
         var oBasicFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BASIC_INFO;
         var oCheckFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_CHECK;
         var oBarrierFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BARRIER;
-        var oAttachmentFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.ATTACHMENT;
         var pRoot = GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
             type: ODataEntityContracts.TYPES.ROOT_KEY
         }).replace(/^\//, ""));
@@ -66,13 +65,9 @@ sap.ui.define([
             "$filter": buildDetailFilter(oBarrierFilter, sRootId),
             "$select": ODataEntityContracts.SELECTS.CHECKLIST_BARRIER
         });
-        var pAttachments = GatewayODataClient.get(oAttachmentFilter.entitySet, {
-            "$filter": buildDetailFilter(oAttachmentFilter, sRootId),
-            "$select": ODataEntityContracts.SELECTS.ATTACHMENT
-        });
-        return Promise.all([pRoot, pBasic, pChecks, pBarriers, pAttachments]).then(function (aResult) {
+        return Promise.all([pRoot, pBasic, pChecks, pBarriers]).then(function (aResult) {
             var oSnapshot = ODataChecklistSnapshotRuntime.mapResult(aResult[0], aResult[1], aResult[2], aResult[3]);
-            oSnapshot.attachments = ODataAdapterUtils.asArray(aResult[4]).map(ChecklistSnapshotMapper.mapAttachmentRow);
+            oSnapshot.attachments = [];
             return oSnapshot;
         });
     }

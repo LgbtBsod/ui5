@@ -114,9 +114,9 @@ CLASS zcl_zodata_mpc_ext IMPLEMENTATION.
     lo_fi->set_http_method( /iwbep/if_mgw_odata_func_imp=>gcs_http_method-post ).
     lo_fi->set_return_type( iv_entity_type_name = 'LockAcquireResponse' ).
     add_fi_param( io_fi = lo_fi iv_name = 'ObjectUuid'   iv_edm_type = 'Guid'    iv_nullable = abap_false ).
-    add_fi_param( io_fi = lo_fi iv_name = 'Uname'        iv_edm_type = 'String'  iv_nullable = abap_false ).
     add_fi_param( io_fi = lo_fi iv_name = 'SessionGuid'  iv_edm_type = 'Guid'    iv_nullable = abap_false ).
     add_fi_param( io_fi = lo_fi iv_name = 'TabSessionId' iv_edm_type = 'String'  iv_nullable = abap_true ).
+    add_fi_param( io_fi = lo_fi iv_name = 'ForceTakeover' iv_edm_type = 'Boolean' iv_nullable = abap_true ).
 
     " ── LockHeartbeat ────────────────────────────────────────────
     lo_fi = model->create_function_import( iv_function_import_name = 'LockHeartbeat' ).
@@ -131,7 +131,6 @@ CLASS zcl_zodata_mpc_ext IMPLEMENTATION.
     lo_fi->set_return_type( iv_entity_type_name = 'LockReleaseResponse' ).
     add_fi_param( io_fi = lo_fi iv_name = 'ObjectUuid'  iv_edm_type = 'Guid'    iv_nullable = abap_false ).
     add_fi_param( io_fi = lo_fi iv_name = 'SessionGuid' iv_edm_type = 'Guid'    iv_nullable = abap_false ).
-    add_fi_param( io_fi = lo_fi iv_name = 'TrySave'     iv_edm_type = 'Boolean' iv_nullable = abap_true ).
 
     " ── AutoSave (delta patch, no COMMIT WORK — deferred) ────────
     lo_fi = model->create_function_import( iv_function_import_name = 'AutoSave' ).

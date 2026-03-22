@@ -1,9 +1,11 @@
 sap.ui.define([
-"PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants"
-], function (DebugLogger, FrontendConfigConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (DebugLogger, FrontendConfigConstants, GatewayContractConstants) {
     "use strict";
 
+    var RUNTIME_SETTINGS_KEY = "Key='GLOBAL'";
     var SETTINGS_CACHE_TTL_MS = Number(FrontendConfigConstants && FrontendConfigConstants.SETTINGS_CACHE_TTL_MS) || (5 * 60 * 1000);
     var _loaded = false;
     var _loadedAt = 0;
@@ -80,7 +82,7 @@ sap.ui.define([
 
             var sReason = _resolveLoadReason(bForce);
             var iStartedAt = Date.now();
-            _loadingPromise = gatewayClient.readEntity("RuntimeSettingsSet", "Key='GLOBAL'", {}).then(function (oData) {
+            _loadingPromise = gatewayClient.readEntity(GatewayContractConstants.ENTITY_SETS.RUNTIME_SETTINGS, RUNTIME_SETTINGS_KEY, {}).then(function (oData) {
                 _runtimeCache = oData || {};
                 _loaded = true;
                 _loadedAt = Date.now();

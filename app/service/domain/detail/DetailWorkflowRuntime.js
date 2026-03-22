@@ -36,6 +36,20 @@ sap.ui.define([
         var sCode = (oResult && oResult.error && oResult.error.code) || (oResult && oResult.data && oResult.data.code) || "";
         var sTextKey;
         var aEffects;
+        if (sCode === DETAIL_CODES.INTEGRATION_CONFIRM_REQUIRED) {
+            aEffects = (oResult.effects || []).concat([
+                Effects.confirm("integrationEnterEdit", DETAIL_MESSAGE_KEYS.INTEGRATION_EDIT_CONFIRM, {
+                    confirmAction: ActionContract.ACTIONS.DETAIL_CONFIRM_ENTER_EDIT,
+                    cancelAction: ActionContract.ACTIONS.DETAIL_CANCEL_ENTER_EDIT,
+                    payload: {
+                        rootId: (mInput && mInput.rootId) || "",
+                        state: true,
+                        confirmedIntegration: true
+                    }
+                })
+            ]);
+            return Object.assign({}, oResult, { effects: aEffects });
+        }
         if (sCode !== DETAIL_CODES.LOCKED_OWN_SESSION && sCode !== DETAIL_CODES.EXPIRED) {
             return oResult;
         }

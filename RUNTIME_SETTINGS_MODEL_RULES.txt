@@ -1,0 +1,24 @@
+RUNTIME SETTINGS MODEL RULES
+
+Canonical source
+- RuntimeSettingsSet('GLOBAL') is the single backend-driven runtime settings source.
+
+Load path
+- SettingsManager owns load/reload, TTL cache, subscriber notification, and load summary logging.
+- ApplyRuntimeSettingsUseCase owns normalization and projection into UI models.
+
+Model write rules
+- Canonical normalized values are written to masterData>/runtime/*.
+- Operational mirrors may be written into state for timers/required fields/UI behavior that need fast access.
+- State mirrors are projections, not independent sources of truth.
+
+Allowed payload domains
+- timers
+- requiredFields
+- frontendVariables
+- uploadPolicy
+
+Disallowed patterns
+- Hardcoded runtime business values spread across controllers/runtime modules when already supplied by RuntimeSettingsSet('GLOBAL').
+- Independent feature-specific caches that bypass SettingsManager for the same dataset.
+- Treating state model projections as an alternative canonical runtime source.

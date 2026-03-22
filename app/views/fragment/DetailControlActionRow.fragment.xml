@@ -89,33 +89,49 @@
 
         <Button
             icon="sap-icon://status-critical"
-            text="{i18n>statusRegistered}"
+            text="{i18n>statusInProcess}"
             visible="{path:'state>/workflow/detail/editMode', formatter:'.formatEditActionVisible'}"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} &amp;&amp; !${state>/validationSummary/hasErrors} }"
             press=".onChangeChecklistStatus"
-            tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusRegisteredTooltip} }"
+            tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusInProcessTooltip} }"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
             </layoutData>
             <customData>
-                <core:CustomData key="targetStatus" value="{view>/statusTargets/REGISTERED}"/>
+                <core:CustomData key="targetStatus" value="{view>/statusTargets/IN_PROCESS}"/>
             </customData>
         </Button>
 
         <Button
             icon="sap-icon://status-positive"
-            text="{i18n>statusClosed}"
+            text="{i18n>statusCompleted}"
             visible="{path:'state>/workflow/detail/editMode', formatter:'.formatEditActionVisible'}"
             enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} &amp;&amp; !${state>/validationSummary/hasErrors} }"
             press=".onChangeChecklistStatus"
-            tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusClosedTooltip} }"
+            tooltip="{= ${state>/validationSummary/hasErrors} ? ${i18n>validationSummaryTitle} : ${i18n>statusCompletedTooltip} }"
             class="detailRailActionBtn appActionSecondary chkRipple">
             <layoutData>
                 <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
             </layoutData>
             <customData>
-                <core:CustomData key="targetStatus" value="{view>/statusTargets/CLOSED}"/>
+                <core:CustomData key="targetStatus" value="{view>/statusTargets/COMPLETED}"/>
+            </customData>
+        </Button>
+
+        <Button
+            icon="sap-icon://decline"
+            text="{i18n>statusCancelled}"
+            visible="{path:'state>/workflow/detail/editMode', formatter:'.formatEditActionVisible'}"
+            enabled="{= !${state>/ui/busy/detail} &amp;&amp; !${state>/lockOperationPending} }"
+            press=".onChangeChecklistStatus"
+            tooltip="{i18n>statusCancelledTooltip}"
+            class="detailRailActionBtn appActionSecondary chkRipple">
+            <layoutData>
+                <OverflowToolbarLayoutData priority="AlwaysOverflow"/>
+            </layoutData>
+            <customData>
+                <core:CustomData key="targetStatus" value="{view>/statusTargets/CANCELLED}"/>
             </customData>
         </Button>
 

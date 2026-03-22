@@ -4,8 +4,9 @@ sap.ui.define([
     "sap/ui/model/Sorter",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchFilterBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
-], function (Filter, FilterOperator, Sorter, SearchFilterBuilder, SearchMaxResults, SearchRuntimeConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (Filter, FilterOperator, Sorter, SearchFilterBuilder, SearchMaxResults, SearchRuntimeConstants, ModelContracts) {
     "use strict";
 
     var SEARCH_MODE = SearchRuntimeConstants.SEARCH_MODE;
@@ -93,7 +94,7 @@ sap.ui.define([
 
     function readSortKey(mState) {
         var sSortKey = String(mState.searchSortKey || "").trim();
-        return sSortKey || "DateCheck";
+        return sSortKey || ModelContracts.TOKENS.DATE_CHECK;
     }
 
     function readGroupKey(mState) {

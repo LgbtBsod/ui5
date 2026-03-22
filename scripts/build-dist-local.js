@@ -41,7 +41,12 @@ function shouldFallback(result) {
   const stderr = String(result && result.stderr ? result.stderr : "");
   const stdout = String(result && result.stdout ? result.stdout : "");
   const combined = stderr + "\n" + stdout;
-  return combined.includes("@sapui5/distribution-metadata") || combined.includes("framework package") || combined.includes("Unable to resolve");
+  return combined.includes("@sapui5/distribution-metadata")
+    || combined.includes("framework package")
+    || combined.includes("Unable to resolve")
+    || combined.includes("'ui5' is not recognized")
+    || combined.includes("not recognized as an internal or external command")
+    || combined.includes("ENOENT");
 }
 
 function writeBuildInfo(mode) {

@@ -1,12 +1,14 @@
 CDS
 
-Repo-evidenced CDS/runtime-settings artifacts:
+Repo-evidenced CDS/runtime-settings artifacts
 - zc_pcct_frontend_variables.ddls.asddls
 - zc_pcct_permission_rules.ddls.asddls
 - zc_pcct_required_fields.ddls.asddls
 - zc_pcct_runtime_settings.ddls.asddls
 - zc_pcct_upload_policy.ddls.asddls
 
-Role in target architecture:
-- CDS/SADL remains the preferred read path
-- Runtime settings and supporting rule sets are backend-driven and surfaced to frontend through the Gateway contract
+Role in target architecture
+- CDS/SADL remains the preferred backend-driven read path where available.
+- Runtime settings and supporting rule sets are surfaced to frontend through the Gateway contract.
+- Search semantics stay tied to current ChecklistSearchSet field contract and existing filter composition rules; no invented search layer is added.
+- Analytics target architecture remains lightweight shared summary plus separate heavy breakdown/read-refresh contracts.

@@ -22,7 +22,7 @@ sap.ui.define([
             return null;
         }
         return {
-            RootId: sRootId,
+            ObjectUuid: sRootId,
             SessionGuid: sSessionGuid
         };
     }

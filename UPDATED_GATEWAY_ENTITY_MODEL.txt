@@ -1,0 +1,24 @@
+UPDATED GATEWAY ENTITY MODEL
+
+Command/read split
+- ChecklistRootSet: aggregate root read model; not directly deletable in target architecture.
+- ChecklistBasicInfoSet: supporting read model for header/basic detail data.
+- ChecklistCheckSet: child read model; child mutations must flow through aggregate save payload, not direct entity delete.
+- ChecklistBarrierSet: child read model; child mutations must flow through aggregate save payload, not direct entity delete.
+- AttachmentSet: attachment metadata read model; not directly deletable in target architecture.
+- ChecklistSearchSet: search/read projection for list page.
+- ChecklistPermissionSet: detail permission/read-only capability projection.
+- ChecklistCreatePermissionSet: create capability projection.
+- DictionaryItemSet: value help / dictionary read model.
+- PersonVHSet: people value help read model.
+- LockStatusSet: lock status read-only projection.
+- LockStatusSet carries explicit lock evaluation fields for owner/session/killed/takeover semantics and should not rely on alias guessing only.
+- LastChangeSet: change tracking / last change projection.
+- SimpleAnalyticalSet: lightweight analytical read.
+- WorkflowAnalyticsBreakdownSet: heavyweight analytical breakdown read.
+- AnalyticsRefreshStateSet: analytics refresh state projection.
+
+Target rules
+- Entity sets are read models and capability projections.
+- Mutations are command-driven through function imports, not direct DELETE of aggregate or child entities.
+- Attachment binary is not the canonical entity source; attachment metadata is.

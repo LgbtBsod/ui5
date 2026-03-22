@@ -1,0 +1,23 @@
+REMAINING TZ 2.1 GAPS CLOSED
+
+Closed in code
+- Removed direct DELETE as a supported Gateway target flow. GatewayClient.deletePath now rejects with DIRECT_DELETE_UNSUPPORTED.
+- Aligned lock payloads with metadata and Gateway MPC: ObjectUuid + SessionGuid, with TabSessionId and optional ForceTakeover only on acquire.
+- Removed frontend lock drift caused by RootId / Force / StealFrom payload variants.
+- Locked release-on-page-leave payload to the same canonical object/session contract.
+- Kept releaseWithTrySave only as a caller-compatibility wrapper name; TrySave is not part of the contract.
+- Preserved attachment architecture: no attachments in initial detail snapshot/cache, metadata-first open/download semantics, direct attachment delete removed from target flow.
+- Preserved search semantics: backend fetch limit separate from visible chunk size; exact=AND, inexact=OR.
+- Preserved runtime settings as backend-driven single source of truth.
+- Preserved analytics split between lightweight operational reads and heavyweight analytical datasets.
+
+Closed in artifacts
+- Updated truth matrix to reflect final code truth instead of target speculation.
+- Added updated Gateway entity/function import matrices.
+- Added explicit ArchiveLink attachment contract note.
+- Added runtime settings model rules.
+- Added analytics architecture rules.
+
+Open residuals
+- Integration-origin confirm-before-edit is still not proven for every enter-edit entry path.
+- Productive download stream ownership must remain metadata-first; legacy Value fallback is compatibility only.

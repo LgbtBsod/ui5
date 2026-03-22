@@ -3,13 +3,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants, GatewayClient, DetailUseCaseConstants, DetailMessageKeyConstants) {
+], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants, GatewayClient, DetailContracts) {
     "use strict";
 
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
+    var DETAIL_CODES = DetailContracts.CODES;
+    var DETAIL_MESSAGE_KEYS = DetailContracts;
 
     function normalizeLockToken(mArgs) {
         return (mArgs && (mArgs.sessionGuid || mArgs.lockToken)) || "";
@@ -66,18 +65,15 @@ sap.ui.define([
     }
 
     function acquire(mArgs) {
-        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sSession = normalizeLockToken(mArgs);
-        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim();
+        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
         var sTabSessionId = String((mArgs && (mArgs.tabSessionId || mArgs.TabSessionId)) || "").trim();
+        var bForceTakeover = !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force));
         return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE, {
             ObjectUuid: sObjectUuid,
-            RootId: sRootId,
             SessionGuid: sSession,
             TabSessionId: sTabSessionId,
-            ForceTakeover: !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force)),
-            Force: !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force)),
-            StealFrom: (mArgs && mArgs.stealFrom) || ((mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force)) ? sSession : "")
+            ForceTakeover: bForceTakeover
         }).then(function (oResult) {
             return normalizeResult(oResult, sSession);
         }).catch(function (oError) {
@@ -86,11 +82,9 @@ sap.ui.define([
     }
 
     function heartbeat(mArgs) {
-        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
         return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT, {
-            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim(),
-            RootId: sRootId,
+            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim(),
             SessionGuid: sToken
         }).then(function (oResult) {
             return normalizeResult(oResult, sToken);
@@ -110,11 +104,9 @@ sap.ui.define([
     }
 
     function release(mArgs) {
-        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
         return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
-            RootId: sRootId,
-            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim(),
+            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim(),
             SessionGuid: sToken
         }).then(function (oResult) {
             var oNormalized = normalizeResult(oResult, sToken);
@@ -128,13 +120,13 @@ sap.ui.define([
     }
 
     function releaseOnPageLeave(mArgs) {
-        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
+        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
         var sToken = normalizeLockToken(mArgs);
         var oModel;
         var sServiceUrl;
         var sCsrfToken;
         var oPayload;
-        if (!sRootId || !sToken || typeof window === "undefined" || typeof window.fetch !== "function") {
+        if (!sObjectUuid || !sToken || typeof window === "undefined" || typeof window.fetch !== "function") {
             return false;
         }
         try {
@@ -148,8 +140,7 @@ sap.ui.define([
             return false;
         }
         oPayload = {
-            RootId: sRootId,
-            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid)) || sRootId).trim(),
+            ObjectUuid: sObjectUuid,
             SessionGuid: sToken
         };
         try {

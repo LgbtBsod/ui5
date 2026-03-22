@@ -25,9 +25,10 @@ sap.ui.define([], function () {
     });
 
     var CHECKLIST_STATUSES = Object.freeze({
+        CANCELLED: "CANCELLED",
+        COMPLETED: "COMPLETED",
         DRAFT: "DRAFT",
-        REGISTERED: "REGISTERED",
-        CLOSED: "CLOSED"
+        IN_PROCESS: "IN_PROCESS"
     });
 
     var REASONS = Object.freeze({

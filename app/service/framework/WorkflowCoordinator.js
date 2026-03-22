@@ -17,6 +17,12 @@ sap.ui.define([
                 error: oError || null
             });
         },
+        releaseActiveLock: function (oController, mPayload) {
+            return runOperation("releaseActiveLock", {
+                controller: oController,
+                payload: mPayload || {}
+            });
+        },
         releaseWithTrySave: function (oController, mPayload) {
             return runOperation("releaseWithTrySave", {
                 controller: oController,

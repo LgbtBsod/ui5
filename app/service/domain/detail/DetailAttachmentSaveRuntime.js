@@ -38,9 +38,7 @@ sap.ui.define([
             ];
 
             if (!bHasPendingAttachments) {
-                aEffects.push(Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.BASE, Object.assign({}, oSavedSnapshot, {
-                    attachments: aSyncedAttachments
-                })));
+                aEffects.push(Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.BASE_ATTACHMENTS, aSyncedAttachments));
             }
 
             DetailAttachmentDeltaRuntime.cleanupStagedAttachmentUrls(aCurrentAttachments);
@@ -50,9 +48,7 @@ sap.ui.define([
                 hasPendingAttachments: bHasPendingAttachments,
                 selectedSnapshot: oSelectedSnapshot,
                 snapshot: Object.assign({}, oSavedSnapshot, {
-                    attachments: bHasPendingAttachments
-                        ? (((mOptions.baseSnapshot || {}).attachments) || [])
-                        : aSyncedAttachments
+                    attachments: []
                 }),
                 effects: aEffects
             };

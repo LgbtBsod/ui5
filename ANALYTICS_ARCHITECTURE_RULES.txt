@@ -1,0 +1,20 @@
+ANALYTICS ARCHITECTURE RULES
+
+Separation of concerns
+- Search/list/detail operational flow must stay independent from heavyweight analytics reads.
+- Analytics datasets are explicit, opt-in reads and refresh triggers.
+
+Analytics read surfaces
+- SimpleAnalyticalSet: lightweight analytical summary read.
+- WorkflowAnalyticsBreakdownSet: heavyweight breakdown read.
+- AnalyticsRefreshStateSet: refresh state read/progress projection.
+- AnalyticsRefreshTrigger: explicit backend refresh command.
+
+Frontend rules
+- Search must not implicitly trigger heavyweight analytics loads.
+- Analytics dialogs/pages may request analytics datasets explicitly when entered.
+- UI meaning colors must represent actual status/risk semantics, not arbitrary filter context.
+
+Backend rules
+- Analytics refresh remains command-driven.
+- Analytics projections are read models; they do not redefine operational search/detail contracts.

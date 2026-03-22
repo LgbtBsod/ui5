@@ -28,6 +28,7 @@ sap.ui.define([], function () {
         LAST_CHANGE_SET: "LastChangeSet",
         LOCK_STATUS: "LockStatusSet",
         PERSON_VALUE_HELP: "PersonVHSet",
+        RUNTIME_SETTINGS: "RuntimeSettingsSet",
         SIMPLE_ANALYTICAL: "SimpleAnalyticalSet",
         WORKFLOW_ANALYTICS_BREAKDOWN: "WorkflowAnalyticsBreakdownSet"
     });

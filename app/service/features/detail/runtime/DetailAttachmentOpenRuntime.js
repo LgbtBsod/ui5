@@ -37,9 +37,13 @@ sap.ui.define([
         var oMainService = oController && oController.getModel && oController.getModel("mainService");
         var sFileName = String((oRow && oRow.FileName) || "attachment").trim() || "attachment";
         var sEntityPath;
+        var sDownloadUrl = String((oRow && oRow.DownloadUrl) || "").trim();
 
         if (sLocalObjectUrl) {
             return DownloadRuntime.triggerDownload(sLocalObjectUrl, sFileName);
+        }
+        if (sDownloadUrl) {
+            return Promise.resolve(DownloadRuntime.triggerDownload(sDownloadUrl, sFileName));
         }
         if (!sAttachmentId || !oMainService || typeof oMainService.read !== "function") {
             return Promise.resolve(false);
@@ -54,8 +58,13 @@ sap.ui.define([
                     "$select": ODataKeyContracts.SELECTS.ATTACHMENT_CONTENT
                 },
                 success: function (oData) {
+                    var sResolvedDownloadUrl = String((oData && oData.DownloadUrl) || "").trim();
                     var sValue = String((oData && oData.Value) || "").trim();
                     var oBlob;
+                    if (sResolvedDownloadUrl) {
+                        resolve(DownloadRuntime.triggerDownload(sResolvedDownloadUrl, sFileName));
+                        return;
+                    }
                     if (!sValue) {
                         resolve(false);
                         return;

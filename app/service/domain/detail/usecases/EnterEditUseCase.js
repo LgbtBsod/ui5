@@ -18,6 +18,7 @@ sap.ui.define([
     var DETAIL_CODES = DetailContracts.CODES;
     var ACCESS_REASON_CODES = DetailContracts.ACCESS_REASON_CODES;
     var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
 
     function EnterEditUseCase() {
         return {
@@ -35,6 +36,13 @@ function readCode(oLock) {
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY),
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
         ];
+    }
+
+    function requiresIntegrationConfirm(mInput, mCtx) {
+        var oUiState = mCtx && mCtx.uiState;
+        var bConfirmed = !!(mInput && mInput.confirmedIntegration);
+        var bIntegration = !!(oUiState && typeof oUiState.get === "function" && oUiState.get(ModelContracts.MODELS.DETAIL, DETAIL_MODEL_PATHS.ROOT_INTEGRATION_FLAG));
+        return bIntegration && !bConfirmed;
     }
 
     function execute(mInput, mCtx) {
@@ -81,6 +89,12 @@ function readCode(oLock) {
         }
         if (!sRootId || !oLockPort || typeof oLockPort.acquire !== "function") {
             return Promise.resolve(Result.fail({ message: "Lock port unavailable", code: "PORT_UNAVAILABLE" }));
+        }
+        if (requiresIntegrationConfirm(mInput, mCtx)) {
+            return Promise.resolve(Result.fail({
+                message: "Integration edit confirmation required",
+                code: DETAIL_CODES.INTEGRATION_CONFIRM_REQUIRED
+            }));
         }
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;

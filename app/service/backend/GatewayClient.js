@@ -39,20 +39,9 @@ sap.ui.define([
         return new RegExp("^" + escapeRegExp(sValue) + "$", "i");
     }
 
-    function entityDeletePattern(sEntitySet, sKeyPattern) {
-        return new RegExp("^\\/" + escapeRegExp(sEntitySet) + "\\(" + sKeyPattern + "\\)$", "i");
-    }
-
     function disallowedPathPattern(sTail) {
         return new RegExp("^\\/+" + sTail + "(?:$|[/?(])", "i");
     }
-
-    var DIRECT_DELETE_ALLOWLIST = [
-        entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, "(?:[^)]+)"),
-        entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK, "(?:Key=)?[^)]+"),
-        entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER, "(?:Key=)?[^)]+"),
-        entityDeletePattern(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, "(?:AttachmentKey=)?[^)]+")
-    ];
 
     var DIRECT_FUNCTION_BODY_ALLOWLIST = [
         exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES),
@@ -96,13 +85,6 @@ sap.ui.define([
                 throw new Error("Forbidden non-canonical OData path: " + sPath);
             }
         });
-        return sPath;
-    }
-
-    function assertAllowedPath(sPath, aAllowed, sOperation) {
-        if (!allowlisted(sPath, aAllowed || [])) {
-            throw new Error("Unsupported " + sOperation + " OData path: " + sPath);
-        }
         return sPath;
     }
 
@@ -300,14 +282,12 @@ sap.ui.define([
             });
         },
         deletePath: function (path, mOptions) {
-            var sPath = assertAllowedPath(assertCanonicalPath(normalizePath(path)), DIRECT_DELETE_ALLOWLIST, REQUEST.DELETE);
-            return executeMutatingRequest(REQUEST.DELETE, function (resolve, reject, mHeaders) {
-                ensureModel().remove(sPath, {
-                    headers: mHeaders,
-                    success: function (oData) { resolve(oData || {}); },
-                    error: function (oError) { reject(oError); }
-                });
-            }, mOptions || {});
+            var sPath = assertCanonicalPath(normalizePath(path));
+            return Promise.reject(normalizeError({
+                code: "DIRECT_DELETE_UNSUPPORTED",
+                message: "Direct DELETE is not supported in target Gateway contract",
+                path: sPath
+            }, REQUEST.DELETE, String((mOptions && mOptions.correlationId) || "").trim()));
         },
         batch: function (groupId) {
             return executeMutatingRequest(REQUEST.BATCH, function (resolve, reject) {

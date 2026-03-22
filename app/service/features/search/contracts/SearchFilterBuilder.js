@@ -1,7 +1,8 @@
 sap.ui.define([
     "sap/ui/model/Filter",
-    "sap/ui/model/FilterOperator"
-], function (Filter, FilterOperator) {
+    "sap/ui/model/FilterOperator",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
+], function (Filter, FilterOperator, SearchContracts) {
     "use strict";
 
     var SEGMENT_KEYS = {
@@ -9,6 +10,7 @@ sap.ui.define([
         FAILED: "FAILED",
         SUCCESS: "SUCCESS"
     };
+    var SEARCH_MODE = SearchContracts.SEARCH_MODE;
 
     function buildBinarySegmentFilter(segmentKey, sFieldName) {
         var sKey = String(segmentKey || SEGMENT_KEYS.ALL).toUpperCase();
@@ -42,7 +44,7 @@ sap.ui.define([
         }
         return new Filter({
             filters: aFilters,
-            and: String(mode || "EXACT").toUpperCase() !== "LOOSE"
+            and: String(mode || SEARCH_MODE.EXACT).toUpperCase() !== SEARCH_MODE.LOOSE
         });
     }
 

@@ -1,0 +1,23 @@
+UPDATED CACHE POLICY
+
+Detail cache
+- Detail open snapshot contains root/basic/checks/barriers and excludes attachments.
+- Attachments are lazy-loaded and synchronized outside the base detail snapshot.
+- Persisted save rewrites the base detail snapshot without embedding attachment binary payload.
+
+Freshness validation
+- LastChangeSet remains the aggregate freshness checkpoint.
+- Cache validation is used before sensitive edit/save flows.
+
+Runtime settings
+- Runtime settings are cached with TTL in SettingsManager.
+- Canonical normalized runtime values are written to masterData>/runtime/*.
+- State model keeps only operational projections and must not become an independent runtime-source cache.
+
+Search request window
+- Backend fetch limit and visible page size remain separate.
+- Top-limit requests may suppress inline count for performance.
+
+Target notes
+- Attachment binaries are never the source of truth in the detail cache.
+- No direct OData DELETE path is used as a cache invalidation mechanism.

@@ -1,20 +1,46 @@
-TRUTH MATRIX
+TRUTH MATRIX FOR FINAL PRODUCTION-HARDENING RESIDUALS
 
-Frontend truth:
-- Routes, models, adapters, constants and runtime orchestration live under app/
-- Search/detail UI state is JSONModel-driven
-- Attachments are lazy-loaded and opened through metadata-first fetch of Value on demand
+1. Integration-origin confirm-before-edit
+- Current repo truth: integration-origin detail objects are marked by integrationFlag and visualized via existing detail badge/chip.
+- Enter-edit truth after remediation: integration-origin objects require explicit user confirm before permission check, cache validation, lock acquire and edit-mode entry start.
+- Implementation stays in existing usecase/effect-dispatch flow and is not duplicated across controllers.
+- Target status: matched.
 
-Gateway truth:
-- Entity set names come from app/constants/GatewayContractConstants.js
-- Command scenarios use function imports: CreateChecklist, SaveChanges, AutoSave, CopyChecklist, LockAcquire, LockHeartbeat, LockRelease, ReportExport
-- Read scenarios use Checklist* entity sets plus supporting sets such as LockStatusSet and RuntimeSettings
+2. Lock contract and status semantics
+- LockAcquire uses ObjectUuid, SessionGuid, TabSessionId, ForceTakeover.
+- LockHeartbeat uses ObjectUuid, SessionGuid.
+- LockRelease uses ObjectUuid, SessionGuid.
+- Page-leave release remains best-effort only and session-aware.
+- LockStatus metadata is enriched to describe explicit status semantics: owner/session, killed state, takeover hint, message/status fields.
+- Target status: matched.
 
-Backend truth:
-- Read path is split into read service / runtime settings service / DPC_EXT integration seam
-- Save path is split into save service + BOPF mapper
-- DB_KEY/PARENT_KEY remain in metadata/backend contract as Edm.Binary technical fields
+3. Legacy lock release compatibility tail
+- Current repo truth: releaseActiveLock is the neutral active orchestration name.
+- releaseWithTrySave remains only as a thin deprecated compatibility alias and no longer carries architectural meaning.
+- Target status: matched.
 
-Known current gaps documented, not invented:
-- Integration-origin confirm-before-edit is not fully evidenced by the current repo truth
-- ArchiveLink productive implementation is represented by attachment contract shape and compatibility notes, but productive ArchiveLink infrastructure is outside this repo
+4. Attachment metadata-first contract
+- Attachment open/download now prefers DownloadUrl from row metadata or read-back metadata before using Value fallback.
+- Value remains compatibility-only and is explicitly marked deprecated in local metadata.
+- Attachments remain lazy-loaded, outside base detail snapshot/cache, and metadata-first.
+- Target status: matched with compatibility fallback retained.
+
+5. Runtime settings source of truth
+- Canonical runtime source remains masterData>/runtime/* populated from RuntimeSettingsSet('GLOBAL').
+- State model remains only an operational projection surface.
+- Target status: matched.
+
+6. Analytics contract
+- SimpleAnalyticalSet remains the lightweight shared summary source.
+- WorkflowAnalyticsBreakdownSet remains the heavyweight breakdown source.
+- AnalyticsRefreshStateSet remains separate for refresh lifecycle/status.
+- Target backend direction remains precomputed persistence plus background refresh.
+- Target status: matched.
+
+7. Search field semantics
+- Search fields remain grounded in current ChecklistSearchSet metadata and existing builder behavior.
+- Exact mode combines filters with AND.
+- Loose mode combines top-level filters with OR.
+- Default sort remains DateCheck descending.
+- Inline count remains optional in top-limited request mode.
+- Target status: matched.

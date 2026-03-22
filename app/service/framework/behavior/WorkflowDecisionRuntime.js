@@ -28,7 +28,7 @@ sap.ui.define([
     });
     var STATE_MODEL = ModelContracts.MODELS.STATE;
 
-    function releaseWithTrySave(mContext) {
+    function releaseActiveLock(mContext) {
         var oController = mContext && mContext.controller;
         var sRootId = RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, STATE_MODEL));
 
@@ -45,6 +45,11 @@ sap.ui.define([
         });
     }
 
+    // Deprecated compatibility alias. Target lock contract no longer carries TrySave semantics.
+    function releaseWithTrySave(mContext) {
+        return releaseActiveLock(mContext);
+    }
+
     function resolveUnsavedDecision(sAction, mContext, DialogOrchestrator) {
         var oController = mContext && mContext.controller;
         var fnOnSave = mContext && mContext.onSave;
@@ -59,7 +64,7 @@ sap.ui.define([
         }
 
         if (sAction === DialogOrchestrator.actions.NO) {
-            return releaseWithTrySave(mContext).then(function () {
+            return releaseActiveLock(mContext).then(function () {
                 WorkflowBehaviorHelpers.resetDetailWorkflowState(oController);
                 return RESULTS.DISCARD;
             });
@@ -72,6 +77,7 @@ sap.ui.define([
 
     return {
         RESULTS: RESULTS,
+        releaseActiveLock: releaseActiveLock,
         releaseWithTrySave: releaseWithTrySave,
         resolveUnsavedDecision: resolveUnsavedDecision
     };

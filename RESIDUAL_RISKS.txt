@@ -1,11 +1,12 @@
 RESIDUAL RISKS
 
-1. Integration-origin UX
-- Search metadata exposes IntegrationFlag and SourceKey, but the repo does not yet provide a fully evidenced end-to-end integration confirm-before-edit implementation path.
+1. ArchiveLink production infrastructure
+- Attachment contract is now metadata-first in active frontend flow, but productive ArchiveLink content provider / stream infrastructure is outside this repo boundary.
+- Legacy Value remains compatibility-only and must not become the canonical productive binary contract.
 
-2. ArchiveLink
-- Attachment contract is kept ArchiveLink-compatible at interface level, but productive ArchiveLink infrastructure and backend content provider behavior are outside this repo.
+2. Compatibility alias tail
+- releaseWithTrySave still exists as a deprecated compatibility alias for callers during transition, even though active architecture now uses releaseActiveLock.
 
 3. SAPUI5 official framework build
-- Local build is now reproducible through repo-owned fallback scripts.
+- Local build is reproducible through repo-owned fallback scripts.
 - Official UI5 CLI framework build for 1.71.70 still requires SAPUI5 registry access not available in this environment.

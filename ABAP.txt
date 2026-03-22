@@ -1,6 +1,6 @@
 ABAP
 
-Repo-evidenced productive backend classes:
+Repo-evidenced productive backend classes
 - zcl_zodata_dpc_ext
 - zcl_zodata_read_service
 - zcl_zodata_save_service
@@ -9,8 +9,11 @@ Repo-evidenced productive backend classes:
 - zcl_zodata_contract_service
 - zfg_zodata_lock
 
-Current truth:
-- Read and save seams are already split into dedicated services
-- Edit mode literals are centralized in zif_zodata_contract_constants
-- BOPF mapper remains the modify bridge
-- DB_KEY / PARENT_KEY compatible contract remains intact
+Current truth
+- Read and save seams remain split into dedicated services.
+- Edit mode literals are centralized in zif_zodata_contract_constants.
+- BOPF mapper remains the modify bridge.
+- DB_KEY / PARENT_KEY compatible contract remains intact.
+- Gateway MPC lock function-import metadata is aligned to ObjectUuid / SessionGuid, with TabSessionId and optional ForceTakeover on LockAcquire.
+- LockRelease target semantics do not include TrySave.
+- Analytics remains split between lightweight summary, heavy breakdown and separate refresh-state contract.

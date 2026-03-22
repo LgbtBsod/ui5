@@ -24,6 +24,25 @@ sap.ui.define([
         assert.strictEqual(oConfirmEffect.textKey, DetailContracts.LOCK_EXPIRED_TAKEOVER_PROMPT, "expired lock prompt is used");
     });
 
+    QUnit.test("decorateEnterEditResult adds integration confirmation before edit flow", function (assert) {
+        var oResult = DetailWorkflowRuntime.decorateEnterEditResult({
+            ok: false,
+            effects: [],
+            error: {
+                code: DetailContracts.CODES.INTEGRATION_CONFIRM_REQUIRED
+            }
+        }, {
+            rootId: "CHK-2"
+        });
+        var oConfirmEffect = (oResult.effects || []).filter(function (oEffect) {
+            return oEffect.type === "confirm";
+        })[0];
+
+        assert.ok(oConfirmEffect, "integration confirm effect is added");
+        assert.strictEqual(oConfirmEffect.textKey, DetailContracts.INTEGRATION_EDIT_CONFIRM, "integration prompt key is used");
+        assert.strictEqual(oConfirmEffect.payload.confirmedIntegration, true, "confirm payload bypasses second prompt");
+    });
+
     QUnit.test("buildDiscardEffects resets dirty and pending navigation state", function (assert) {
         var aEffects = DetailWorkflowRuntime.buildDiscardEffects({
             get: function (_sModel, sPath) {

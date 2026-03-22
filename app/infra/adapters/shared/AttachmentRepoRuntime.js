@@ -3,10 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ODataKeyNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, GatewayClient, ODataKeyNormalizer, GatewayContractConstants) {
+], function (GatewayODataClient, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, ODataKeyNormalizer, GatewayContractConstants) {
     "use strict";
 
     function normalizeRootKey(sRootId) {
@@ -32,14 +31,10 @@ sap.ui.define([
 
     function deleteAttachment(mArgs) {
         var sAttachmentId = String((mArgs && (mArgs.attachmentId || mArgs.attachmentKey)) || "").trim().toUpperCase();
-        if (!sAttachmentId) {
-            return Promise.resolve({ deleted: true });
-        }
-        return GatewayClient.deletePath(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, sAttachmentId, {
-            name: "AttachmentKey",
-            type: ODataKeyContracts.TYPES.ATTACHMENT_KEY
-        })).then(function () {
-            return { deleted: true };
+        return Promise.resolve({
+            attachmentId: sAttachmentId,
+            deferred: !!sAttachmentId,
+            deleted: !!sAttachmentId
         });
     }
 

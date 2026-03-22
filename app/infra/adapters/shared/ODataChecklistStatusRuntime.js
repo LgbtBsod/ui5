@@ -1,16 +1,23 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (ODataAdapterUtils, ODataKeyContracts, GatewayClient, GatewayContractConstants) {
+], function (GatewayODataClient, GatewayContractConstants) {
     "use strict";
 
     function deleteChecklist(mArgs, mDeps) {
         var sRootId = mDeps.normalizeRootKey(mDeps.rootId(mArgs));
-        return GatewayClient.deletePath(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
-            type: ODataKeyContracts.TYPES.ROOT_KEY
-        })).then(function () {
+        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES, {
+            root: {
+                pcct_uuid: sRootId,
+                edit_mode: "D"
+            },
+            checks: [],
+            barriers: [],
+            participants: [],
+            attachments: [],
+            client_version: 0,
+            SessionGuid: String((mArgs && mArgs.sessionGuid) || "").trim() || null
+        }).then(function () {
             return {
                 deleted: true,
                 rootId: sRootId

@@ -27,7 +27,6 @@ sap.ui.define([
     }
 
     function execute(mInput, mCtx) {
-        var oRepo = mCtx && mCtx.repo;
         var sRootId = UseCaseValue.rootId(mInput);
         var oAttachment = (mInput && mInput.attachment) || null;
         var sAttachmentId = String((mInput && mInput.attachmentId) || "").trim();
@@ -38,16 +37,10 @@ sap.ui.define([
                 buildDeleteEffects(mCtx, sAttachmentId, oAttachment)
             ));
         }
-        return UseCaseValue.callOrDefault(function () {
-            return oRepo && oRepo.deleteAttachment(mInput || {});
-        }, { deleted: true }).then(function (oRes) {
-            return Result.ok(
-                oRes || {},
-                buildDeleteEffects(mCtx, sAttachmentId, oAttachment)
-            );
-        }).catch(function (oError) {
-            return Result.fail(oError, DetailAttachmentStateRuntime.buildAttachmentBusyResetEffects());
-        });
+        return Promise.resolve(Result.ok(
+            { deleted: true, deferred: true },
+            buildDeleteEffects(mCtx, sAttachmentId, oAttachment)
+        ));
     }
 
     return AttachmentDeleteUseCase;

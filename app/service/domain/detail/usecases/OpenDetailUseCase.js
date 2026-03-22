@@ -253,8 +253,7 @@ sap.ui.define([
             var oCurrentSelected = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.ROOT);
             var oCurrentSnapshot = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.BASE);
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
-            var aSnapshotAttachments = Array.isArray(oSnapshot && oSnapshot.attachments) ? oSnapshot.attachments : [];
-            var aEffectiveAttachments = aLoadedAttachments.length ? aLoadedAttachments : aSnapshotAttachments;
+            var aEffectiveAttachments = aLoadedAttachments.length ? aLoadedAttachments : [];
             var oEditState = resolveEditableOpenState(oUiState, sCanonicalRootId);
             var oNormalizedSnapshot = DetailSaveRuntime.normalizeOverallResult(
                 DetailSaveRuntime.preserveBasicFields(oSnapshot, oCurrentSelected, oCurrentSnapshot)
@@ -283,6 +282,7 @@ sap.ui.define([
                 Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, oSelectedSnapshot),
                 Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS, aEffectiveAttachments),
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS, aEffectiveAttachments),
+                Effects.modelPatch(VIEW_MODEL, ViewPathContracts.ATTACHMENTS_LOADED, aLoadedAttachments.length > 0),
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.DETAIL_SKELETON_BUSY, false)
             ]));
         }).catch(function (oError) {

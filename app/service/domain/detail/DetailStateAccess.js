@@ -37,7 +37,11 @@ sap.ui.define([
 
     function readDetailSnapshot(mCtx) {
         var oUiState = uiState(mCtx);
-        return (oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE)) || {};
+        var oSnapshot = (oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE)) || {};
+        var aBaseAttachments = oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE_ATTACHMENTS);
+        return Object.assign({}, oSnapshot, {
+            attachments: Array.isArray(aBaseAttachments) ? aBaseAttachments : []
+        });
     }
 
     function readRequiredFields(mCtx) {

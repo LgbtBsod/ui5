@@ -113,6 +113,7 @@ sap.ui.define([
 
     var mHandlers = {
         extractBackendDetail: extractBackendDetail,
+        releaseActiveLock: WorkflowDecisionRuntime.releaseActiveLock,
         releaseWithTrySave: WorkflowDecisionRuntime.releaseWithTrySave,
         confirmUnsavedAndHandle: confirmUnsavedAndHandle,
         handleBackendError: handleBackendError,

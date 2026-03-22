@@ -4,6 +4,7 @@ sap.ui.define([
     "use strict";
 
     var ACTIONS = {
+        DETAIL_CONFIRM_ENTER_EDIT: "detail.confirmEnterEdit",
         DETAIL_RETRY_GUARDED_SAVE: "detail.retryGuardedSave",
         DETAIL_TAKEOVER_LOCK: "detail.takeoverLock",
         DETAIL_CANCEL_ENTER_EDIT: "detail.cancelEnterEdit"
@@ -43,7 +44,17 @@ sap.ui.define([
         };
     }
 
+    function normalizeEnterEditPayload(vPayload) {
+        var oPayload = RuntimeInput.asObject(vPayload);
+        return {
+            rootId: RuntimeInput.asString(oPayload.rootId || "").trim(),
+            state: RuntimeInput.asBoolean(oPayload.state, true),
+            confirmedIntegration: RuntimeInput.asBoolean(oPayload.confirmedIntegration, false)
+        };
+    }
+
     var ACTION_PAYLOAD_NORMALIZERS = {};
+    ACTION_PAYLOAD_NORMALIZERS[ACTIONS.DETAIL_CONFIRM_ENTER_EDIT] = normalizeEnterEditPayload;
     ACTION_PAYLOAD_NORMALIZERS[ACTIONS.DETAIL_TAKEOVER_LOCK] = normalizeTakeoverPayload;
 
     function normalizeActionPayload(sAction, vPayload) {
