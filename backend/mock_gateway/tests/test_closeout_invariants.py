@@ -199,7 +199,7 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     backend_mode_contracts = _read(APP_ROOT / "service" / "domain" / "shared" / "BackendModeContracts.js")
     boot_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootRuntime.js")
     init_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreInitRuntime.js")
-    feedback_bootstrap_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentFeedbackInitRuntime.js")
+    feedback_bootstrap_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreRuntimeBootstrap.js")
     boot_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootstrapContracts.js")
     feedback_contracts = _read(APP_ROOT / "service" / "framework" / "EffectFeedbackContracts.js")
     listener_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentListenerContracts.js")

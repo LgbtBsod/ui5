@@ -42,6 +42,19 @@ sap.ui.define([], function () {
         };
     }
 
+    function seedInitialState(oStateModel, StatePaths, TimeConfigService) {
+        var mTimerDefaults = TimeConfigService.buildDefaultTimerMap();
+        var mInitState = { "/timers": mTimerDefaults };
+        mInitState[StatePaths.SAVE_IN_FLIGHT] = false;
+        mInitState[StatePaths.PENDING_NAVIGATION_INTENT] = null;
+        mInitState[StatePaths.TAB_CONFLICT_STATE] = { active: false, source: "", at: "" };
+        mInitState["/networkOnline"] = true;
+        mInitState["/networkGraceMode"] = false;
+        mInitState["/networkGraceExpiresAt"] = null;
+        mDeps.ModelStateRuntime.setManyOnModel(oStateModel, mInitState);
+        return mTimerDefaults;
+    }
+
     function bootstrap(oComponent, mDeps, mModels) {
         var oCoreRuntime = mDeps.ComponentCoreInitRuntime.initializeComponentRuntime(oComponent, mDeps, mModels, {
             buildActionValidators: mDeps.ComponentActionRuntime.buildActionValidators,
@@ -140,7 +153,7 @@ sap.ui.define([], function () {
             telemetry: {
                 bundleText: mDeps.bundleText,
                 emitTelemetry: mDeps.emitTelemetry,
-                timerDefaults: mDeps.ComponentStateSeedRuntime.seedInitialState(mModels.stateModel, mDeps.StatePaths, mDeps.TimeConfigService)
+                timerDefaults: seedInitialState(mModels.stateModel, mDeps.StatePaths, mDeps.TimeConfigService)
             }
         };
     }

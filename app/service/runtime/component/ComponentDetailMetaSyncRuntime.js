@@ -2,14 +2,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaContracts, ModelPathContracts, ModelContracts) {
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ModelPathContracts, ModelContracts) {
     "use strict";
 
-    var READINESS_STATUS = ComponentDetailMetaContracts.READINESS_STATUS;
-    var VALIDATION_STATE = ComponentDetailMetaContracts.VALIDATION_STATE;
+    var READINESS_STATUS = WorkflowContracts.READINESS_STATUS;
+    var VALIDATION_STATE = Object.freeze({
+        IDLE: WorkflowContracts.VALIDATION_STATUS.IDLE
+    });
     var PATHS = ComponentListenerContracts.PATHS;
     var VALUES = ComponentListenerContracts.VALUES;
 
