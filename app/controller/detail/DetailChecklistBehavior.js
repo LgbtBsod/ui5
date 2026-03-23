@@ -75,6 +75,20 @@ sap.ui.define([
             DetailViewBehavior.applyLayoutState(this, sLayout, mOptions);
         },
 
+        _syncComputedEditFlags: function () {
+            var oViewModel = this.getView && this.getView().getModel && this.getView().getModel(ModelContracts.MODELS.VIEW);
+            var sMode = WorkflowContracts.normalizeEditMode(
+                ModelStateRuntime.read(this, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ)
+            );
+            var sActiveObjectId = String(ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+            if (!oViewModel || !oViewModel.setProperty) {
+                return;
+            }
+            oViewModel.setProperty("/isEditMode", WorkflowContracts.isEditableMode(sMode));
+            oViewModel.setProperty("/isCreateMode", sMode === WorkflowContracts.EDIT_MODES.CREATE);
+            oViewModel.setProperty("/hasPersistedObject", !!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId));
+        },
+
         _currentRootId: function () {
             return ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "")
                 || ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.SELECTED_ID, "")

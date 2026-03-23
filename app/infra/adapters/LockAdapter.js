@@ -28,8 +28,8 @@ sap.ui.define([
     }
 
     function resolveCode(oResult, bOk, bKilled, bCanTakeover) {
-        if (bKilled) { return DETAIL_CODES.KILLED; }
         if (bOk) { return DETAIL_CODES.OK; }
+        if (bKilled) { return DETAIL_CODES.KILLED; }
         if (bCanTakeover) { return DETAIL_CODES.LOCKED_OWN_SESSION; }
         if (oResult && (oResult.expired || oResult.is_expired || oResult.code === DETAIL_CODES.EXPIRED)) { return DETAIL_CODES.EXPIRED; }
         return DETAIL_CODES.LOCKED;
@@ -70,6 +70,7 @@ sap.ui.define([
         var sTabSessionId = String((mArgs && (mArgs.tabSessionId || mArgs.TabSessionId)) || "").trim();
         var bForceTakeover = !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force));
         return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE, {
+            RootId: sObjectUuid,
             ObjectUuid: sObjectUuid,
             SessionGuid: sSession,
             TabSessionId: sTabSessionId,
@@ -83,8 +84,10 @@ sap.ui.define([
 
     function heartbeat(mArgs) {
         var sToken = normalizeLockToken(mArgs);
+        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
         return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT, {
-            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim(),
+            RootId: sObjectUuid,
+            ObjectUuid: sObjectUuid,
             SessionGuid: sToken
         }).then(function (oResult) {
             return normalizeResult(oResult, sToken);
@@ -105,8 +108,10 @@ sap.ui.define([
 
     function release(mArgs) {
         var sToken = normalizeLockToken(mArgs);
+        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
         return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
-            ObjectUuid: String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim(),
+            RootId: sObjectUuid,
+            ObjectUuid: sObjectUuid,
             SessionGuid: sToken
         }).then(function (oResult) {
             var oNormalized = normalizeResult(oResult, sToken);
@@ -140,6 +145,7 @@ sap.ui.define([
             return false;
         }
         oPayload = {
+            RootId: sObjectUuid,
             ObjectUuid: sObjectUuid,
             SessionGuid: sToken
         };

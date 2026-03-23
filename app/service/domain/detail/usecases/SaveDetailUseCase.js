@@ -25,7 +25,9 @@ sap.ui.define([
 
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL = MODELS.DETAIL;
+    var SHELL_MODEL = MODELS.SHELL;
     var STATE_MODEL = MODELS.STATE;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var DETAIL_CODES = DetailContracts.CODES;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
     var DETAIL_REASONS = DetailContracts.REASONS;
@@ -209,6 +211,14 @@ sap.ui.define([
                                     aEffects = aEffects.concat(DetailPostOpenRuntime.buildEditableDetailEffects(sServerRootId, {
                                         snapshot: oSelectedSnapshot,
                                         autosaveEnabled: true
+                                    }));
+                                    aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_HAS_VALID_LOCK, true));
+                                    aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, true));
+                                    aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_LAST_LOCK_REFRESH_AT, sNow));
+                                    aEffects.push(Effects.modelPatch(SHELL_MODEL, MODEL_PATHS.SHELL_LOCK, {
+                                        ok: true,
+                                        reason: WorkflowContracts.REASONS.OWNED_BY_YOU,
+                                        isKilled: false
                                     }));
                                 } else {
                                     aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));

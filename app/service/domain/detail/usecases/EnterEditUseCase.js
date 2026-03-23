@@ -15,6 +15,8 @@ sap.ui.define([
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var SHELL_MODEL = ModelContracts.MODELS.SHELL;
+    var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var DETAIL_CODES = DetailContracts.CODES;
     var ACCESS_REASON_CODES = DetailContracts.ACCESS_REASON_CODES;
     var DETAIL_MESSAGE_KEYS = DetailContracts;
@@ -144,6 +146,14 @@ function readCode(oLock) {
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.EDIT),
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.EDIT_LOCKED),
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, true),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_HAS_VALID_LOCK, true),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, true),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_LAST_LOCK_REFRESH_AT, new Date().toISOString()),
+                    Effects.modelPatch(SHELL_MODEL, MODEL_PATHS.SHELL_LOCK, {
+                        ok: true,
+                        reason: WorkflowContracts.REASONS.OWNED_BY_YOU,
+                        isKilled: false
+                    }),
                 ]));
             }
             if (sCode === DETAIL_CODES.LOCKED_OWN_SESSION) {

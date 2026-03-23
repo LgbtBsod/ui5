@@ -110,7 +110,12 @@ sap.ui.define([
         toggleEdit: function (oController, oEvent, mHooks) {
             return Promise.resolve(mHooks.enterEdit({
                 state: !!(oEvent && typeof oEvent.getParameter === TYPE_FUNCTION && oEvent.getParameter("state"))
-            })).finally(function () {
+            })).then(function (oResult) {
+                if (typeof oController._syncComputedEditFlags === TYPE_FUNCTION) {
+                    oController._syncComputedEditFlags();
+                }
+                return oResult;
+            }).finally(function () {
                 if (typeof oController._scheduleAttachmentDropZoneBind === TYPE_FUNCTION) {
                     oController._scheduleAttachmentDropZoneBind();
                 }

@@ -4,15 +4,20 @@ sap.ui.define([
 ], function (CtxRuntimeFactory, UiControlIds) {
     "use strict";
 
+    function resolveComponentCtx(oController) {
+        var oOwnerComponent = oController && typeof oController.getOwnerComponent === "function" && oController.getOwnerComponent();
+        return (oOwnerComponent && oOwnerComponent._ctx) || {};
+    }
+
     function buildDefaultCtx(oController) {
-        return CtxRuntimeFactory.build(oController, {});
+        return Object.assign({}, resolveComponentCtx(oController), CtxRuntimeFactory.build(oController, {}));
     }
 
     function buildSearchCtx(oController) {
-        return CtxRuntimeFactory.build(oController, {
+        return Object.assign({}, resolveComponentCtx(oController), CtxRuntimeFactory.build(oController, {
             smartFilterBar: oController && oController.byId && oController.byId(UiControlIds.SEARCH.SMART_FILTER_BAR),
             smartTable: oController && oController.byId && oController.byId(UiControlIds.SEARCH.SMART_TABLE)
-        });
+        }));
     }
 
     return Object.freeze({
