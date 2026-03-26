@@ -30,3 +30,15 @@
 - Search and dialog modules still contain internal UI5 selector debt and remain on the remediation backlog.
 - No new `.sap*` selector allowances were introduced in this pass.
 - Contract cleanup was prioritized ahead of visual refactoring because lock/copy/attachment drift is a harder production blocker.
+## 2026-03-27 Re-verified Status
+- `node scripts/dom-hack-gate.js` still fails. Main remaining offenders:
+  - detail: `AttachmentDropZoneRuntime.js`, `DetailControllerRuntime.js`, `DetailInfoCardFactory.js`
+  - search: `SearchViewportRuntime.js`, `SearchSelectionRuntime.js`, `SearchReturnRediscoveryRuntime.js`, `SearchStartupRuntime.js`, `SearchViewStateRuntime.js`
+  - shell: `ShellLayoutRuntime.js`, `ShellViewportRuntime.js`
+- `node scripts/sap-internal-css-gate.js` still fails at scale. Highest-debt modules remain:
+  - `app/styles/modules/23_dialogs.css`
+  - `app/styles/modules/40_page_search.css`
+  - `app/styles/modules/41_page_detail.css`
+  - `app/styles/modules/controls/30_action_and_shell_buttons.css`
+  - `app/styles/modules/controls/32_switch_parity.css`
+  - `app/styles/modules/controls/34_action_priority_and_a11y.css`

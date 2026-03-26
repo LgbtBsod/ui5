@@ -15,7 +15,7 @@ sap.ui.define([
             var oStateModel = ctx && ctx.stateModel;
 
             if (!ctx || !ctx.dict || typeof ctx.dict.ensureLoaded !== "function") {
-                return Promise.resolve(Result.fail({ message: "DictPort missing: ctx.dict.ensureLoaded", code: "DICT_PORT_MISSING" }, []));
+                return Promise.resolve(Result.fail({ code: "DICT_PORT_MISSING" }, []));
             }
 
             if (oStateModel && oStateModel.setProperty) {

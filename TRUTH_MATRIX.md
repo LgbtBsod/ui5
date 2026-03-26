@@ -56,3 +56,10 @@
 | Attachment persisted read | `DownloadUrl` + `DocumentHandle` | None | Canonical |
 | Attachment upload transport | transient `ContentBase64` boundary only | Mock/backend create boundary | Residual risk |
 | Binary OData literal formatting | explicit `binary'HEX'` | None | Canonical frontend adapter boundary |
+## 2026-03-27 Canonical Truth Update
+- Frontend canonical lock key: `dbKey`
+- Shell current active root owner: `shell>/currentChecklistDbKey`
+- Root entity canonical identity: `DB_KEY`
+- Child relation canonical owner: `PARENT_KEY`
+- Persisted attachment read/open contract: `DownloadUrl` + `DocumentHandle`
+- Attachment upload compatibility boundary: `AttachmentRepoRuntime` + mock gateway only

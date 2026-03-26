@@ -68,6 +68,10 @@ sap.ui.define([
         });
     }
 
+    function hasAnimationFrameSupport() {
+        return typeof window !== JsRuntime.TYPEOF.UNDEFINED && typeof window.requestAnimationFrame === TYPE_FUNCTION;
+    }
+
     return {
         clearTimer: clearTimer,
         restartTimer: restartTimer,
@@ -76,6 +80,7 @@ sap.ui.define([
         restartFrame: restartFrame,
         nextFrame: nextFrame,
         nextDoubleFrame: nextDoubleFrame,
+        hasAnimationFrameSupport: hasAnimationFrameSupport,
         wait: wait
     };
 });

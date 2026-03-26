@@ -15,10 +15,10 @@ sap.ui.define([
         };
     }
 
-function execute(mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var oSmartControls = mCtx && mCtx.smartControls;
         if (!oSmartControls || typeof oSmartControls.rebindSearchTable !== "function") {
-            return Promise.resolve(Result.fail({ message: "SmartControls unavailable", code: "PORT_UNAVAILABLE" }, [Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_SEARCH_TABLE, false)]));
+            return Promise.resolve(Result.fail({ code: "PORT_UNAVAILABLE" }, [Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_SEARCH_TABLE, false)]));
         }
 
         if (typeof oSmartControls.isReady === "function" && !oSmartControls.isReady()) {

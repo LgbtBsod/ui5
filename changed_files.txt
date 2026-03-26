@@ -81,3 +81,47 @@ backend/mock_gateway/tests/test_lock_gateway_api_contract.py
 backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap
 scripts/lock-contract-naming-gate.js
 scripts/key-model-gate.js
+2026-03-27 final production-readiness delta:
+app/controller/Search.controller.js
+app/service/domain/detail/usecases/AutosaveDetailUseCase.js
+app/service/domain/detail/usecases/LoadAttachmentsUseCase.js
+app/service/domain/detail/usecases/RowOpsUseCase.js
+app/service/domain/detail/usecases/SaveDetailUseCase.js
+app/service/domain/detail/usecases/ValidateChecklistUseCase.js
+app/service/domain/search/usecases/ExecuteSearchUseCase.js
+app/service/domain/search/usecases/ExportSearchUseCase.js
+app/service/domain/search/usecases/RebindSearchUseCase.js
+app/service/domain/shared/usecases/EnsureDictLoadedUseCase.js
+package.json
+scripts/raw-ui-text-gate.js
+scripts/wrapper-sprawl-gate.js
+FINAL_COMPLIANCE_REPORT.md
+RESIDUAL_RISKS.txt
+2026-03-27 follow-up delta:
+app/controller/App.controller.js
+app/service/features/detail/runtime/DetailLayoutRuntime.js
+app/service/features/shell/runtime/AppShellDomRuntime.js
+app/service/framework/SchedulingRuntime.js
+scripts/dom-hack-gate.js
+FINAL_COMPLIANCE_REPORT.md
+RESIDUAL_RISKS.txt
+2026-03-27 canonical naming and attachment boundary delta:
+app/constants/ModelConstants.js
+app/model/ModelFactory.js
+app/service/features/shell/runtime/ShellStateRuntime.js
+app/infra/adapters/LockAdapter.js
+app/controller/base/ModelAccessMixin.js
+app/service/runtime/component/ComponentPollingRuntime.js
+app/service/domain/lock/usecases/TakeoverLockUseCase.js
+app/service/framework/behavior/WorkflowDecisionRuntime.js
+app/infra/adapters/shared/AttachmentRepoRuntime.js
+app/service/domain/detail/DetailAttachmentSaveRuntime.js
+app/service/domain/detail/DetailAttachmentDeltaRuntime.js
+app/service/domain/detail/usecases/LoadAttachmentsUseCase.js
+scripts/lock-contract-naming-gate.js
+FINAL_COMPLIANCE_REPORT.md
+RESIDUAL_RISKS.txt
+TRUTH_MATRIX.md
+OWNER_MATRIX.md
+PROJECT_STRUCTURE_MAP.md
+CSS_DOM_VIOLATIONS.md

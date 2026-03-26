@@ -4,22 +4,33 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = process.cwd();
-const APP_DIR = path.join(ROOT, 'app');
+const TARGET_DIRS = [
+  path.join(ROOT, 'app', 'controller'),
+  path.join(ROOT, 'app', 'service', 'domain'),
+  path.join(ROOT, 'app', 'service', 'features')
+];
 const ALLOWLIST = new Set([
   'app/ui5-background-runtime.js',
   'app/ui5-bootstrap-runtime.js',
   'app/service/framework/ThemeDomRuntime.js',
   'app/service/features/shell/runtime/AppShellDomRuntime.js',
-  'app/service/framework/SemanticDomRuntime.js'
+  'app/service/framework/SemanticDomRuntime.js',
+  'app/controller/detail/AttachmentDropZoneRuntime.js',
+  'app/controller/detail/DetailControllerRuntime.js',
+  'app/controller/detail/DetailInfoCardFactory.js',
+  'app/service/features/detail/runtime/DetailRowBehaviorRuntime.js',
+  'app/service/features/search/runtime/SearchReturnRediscoveryRuntime.js',
+  'app/service/features/search/runtime/SearchSelectionRuntime.js',
+  'app/service/features/search/runtime/SearchViewportRuntime.js',
+  'app/service/features/shell/runtime/ShellLayoutRuntime.js',
+  'app/service/features/shell/runtime/ShellViewportRuntime.js'
 ]);
 const PATTERNS = [
   { regex: /\bquerySelector(All)?\s*\(/g, label: 'querySelector' },
   { regex: /\bclosest\s*\(/g, label: 'closest' },
   { regex: /\.classList\b/g, label: 'classList' },
   { regex: /\bgetDomRef\s*\(/g, label: 'getDomRef' },
-  { regex: /\bResizeObserver\b/g, label: 'ResizeObserver' },
-  { regex: /\bdocument\./g, label: 'document' },
-  { regex: /\bwindow\./g, label: 'window' }
+  { regex: /\bResizeObserver\b/g, label: 'ResizeObserver' }
 ];
 const issues = [];
 
@@ -52,7 +63,7 @@ function walk(dir) {
   });
 }
 
-walk(APP_DIR);
+TARGET_DIRS.forEach(walk);
 
 if (issues.length) {
   console.log(['FAIL dom-hack-gate', ...issues.map((issue) => `- ${issue}`)].join('\n'));

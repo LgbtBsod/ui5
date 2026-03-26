@@ -1,6 +1,6 @@
 html.chkAppRoot,
 body.chkAppRoot,
-.chkAppRoot.sapUiBody {
+.chkAppRoot {
   background: var(--bg-base);
 }
 

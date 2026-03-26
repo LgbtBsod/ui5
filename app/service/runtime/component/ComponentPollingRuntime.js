@@ -26,10 +26,10 @@ sap.ui.define([
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock[sLockMethod] !== "function") {
                     return Promise.resolve({ success: false, is_killed: false, skipped: true, missing: "ctx.lock." + sLockMethod });
                 }
-                var sRootId = ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "");
+                var sDbKey = ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "");
                 var sSessionGuid = ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "");
-                return oComponent._ctx.lock[sLockMethod]({ rootId: sRootId, sessionGuid: sSessionGuid }).then(function (oRes) {
-                    return Object.assign({ rootId: sRootId, sessionGuid: sSessionGuid }, oRes || {});
+                return oComponent._ctx.lock[sLockMethod]({ dbKey: sDbKey, sessionGuid: sSessionGuid }).then(function (oRes) {
+                    return Object.assign({ dbKey: sDbKey, sessionGuid: sSessionGuid }, oRes || {});
                 });
             },
             eventName: sEventName,

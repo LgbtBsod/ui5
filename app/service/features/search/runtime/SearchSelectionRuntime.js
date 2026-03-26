@@ -196,6 +196,11 @@ sap.ui.define([
         if (typeof oInnerTable.setAutoPopinMode === TYPE_FUNCTION) {
             oInnerTable.setAutoPopinMode(false);
         }
+        if (typeof oInnerTable.addStyleClass === TYPE_FUNCTION) {
+            oInnerTable.addStyleClass("searchResultsInnerTable");
+            oInnerTable.toggleStyleClass("searchResultsInnerTableCompact", bCompactViewport);
+            oInnerTable.toggleStyleClass("searchResultsInnerTableRegular", !bCompactViewport);
+        }
         aColumns = oInnerTable.getColumns ? (oInnerTable.getColumns() || []) : [];
         aColumns.forEach(function (oColumn) {
             var sColumnKey = resolveSearchColumnKey(oColumn);

@@ -18,10 +18,10 @@ sap.ui.define([
         };
     }
 
-function execute(mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var oSmartControls = mCtx && mCtx.smartControls;
         if (!oSmartControls || typeof oSmartControls.rebindSearchTable !== "function") {
-            return Promise.resolve(Result.fail({ message: "Smart controls unavailable", code: "SMART_CONTROLS_UNAVAILABLE" }));
+            return Promise.resolve(Result.fail({ code: "SMART_CONTROLS_UNAVAILABLE" }));
         }
 
         var sIntent = (mInput && mInput.intent) || "search";

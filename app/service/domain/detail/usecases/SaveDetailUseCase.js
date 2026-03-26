@@ -101,13 +101,13 @@ sap.ui.define([
         var aCurrentAttachments = DetailStateAccess.readWorkingAttachments(mCtx);
 
         if (!oRepo) {
-            return Promise.resolve(Result.fail({ message: "Save handler unavailable", code: DETAIL_CODES.SAVE_HANDLER_MISSING }));
+            return Promise.resolve(Result.fail({ code: DETAIL_CODES.SAVE_HANDLER_MISSING, messageKey: DETAIL_VIEW_KEYS.GENERIC_OPERATION_FAILED }));
         }
         if (!bCreate && typeof oRepo.saveChecklist !== "function") {
-            return Promise.resolve(Result.fail({ message: "Save handler unavailable", code: DETAIL_CODES.SAVE_HANDLER_MISSING }));
+            return Promise.resolve(Result.fail({ code: DETAIL_CODES.SAVE_HANDLER_MISSING, messageKey: DETAIL_VIEW_KEYS.GENERIC_OPERATION_FAILED }));
         }
         if (bCreate && typeof oRepo.createChecklist !== "function") {
-            return Promise.resolve(Result.fail({ message: "Create handler unavailable", code: DETAIL_CODES.CREATE_HANDLER_MISSING }));
+            return Promise.resolve(Result.fail({ code: DETAIL_CODES.CREATE_HANDLER_MISSING, messageKey: DETAIL_VIEW_KEYS.GENERIC_OPERATION_FAILED }));
         }
         if (!bCreate && !oDelta) {
             return Promise.resolve(Result.ok({ saved: false, skipped: true, reason: DETAIL_FLOW_CODES.NO_CHANGES }, [
@@ -120,7 +120,7 @@ sap.ui.define([
             }))));
         }
         if (!bCreate && (!oDelta || !oDelta.client_version) && !iClientVersion) {
-            return Promise.resolve(Result.fail({ message: "Detail snapshot is stale; reload required", code: DETAIL_CODES.MISSING_CLIENT_VERSION }, [
+            return Promise.resolve(Result.fail({ code: DETAIL_CODES.MISSING_CLIENT_VERSION, messageKey: DETAIL_VIEW_KEYS.PERSISTENCE_CONFLICT }, [
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.FAILED)
             ]));
@@ -129,7 +129,7 @@ sap.ui.define([
             oDelta = Object.assign({}, oDelta, { client_version: iClientVersion });
         }
         if (!bCreate && (!sSessionGuid || sLockState !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED)) {
-            return Promise.resolve(Result.fail({ message: "Active lock is required before save", code: DETAIL_CODES.LOCK_REQUIRED }, [
+            return Promise.resolve(Result.fail({ code: DETAIL_CODES.LOCK_REQUIRED, messageKey: DETAIL_VIEW_KEYS.PERSISTENCE_LOCK_MISSING }, [
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.FAILED)
             ]));

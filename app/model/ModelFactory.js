@@ -64,7 +64,7 @@ sap.ui.define([
             isTabletViewport: false,
             viewportWidth: 0,
             busy: false,
-            currentRootKey: "",
+            currentChecklistDbKey: "",
             sessionGuid: "",
             lock: { ok: false, reason: WorkflowContracts.REASONS.FREE, isKilled: false },
             timers: createTimers(),

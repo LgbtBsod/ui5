@@ -56,9 +56,9 @@ sap.ui.define([
         if (!sRootId || !oRepo || typeof oRepo.loadAttachments !== JsRuntime.TYPEOF.FUNCTION || !bForceReload) {
             return Promise.resolve(Array.isArray(aCurrentAttachments) ? aCurrentAttachments : []);
         }
-        return oRepo.loadAttachments({ rootId: sRootId }).then(function (oLoaded) {
-            return (oLoaded && oLoaded.attachments) || [];
-        }).catch(function () {
+            return oRepo.loadAttachments({ dbKey: sRootId }).then(function (oLoaded) {
+                return (oLoaded && oLoaded.attachments) || [];
+            }).catch(function () {
             return Array.isArray(aCurrentAttachments) ? aCurrentAttachments : [];
         });
     }

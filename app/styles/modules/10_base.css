@@ -8,7 +8,6 @@
 
 html.chkAppRoot,
 body.chkAppRoot,
-.chkAppRoot.sapUiBody,
 #ui5_container.chkAppRoot {
   height: 100%;
 }

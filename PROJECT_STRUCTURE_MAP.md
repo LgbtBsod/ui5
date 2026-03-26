@@ -54,3 +54,7 @@
 - `scripts/lock-contract-naming-gate.js`: release gate for canonical `DB_KEY` lock/copy contract.
 - `scripts/binary-transport-gate.js`: release gate for binary-safe canonical entity paths and filters.
 - `backend/mock_gateway/tests/test_lock_gateway_api_contract.py`: backend contract regression coverage for lock/copy naming.
+## 2026-03-27 Structure Delta
+- `app/infra/adapters/LockAdapter.js` is the canonical frontend lock boundary and now owns `dbKey` semantics for acquire/heartbeat/status/release.
+- `app/service/features/shell/runtime/ShellStateRuntime.js` is the shell owner for active checklist key projection into UI state.
+- `app/infra/adapters/shared/AttachmentRepoRuntime.js` remains the only frontend attachment upload/read boundary allowed to speak compatibility upload transport.

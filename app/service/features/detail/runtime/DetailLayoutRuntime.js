@@ -10,7 +10,6 @@ sap.ui.define([
     "use strict";
 
     var SHELL_MODEL = ModelContracts.MODELS.SHELL;
-    var DETAIL_MODEL = ModelContracts.MODELS.DETAIL;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
 
     function resolveActiveDbKey(oController) {

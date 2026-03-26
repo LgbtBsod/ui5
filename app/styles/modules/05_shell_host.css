@@ -6,14 +6,11 @@ body,
 }
 
 html.chkAppRoot,
-body.chkAppRoot {
+body.chkAppRoot,
+.chkAppRoot {
     background:
         linear-gradient(180deg, #f3ead0 0%, #eddcf0 48%, #d8dbe6 100%);
     overflow: hidden;
-}
-
-body.sapUiBody {
-    background: transparent;
 }
 
 #ui5_container.chkAppRoot {

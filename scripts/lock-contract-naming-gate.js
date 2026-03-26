@@ -9,6 +9,9 @@ const issues = [];
 const metadata = read("app/localService/metadata.xml");
 const lockAdapter = read("app/infra/adapters/LockAdapter.js");
 const dpc = read("backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap");
+const shellState = read("app/service/features/shell/runtime/ShellStateRuntime.js");
+const modelConstants = read("app/constants/ModelConstants.js");
+const modelFactory = read("app/model/ModelFactory.js");
 
 if (!/FunctionImport Name="LockAcquire"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.Binary"/.test(metadata)) {
   issues.push("app/localService/metadata.xml: LockAcquire must expose DB_KEY as canonical Edm.Binary lock key");
@@ -28,6 +31,12 @@ if (!/FunctionImport Name="CopyChecklist"[\s\S]*?<Parameter Name="DB_KEY" Type="
 
 if (/ObjectUuid/.test(lockAdapter)) {
   issues.push("app/infra/adapters/LockAdapter.js: frontend canonical lock surface must not use ObjectUuid");
+}
+if (/rootId/.test(lockAdapter) && !/dbKey \|\| mArgs\.DB_KEY \|\| mArgs\.rootId/.test(lockAdapter)) {
+  issues.push("app/infra/adapters/LockAdapter.js: lock adapter must expose dbKey as canonical frontend key and keep rootId only as compatibility fallback");
+}
+if (/currentRootKey/.test(shellState) || /currentRootKey/.test(modelFactory) || /SHELL_CURRENT_ROOT_KEY/.test(modelConstants)) {
+  issues.push("shell lock state still uses currentRootKey naming instead of canonical currentChecklistDbKey");
 }
 
 const mutationRuntime = read("app/infra/adapters/shared/ODataChecklistMutationRuntime.js");

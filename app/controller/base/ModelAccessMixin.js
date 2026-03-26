@@ -47,7 +47,7 @@ sap.ui.define([
         },
         releaseLock: function (sObjectId, sSessionId) {
             if (!sObjectId || !sSessionId) { return Promise.resolve(); }
-            return LockAdapter.release({ rootId: sObjectId, sessionGuid: sSessionId }).catch(function () { return null; });
+            return LockAdapter.release({ dbKey: sObjectId, sessionGuid: sSessionId }).catch(function () { return null; });
         },
         setLockPending: function (oStateModel, bPending) { if (oStateModel) { oStateModel.setProperty("/lockOperationPending", !!bPending); } },
         deleteRowFromEvent: function (oEvent, sModelName, sCollectionPath) {

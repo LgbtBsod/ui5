@@ -17,7 +17,7 @@ sap.ui.define([], function () {
             SHELL_ANIMATION_ENABLED: "/animationEnabled",
             SHELL_BUSY: "/busy",
             SHELL_COMPACT_DENSITY: "/compactDensity",
-            SHELL_CURRENT_ROOT_KEY: "/currentRootKey",
+            SHELL_CURRENT_DB_KEY: "/currentChecklistDbKey",
             SHELL_INVERTED_BLOCK_SCHEME: "/invertedBlockScheme",
             SHELL_IS_PHONE_VIEWPORT: "/isPhoneViewport",
             SHELL_IS_TABLET_VIEWPORT: "/isTabletViewport",

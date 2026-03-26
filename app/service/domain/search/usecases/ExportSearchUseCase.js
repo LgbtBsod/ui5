@@ -218,7 +218,7 @@ function pick(v, fallback) {
             var aSelectedIds = ChecklistIdentity.normalizeChecklistIds(mInput && mInput.selectedRowIds);
             var sMode = aSelectedIds.length ? "selected" : "all";
             if (!aNormalized.length) {
-                return Result.fail({ message: "No export data", code: "NO_EXPORT_DATA" }, [Effects.toast("nothingToExport", "warning")]);
+                return Result.fail({ code: "NO_EXPORT_DATA" }, [Effects.toast("nothingToExport", "warning")]);
             }
             return SpreadsheetExport.download("checklist_" + sEntity, aNormalized).then(function () {
                 emitExportTelemetry(mCtx, sMode === "selected" ? "export.selected.completed" : "export.all.completed", {
@@ -238,7 +238,7 @@ function pick(v, fallback) {
                 entity: sEntity,
                 code: sMessageCode
             });
-            return Result.fail({ message: sMessageCode, code: sMessageCode }, [Effects.toast("exportFailed", "error")]);
+            return Result.fail({ code: sMessageCode }, [Effects.toast("exportFailed", "error")]);
         });
     }
 

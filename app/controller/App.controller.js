@@ -80,7 +80,6 @@ sap.ui.define([
     var getText = ControllerTextRuntime.getText;
     var _RESIZE_END_DELAY_MS = 520;
     var _RESIZE_SAFETY_DELAY_MS = 1800;
-    var _RESIZE_CLASS = "chkResizing";
     var SHELL_OVERLAY_FRAGMENTS = {
         help: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ShellHelpPopover",
         settings: "PRODUCTION_CONTROL_CHECKLIST.views.fragment.ShellSettingsPopover",
@@ -158,24 +157,6 @@ sap.ui.define([
         });
     }
 
-    function getDomRuntimeState(oController) {
-        if (!oController) {
-            return {
-                resizeRafId: 0,
-                resizeEndTimer: 0,
-                resizeSafetyTimer: 0,
-                shellRefreshRafId: 0
-            };
-        }
-        oController._oAppDomRuntimeState = oController._oAppDomRuntimeState || {
-            resizeRafId: 0,
-            resizeEndTimer: 0,
-            resizeSafetyTimer: 0,
-            shellRefreshRafId: 0
-        };
-        return oController._oAppDomRuntimeState;
-    }
-
     function getBackgroundRuntime() {
         return ShellGlobalsRuntime.getBackgroundRuntime();
     }
@@ -189,62 +170,9 @@ sap.ui.define([
         };
     }
 
-    function getAppContainerDom(oController) {
-        var oRoot = oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
-        if (oRoot && oRoot.closest) {
-            return oRoot.closest(".chkAppRoot") || oRoot;
-        }
-        return oRoot || null;
-    }
-
-    function getAppDomTargets(oController) {
-        var oNodes = getGlobalDomNodes();
-        var oContainer = getAppContainerDom(oController);
-        var oAppDom = oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
-        return [oNodes.root, oNodes.body, oContainer, oAppDom];
-    }
-
     function syncSemanticAttributes(oController) {
-        var oMainHost = oController && oController.byId && oController.byId("mainContentHost");
-        var oFeedbackRegion = oController && oController.byId && oController.byId("feedbackCorrelationRegion");
-        SemanticDomRuntime.syncAttributes(oMainHost, { role: "main" });
-        SemanticDomRuntime.syncAttributes(oFeedbackRegion, { role: "region" });
-    }
-
-    function scheduleInvalidate(oController, oLayout) {
-        var oRuntimeState = getDomRuntimeState(oController);
-        oRuntimeState.resizeRafId = SchedulingRuntime.requestFrameOnce(oRuntimeState.resizeRafId, function () {
-            oRuntimeState.resizeRafId = 0;
-            if (oLayout && typeof oLayout.invalidate === "function") {
-                oLayout.invalidate();
-            }
-        });
-    }
-
-    function beginResizing(oController) {
-        var oRuntimeState = getDomRuntimeState(oController);
-        var oDoc = getGlobalDomNodes().root;
-        ThemeDomRuntime.addClass([oDoc], _RESIZE_CLASS);
-        oRuntimeState.resizeEndTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeEndTimer);
-        oRuntimeState.resizeSafetyTimer = SchedulingRuntime.restartTimer(oRuntimeState.resizeSafetyTimer, function () {
-            settleResizing(oController);
-        }, _RESIZE_SAFETY_DELAY_MS);
-    }
-
-    function settleResizing(oController) {
-        var oRuntimeState = getDomRuntimeState(oController);
-        var oDoc = getGlobalDomNodes().root;
-        oRuntimeState.resizeEndTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeEndTimer);
-        oRuntimeState.resizeSafetyTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeSafetyTimer);
-        ThemeDomRuntime.removeClass([oDoc], _RESIZE_CLASS);
-        AppShellDomRuntime.notifyBackgroundResize(getBackgroundRuntime(), "end");
-    }
-
-    function scheduleResizeEnd(oController) {
-        var oRuntimeState = getDomRuntimeState(oController);
-        oRuntimeState.resizeEndTimer = SchedulingRuntime.restartTimer(oRuntimeState.resizeEndTimer, function () {
-            settleResizing(oController);
-        }, _RESIZE_END_DELAY_MS);
+        SemanticDomRuntime.syncControllerTarget(oController, "mainContentHost", { role: "main" });
+        SemanticDomRuntime.syncControllerTarget(oController, "feedbackCorrelationRegion", { role: "region" });
     }
 
     function initializeAppShell(oController) {
@@ -306,7 +234,7 @@ sap.ui.define([
         onAfterRendering: function () {
             var oOwner = typeof this.getOwnerComponent === TYPE_FUNCTION && this.getOwnerComponent();
             if (oOwner && typeof oOwner.attachInteractionFxToApp === TYPE_FUNCTION) {
-                oOwner.attachInteractionFxToApp(this.getView().getDomRef());
+                oOwner.attachInteractionFxToApp(AppShellDomRuntime.resolveViewDom(this));
             }
             this._syncStaticAreaScope();
             this._syncSemanticAttributes();
@@ -537,10 +465,14 @@ sap.ui.define([
 
         _syncLayoutViewportGeometry: function () {
             var oLayout = this.byId("mainFcl");
-            beginResizing(this);
+            AppShellDomRuntime.beginResizeCycle(this, _RESIZE_END_DELAY_MS, _RESIZE_SAFETY_DELAY_MS, function () {
+                AppShellDomRuntime.notifyBackgroundResize(getBackgroundRuntime(), "end");
+            });
             AppShellDomRuntime.notifyBackgroundResize(getBackgroundRuntime(), "start");
-            scheduleInvalidate(this, oLayout);
-            scheduleResizeEnd(this);
+            AppShellDomRuntime.scheduleInvalidate(this, oLayout);
+            AppShellDomRuntime.scheduleResizeEnd(this, _RESIZE_END_DELAY_MS, _RESIZE_SAFETY_DELAY_MS, function () {
+                AppShellDomRuntime.notifyBackgroundResize(getBackgroundRuntime(), "end");
+            });
         },
 
         _syncStaticAreaScope: function () {
@@ -554,12 +486,12 @@ sap.ui.define([
 
         _applyCompactDensityClass: function () {
             var bCompact = !!ModelStateRuntime.read(this, SHELL_MODEL, MODEL_PATHS.SHELL_COMPACT_DENSITY, false);
-            ThemeDomRuntime.toggleClass(getAppDomTargets(this), "appDensityCompact", bCompact);
+            ThemeDomRuntime.toggleClass(AppShellDomRuntime.getAppDomTargets(this), "appDensityCompact", bCompact);
         },
 
         _applyInvertedBlockSchemeClass: function () {
             var bEnabled = !!ModelStateRuntime.read(this, SHELL_MODEL, MODEL_PATHS.SHELL_INVERTED_BLOCK_SCHEME, false);
-            ThemeDomRuntime.toggleClass(getAppDomTargets(this), "appInvertedBlockScheme", bEnabled);
+            ThemeDomRuntime.toggleClass(AppShellDomRuntime.getAppDomTargets(this), "appInvertedBlockScheme", bEnabled);
         },
 
         _syncShellMetrics: function () {
@@ -571,7 +503,7 @@ sap.ui.define([
         },
 
         _scheduleShellLayoutRefresh: function () {
-            var oRuntimeState = getDomRuntimeState(this);
+            var oRuntimeState = AppShellDomRuntime.ensureDomRuntimeState(this);
             var that = this;
             oRuntimeState.shellRefreshRafId = SchedulingRuntime.restartFrame(oRuntimeState.shellRefreshRafId, function () {
                 oRuntimeState.shellRefreshRafId = 0;
@@ -584,13 +516,8 @@ sap.ui.define([
         },
 
         _teardownAppDomRuntime: function () {
-            var oRuntimeState = getDomRuntimeState(this);
-            oRuntimeState.resizeRafId = SchedulingRuntime.clearFrame(oRuntimeState.resizeRafId);
-            oRuntimeState.resizeEndTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeEndTimer);
-            oRuntimeState.resizeSafetyTimer = SchedulingRuntime.clearTimer(oRuntimeState.resizeSafetyTimer);
-            oRuntimeState.shellRefreshRafId = SchedulingRuntime.clearFrame(oRuntimeState.shellRefreshRafId);
-            settleResizing(this);
-            this._oAppDomRuntimeState = null;
+            AppShellDomRuntime.teardownResizeCycle(this);
+            AppShellDomRuntime.notifyBackgroundResize(getBackgroundRuntime(), "end");
         },
 
         _bindShellPaneRouting: function () {
@@ -646,7 +573,7 @@ sap.ui.define([
             ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SHELL_READY, {
                 route: String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.CURRENT_ROUTE_NAME, "") || "").trim()
             });
-            if (typeof window !== JsRuntime.TYPEOF.UNDEFINED && typeof window.requestAnimationFrame === TYPE_FUNCTION) {
+            if (SchedulingRuntime.hasAnimationFrameSupport()) {
                 SchedulingRuntime.nextFrame(function () {
                     if (!this._bShellStatePostStartupSyncScheduled && typeof this._syncShellState === TYPE_FUNCTION) {
                         this._bShellStatePostStartupSyncScheduled = true;

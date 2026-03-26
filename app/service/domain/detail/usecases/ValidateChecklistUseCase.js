@@ -28,7 +28,6 @@ function execute(_mInput, mCtx) {
         });
         if (oValidation.unavailable) {
             return Promise.resolve(Result.fail({
-                message: "Validation rules are not loaded yet",
                 code: "REQUIRED_FIELDS_UNAVAILABLE"
             }, [
                 Effects.modelPatch(VIEW_MODEL, ViewPathContracts.VALIDATION_SHOWN, false),

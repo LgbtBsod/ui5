@@ -113,19 +113,19 @@ function execute(mInput, mCtx) {
             return Promise.resolve(Result.ok({ skipped: true, reason: DETAIL_REASONS.AUTOSAVE_GUARD }, []));
         }
         if (!sRootId || !oRepo || typeof oRepo.autosaveChecklist !== "function") {
-            return Promise.resolve(Result.fail({ message: "Autosave unavailable", code: DETAIL_CODES.AUTOSAVE_UNAVAILABLE }));
+            return Promise.resolve(Result.fail({ code: DETAIL_CODES.AUTOSAVE_UNAVAILABLE, messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_TECHNICAL_ERROR }));
         }
 
         oDelta = resolveDelta(mInput, mCtx);
         if (!oDelta) {
-            return Promise.resolve(Result.fail({ message: "Autosave delta is empty", code: DETAIL_CODES.AUTOSAVE_EMPTY_DELTA }));
+            return Promise.resolve(Result.fail({ code: DETAIL_CODES.AUTOSAVE_EMPTY_DELTA, messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_NO_CHANGES }));
         }
         if (!oDelta.client_version) {
             oDelta = Object.assign({}, oDelta, { client_version: resolveClientVersion(oDelta, mCtx) });
         }
 
         if (!sSessionGuid) {
-            return Promise.resolve(Result.fail({ message: "Autosave requires active session lock", code: DETAIL_CODES.LOCK_REQUIRED }, [
+            return Promise.resolve(Result.fail({ code: DETAIL_CODES.LOCK_REQUIRED, messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_LOCK_MISSING }, [
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.FAILED)
             ]));
         }

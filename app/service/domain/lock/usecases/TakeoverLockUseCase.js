@@ -21,15 +21,15 @@ sap.ui.define([
 function execute(mInput, mCtx) {
         var oLock = mCtx && mCtx.lock;
         var oUiState = mCtx && mCtx.uiState;
-        var sRootId = (mInput && mInput.rootId) || (oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID));
+        var sDbKey = (mInput && (mInput.dbKey || mInput.rootId)) || (oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID));
         var sSessionGuid = (oUiState && oUiState.get(STATE_MODEL, StatePaths.SESSION_ID)) || "";
 
-        if (!sRootId || !sSessionGuid || !oLock || typeof oLock.acquire !== "function") {
+        if (!sDbKey || !sSessionGuid || !oLock || typeof oLock.acquire !== "function") {
             return Promise.resolve(Result.fail({ code: "TAKEOVER_UNAVAILABLE" }));
         }
 
         return Promise.resolve(oLock.acquire({
-            rootId: sRootId,
+            dbKey: sDbKey,
             sessionGuid: sSessionGuid,
             forceTakeover: true
         })).then(function (oRes) {

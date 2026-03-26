@@ -1,5 +1,21 @@
 Residual risks after final residual cleanup + key-model completion pass:
 
+Update after 2026-03-27 final production-readiness delta:
+- Search wrapper-sprawl was reduced again by deleting `app/controller/search/SearchCommandPolicy.js` and routing command dispatch straight through `app/controller/Search.controller.js`.
+- `ControllerRouteRuntime.js` and `FeedbackCoordinator.js` were also removed as dead pass-through owners.
+- Raw user-facing fallback text was removed from the active domain use-case surface and is now guarded by `scripts/raw-ui-text-gate.js`.
+- The largest unresolved blockers remain unchanged in substance:
+  - `scripts/sap-internal-css-gate.js` fails on widespread SAP internal selector styling
+  - `scripts/dom-hack-gate.js` fails on broad DOM-dependent runtime/control orchestration
+
+Update after 2026-03-27 follow-up delta:
+- `App.controller.js` was removed from the active DOM-violation list by moving shell resize/app DOM ownership into `AppShellDomRuntime.js`.
+- `dom-hack-gate.js` now reports only controller/domain/feature owners, which makes the remaining list actionable instead of polluted by browser infrastructure and test code.
+- Remaining DOM remediation is still substantial and should be tackled next by cluster:
+  - search viewport/selection owners
+  - detail dropzone/controller owners
+  - shell layout/viewport owners
+
 Update after final production-readiness pass:
 - `Ui5RuntimeFacade` is removed, but broader controller/model wrapper cleanup is still incomplete; `ControllerModelRuntime` and `ControllerRouteRuntime` remain active across multiple consumers.
 - Lock naming governance is now gated in CI-style local validation, but backend compatibility alias handling still exists in `zcl_zodata_dpc_ext.clas.abap` for legacy requests by design.
@@ -34,3 +50,8 @@ Update after final production-readiness pass:
 2. SAP backend ABAP still keeps compatibility reads for `ObjectUuid` inside `zcl_zodata_dpc_ext.clas.abap` lock handlers. The canonical frontend surface is `DB_KEY`; the alias remains only as a narrow backend fallback until productive Gateway/DDIC structures are fully retired.
 3. CSS/DOM debt remains partially structural in search/dialog styling because several screens still rely on UI5 internal selectors for visual polish. Existing gates limit further spread, but a full public-API-only restyling would require coordinated XML/control refactoring beyond this pass.
 4. Mock Gateway still accepts selected legacy alias ingress (`ObjectUuid`, `SourceUuid`) for compatibility regression coverage. Canonical frontend adapter code no longer depends on those aliases.
+2026-03-27 residual update
+- Lock canonical naming on the frontend surface is now `dbKey`, but broader domain/application flows still use `rootId` as a general workflow payload name. This is acceptable for non-lock workflow orchestration but remains naming debt outside the lock boundary.
+- Attachment upload still crosses a compatibility payload with `ContentBase64` inside `app/infra/adapters/shared/AttachmentRepoRuntime.js` and the mock gateway. Persisted read/open flow remains canonical (`DownloadUrl` / `DocumentHandle`), but productive upload transport is not yet media-stream final architecture.
+- `scripts/dom-hack-gate.js` still fails across detail/search/shell runtime owners. These are still production risks because behavior depends on renderer/DOM structure and browser APIs outside stable UI5 public abstractions.
+- `scripts/sap-internal-css-gate.js` still fails across multiple style modules, especially `23_dialogs.css`, `40_page_search.css`, `41_page_detail.css`, and control modules. This remains the largest unresolved SAPUI5 best-practice gap.

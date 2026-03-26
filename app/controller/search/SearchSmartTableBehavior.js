@@ -2,6 +2,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimePayloadNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
@@ -10,7 +12,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchRateProgress",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
@@ -23,6 +24,8 @@ sap.ui.define([
     ControllerViewStateRuntime,
     ModelStateRuntime,
     SchedulingRuntime,
+    ControllerRuntime,
+    RuntimePayloadNormalizer,
     StatePaths,
     SearchSelectionRuntime,
     SearchViewportRuntime,
@@ -31,7 +34,6 @@ sap.ui.define([
     SearchReturnRediscoveryRuntime,
     SearchViewStateRuntime,
     SearchRateProgress,
-    SearchCommandPolicy,
     SearchToolbarContracts,
     SearchMaxResults,
     ModelContracts,
@@ -55,6 +57,25 @@ sap.ui.define([
     var SEARCH_WORKING_HINT_MS = 2000;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
+
+    function normalizeSearchCommandPayload(sMethod, mInput) {
+        if (sMethod === SearchRuntimeContracts.COMMANDS.APPLY_REBIND_POLICY) {
+            return RuntimePayloadNormalizer.normalize(mInput, {
+                booleanKeys: ["silent", "userInitiated"]
+            });
+        }
+        return RuntimePayloadNormalizer.normalize(mInput);
+    }
+
+    function executeSearchCommand(oController, sMethod, mInput) {
+        return ControllerRuntime.executeCommand(
+            oController,
+            oController && oController._facade,
+            sMethod,
+            normalizeSearchCommandPayload(sMethod, mInput || {}),
+            ControllerRuntime.buildCtx(oController)
+        );
+    }
 
     function normalizeRequestValue(sNormalizedValue, sFallbackValue) {
         var sSafeFallback = String(sFallbackValue || "").trim();
@@ -366,7 +387,7 @@ sap.ui.define([
         SearchRateProgress.wireTable(oController, oInnerTable);
         SearchViewportRuntime.bindSearchViewportRuntime(oController);
         SearchViewportRuntime.scheduleSearchViewportSync(oController, true);
-        return SearchCommandPolicy.rebind(oController, { source: "smartTableInitialise" });
+        return executeSearchCommand(oController, SearchRuntimeContracts.COMMANDS.REBIND, { source: "smartTableInitialise" });
     }
 
     function onBeforeSmartTableRebind(oController, oEvent, fnReadRows) {
@@ -382,7 +403,7 @@ sap.ui.define([
         SearchViewportRuntime.scheduleSearchViewportSync(oController, false);
         mLoadHooks.bindPendingSearchLoad(oInnerTable);
 
-        return Promise.resolve(SearchCommandPolicy.applyRebindPolicy(oController, {
+        return Promise.resolve(executeSearchCommand(oController, SearchRuntimeContracts.COMMANDS.APPLY_REBIND_POLICY, {
             source: "beforeRebind",
             bindingParams: oBindingParams || {},
             state: SearchViewStateRuntime.readStateData(oController),
@@ -405,7 +426,7 @@ sap.ui.define([
             }
             bindClearHandler(oController);
             deferCustomSegmentReset(oController);
-            SearchCommandPolicy.buildFilter(oController, { source: SEARCH_SOURCES.SMART_FILTER_INIT });
+            executeSearchCommand(oController, SearchRuntimeContracts.COMMANDS.BUILD_FILTER, { source: SEARCH_SOURCES.SMART_FILTER_INIT });
             fnApplyAnalyticsDrilldownIntent();
         },
         onSmartFilterChanged: function (oController) {
@@ -416,7 +437,7 @@ sap.ui.define([
             if (oController && typeof oController._bindLocationSuggest === "function") {
                 oController._bindLocationSuggest();
             }
-            SearchCommandPolicy.buildFilter(oController, { source: SEARCH_SOURCES.SMART_FILTER_CHANGED });
+            executeSearchCommand(oController, SearchRuntimeContracts.COMMANDS.BUILD_FILTER, { source: SEARCH_SOURCES.SMART_FILTER_CHANGED });
         },
         onSmartFilterClear: function (oController) {
             deferCustomSegmentReset(oController);
@@ -428,13 +449,16 @@ sap.ui.define([
             if (applyBackendTopChange(oController, oEvent) &&
                 ControllerViewStateRuntime.get(oController, "/hasSearched") &&
                 ControllerViewStateRuntime.get(oController, "/smartTableReady")) {
-                SearchCommandPolicy.rebind(oController, { source: SEARCH_SOURCES.BACKEND_TOP_CHANGE });
+                executeSearchCommand(oController, SearchRuntimeContracts.COMMANDS.REBIND, { source: SEARCH_SOURCES.BACKEND_TOP_CHANGE });
             }
         },
         onSearchModeToggle: function (oController, oEvent) {
             var bLoose = !!(oEvent && oEvent.getParameter && oEvent.getParameter("state"));
             ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_MODE, bLoose ? SEARCH_MODE.LOOSE : SEARCH_MODE.EXACT);
-            SearchCommandPolicy.executeSearch(oController, { intent: SEARCH_SOURCES.SEARCH_MODE_TOGGLE, state: bLoose });
+            executeSearchCommand(oController, SearchRuntimeContracts.COMMANDS.EXECUTE_SEARCH, {
+                intent: SEARCH_SOURCES.SEARCH_MODE_TOGGLE,
+                state: bLoose
+            });
         },
         onBeforeSmartTableRebind: onBeforeSmartTableRebind,
         onSmartTableInitialise: onSmartTableInitialise

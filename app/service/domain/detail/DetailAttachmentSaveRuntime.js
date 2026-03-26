@@ -21,7 +21,7 @@ sap.ui.define([
         }
         return Promise.all(aPendingUploads.map(function (oPending) {
             return Promise.resolve(oRepo.uploadAttachment({
-                rootId: sRootId,
+                dbKey: sRootId,
                 sessionGuid: sSessionGuid,
                 attachment: oPending
             })).catch(function () {

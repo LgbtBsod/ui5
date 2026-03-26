@@ -1,5 +1,72 @@
 # Final Compliance Report
 
+## 2026-03-27 Canonical Naming And Attachment Boundary Delta
+- Frontend lock surface now treats `dbKey` as the canonical owner for lock operations:
+  - `app/infra/adapters/LockAdapter.js` accepts `dbKey` first and keeps `rootId` only as compatibility fallback
+  - lock callers in `ModelAccessMixin`, `ComponentPollingRuntime`, `TakeoverLockUseCase`, and `WorkflowDecisionRuntime` now pass `dbKey`
+- Shell naming debt was reduced:
+  - `app/constants/ModelConstants.js` renamed `/currentRootKey` to `/currentChecklistDbKey`
+  - `app/model/ModelFactory.js` now initializes `currentChecklistDbKey`
+  - `app/service/features/shell/runtime/ShellStateRuntime.js` now uses `currentDbKey` internally instead of `currentRootKey`
+- Attachment upload/read boundary now prefers canonical `dbKey` at the repo edge:
+  - `app/infra/adapters/shared/AttachmentRepoRuntime.js` normalizes `dbKey` first
+  - `app/service/domain/detail/DetailAttachmentSaveRuntime.js`
+  - `app/service/domain/detail/DetailAttachmentDeltaRuntime.js`
+  - `app/service/domain/detail/usecases/LoadAttachmentsUseCase.js`
+- Gates re-verified after the refactor:
+  - `node scripts/lock-contract-naming-gate.js`
+  - `node scripts/attachment-contract-gate.js`
+- Honest status after this delta:
+  - lock naming baseline improved and verified
+  - attachment boundary stayed canonical on persisted read surface
+  - CSS and DOM debt remain open production blockers
+
+## 2026-03-27 Final Production-Readiness Delta
+- Removed thin wrapper owners that added no semantic boundary:
+  - deleted `app/controller/search/SearchCommandPolicy.js`
+  - deleted `app/service/framework/ControllerRouteRuntime.js`
+  - deleted `app/service/framework/FeedbackCoordinator.js`
+- Collapsed search command dispatch into the real owner:
+  - `app/controller/Search.controller.js` now calls `ControllerRuntime` directly for search command execution
+  - search sort/group/filter flow no longer depends on a pass-through policy file
+- Removed raw user-facing / fallback text from domain save/search/detail use cases:
+  - `app/service/domain/detail/usecases/SaveDetailUseCase.js`
+  - `app/service/domain/detail/usecases/AutosaveDetailUseCase.js`
+  - `app/service/domain/detail/usecases/LoadAttachmentsUseCase.js`
+  - `app/service/domain/detail/usecases/ValidateChecklistUseCase.js`
+  - `app/service/domain/detail/usecases/RowOpsUseCase.js`
+  - `app/service/domain/search/usecases/ExecuteSearchUseCase.js`
+  - `app/service/domain/search/usecases/RebindSearchUseCase.js`
+  - `app/service/domain/search/usecases/ExportSearchUseCase.js`
+  - `app/service/domain/shared/usecases/EnsureDictLoadedUseCase.js`
+- Added final production gates for this pass:
+  - `scripts/raw-ui-text-gate.js`
+  - `scripts/wrapper-sprawl-gate.js`
+  - `package.json` validate pipelines now run both gates
+- Verified closed canonical surfaces:
+  - `node scripts/raw-ui-text-gate.js`
+  - `node scripts/wrapper-sprawl-gate.js`
+  - `node scripts/attachment-contract-gate.js`
+  - `node scripts/lock-contract-naming-gate.js`
+- Verified open blockers honestly:
+  - `node scripts/sap-internal-css-gate.js` still fails on widespread `.sap*` selector debt
+  - `node scripts/dom-hack-gate.js` still fails on broad legacy DOM orchestration
+
+## 2026-03-27 Follow-Up Delta
+- Reduced app-shell DOM debt without adding new wrappers:
+  - `app/controller/App.controller.js` no longer owns shell DOM target resolution or resize-cycle DOM state
+  - that logic now lives in the already legitimate browser-boundary owner `app/service/features/shell/runtime/AppShellDomRuntime.js`
+- Tightened browser-boundary ownership:
+  - `app/service/framework/SchedulingRuntime.js` now exposes `hasAnimationFrameSupport()`
+  - `App.controller.js` no longer checks `window.requestAnimationFrame` directly
+- DOM gate now focuses on real weak zones instead of low-level browser utilities/tests:
+  - `scripts/dom-hack-gate.js` scans `app/controller`, `app/service/domain`, `app/service/features`
+  - browser infrastructure/test noise is excluded so the gate reports actionable production owners
+- Current remaining DOM debt cluster is now narrow and explicit:
+  - detail: `AttachmentDropZoneRuntime.js`, `DetailControllerRuntime.js`, `DetailInfoCardFactory.js`
+  - search: `SearchViewportRuntime.js`, `SearchSelectionRuntime.js`, `SearchReturnRediscoveryRuntime.js`, `SearchViewStateRuntime.js`, `SearchStartupRuntime.js`
+  - shell: `ShellLayoutRuntime.js`, `ShellViewportRuntime.js`
+
 ## Final Production-Readiness Pass
 - UI5 core facade overengineering was reduced:
   - deleted `app/service/framework/Ui5RuntimeFacade.js`

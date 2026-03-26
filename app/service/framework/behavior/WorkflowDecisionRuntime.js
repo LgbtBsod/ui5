@@ -33,18 +33,18 @@ sap.ui.define([
     function releaseActiveLock(mContext) {
         var oController = mContext && mContext.controller;
         var oStateModel = ModelStateRuntime.model(oController, STATE_MODEL);
-        var sRootId = String(
+        var sDbKey = String(
             ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
             || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
             || ""
         ).trim();
 
-        if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
+        if (!sDbKey || CreateSentinel.isCreateId(sDbKey)) {
             return Promise.resolve(null);
         }
 
         return LockAdapter.release({
-            rootId: sRootId,
+            dbKey: sDbKey,
             sessionGuid: ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.SESSION_ID, ""),
             payload: (mContext && mContext.payload) || {}
         }).catch(function () {

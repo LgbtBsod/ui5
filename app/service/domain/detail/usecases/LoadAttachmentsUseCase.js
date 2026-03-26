@@ -36,12 +36,11 @@ sap.ui.define([
         }
         if (!oRepo || typeof oRepo.loadAttachments !== "function") {
             return Promise.resolve(Result.fail({
-                message: "Attachment loader unavailable",
                 code: "ATTACHMENT_LOAD_UNAVAILABLE"
             }, DetailAttachmentStateRuntime.buildAttachmentBusyResetEffects()));
         }
 
-        return Promise.resolve(oRepo.loadAttachments({ rootId: sRootId })).then(function (oResult) {
+        return Promise.resolve(oRepo.loadAttachments({ dbKey: sRootId })).then(function (oResult) {
             return Result.ok(oResult || {}, DetailAttachmentStateRuntime.buildAttachmentLoadEffects((oResult && oResult.attachments) || [], "", "info"));
         }).catch(function (oError) {
             return Result.fail(oError, DetailAttachmentStateRuntime.buildAttachmentBusyResetEffects());

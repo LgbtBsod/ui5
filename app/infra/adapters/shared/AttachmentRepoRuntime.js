@@ -30,8 +30,8 @@ sap.ui.define([
         });
     }
 
-    function normalizeRootKey(sRootId) {
-        return ODataKeyNormalizer.normalizeBinaryKey(sRootId);
+    function normalizeDbKey(sDbKey) {
+        return ODataKeyNormalizer.normalizeBinaryKey(sDbKey);
     }
 
     function mapAttachmentResult(vData) {
@@ -39,12 +39,12 @@ sap.ui.define([
     }
 
     function loadAttachments(mArgs) {
-        var sRootId = normalizeRootKey(mArgs && mArgs.rootId);
-        if (!sRootId) {
+        var sDbKey = normalizeDbKey(mArgs && (mArgs.dbKey || mArgs.rootId));
+        if (!sDbKey) {
             return Promise.resolve({ attachments: [] });
         }
         return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
-            "$filter": ODataAdapterUtils.buildEqFilter("PARENT_KEY", sRootId, ODataKeyContracts.TYPES.PARENT_KEY),
+            "$filter": ODataAdapterUtils.buildEqFilter("PARENT_KEY", sDbKey, ODataKeyContracts.TYPES.PARENT_KEY),
             "$select": ODataKeyContracts.SELECTS.ATTACHMENT
         }).then(function (oResult) {
             return { attachments: mapAttachmentResult(oResult) };
@@ -53,8 +53,8 @@ sap.ui.define([
 
     function deleteAttachment(mArgs) {
         var sAttachmentId = String((mArgs && (mArgs.attachmentId || mArgs.attachmentKey)) || "").trim().toUpperCase();
-        var sRootId = normalizeRootKey(mArgs && mArgs.rootId);
-        if (!sAttachmentId || !sRootId) {
+        var sDbKey = normalizeDbKey(mArgs && (mArgs.dbKey || mArgs.rootId));
+        if (!sAttachmentId || !sDbKey) {
             return Promise.resolve({
                 attachmentId: sAttachmentId,
                 deleted: false
@@ -63,7 +63,7 @@ sap.ui.define([
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES, {
             Payload: {
                 root: {
-                    pcct_uuid: sRootId,
+                    pcct_uuid: sDbKey,
                     edit_mode: "U"
                 },
                 checks: [],
@@ -88,18 +88,18 @@ sap.ui.define([
 
     function uploadAttachment(mArgs) {
         var oAttachment = (mArgs && mArgs.attachment) || {};
-        var sRootId = normalizeRootKey((mArgs && mArgs.rootId) || oAttachment.parentKey);
+        var sDbKey = normalizeDbKey((mArgs && (mArgs.dbKey || mArgs.rootId)) || oAttachment.parentKey);
         var sAttachmentId = String(oAttachment.attachmentId || oAttachment.AttachmentKey || "").trim().toUpperCase();
-        if (!sRootId || !oAttachment.file) {
+        if (!sDbKey || !oAttachment.file) {
             return Promise.resolve(null);
         }
         return readTransientUploadPayload(oAttachment.file).then(function (sBase64) {
             // Canonical persisted attachment state stays on DownloadUrl/DocumentHandle after save.
             return GatewayClient.create("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
                 AttachmentKey: sAttachmentId || undefined,
-                DB_KEY: sRootId,
-                PARENT_KEY: normalizeRootKey(oAttachment.parentKey || sRootId),
-                FolderKey: String(oAttachment.folderKey || normalizeRootKey(oAttachment.parentKey || sRootId) || sRootId).trim(),
+                DB_KEY: sDbKey,
+                PARENT_KEY: normalizeDbKey(oAttachment.parentKey || sDbKey),
+                FolderKey: String(oAttachment.folderKey || normalizeDbKey(oAttachment.parentKey || sDbKey) || sDbKey).trim(),
                 CategoryKey: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
                 Type: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
                 FileName: String(oAttachment.fileName || "").trim(),
@@ -116,7 +116,7 @@ sap.ui.define([
     }
 
     return {
-        normalizeRootKey: normalizeRootKey,
+        normalizeDbKey: normalizeDbKey,
         loadAttachments: loadAttachments,
         deleteAttachment: deleteAttachment,
         uploadAttachment: uploadAttachment

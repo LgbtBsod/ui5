@@ -14,8 +14,8 @@ sap.ui.define([
         return (mArgs && (mArgs.sessionGuid || mArgs.lockToken)) || "";
     }
 
-    function normalizeLockObjectId(mArgs) {
-        return String((mArgs && (mArgs.dbKey || mArgs.DB_KEY)) || "").trim();
+    function normalizeLockDbKey(mArgs) {
+        return String((mArgs && (mArgs.dbKey || mArgs.DB_KEY || mArgs.rootId)) || "").trim();
     }
 
     function resolveOwner(oResult) {
@@ -70,7 +70,7 @@ sap.ui.define([
 
     function acquire(mArgs) {
         var sSession = normalizeLockToken(mArgs);
-        var sDbKey = normalizeLockObjectId(mArgs);
+        var sDbKey = normalizeLockDbKey(mArgs);
         var sTabSessionId = String((mArgs && (mArgs.tabSessionId || mArgs.TabSessionId)) || "").trim();
         var bForceTakeover = !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force));
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE, {
@@ -87,7 +87,7 @@ sap.ui.define([
 
     function heartbeat(mArgs) {
         var sToken = normalizeLockToken(mArgs);
-        var sDbKey = normalizeLockObjectId(mArgs);
+        var sDbKey = normalizeLockDbKey(mArgs);
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT, {
             DB_KEY: sDbKey,
             SessionGuid: sToken
@@ -99,12 +99,12 @@ sap.ui.define([
     }
 
     function status(mArgs) {
-        var sRootId = normalizeLockObjectId(mArgs);
+        var sDbKey = normalizeLockDbKey(mArgs);
         var sToken = normalizeLockToken(mArgs);
         return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(
             GatewayContractConstants.ENTITY_SETS.LOCK_STATUS,
             {
-                DB_KEY: sRootId,
+                DB_KEY: sDbKey,
                 SessionGuid: sToken
             },
             {
@@ -120,7 +120,7 @@ sap.ui.define([
 
     function release(mArgs) {
         var sToken = normalizeLockToken(mArgs);
-        var sDbKey = normalizeLockObjectId(mArgs);
+        var sDbKey = normalizeLockDbKey(mArgs);
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
             DB_KEY: sDbKey,
             SessionGuid: sToken
@@ -136,7 +136,7 @@ sap.ui.define([
     }
 
     function releaseOnPageLeave(mArgs) {
-        var sDbKey = normalizeLockObjectId(mArgs);
+        var sDbKey = normalizeLockDbKey(mArgs);
         var sToken = normalizeLockToken(mArgs);
         var oModel;
         var sServiceUrl;

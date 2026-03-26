@@ -42,3 +42,9 @@
 - Copy/lock canonical transport owner: `app/infra/adapters/shared/ODataChecklistMutationRuntime.js`, `app/infra/adapters/LockAdapter.js`, `scripts/lock-contract-naming-gate.js`.
 - Backend compatibility owner: `backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap` and `backend/mock_gateway/api/gateway_canonical_api.py`.
 - Backend human-readable text owner: `backend/sap_backend/src/zcl_zodata_message_texts.clas.abap` remains the central non-interface text provider.
+## 2026-03-27 Owner Update
+- Root key owner: `app/service/domain/shared/DetailRuntimePayload.js` and `app/infra/adapters/shared/ODataChecklistPayloadMapper.js`
+- Lock frontend owner: `app/infra/adapters/LockAdapter.js`
+- Shell active root/db key owner: `app/service/features/shell/runtime/ShellStateRuntime.js`
+- Attachment transport boundary owner: `app/infra/adapters/shared/AttachmentRepoRuntime.js`
+- Attachment staged UI state owner: `app/service/domain/detail/DetailAttachmentDeltaRuntime.js`

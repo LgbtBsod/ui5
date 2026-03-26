@@ -18,3 +18,6 @@ app/service/framework/CtxCacheRuntimeFactory.js -> app/service/framework/CtxRunt
 app/service/framework/AppShellCoordinator.js -> app/controller/App.controller.js
 app/service/features/detail/runtime/AttachmentValueCodec.js -> app/infra/adapters/shared/AttachmentRepoRuntime.js
 2026-03-27 final production-readiness delta: no additional safe merges in this pass.
+2026-03-27 final production-readiness delta:
+app/controller/search/SearchCommandPolicy.js -> app/controller/Search.controller.js
+why: deleted pass-through wrapper; search command dispatch now lives in the real controller owner and uses ControllerRuntime directly.

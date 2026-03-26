@@ -171,7 +171,7 @@ function nextNum(aRows, sField) {
         var sOp = (mInput && mInput.op) || "";
         var oResult;
         if (!oUiState) {
-            return Promise.resolve(Result.fail({ message: "UiState unavailable", code: "UISTATE_UNAVAILABLE" }));
+            return Promise.resolve(Result.fail({ code: "UISTATE_UNAVAILABLE" }));
         }
         if (DetailRowEntityConfig.all[sEntity]) {
             oResult = handleEntityRowOp(oUiState, sEntity, sOp, mInput);

@@ -21,3 +21,7 @@ app/test/unit/framework/ComponentModelBootstrap.qunit.js
 app/service/features/detail/runtime/AttachmentValueCodec.js
 app/service/framework/AppShellCoordinator.js
 2026-03-27 final production-readiness delta: no additional safe deletions in this pass.
+2026-03-27 final production-readiness delta:
+app/controller/search/SearchCommandPolicy.js
+app/service/framework/ControllerRouteRuntime.js
+app/service/framework/FeedbackCoordinator.js

@@ -119,7 +119,7 @@ sap.ui.define([
                 ModelStateRuntime.readOnModel(oStateModel, "/ui/busy/detail", false)
                 || ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false)
             ),
-            [MODEL_PATHS.SHELL_CURRENT_ROOT_KEY]: oShellLockState.currentRootKey,
+            [MODEL_PATHS.SHELL_CURRENT_DB_KEY]: oShellLockState.currentDbKey,
             [MODEL_PATHS.SHELL_SESSION_GUID]: String(
                 ModelStateRuntime.readOnModel(oStateModel, "/sessionId", "") || ""
             ).trim(),
@@ -149,7 +149,7 @@ sap.ui.define([
             && sEditMode === WorkflowContracts.EDIT_MODES.EDIT
             && sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
         return {
-            currentRootKey: sActiveRootKey,
+            currentDbKey: sActiveRootKey,
             lock: {
                 ok: bOwnsActiveLock,
                 reason: bOwnsActiveLock ? WorkflowContracts.REASONS.OWNED_BY_YOU : WorkflowContracts.REASONS.FREE,
@@ -238,7 +238,7 @@ sap.ui.define([
         mShellPatch["/shell/userTooltip"] = sUserSummaryText || resolveText(mHooks, oController, MessageKeyConstants.SHELL.USER_TOOLTIP_STANDALONE);
         mShellPatch["/shell/userIcon"] = "sap-icon://employee";
         mShellPatch["/shell/showHints"] = bShowHints;
-        mShellPatch[MODEL_PATHS.SHELL_CURRENT_ROOT_KEY] = oShellLockState.currentRootKey;
+        mShellPatch[MODEL_PATHS.SHELL_CURRENT_DB_KEY] = oShellLockState.currentDbKey;
         mShellPatch[MODEL_PATHS.SHELL_SESSION_GUID] = String(ModelStateRuntime.read(oController, STATE_MODEL, "/sessionId", "") || "").trim();
         mShellPatch[MODEL_PATHS.SHELL_LOCK] = oShellLockState.lock;
         ModelStateRuntime.setMany(oController, SHELL_MODEL, mShellPatch);
@@ -253,5 +253,4 @@ sap.ui.define([
         syncShellState: syncShellState
     };
 });
-
 
