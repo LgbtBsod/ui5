@@ -8,15 +8,21 @@ sap.ui.define([
 ], function (ControllerTextRuntime, DetailAccessViewState, DetailInfoCardLayoutRuntime, DetailRuntimeContracts, DetailRowEntityConfig, WorkflowContracts) {
     "use strict";
 
+    /* Этот блок фиксирует contracts для построения view-model detail-экрана.
+     * Результат: фабрика собирает состояние из одних и тех же канонических ключей. */
     var INFO_CARD_KEYS = DetailRuntimeContracts.INFO_CARD_KEYS;
     var INFO_CARD_TEXT_KEYS = DetailRuntimeContracts.INFO_CARD_TEXT_KEYS;
     var INFO_CARD_TEXT_FALLBACKS = DetailRuntimeContracts.INFO_CARD_TEXT_FALLBACKS;
     var VIEW_DEFAULTS = DetailRuntimeContracts.VIEW_DEFAULTS;
 
+    /* Этот блок берет локализованный текст для view state.
+     * Результат: фабрика не размазывает прямой доступ к bundle по всему объекту состояния. */
     function resolveText(oController, sKey, sFallback) {
         return ControllerTextRuntime.getText(oController, sKey, [], sFallback || sKey);
     }
 
+    /* Этот блок создает базовое состояние секции checks/barriers.
+     * Результат: обе секции строятся по одной модели и не расходятся по структуре. */
     function createSectionState(oConfig) {
         return {
             kind: oConfig.kind,
@@ -42,6 +48,8 @@ sap.ui.define([
         };
     }
 
+    /* Этот блок создает состояние expanded-dialog для табличных секций.
+     * Результат: полноэкранный режим использует тот же owner-contract, что и обычная секция. */
     function createExpandedDialogState(oConfig) {
         return {
             kind: oConfig.kind,
@@ -63,6 +71,8 @@ sap.ui.define([
         };
     }
 
+    /* Этот блок собирает полный начальный view state detail-экрана.
+     * Результат: контроллер получает один согласованный объект для runtime-флагов, секций и карточек. */
     function create(oController) {
         var oCheckConfig = DetailRowEntityConfig.get("check");
         var oBarrierConfig = DetailRowEntityConfig.get("barrier");

@@ -5,11 +5,13 @@ sap.ui.define([
 ], function (ThemeContracts, ThemeService, Ui5RuntimeFacade) {
     "use strict";
 
-    // Productive mode is currently locked to morning/light.
-    // Keep the public API intact because app shell and tests depend on it.
+    /* Этот блок задает единственный допустимый визуальный режим приложения.
+     * Результат: shell, контроллеры и тесты всегда получают стабильный светлый профиль. */
     var DEFAULT_MODE = ThemeContracts.MODES.MORNING;
     var DEFAULT_ANIMATION_ENABLED = ThemeService.DEFAULT_ANIMATION_ENABLED;
 
+    /* Этот блок читает текущий профиль темы из сервиса и нормализует значения.
+     * Результат: наружу всегда возвращается валидная структура mode + animationEnabled. */
     function readThemeProfile() {
         var oProfile = ThemeService.getThemeProfile ? ThemeService.getThemeProfile() : null;
         return {
@@ -20,6 +22,8 @@ sap.ui.define([
         };
     }
 
+    /* Этот блок один раз подписывает контроллер на синхронизацию UI5-токенов темы.
+     * Результат: после смены темы CSS-переменные приложения остаются согласованными. */
     function ensureThemeSyncListener(oController) {
         if (oController._fnThemeChangedHandler) {
             return;
@@ -30,6 +34,8 @@ sap.ui.define([
         Ui5RuntimeFacade.attachThemeChanged(oController._fnThemeChangedHandler);
     }
 
+    /* Этот блок применяет канонический утренний режим и при необходимости сохраняет профиль.
+     * Результат: приложение всегда рендерится в поддерживаемом productive-виде. */
     function applyMorningMode(oController, oClickXY, mOptions) {
         var oProfile = readThemeProfile();
         ensureThemeSyncListener(oController);
@@ -41,6 +47,8 @@ sap.ui.define([
         });
     }
 
+    /* Этот блок сохраняет публичный контракт setThemeMode, но не разрешает уходить в неподдерживаемый режим.
+     * Результат: внешние вызовы не ломаются, а фактическая тема остается канонической. */
     function applySupportedMode(oController, _sMode, oClickXY, mOptions) {
         return applyMorningMode(oController, oClickXY, mOptions);
     }
@@ -71,8 +79,8 @@ sap.ui.define([
             return applyMorningMode(this, null);
         },
         toggleTheme: function (oClickXY) {
-            // Re-applies the only supported productive visual profile and keeps the
-            // public contract stable for shell actions and tests.
+            /* Этот блок повторно применяет единственный поддерживаемый профиль без смены каноники.
+             * Результат: shell actions и автотесты продолжают работать по прежнему контракту. */
             return applySupportedMode(this, DEFAULT_MODE, oClickXY);
         },
         _ensureThemeSyncListener: function () {

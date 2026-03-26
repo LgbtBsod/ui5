@@ -8,6 +8,8 @@ sap.ui.define([
 ], function (GatewayODataClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataEntityContracts, ChecklistSnapshotMapper, GatewayContractConstants) {
     "use strict";
 
+    /* Этот блок задает размер чанка для догрузки строк detail-разделов.
+     * Результат: проверки и барьеры приходят порциями, а initial open остается легким. */
     var DETAIL_ROW_CHUNK_SIZE = 20;
 
     /*
@@ -20,14 +22,20 @@ sap.ui.define([
      * sap.ui.model.odata.ODataUtils.formatValue internally.
      * Verify accepted format via st05 trace on target BASIS before changing type.
      */
+    /* Этот блок собирает строковый eq-filter для lookup по человекочитаемому идентификатору.
+     * Результат: запрос к search/read-модели формируется в одном стандартизованном виде. */
     function buildStringEqFilter(sProperty, sRootId) {
         return ODataAdapterUtils.buildEqFilter(sProperty, sRootId);
     }
 
+    /* Этот блок собирает канонический фильтр для detail entity set.
+     * Результат: все children/read запросы используют один и тот же boundary-контракт. */
     function buildDetailFilter(oFilterContract, sRootId) {
         return ODataAdapterUtils.buildEqFilter(oFilterContract.property, sRootId, oFilterContract.type);
     }
 
+    /* Этот блок разрешает входной route/id в реальный backend root key.
+     * Результат: downstream detail flow работает с техническим ключом, а не с display-id. */
     function resolveRootId(mArgs, mDeps) {
         var sRequestedId = String(mDeps.rootId(mArgs) || "").trim();
         if (!sRequestedId) {
@@ -45,6 +53,8 @@ sap.ui.define([
         });
     }
 
+    /* Этот блок загружает phase-1 snapshot карточки.
+     * Результат: на initial open приходят root + basic, а heavy rows остаются отложенными. */
     function fetchDetailSnapshot(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var bIncludeChildren = !mArgs || mArgs.includeChildren !== false;
@@ -71,6 +81,8 @@ sap.ui.define([
         });
     }
 
+    /* Этот блок постранично читает коллекцию дочерних строк из OData.
+     * Результат: большие наборы данных не грузятся одним тяжелым запросом. */
     function loadChunkedCollection(oFilterContract, sRootId, sSelect, fnMapRow) {
         var aRows = [];
 
@@ -93,6 +105,8 @@ sap.ui.define([
         return loadPage(0);
     }
 
+    /* Этот блок объединяет чтение checks и barriers в один отложенный owner.
+     * Результат: контроллер и use case получают уже нормализованный набор строк. */
     function loadDetailRows(mArgs, mDeps) {
         var sRootId = mDeps.rootId(mArgs);
         var bChecks = !mArgs || mArgs.includeChecks !== false;
@@ -122,6 +136,8 @@ sap.ui.define([
         });
     }
 
+    /* Этот блок после save/read достраивает полный snapshot из backend-ответа.
+     * Результат: UI получает согласованный root/meta state даже после переходных payload-ов. */
     function enrichServerSnapshot(oServerPayload, sFallbackRootId, mDeps) {
         var sResolvedRootId = mDeps.resolveServerRootId(oServerPayload, sFallbackRootId);
         if (!sResolvedRootId || mDeps.isCreateId(sResolvedRootId)) {

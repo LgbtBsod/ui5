@@ -2,8 +2,8 @@
 (function () {
     "use strict";
 
-    // Productive support baseline: Chromium-based Edge on SAP UI 754 / UI5 1.71.
-    // No Internet Explorer compatibility branches are kept in this bootstrap.
+    /* Этот блок задает продуктивный baseline bootstrap для UI5 1.71.
+     * Результат: приложение стартует в Edge/Chromium без legacy-веток под IE. */
     var UI5_BOOTSTRAP_SRC = window.__ui5BootstrapSrc || "/resources/sap-ui-core.js";
     var DEFAULT_THEME = "sap_fiori_3";
     var THEME_PROFILE_KEY = "checklist_app_theme_profile";
@@ -13,12 +13,16 @@
         "localhost": true
     });
 
+    /* Этот блок определяет локальную dev-среду по hostname.
+     * Результат: preload и bootstrap можно ослабить для локальной разработки. */
     function isDevHost() {
         var oLocation = typeof window !== "undefined" ? window.location : null;
         var sHost = String(oLocation && oLocation.hostname || "").trim().toLowerCase();
         return !!DEV_HOSTS[sHost];
     }
 
+    /* Этот блок нормализует профиль темы в localStorage.
+     * Результат: до старта UI5 у приложения уже есть валидные ключи темы и анимации. */
     function ensureStoredThemeProfile() {
         var oStoredProfile;
         try {
@@ -34,7 +38,6 @@
                     animationEnabled: true
                 }));
             } catch (_profilePersistError) {
-                // Best-effort normalization only.
             }
         }
 
@@ -43,10 +46,11 @@
                 window.localStorage.setItem(APP_THEME_KEY, "morning");
             }
         } catch (_themePersistError) {
-            // Best-effort normalization only.
         }
     }
 
+    /* Этот блок монтирует корневой UI5-компонент в host-контейнер.
+     * Результат: manifest-driven приложение поднимается в одном стандартном ComponentContainer. */
     function mountComponent() {
         sap.ui.require([
             "sap/ui/core/ComponentContainer"
@@ -61,6 +65,8 @@
         });
     }
 
+    /* Этот блок откладывает монтирование до готовности Core.
+     * Результат: компонент стартует только после полной готовности UI5 runtime. */
     function attachInit() {
         sap.ui.require(["sap/ui/core/Core"], function (Core) {
             if (Core && typeof Core.ready === "function") {
@@ -71,6 +77,8 @@
         });
     }
 
+    /* Этот блок загружает bootstrap script и настраивает атрибуты UI5.
+     * Результат: приложение получает единый путь старта и прогнозируемый preload-режим. */
     function loadBootstrapScript() {
         var oScript = document.createElement("script");
         var bDevHost = isDevHost();

@@ -28,6 +28,8 @@ sap.ui.define([
     });
     var STATE_MODEL = ModelContracts.MODELS.STATE;
 
+    /* Этот блок освобождает активную блокировку для текущего detail-объекта.
+     * Результат: при выходе или отказе от изменений backend-lock корректно снимается. */
     function releaseActiveLock(mContext) {
         var oController = mContext && mContext.controller;
         var sRootId = RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, STATE_MODEL));
@@ -45,11 +47,14 @@ sap.ui.define([
         });
     }
 
-    // Deprecated compatibility alias. Target lock contract no longer carries TrySave semantics.
+    /* Этот блок сохраняет совместимость со старым именем releaseWithTrySave.
+     * Результат: старые call sites не падают, но фактическая семантика остается простой release. */
     function releaseWithTrySave(mContext) {
         return releaseActiveLock(mContext);
     }
 
+    /* Этот блок принимает решение по диалогу несохраненных изменений.
+     * Результат: сценарий save, discard или cancel завершается единым каноническим результатом. */
     function resolveUnsavedDecision(sAction, mContext, DialogOrchestrator) {
         var oController = mContext && mContext.controller;
         var fnOnSave = mContext && mContext.onSave;

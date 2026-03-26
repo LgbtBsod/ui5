@@ -3,20 +3,22 @@ sap.ui.define([
 ], function (StatePaths) {
     "use strict";
 
+    /* Этот блок описывает контракт session-кэша detail snapshot в IndexedDB.
+     * Результат: записи кэша изолированы по вкладке и не смешиваются с постоянными настройками. */
     var DB_NAME = "PcctSessionCache";
     var DB_VERSION = 2;
     var STORE = "entries";
     var DEFAULT_ENTITY_KIND = "detailSnapshot";
     var SCHEMA_VERSION = 2;
 
-    // Session-scoped snapshots live in IndexedDB and are namespaced by tabSessionId.
-    // Persistent preferences belong to dedicated local preference runtimes, while
-    // SmartFilter/SmartTable personalization stays with standard SAP mechanisms.
-
+    /* Этот блок возвращает текущее время в ISO-формате для метаданных кэша.
+     * Результат: createdAt/validatedAt записываются единообразно. */
     function nowIso() {
         return new Date().toISOString();
     }
 
+    /* Этот блок безопасно читает значение из sessionStorage.
+     * Результат: отсутствие доступа к storage не роняет приложение. */
     function safeSessionGet(sKey) {
         try {
             return window.sessionStorage.getItem(sKey) || "";
@@ -25,6 +27,8 @@ sap.ui.define([
         }
     }
 
+    /* Этот блок безопасно пишет значение в sessionStorage.
+     * Результат: деградация storage не ломает runtime-flow. */
     function safeSessionSet(sKey, sValue) {
         try {
             window.sessionStorage.setItem(sKey, sValue);
@@ -33,6 +37,8 @@ sap.ui.define([
         }
     }
 
+    /* Этот блок создает fallback tabSessionId для изоляции кэша внутри текущей вкладки.
+     * Результат: записи разных вкладок не пересекаются. */
     function buildFallbackTabSessionId() {
         return "T" + Math.random().toString(36).slice(2) + Date.now().toString(36);
     }
@@ -49,6 +55,8 @@ sap.ui.define([
         return [String(sTabSessionId || "").trim(), normalizeEntityKind(sEntityKind), normalizeRootId(sRootId)].join("|");
     }
 
+    /* Этот блок оборачивает IndexedDB request в Promise.
+     * Результат: read/write операции дальше можно собирать в последовательный async flow. */
     function requestAsPromise(oRequest, sErrorCode) {
         return new Promise(function (resolve, reject) {
             oRequest.onsuccess = function () {
@@ -60,6 +68,8 @@ sap.ui.define([
         });
     }
 
+    /* Этот блок открывает IndexedDB и при необходимости пересоздает схему store/indexes.
+     * Результат: session cache всегда работает на ожидаемой версии структуры. */
     function openDb() {
         return new Promise(function (resolve, reject) {
             if (typeof indexedDB === "undefined") {
@@ -87,6 +97,8 @@ sap.ui.define([
         });
     }
 
+    /* Этот блок дает единый способ выполнить операцию внутри transaction/store.
+     * Результат: readwrite/readonly действия завершаются с контролируемым resolve/reject. */
     function withStore(mode, fn) {
         return openDb().then(function (db) {
             return new Promise(function (resolve, reject) {
@@ -130,6 +142,8 @@ sap.ui.define([
         });
     }
 
+    /* Этот блок итерирует индекс через курсор.
+     * Результат: можно массово чистить или анализировать записи без дублирования кода. */
     function iterateIndex(oIndex, fnVisit) {
         return new Promise(function (resolve, reject) {
             var oRequest = oIndex.openCursor();
@@ -152,6 +166,8 @@ sap.ui.define([
         });
     }
 
+    /* Этот блок создает adapter instance для session cache.
+     * Результат: фронт получает единый owner для read/write/cleanup snapshot-кэша. */
     function create(mArgs) {
         var oStateModel = mArgs && mArgs.stateModel;
 
