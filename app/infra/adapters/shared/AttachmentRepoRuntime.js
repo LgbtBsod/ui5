@@ -98,8 +98,8 @@ sap.ui.define([
             return GatewayClient.create("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
                 AttachmentKey: sAttachmentId || undefined,
                 DB_KEY: sRootId,
-                PARENT_KEY: sRootId,
-                FolderKey: String(oAttachment.folderKey || sRootId).trim(),
+                PARENT_KEY: normalizeRootKey(oAttachment.parentKey || sRootId),
+                FolderKey: String(oAttachment.folderKey || normalizeRootKey(oAttachment.parentKey || sRootId) || sRootId).trim(),
                 CategoryKey: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
                 Type: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
                 FileName: String(oAttachment.fileName || "").trim(),

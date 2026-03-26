@@ -49,5 +49,8 @@
 # Structure Map Delta
 
 - `app/infra/adapters/shared/ODataChecklistMutationRuntime.js`: canonical function-import write adapter for aggregate mutations and copy flow.
+- `app/service/shared/ODataKeyNormalizer.js`: canonical binary key transport formatter and normalizer.
+- `app/infra/adapters/shared/ODataAdapterUtils.js`: shared OData helper that delegates binary transport formatting to the key normalizer.
 - `scripts/lock-contract-naming-gate.js`: release gate for canonical `DB_KEY` lock/copy contract.
+- `scripts/binary-transport-gate.js`: release gate for binary-safe canonical entity paths and filters.
 - `backend/mock_gateway/tests/test_lock_gateway_api_contract.py`: backend contract regression coverage for lock/copy naming.

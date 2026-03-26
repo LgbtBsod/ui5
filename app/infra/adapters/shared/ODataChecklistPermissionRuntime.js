@@ -69,7 +69,8 @@ sap.ui.define([
             return checkCreatePermission(sActivity, mDeps);
         }
         return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_PERMISSION, sRootId, {
-            type: ODataKeyContracts.TYPES.ROOT_KEY
+            name: "DB_KEY",
+            type: ODataKeyContracts.TYPES.DB_KEY
         }), {
             ACTVT: sActivity,
             "$select": ODataKeyContracts.SELECTS.CHECKLIST_PERMISSION

@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayClient, ODataAdapterUtils, ODataKeyContracts, GatewayContractConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ODataKeyNormalizer"
+], function (GatewayClient, ODataAdapterUtils, ODataKeyContracts, GatewayContractConstants, ODataKeyNormalizer) {
     "use strict";
 
     function parseMs(v) {
@@ -37,14 +38,15 @@ sap.ui.define([
     }
 
     function readAggChangedOnAdapter(sRootId) {
-        return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.LAST_CHANGE_SET, sRootId, {
+        var sNormalizedRootId = ODataKeyNormalizer.normalizeBinaryKey(sRootId);
+        return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.LAST_CHANGE_SET, sNormalizedRootId, {
             name: "DB_KEY",
             type: ODataKeyContracts.TYPES.DB_KEY
         })).then(function (oRes) {
             return readAggChangedOn(oRes);
         }).catch(function () {
             return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.LAST_CHANGE_SET, {
-                "$filter": ODataAdapterUtils.buildEqFilter("DB_KEY", sRootId, ODataKeyContracts.TYPES.DB_KEY),
+                "$filter": ODataAdapterUtils.buildEqFilter("DB_KEY", sNormalizedRootId, ODataKeyContracts.TYPES.DB_KEY),
                 "$top": 1
             }).then(function (oRes) {
                 return readAggChangedOn(oRes);

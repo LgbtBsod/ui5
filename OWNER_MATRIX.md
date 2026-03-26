@@ -37,6 +37,8 @@
 # Owner Matrix Delta
 
 - Root key owner: `app/constants/GatewayContractConstants.js` plus `app/localService/metadata.xml` for service contract exposure.
+- Binary key transport owner: `app/service/shared/ODataKeyNormalizer.js`, `app/infra/adapters/shared/ODataEntityContracts.js`, `app/localService/metadata.xml`, `backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap`.
+- Binary-safe adapter boundary owner: `app/service/shared/ODataKeyNormalizer.js` plus `app/infra/adapters/shared/ODataAdapterUtils.js`.
 - Copy/lock canonical transport owner: `app/infra/adapters/shared/ODataChecklistMutationRuntime.js`, `app/infra/adapters/LockAdapter.js`, `scripts/lock-contract-naming-gate.js`.
 - Backend compatibility owner: `backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap` and `backend/mock_gateway/api/gateway_canonical_api.py`.
 - Backend human-readable text owner: `backend/sap_backend/src/zcl_zodata_message_texts.clas.abap` remains the central non-interface text provider.

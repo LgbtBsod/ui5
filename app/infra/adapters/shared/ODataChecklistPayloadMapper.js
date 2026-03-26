@@ -12,7 +12,7 @@ sap.ui.define([
 
     function resolveServerRootId(oPayload, sFallbackRootId) {
         var oData = oPayload || {};
-        return String(
+        return normalizeRootKey(
             oData[IDENTITY.ROOT_CANONICAL_FIELDS[0]] ||
             oData[IDENTITY.ROOT_ALIAS_FIELDS[0]] ||
             oData[IDENTITY.ROOT_CANONICAL_FIELDS[1]] ||
@@ -22,7 +22,7 @@ sap.ui.define([
             (oData.root && oData.root.id) ||
             sFallbackRootId ||
             ""
-        ).trim();
+        );
     }
 
     function normalizeAttachmentRows(aAttachments, sRootId) {

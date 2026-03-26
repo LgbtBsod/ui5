@@ -4,8 +4,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataEntityContracts, ChecklistSnapshotMapper, GatewayContractConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ODataKeyNormalizer"
+], function (GatewayClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataEntityContracts, ChecklistSnapshotMapper, GatewayContractConstants, ODataKeyNormalizer) {
     "use strict";
 
     /* Этот блок задает размер чанка для догрузки строк detail-разделов.
@@ -31,7 +32,11 @@ sap.ui.define([
     /* Этот блок собирает канонический фильтр для detail entity set.
      * Результат: все children/read запросы используют один и тот же boundary-контракт. */
     function buildDetailFilter(oFilterContract, sRootId) {
-        return ODataAdapterUtils.buildEqFilter(oFilterContract.property, sRootId, oFilterContract.type);
+        return ODataAdapterUtils.buildEqFilter(
+            oFilterContract.property,
+            ODataKeyNormalizer.normalizeBinaryKey(sRootId),
+            oFilterContract.type
+        );
     }
 
     /* Этот блок разрешает входной route/id в реальный backend root key.
@@ -47,19 +52,20 @@ sap.ui.define([
         }).then(function (oResponse) {
             var aRows = ODataAdapterUtils.asArray(oResponse);
             var oFirst = aRows[0] || {};
-            return String(oFirst.DB_KEY || oFirst.Id || sRequestedId).trim();
+            return ODataKeyNormalizer.normalizeBinaryKey(oFirst.DB_KEY || oFirst.Id || sRequestedId);
         }).catch(function () {
-            return sRequestedId;
+            return ODataKeyNormalizer.normalizeBinaryKey(sRequestedId);
         });
     }
 
     /* Этот блок загружает phase-1 snapshot карточки.
      * Результат: на initial open приходят root + basic, а heavy rows остаются отложенными. */
     function fetchDetailSnapshot(mArgs, mDeps) {
-        var sRootId = mDeps.rootId(mArgs);
+        var sRootId = ODataKeyNormalizer.normalizeBinaryKey(mDeps.rootId(mArgs));
         var bIncludeChildren = !mArgs || mArgs.includeChildren !== false;
         var oBasicFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BASIC_INFO;
         var pRoot = GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
+            name: "DB_KEY",
             type: ODataEntityContracts.TYPES.DB_KEY
         }));
         // ChecklistBasicInfoSet is a separate CDS-backed read model.
@@ -108,7 +114,7 @@ sap.ui.define([
     /* Этот блок объединяет чтение checks и barriers в один отложенный owner.
      * Результат: контроллер и use case получают уже нормализованный набор строк. */
     function loadDetailRows(mArgs, mDeps) {
-        var sRootId = mDeps.rootId(mArgs);
+        var sRootId = ODataKeyNormalizer.normalizeBinaryKey(mDeps.rootId(mArgs));
         var bChecks = !mArgs || mArgs.includeChecks !== false;
         var bBarriers = !mArgs || mArgs.includeBarriers !== false;
         var pChecks = bChecks

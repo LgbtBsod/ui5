@@ -10,20 +10,20 @@ const metadata = read("app/localService/metadata.xml");
 const lockAdapter = read("app/infra/adapters/LockAdapter.js");
 const dpc = read("backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap");
 
-if (!/FunctionImport Name="LockAcquire"[\s\S]*?<Parameter Name="DB_KEY"/.test(metadata)) {
-  issues.push("app/localService/metadata.xml: LockAcquire must expose DB_KEY as the canonical lock key");
+if (!/FunctionImport Name="LockAcquire"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.Binary"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: LockAcquire must expose DB_KEY as canonical Edm.Binary lock key");
 }
 
-if (!/FunctionImport Name="LockHeartbeat"[\s\S]*?<Parameter Name="DB_KEY"/.test(metadata)) {
-  issues.push("app/localService/metadata.xml: LockHeartbeat must expose DB_KEY as the canonical lock key");
+if (!/FunctionImport Name="LockHeartbeat"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.Binary"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: LockHeartbeat must expose DB_KEY as canonical Edm.Binary lock key");
 }
 
-if (!/FunctionImport Name="LockRelease"[\s\S]*?<Parameter Name="DB_KEY"/.test(metadata)) {
-  issues.push("app/localService/metadata.xml: LockRelease must expose DB_KEY as the canonical lock key");
+if (!/FunctionImport Name="LockRelease"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.Binary"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: LockRelease must expose DB_KEY as canonical Edm.Binary lock key");
 }
 
-if (!/FunctionImport Name="CopyChecklist"[\s\S]*?<Parameter Name="DB_KEY"/.test(metadata)) {
-  issues.push("app/localService/metadata.xml: CopyChecklist must expose DB_KEY as the canonical root key");
+if (!/FunctionImport Name="CopyChecklist"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.Binary"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: CopyChecklist must expose DB_KEY as canonical Edm.Binary root key");
 }
 
 if (/ObjectUuid/.test(lockAdapter)) {
@@ -48,8 +48,21 @@ if (/SourceUuid/.test(mutationRuntime)) {
 });
 
 const mpc = read("backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap");
-if (!/CopyChecklist[\s\S]*?iv_name = 'DB_KEY'/.test(mpc)) {
-  issues.push("backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap: CopyChecklist must define DB_KEY as canonical parameter");
+if (!/CopyChecklist[\s\S]*?iv_name = 'DB_KEY'\s+iv_edm_type = 'Binary'/.test(mpc)) {
+  issues.push("backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap: CopyChecklist must define DB_KEY as Binary");
+}
+
+["LockAcquire", "LockHeartbeat", "LockRelease"].forEach((name) => {
+  if (!new RegExp(`${name}[\\s\\S]*?iv_name = 'DB_KEY'\\s+iv_edm_type = 'Binary'`).test(mpc)) {
+    issues.push(`backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap: ${name} must define DB_KEY as Binary`);
+  }
+  if (!new RegExp(`${name}[\\s\\S]*?iv_name = 'SessionGuid'\\s+iv_edm_type = 'String'`).test(mpc)) {
+    issues.push(`backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap: ${name} must define SessionGuid as String`);
+  }
+});
+
+if (!/CopyChecklist[\s\S]*?iv_name = 'SessionGuid'\s+iv_edm_type = 'String'/.test(mpc)) {
+  issues.push("backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap: CopyChecklist must define SessionGuid as String");
 }
 
 const fallbackCount = (dpc.match(/ObjectUuid/g) || []).length;

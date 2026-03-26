@@ -133,6 +133,19 @@
 # Final Production Readiness Delta
 
 - Canonical lock and copy contract now uses `DB_KEY` on the frontend and metadata surface. `SourceUuid` was removed from the active frontend copy flow and kept only as backend/mock compatibility fallback where legacy transport still exists.
+- Canonical key transport is aligned with productive SAP Gateway binary semantics: lock/copy function imports now declare `DB_KEY` as `Edm.Binary`, and child entities in local metadata expose both `DB_KEY` and `PARENT_KEY` as `Edm.Binary`.
 - Lock naming gate now validates `CopyChecklist` together with acquire/heartbeat/release so contract drift is flagged before release packaging.
 - Mock Gateway regression coverage now asserts `CopyChecklist` works with the canonical `DB_KEY` query parameter.
 - Attachment productive read contract remains canonical on `DownloadUrl` and `DocumentHandle`. Base64 is still confined to the current upload transport boundary in `AttachmentRepoRuntime` and mock backend create handling; this remains a controlled residual risk, not a frontend domain contract.
+- Binary transport sweep was completed on the canonical frontend adapter boundary:
+  - `app/service/shared/ODataKeyNormalizer.js` now owns explicit `Edm.Binary` literal, predicate, and eq-filter formatting
+  - `app/infra/adapters/shared/ODataAdapterUtils.js` delegates binary key transport formatting to the key normalizer instead of relying on generic formatter behavior
+- Binary-safe canonical reads are now enforced in:
+  - `app/infra/adapters/shared/ODataChecklistReadRuntime.js`
+  - `app/infra/adapters/shared/ODataChecklistPermissionRuntime.js`
+  - `app/infra/adapters/LastChangeSetAdapter.js`
+  - `app/infra/adapters/shared/AttachmentRepoRuntime.js`
+- Binary-safe attachment sync was tightened after save:
+  - `app/service/domain/detail/DetailAttachmentSaveRuntime.js` now normalizes the effective root key before reload
+  - `app/infra/adapters/shared/ODataChecklistPayloadMapper.js` now resolves server root ids back into canonical binary form
+- Release validation was strengthened with a dedicated `scripts/binary-transport-gate.js`.

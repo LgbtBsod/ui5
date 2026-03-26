@@ -41,6 +41,15 @@ scripts/attachment-contract-gate.js
 scripts/broken-import-gate.js
 scripts/detail-contracts-owner-gate.js
 scripts/key-model-gate.js
+app/service/shared/ODataKeyNormalizer.js
+app/infra/adapters/shared/ODataAdapterUtils.js
+app/infra/adapters/LastChangeSetAdapter.js
+app/infra/adapters/shared/ODataChecklistPermissionRuntime.js
+app/infra/adapters/shared/ODataChecklistReadRuntime.js
+app/infra/adapters/shared/ODataChecklistPayloadMapper.js
+app/service/domain/detail/DetailAttachmentSaveRuntime.js
+app/test/unit/framework/ODataKeyNormalizer.qunit.js
+scripts/binary-transport-gate.js
 scripts/metadata-contract-gate.js
 scripts/proxy-constants-gate.js
 scripts/sap-internal-css-allowlist.json
@@ -71,3 +80,4 @@ app/localService/metadata.xml
 backend/mock_gateway/tests/test_lock_gateway_api_contract.py
 backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap
 scripts/lock-contract-naming-gate.js
+scripts/key-model-gate.js

@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Effects, DetailAttachmentDeltaRuntime, DetailAttachmentStateRuntime, CreateSentinel, StatePaths, ViewPathContracts, ModelContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/ODataKeyNormalizer"
+], function (Effects, DetailAttachmentDeltaRuntime, DetailAttachmentStateRuntime, CreateSentinel, StatePaths, ViewPathContracts, ModelContracts, DetailUseCaseConstants, ODataKeyNormalizer) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -35,9 +36,9 @@ sap.ui.define([
         var bCreate = !!mOptions.createMode;
         var aCurrentAttachments = Array.isArray(mOptions.currentAttachments) ? mOptions.currentAttachments : [];
         var oSavedSnapshot = mOptions.savedSnapshot || {};
-        var sServerRootId = String(mOptions.serverRootId || "").trim();
+        var sServerRootId = ODataKeyNormalizer.normalizeBinaryKey(mOptions.serverRootId);
         var bNeedsAttachmentReload = bCreate || !!mOptions.hasStagedPayload;
-        var sEffectiveRootId = sServerRootId || sRootId;
+        var sEffectiveRootId = sServerRootId || ODataKeyNormalizer.normalizeBinaryKey(sRootId);
 
         return uploadPendingAttachments(oRepo, sEffectiveRootId, aCurrentAttachments, mOptions.sessionGuid).then(function () {
             return DetailAttachmentDeltaRuntime.refreshAttachments(

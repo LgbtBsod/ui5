@@ -49,9 +49,10 @@
 
 | Area | Canonical owner | Compatibility boundary | Final state |
 | --- | --- | --- | --- |
-| Root identity | `DB_KEY` | Backend may still accept `ObjectUuid` in DPC fallback | Frontend canonical |
-| Child relation | `PARENT_KEY` | None on frontend | Canonical |
+| Root identity | `DB_KEY` (`Edm.Binary`) | Backend may still accept `ObjectUuid` in DPC fallback | Frontend canonical |
+| Child relation | `PARENT_KEY` (`Edm.Binary`) | None on frontend | Canonical |
 | Copy checklist function import | `DB_KEY` | Mock/backend may still read `SourceUuid` as fallback | Canonicalized on metadata/frontend |
 | Lock function imports | `DB_KEY` + `SessionGuid` | Backend DPC fallback may still read `ObjectUuid` | Canonicalized on metadata/frontend |
 | Attachment persisted read | `DownloadUrl` + `DocumentHandle` | None | Canonical |
 | Attachment upload transport | transient `ContentBase64` boundary only | Mock/backend create boundary | Residual risk |
+| Binary OData literal formatting | explicit `binary'HEX'` | None | Canonical frontend adapter boundary |

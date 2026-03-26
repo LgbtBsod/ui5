@@ -39,6 +39,12 @@ function entityBlock(name) {
   if (!/Name="DB_KEY"/.test(block)) {
     add(`child entity ${name} missing DB_KEY`);
   }
+  if (!/Name="DB_KEY" Type="Edm.Binary"/.test(block)) {
+    add(`child entity ${name} must expose DB_KEY as Edm.Binary`);
+  }
+  if (!/Name="PARENT_KEY" Type="Edm.Binary"/.test(block)) {
+    add(`child entity ${name} must expose PARENT_KEY as Edm.Binary`);
+  }
 });
 
 ['FunctionResult', 'ExportRow'].forEach((name) => {
