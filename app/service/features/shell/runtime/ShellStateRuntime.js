@@ -109,24 +109,54 @@ sap.ui.define([
     }
 
     function syncRuntimeShellState(oStateModel, oShellModel) {
+        var oShellLockState;
+
         if (!oStateModel || !oShellModel) {
             return false;
         }
+        oShellLockState = resolveShellLockState(oStateModel);
         return ModelStateRuntime.setManyOnModel(oShellModel, {
             [MODEL_PATHS.SHELL_BUSY]: !!(
                 ModelStateRuntime.readOnModel(oStateModel, "/ui/busy/detail", false)
                 || ModelStateRuntime.readOnModel(oStateModel, "/isLoading", false)
             ),
-            [MODEL_PATHS.SHELL_CURRENT_ROOT_KEY]: String(
-                ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "")
-                || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
-                || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
-                || ""
-            ).trim(),
+            [MODEL_PATHS.SHELL_CURRENT_ROOT_KEY]: oShellLockState.currentRootKey,
             [MODEL_PATHS.SHELL_SESSION_GUID]: String(
                 ModelStateRuntime.readOnModel(oStateModel, "/sessionId", "") || ""
-            ).trim()
+            ).trim(),
+            [MODEL_PATHS.SHELL_LOCK]: oShellLockState.lock
         });
+    }
+
+    function resolveShellLockState(oStateModel) {
+        var sActiveRootKey;
+        var sEditMode;
+        var sLockState;
+        var bOwnsActiveLock;
+
+        sActiveRootKey = String(
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
+            || ""
+        ).trim();
+        sEditMode = WorkflowContracts.normalizeEditMode(
+            ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/editMode", WorkflowContracts.EDIT_MODES.READ)
+        );
+        sLockState = WorkflowContracts.normalizeLockState(
+            ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/lock/state", WorkflowContracts.LOCK_STATES.IDLE)
+        );
+        bOwnsActiveLock = !!sActiveRootKey
+            && sEditMode === WorkflowContracts.EDIT_MODES.EDIT
+            && sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
+        return {
+            currentRootKey: sActiveRootKey,
+            lock: {
+                ok: bOwnsActiveLock,
+                reason: bOwnsActiveLock ? WorkflowContracts.REASONS.OWNED_BY_YOU : WorkflowContracts.REASONS.FREE,
+                isKilled: !!ModelStateRuntime.readOnModel(oStateModel, "/isKilled", false)
+            }
+        };
     }
 
     function syncShellState(oController, mHooks) {
@@ -145,12 +175,14 @@ sap.ui.define([
         var sFrontendSource;
         var bSearchWorkspace;
         var bEditWorkspace;
+        var oShellLockState;
 
         if (!ControllerModelRuntime.shell(oController) || !oState) {
             return;
         }
 
         ensureShellDefaults(oController);
+        oShellLockState = resolveShellLockState(oState);
         sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
         sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         sMode = LayoutStateRuntime.readMode(oState, WorkflowContracts.EDIT_MODES.READ);
@@ -203,6 +235,9 @@ sap.ui.define([
         mShellPatch["/shell/userTooltip"] = sUserSummaryText || resolveText(mHooks, oController, ShellMessageKeyConstants.USER_TOOLTIP_STANDALONE);
         mShellPatch["/shell/userIcon"] = "sap-icon://employee";
         mShellPatch["/shell/showHints"] = bShowHints;
+        mShellPatch[MODEL_PATHS.SHELL_CURRENT_ROOT_KEY] = oShellLockState.currentRootKey;
+        mShellPatch[MODEL_PATHS.SHELL_SESSION_GUID] = String(ModelStateRuntime.read(oController, STATE_MODEL, "/sessionId", "") || "").trim();
+        mShellPatch[MODEL_PATHS.SHELL_LOCK] = oShellLockState.lock;
         ModelStateRuntime.setMany(oController, SHELL_MODEL, mShellPatch);
         if (typeof oController._markStartupReady === "function") {
             oController._markStartupReady();
