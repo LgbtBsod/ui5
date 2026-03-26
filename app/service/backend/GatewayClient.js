@@ -1,14 +1,13 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/RequestVerbConstants"
-], function (GatewayErrorNormalizer, GatewayContractConstants, RequestVerbConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
+], function (GatewayErrorNormalizer, GatewayContractConstants) {
     "use strict";
 
     var _oModel = null;
     var _sServiceUrl = "";
     var mResponseGuardTokens = {};
-    var REQUEST = RequestVerbConstants.REQUEST;
+    var REQUEST = GatewayContractConstants.REQUEST;
 
     function createModelError() {
         var oError = new Error("GatewayClient model is not initialized");

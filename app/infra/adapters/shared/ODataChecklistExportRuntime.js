@@ -1,9 +1,9 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ODataAdapterUtils, ChecklistIdentity, GatewayContractConstants) {
+], function (GatewayClient, ODataAdapterUtils, ChecklistIdentity, GatewayContractConstants) {
     "use strict";
 
     function exportSearchResults(mArgs) {
@@ -19,7 +19,7 @@ sap.ui.define([
         if (!aRootIds.length && mArgs && mArgs.searchContract) {
             oPayload.SearchContract = Object.assign({}, mArgs.searchContract);
         }
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.REPORT_EXPORT, oPayload).then(function (oResponse) {
+        return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.REPORT_EXPORT, oPayload).then(function (oResponse) {
             return ODataAdapterUtils.asArray(oResponse);
         });
     }

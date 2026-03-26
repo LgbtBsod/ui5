@@ -1,6 +1,15 @@
 sap.ui.define([], function () {
     "use strict";
 
+    var REQUEST = Object.freeze({
+        BATCH: "BATCH",
+        DELETE: "DELETE",
+        GET: "GET",
+        GET_FUNCTION: "GET_FUNCTION",
+        POST: "POST",
+        POST_FUNCTION: "POST_FUNCTION"
+    });
+
     var FUNCTION_IMPORTS = Object.freeze({
         ANALYTICS_REFRESH_TRIGGER: "AnalyticsRefreshTrigger",
         AUTO_SAVE: "AutoSave",
@@ -43,6 +52,7 @@ sap.ui.define([], function () {
     return {
         DISALLOWED_PATHS: DISALLOWED_PATHS,
         ENTITY_SETS: ENTITY_SETS,
-        FUNCTION_IMPORTS: FUNCTION_IMPORTS
+        FUNCTION_IMPORTS: FUNCTION_IMPORTS,
+        REQUEST: REQUEST
     };
 });

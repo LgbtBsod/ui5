@@ -39,45 +39,30 @@ sap.ui.define([
             oRow.FileSize = Number(oRow.FileSize || oRow.FileSizeContent || 0) || 0;
             oRow.FileSizeContent = Number(oRow.FileSizeContent || oRow.FileSize || 0) || 0;
             oRow.Description = String(oRow.Description || "").trim();
-            oRow.Value = String(oRow.Value || "").trim();
+            oRow.DownloadUrl = String(oRow.DownloadUrl || "").trim();
+            oRow.DocumentHandle = String(oRow.DocumentHandle || "").trim();
             return oRow;
         }).filter(function (oRow) {
-            return !!(oRow.FileName && oRow.Value);
+            return !!(oRow.FileName && (oRow.DownloadUrl || oRow.DocumentHandle));
         });
     }
 
     function normalizeSavePayload(sRootId, oPayload, aAttachments) {
         var oIn = oPayload || {};
         var aNormalizedAttachments = normalizeAttachmentRows(aAttachments, sRootId);
-        if (
-            Object.prototype.hasOwnProperty.call(oIn, "root") ||
-            Object.prototype.hasOwnProperty.call(oIn, "checks") ||
-            Object.prototype.hasOwnProperty.call(oIn, "barriers") ||
-            Object.prototype.hasOwnProperty.call(oIn, "participants") ||
-            Object.prototype.hasOwnProperty.call(oIn, "attachments")
-        ) {
-            var aUnifiedAttachments = Array.isArray(oIn.attachments) ? oIn.attachments.slice() : [];
-            return Object.assign({}, oIn, {
-                root: Object.assign({}, oIn.root || {}, {
-                    pcct_uuid: normalizeRootKey((oIn.root && oIn.root[IDENTITY.ROOT_ALIAS_FIELDS[2]]) || sRootId)
-                }),
-                participants: Array.isArray(oIn.participants) ? oIn.participants.slice() : [],
-                attachments: aUnifiedAttachments.concat(aNormalizedAttachments),
-                client_version: Number(oIn.client_version || ((oIn.root || {}).version_number) || 0) || 0,
-                SessionGuid: oIn.SessionGuid || oIn.session_guid || null
-            });
-        }
         return {
-            RootKey: normalizeRootKey(sRootId),
-            ClientAggChangedOn: (oIn.meta && oIn.meta.aggChangedOn) || null,
-            FullPayload: {
-                root: oIn.root || {},
-                basic: oIn.basic || {},
-                checks: oIn.checks || [],
-                barriers: oIn.barriers || [],
-                participants: oIn.participants || [],
-                attachments: aNormalizedAttachments
-            }
+            Payload: {
+                root: Object.assign({}, oIn.root || {}, {
+                    pcct_uuid: normalizeRootKey((oIn.root && (oIn.root.pcct_uuid || oIn.root.RootKey || oIn.root.rootKey)) || sRootId)
+                }),
+                basic: Object.assign({}, oIn.basic || {}),
+                checks: Array.isArray(oIn.checks) ? oIn.checks.slice() : [],
+                barriers: Array.isArray(oIn.barriers) ? oIn.barriers.slice() : [],
+                participants: Array.isArray(oIn.participants) ? oIn.participants.slice() : [],
+                attachments: aNormalizedAttachments.concat(Array.isArray(oIn.attachments) ? oIn.attachments.slice() : [])
+            },
+            ClientVersion: Number(oIn.client_version || (oIn.root && oIn.root.version_number) || oIn.ClientVersion || 0) || 0,
+            SessionGuid: String(oIn.SessionGuid || oIn.session_guid || "").trim() || null
         };
     }
 

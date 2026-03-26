@@ -1,8 +1,8 @@
 {
   "app/service/features/search/runtime/SearchSelectionFocusRuntime.js": "Focus fallback still needs SmartTable renderer landmarks on UI5 1.71.",
+  "app/service/features/search/runtime/SearchSelectionRuntime.js": "Search table focus and selection fallback still relies on renderer landmarks on UI5 1.71.",
   "app/styles/modules/10_base.css": "Legacy root compatibility while app-owned wrappers replace old UI5 height chains.",
   "app/styles/modules/22_skeleton.css": "Busy/list skeleton state still anchored to table row renderer in UI5 1.71.",
-  "app/styles/modules/controls/25_table_actions.css": "Shared row action styling for sap.m/sap.ui.table hybrid tables.",
   "app/styles/modules/23_dialogs.css": "Dialog bundle still contains narrow UI5 renderer compatibility selectors for UI5 1.71.",
   "app/styles/modules/40_page_search.css": "Search bundle still contains scoped search/table renderer compatibility hooks.",
   "app/styles/modules/41_page_detail.css": "Detail bundle still contains scoped attachment/table/object-page compatibility hooks.",

@@ -107,7 +107,7 @@ class LockService:
         return lock
 
     @staticmethod
-    def acquire(db: Session, object_uuid: str, session_guid: str, uname: str, steal_from: str | None = None) -> dict:
+    def acquire(db: Session, object_uuid: str, session_guid: str, uname: str, steal_from: str | None = None, force_takeover: bool = False) -> dict:
         current_time = now_utc()
         existing = LockService._active_lock(db, object_uuid)
 
@@ -136,7 +136,7 @@ class LockService:
                 object_uuid
             )
 
-        if existing.user_id == uname and (not steal_from or steal_from == existing.session_guid):
+        if force_takeover and (not steal_from or steal_from == existing.session_guid):
             existing.is_killed = True
             existing.killed_by = session_guid
 
@@ -149,7 +149,7 @@ class LockService:
                 expires_at=current_time + LOCK_TTL,
             )
             db.add(new_lock)
-            db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="STEAL_OWN_SESSION"))
+            db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="FORCE_TAKEOVER"))
             db.commit()
             return LockService._with_server_state(
                 LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(new_lock), True, True, True, "ACQUIRED"),

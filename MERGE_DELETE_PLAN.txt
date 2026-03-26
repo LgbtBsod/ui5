@@ -1,70 +1,28 @@
 MERGE DELETE PLAN
 
-1. Component bootstrap cluster
-- Review:
-  - ComponentBootRuntime.js
-  - ComponentBootstrapContracts.js
-  - ComponentBootstrapDependencyBuilder.js
-  - ComponentBootstrapFlowRuntime.js
-  - ComponentCoreInitRuntime.js
-  - ComponentCoreRuntimeBootstrap.js
-  - ComponentLifecycleBootstrap.js
-  - ComponentModelBootstrap.js
-  - ComponentModelInitRuntime.js
-  - ComponentRuntimeOptionsFactory.js
-- Goal:
-  - one main bootstrap owner, one contracts/config owner at most.
+1. Completed component wrapper consolidation
+- Merged:
+  - `ComponentBootRuntime.js` -> `ComponentLifecycleRuntime.js`
+  - `ComponentListenerBindingRuntime.js` -> `ComponentLockEventsRuntime.js`
+  - `ComponentNavigationGuardRuntime.js` -> `ComponentNavigationGuardDecisionRuntime.js`
 
-2. Component save/navigation guard cluster
-- Review:
-  - ComponentGuardedSaveRuntime.js
-  - ComponentSaveGuardRuntime.js
-  - ComponentSaveGuardPolicy.js
-  - ComponentSaveGuardContracts.js
-  - ComponentNavigationGuardRuntime.js
-  - ComponentNavigationGuardDecisionRuntime.js
-  - ComponentPendingNavigationRuntime.js
-- Goal:
-  - one guard owner, no duplicated decision split.
+2. Completed shell/message ownership cleanup
+- Merged:
+  - `ShellMessageKeyConstants` -> `MessageKeyConstants`
 
-3. Component lock/session cluster
-- Review:
-  - ComponentLockEventsRuntime.js
-  - ComponentLockReleaseRuntime.js
-  - ComponentCrossTabHandlerRuntime.js
-  - ComponentCrossTabRuntime.js
-  - ComponentSessionRuntime.js
-  - ComponentPollingRuntime.js
-- Goal:
-  - one lock/session lifecycle owner.
+3. Completed detail thin-wrapper removal
+- Deleted:
+  - `DetailActionViewportBehavior.js`
+  - `DetailActionPinnedRailRuntime.js`
 
-4. Attachment cluster
-- Review:
-  - DetailAttachmentStateRuntime.js
-  - DetailAttachmentSaveRuntime.js
-  - DetailAttachmentDeltaRuntime.js
-  - DetailAttachmentOpenRuntime.js
-  - AttachmentUploadRuntime.js
-  - AttachmentUploadCore.js
-  - LoadAttachmentsUseCase.js
-- Goal:
-  - no duplicate state mutation owners, persisted/session split made explicit.
+4. Still open only as real owners
+- `ComponentPollingRuntime.js`
+- `ComponentAutosaveRuntime.js`
+- `DetailInfoCardFactory.js`
+- `DetailObserverCardRuntime.js`
+- `DetailSimpleCardRuntime.js`
 
-5. App shell cluster
-- Review:
-  - controller/app/*
-- Goal:
-  - collapse clear pass-through behaviors into one app owner.
-
-6. Constants simplification
-- Review:
-  - UiAssetPaths.js
-  - UiControlIds.js
-  - UiSemanticConstants.js
-  - FrontendConfigConstants.js
-  - RequestVerbConstants.js
-  - FacadeCommandConstants.js
-  - FeedbackConstants.js
-  - DialogConstants.js
-- Goal:
-  - fewer, broader semantic constants owners.
+5. Next cleanup candidates
+- app shell cluster
+- analytics/search controller clusters
+- any remaining CSS selectors that still depend on UI5 internals

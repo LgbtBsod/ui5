@@ -1,5 +1,10 @@
-DELETED FILES
-
-- app/service/domain/detail/DetailService.js
-- app/service/domain/detail/DetailUseCaseRegistry.js
-- app/service/domain/detail/DetailEntryAdapterRuntime.js
+- app/controller/detail/DetailActionPinnedRailRuntime.js
+- app/controller/detail/DetailActionViewportBehavior.js
+- app/service/runtime/component/ComponentActionRuntime.js
+- app/service/runtime/component/ComponentBootRuntime.js
+- app/service/runtime/component/ComponentFeedbackRuntime.js
+- app/service/runtime/component/ComponentListenerBindingRuntime.js
+- app/service/runtime/component/ComponentNavigationGuardRuntime.js
+- app/test/unit/framework/ComponentBootRuntime.qunit.js
+- app/test/unit/framework/ComponentListenerBindingRuntime.qunit.js
+- app/test/unit/framework/ComponentNavigationGuardRuntime.qunit.js

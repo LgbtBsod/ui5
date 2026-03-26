@@ -7,7 +7,7 @@ sap.ui.define([
      * Search init bundle loader.
      *
      * This use case owns only the search bootstrap dictionary/reference-data bundle.
-     * App boot readiness stays in ComponentBootRuntime; detail/analytics-specific data
+     * App boot readiness stays in ComponentLifecycleRuntime; detail/analytics-specific data
      * must be loaded by their own route/domain flows.
      */
     return {

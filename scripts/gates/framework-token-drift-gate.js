@@ -14,14 +14,16 @@ const TOKEN_RULES = [
     literals: ['boot_failed', 'bootstrap_app_failed', 'bootstrap_init_bundle_failed', 'load_current_user_failed', 'load_runtime_settings_failed'],
     allowedFiles: new Set([
       'app/service/framework/ComponentBootContracts.js',
-      'app/service/framework/ComponentBootRuntime.js'
+      'app/service/runtime/component/ComponentLifecycleRuntime.js'
     ])
   },
   {
     label: 'listener-token',
     literals: ['workflow.mode.changed', 'lock.state.changed', 'pcct:fullSave', 'LOCK_OWNED', 'LOCK_RELEASED', 'You have unsaved changes'],
     allowedFiles: new Set([
-      'app/service/framework/ComponentListenerContracts.js'
+      'app/service/framework/ComponentListenerContracts.js',
+      'app/service/framework/ComponentAppRuntime.js',
+      'app/service/runtime/component/ComponentLockEventsRuntime.js'
     ])
   },
   {

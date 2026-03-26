@@ -27,16 +27,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentModelInitRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentMainServiceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentModelBootstrap",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentCoreRuntimeBootstrap",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLifecycleBootstrap",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentCoreInitRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFeedbackRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLifecycleRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeSettingsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentPollingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentCrossTabRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentInitListenersRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockEventsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionDispatcher",
@@ -45,7 +42,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/InteractionFX",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapFlowRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeOptionsFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/SearchUiConfig",
@@ -84,16 +80,13 @@ sap.ui.define([
     ComponentModelInitRuntime,
     ComponentMainServiceRuntime,
     ComponentModelBootstrap,
-    ComponentCoreRuntimeBootstrap,
-    ComponentLifecycleBootstrap,
-    ComponentBootRuntime,
-    ComponentCoreInitRuntime,
-    ComponentFeedbackRuntime,
+    ComponentLifecycleRuntime,
     ComponentRuntimeSettingsRuntime,
     ComponentPollingRuntime,
     ComponentCrossTabRuntime,
     ComponentInitListenersRuntime,
     ComponentLockEventsRuntime,
+    ComponentNavigationRuntime,
     TelemetryRuntime,
     LayoutStateRuntime,
     ActionDispatcher,
@@ -102,7 +95,6 @@ sap.ui.define([
     InteractionFX,
     ThemeService,
     ComponentAppRuntime,
-    ComponentBootstrapFlowRuntime,
     ComponentRuntimeOptionsFactory,
     DetailFacade,
     SearchUiConfig,
@@ -144,10 +136,10 @@ sap.ui.define([
             ActionDispatcher: ActionDispatcher,
             ActionContract: ActionContract,
             WorkflowTelemetry: WorkflowTelemetry,
-            ComponentFeedbackRuntime: ComponentFeedbackRuntime,
             ComponentRuntimeSettingsRuntime: ComponentRuntimeSettingsRuntime,
             ComponentPollingRuntime: ComponentPollingRuntime,
             ThemeService: ThemeService,
+            ComponentNavigationRuntime: ComponentNavigationRuntime,
             SearchUiConfig: SearchUiConfig,
             DetailFacade: DetailFacade,
             ApplyRuntimeSettingsUseCase: ApplyRuntimeSettingsUseCase,
@@ -169,35 +161,92 @@ sap.ui.define([
         };
     }
 
+    function initializeStartupState(oComponent, aInitArgs) {
+        oComponent._oInteractionFX = InteractionFX;
+        UIComponent.prototype.init.apply(oComponent, aInitArgs || []);
+        oComponent._startupPerf = oComponent._startupPerf || {
+            t0: (window.performance && typeof window.performance.now === "function") ? window.performance.now() : Date.now(),
+            firstRouteReadyLogged: false,
+            analyticsStartedLogged: false
+        };
+        ThemeService.syncDocumentRootClasses();
+    }
+
+    function runDiagnostics(oDiagnosticsUseCase, mBootstrapDeps, oModelBootstrap) {
+        return oDiagnosticsUseCase.execute({}, {
+            mainServiceModel: oModelBootstrap.mainServiceModel,
+            stateModel: oModelBootstrap.models.stateModel,
+            getBackendMode: function () {
+                return BackendModeContracts.MODES.REAL;
+            },
+            onMetadataFailed: function () {
+                mBootstrapDeps.ModelStateRuntime.writeOnModel(
+                    oModelBootstrap.models.stateModel,
+                    BackendModeContracts.PATHS.BACKEND_MODE,
+                    BackendModeContracts.MODES.REAL
+                );
+            }
+        });
+    }
+
     function init(oComponent, aInitArgs) {
         var oBootstrap;
         var mBootstrapDeps;
         var oModelBootstrap;
         var mRuntimeModels;
         var mActionRuntimeOptions;
-        var oRuntimeContext;
+        var oNavigationRuntime;
 
-        ComponentBootstrapFlowRuntime.initializeStartupState(oComponent, UIComponent, InteractionFX, ThemeService, aInitArgs);
+        initializeStartupState(oComponent, aInitArgs);
 
         oBootstrap = createBootstrapDeps();
         mBootstrapDeps = oBootstrap.deps;
 
         oModelBootstrap = ComponentModelBootstrap.bootstrap(oComponent, mBootstrapDeps);
         ModelStateRuntime.writeOnModel(oModelBootstrap.models.stateModel, BackendModeContracts.PATHS.BACKEND_MODE, oBootstrap.getBackendMode());
-        ComponentBootstrapFlowRuntime.runDiagnostics(DiagnosticsUseCase, BackendModeContracts, mBootstrapDeps, oModelBootstrap);
+        runDiagnostics(DiagnosticsUseCase, mBootstrapDeps, oModelBootstrap);
         ComponentModelInitRuntime.registerModels(oComponent, oModelBootstrap.models);
         oComponent.setModel(oModelBootstrap.mainServiceModel);
         mRuntimeModels = ComponentRuntimeOptionsFactory.buildRuntimeModels(oModelBootstrap);
         mActionRuntimeOptions = ComponentRuntimeOptionsFactory.buildActionRuntimeOptions(oComponent, {
             WorkflowTelemetry: WorkflowTelemetry
         }, oModelBootstrap.models);
-        oRuntimeContext = ComponentCoreRuntimeBootstrap.bootstrap(oComponent, Object.assign({}, mBootstrapDeps, mActionRuntimeOptions), mRuntimeModels);
-
-        return ComponentLifecycleBootstrap.bootstrap(
+        oNavigationRuntime = ComponentLifecycleRuntime.attachRuntime(
             oComponent,
-            ComponentRuntimeOptionsFactory.buildLifecycleDeps(mBootstrapDeps, ComponentBootstrapDependencyBuilder),
-            ComponentRuntimeOptionsFactory.buildLifecycleContext(oRuntimeContext, mRuntimeModels)
+            Object.assign({}, mBootstrapDeps, mActionRuntimeOptions),
+            mRuntimeModels
         );
+
+        return ComponentLifecycleRuntime.runBootSequence({
+            component: oComponent,
+            stateModel: oModelBootstrap.models.stateModel,
+            shellModel: oModelBootstrap.models.shellModel,
+            envState: oModelBootstrap.models.envState,
+            cacheState: oModelBootstrap.models.cacheState,
+            cacheAdapter: oComponent._ctx && oComponent._ctx.cache,
+            initializeAppUseCase: InitializeAppUseCase,
+            ensureDictLoadedUseCase: EnsureDictLoadedUseCase,
+            componentRuntimeSupport: mBootstrapDeps.ComponentRuntimeSupport,
+            loadRuntimeSettings: function () {
+                return mBootstrapDeps.ComponentRuntimeSettingsRuntime.loadRuntimeSettings({
+                    stateModel: oModelBootstrap.models.stateModel,
+                    envState: oModelBootstrap.models.envState,
+                    masterDataModel: oModelBootstrap.models.masterDataModel,
+                    settingsManager: mBootstrapDeps.Managers && mBootstrapDeps.Managers.SettingsManager || mBootstrapDeps.SettingsManager,
+                    gatewayBackendService: GatewayClient,
+                    telemetryRuntime: TelemetryRuntime,
+                    emitTelemetry: mActionRuntimeOptions.emitTelemetry
+                });
+            },
+            loadCurrentUser: function () {
+                return LoadCurrentUserUseCase && LoadCurrentUserUseCase.refresh
+                    ? LoadCurrentUserUseCase.refresh({ stateModel: oModelBootstrap.models.stateModel })
+                    : Promise.resolve(null);
+            },
+            bundleText: mActionRuntimeOptions.bundleText
+        }).then(function () {
+            return oNavigationRuntime;
+        });
     }
 
     return {

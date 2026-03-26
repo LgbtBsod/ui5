@@ -1,12 +1,24 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeOptionsFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
-], function (ComponentBootstrapContracts, ModelStateRuntime, CloneUtil, WorkflowTelemetry, FrontendConfigConstants, EffectFeedbackContracts, ShellStateRuntime) {
+], function (
+    ComponentBootstrapContracts,
+    ComponentRuntimeOptionsFactory,
+    ComponentNavigationRuntime,
+    ModelStateRuntime,
+    CloneUtil,
+    WorkflowTelemetry,
+    FrontendConfigConstants,
+    EffectFeedbackContracts,
+    ShellStateRuntime
+) {
     "use strict";
 
     var PATHS = ComponentBootstrapContracts.PATHS;
@@ -14,6 +26,15 @@ sap.ui.define([
     var READINESS_STATUS = ComponentBootstrapContracts.READINESS_STATUS;
     var CONFIG_SOURCE = ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE;
     var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
+
+    function initializeRouter(oComponent) {
+        var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
+        if (!oRouter || typeof oRouter.initialize !== "function" || oComponent._routerInitialized) {
+            return;
+        }
+        oRouter.initialize();
+        oComponent._routerInitialized = true;
+    }
 
     function hasServerDataSnapshot(aCheckLists, oServerState) {
         return !!((Array.isArray(aCheckLists) && aCheckLists.length > 0) || oServerState);
@@ -231,8 +252,42 @@ sap.ui.define([
             });
     }
 
+    function attachRuntime(oComponent, mDeps, oRuntimeContext) {
+        var mModels = oRuntimeContext.models;
+        var mHandlers = oRuntimeContext.handlers;
+        var mServices = oRuntimeContext.services;
+        var mTelemetry = oRuntimeContext.telemetry;
+        var oRuntimeSupport = mServices.componentRuntimeSupport;
+
+        mDeps.ComponentPollingRuntime.createHeartbeatManager(
+            ComponentRuntimeOptionsFactory.buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
+        );
+        mDeps.ComponentPollingRuntime.createSupportManagers({
+            component: oComponent,
+            timerDefaults: mTelemetry.timerDefaults,
+            managers: mDeps.managers
+        });
+        mDeps.ComponentAutosaveRuntime.createAutoSaveManager(
+            ComponentRuntimeOptionsFactory.buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
+        );
+        mDeps.ComponentPollingRuntime.createLockStatusManager(
+            ComponentRuntimeOptionsFactory.buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
+        );
+
+        mDeps.ComponentLockEventsRuntime.attachLockRuntime(
+            ComponentRuntimeOptionsFactory.buildLockRuntimeOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
+        );
+        mDeps.ComponentInitListenersRuntime.attachInitListeners(
+            ComponentRuntimeOptionsFactory.buildInitListenerOptions(oComponent, mDeps, mModels, mHandlers, mServices, mTelemetry, oRuntimeSupport)
+        );
+
+        initializeRouter(oComponent);
+        return ComponentNavigationRuntime.createRuntime(oComponent, mModels.stateModel, mDeps.StatePaths);
+    }
+
     return {
         allSettledPolyfill: allSettledPolyfill,
+        attachRuntime: attachRuntime,
         cleanupCacheSessions: cleanupCacheSessions,
         finalizeBootError: finalizeBootError,
         finalizeBootSuccess: finalizeBootSuccess,

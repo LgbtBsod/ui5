@@ -30,7 +30,7 @@ sap.ui.define([
             NO_CHANGES: DetailUseCaseConstants.CODES.NO_CHANGES,
             ONE_COLUMN: NavigationContracts.LAYOUTS.ONE_COLUMN,
             SAVE: "SAVE",
-            UNSAVED_CHANGES_MESSAGE: "You have unsaved changes"
+            UNSAVED_CHANGES_MESSAGE: "unsavedChangesPrompt"
         }),
         TELEMETRY_EVENT: Object.freeze({
             LOCK_STATE_CHANGED: "lock.state.changed",

@@ -1,10 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/AccessPayload",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, AccessPayload, ODataAdapterUtils, ODataKeyContracts, GatewayContractConstants) {
+], function (GatewayClient, AccessPayload, ODataAdapterUtils, ODataKeyContracts, GatewayContractConstants) {
     "use strict";
 
     function parseGrantedOperations(vValue) {
@@ -36,9 +36,9 @@ sap.ui.define([
 
     function checkCreatePermission(sActivity, mDeps) {
         var firstRow = mDeps.firstRow;
-        return GatewayODataClient.get(ODataAdapterUtils.buildEntityPath("ChecklistCreatePermissionSet", "CURRENT", {
+        return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath("ChecklistCreatePermissionSet", "CURRENT", {
             type: ODataKeyContracts.TYPES.CURRENT_ALIAS_KEY
-        }).replace(/^\//, ""), {
+        }), {
             "__ts": Date.now()
         }).then(function (oResponse) {
             return normalizePermissionResponse(firstRow(oResponse), "", sActivity);
@@ -68,10 +68,11 @@ sap.ui.define([
             }
             return checkCreatePermission(sActivity, mDeps);
         }
-        return GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_PERMISSION, sRootId, {
-            type: ODataKeyContracts.TYPES.ROOT_KEY,
-            "$select": ODataKeyContracts.SELECTS.CHECKLIST_PERMISSION}).replace(/^\//, ""), {
-            ACTVT: sActivity
+        return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_PERMISSION, sRootId, {
+            type: ODataKeyContracts.TYPES.ROOT_KEY
+        }), {
+            ACTVT: sActivity,
+            "$select": ODataKeyContracts.SELECTS.CHECKLIST_PERMISSION
         }).then(function (oResponse) {
             return normalizePermissionResponse(firstRow(oResponse), sRootId, sActivity);
         });

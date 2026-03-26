@@ -15,6 +15,7 @@ INTERFACE zif_zodata_lock_manager PUBLIC.
     IMPORTING
       !is_key          TYPE ty_key
       !is_owner        TYPE ty_owner
+      !iv_force_takeover TYPE abap_bool DEFAULT abap_false
     CHANGING
       !cs_result       TYPE zstr_pcct_lock_acquire_rs
     RAISING
@@ -40,6 +41,8 @@ INTERFACE zif_zodata_lock_manager PUBLIC.
     IMPORTING
       !is_key          TYPE ty_key
       !iv_session_guid TYPE string OPTIONAL
+    CHANGING
+      !cs_result       TYPE zstr_pcct_lock_acquire_rs
     RAISING
       zcx_zodata_error.
 

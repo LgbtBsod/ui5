@@ -16,6 +16,7 @@ FUNCTION zodata_lock_control.
 "*     VALUE(IV_SESSION_GUID) TYPE STRING OPTIONAL
 "*     VALUE(IV_OWNER) TYPE SYUNAME OPTIONAL
 "*     VALUE(IV_TAB_SESSION_ID) TYPE STRING OPTIONAL
+"*     VALUE(IV_FORCE_TAKEOVER) TYPE ABAP_BOOL OPTIONAL
 "*  EXCEPTIONS
 "*      LOCK_ERROR
 "*      UPDATE_ERROR
@@ -31,6 +32,17 @@ FUNCTION zodata_lock_control.
 
   CASE iv_mode.
     WHEN 'A'. " acquire
+      IF iv_force_takeover = abap_true.
+        UPDATE ztodata_hdr
+           SET lock_owner      = ''
+               lock_session    = ''
+               tab_session_id  = ''
+               lock_expires_at = '00000000000000'
+         WHERE bo_key          = iv_bo_key
+           AND object_id       = iv_object_id.
+        COMMIT WORK AND WAIT.
+      ENDIF.
+
       CALL FUNCTION 'ENQUEUE_EZODATA_LCK'
         EXPORTING
           mode_ztodata_lck = 'E'

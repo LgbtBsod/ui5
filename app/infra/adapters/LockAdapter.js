@@ -1,10 +1,9 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants, GatewayClient, DetailContracts) {
+], function (ODataAdapterUtils, GatewayContractConstants, GatewayClient, DetailContracts) {
     "use strict";
 
     var DETAIL_CODES = DetailContracts.CODES;
@@ -69,8 +68,7 @@ sap.ui.define([
         var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
         var sTabSessionId = String((mArgs && (mArgs.tabSessionId || mArgs.TabSessionId)) || "").trim();
         var bForceTakeover = !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force));
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE, {
-            RootId: sObjectUuid,
+        return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE, {
             ObjectUuid: sObjectUuid,
             SessionGuid: sSession,
             TabSessionId: sTabSessionId,
@@ -85,8 +83,7 @@ sap.ui.define([
     function heartbeat(mArgs) {
         var sToken = normalizeLockToken(mArgs);
         var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT, {
-            RootId: sObjectUuid,
+        return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT, {
             ObjectUuid: sObjectUuid,
             SessionGuid: sToken
         }).then(function (oResult) {
@@ -99,7 +96,17 @@ sap.ui.define([
     function status(mArgs) {
         var sRootId = String((mArgs && mArgs.rootId) || "").trim();
         var sToken = normalizeLockToken(mArgs);
-        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.LOCK_STATUS + "('" + sRootId + "')", { SessionGuid: sToken }).then(function (oResult) {
+        return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(
+            GatewayContractConstants.ENTITY_SETS.LOCK_STATUS,
+            {
+                RootKey: sRootId,
+                SessionGuid: sToken
+            },
+            {
+                RootKey: { type: "Edm.Binary" },
+                SessionGuid: { type: "Edm.String" }
+            }
+        )).then(function (oResult) {
             return normalizeResult(oResult, sToken);
         }).catch(function (oError) {
             return { ok: false, code: DETAIL_CODES.TECHNICAL_ERROR, killed: false, messageKey: DETAIL_MESSAGE_KEYS.LOCK_STATUS_FAILED, raw: oError || {} };
@@ -109,8 +116,7 @@ sap.ui.define([
     function release(mArgs) {
         var sToken = normalizeLockToken(mArgs);
         var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
-            RootId: sObjectUuid,
+        return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
             ObjectUuid: sObjectUuid,
             SessionGuid: sToken
         }).then(function (oResult) {
@@ -145,9 +151,9 @@ sap.ui.define([
             return false;
         }
         oPayload = {
-            RootId: sObjectUuid,
             ObjectUuid: sObjectUuid,
-            SessionGuid: sToken
+            SessionGuid: sToken,
+            ForceTakeover: false
         };
         try {
             window.fetch(String(sServiceUrl).replace(/\/+$/, "") + "/" + GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {

@@ -127,6 +127,19 @@ sap.ui.define([
     }
 
     return {
+        attachmentDelete: function (oController, mInput) {
+            return DetailCommandPolicy.attachmentDelete(oController, RootIdRuntime.withCurrentRootId(oController, mInput));
+        },
+        attachmentLoad: function (oController, mInput) {
+            return DetailCommandPolicy.attachmentLoad(oController, RootIdRuntime.withCurrentRootId(oController, mInput));
+        },
+        openWorkflowAnalytics: function (oController) {
+            NavigationIntentService.navigateToAnalytics(oController);
+            return Promise.resolve();
+        },
+        toggleAttachmentsSection: function (oController, mInput) {
+            return DetailAttachmentRuntime.toggleAttachmentsSection(oController, mInput || {});
+        },
         onAttachmentUploadChange: function (oEvent) {
             return AttachmentUploadCore.onUploaderChange(this, oEvent);
         },

@@ -12,7 +12,6 @@ sap.ui.define([
      * Результат: фабрика собирает состояние из одних и тех же канонических ключей. */
     var INFO_CARD_KEYS = DetailRuntimeContracts.INFO_CARD_KEYS;
     var INFO_CARD_TEXT_KEYS = DetailRuntimeContracts.INFO_CARD_TEXT_KEYS;
-    var INFO_CARD_TEXT_FALLBACKS = DetailRuntimeContracts.INFO_CARD_TEXT_FALLBACKS;
     var VIEW_DEFAULTS = DetailRuntimeContracts.VIEW_DEFAULTS;
 
     /* Этот блок берет локализованный текст для view state.
@@ -121,13 +120,13 @@ sap.ui.define([
             validationShown: false,
             validationMissing: {},
             infoCards: DetailInfoCardLayoutRuntime.resolveCards(oController, [
-                { key: INFO_CARD_KEYS.DATETIME, title: resolveText(oController, INFO_CARD_TEXT_KEYS.DATETIME, INFO_CARD_TEXT_FALLBACKS.DATETIME), pinned: true },
-                { key: INFO_CARD_KEYS.LOCATION, title: resolveText(oController, INFO_CARD_TEXT_KEYS.LOCATION, INFO_CARD_TEXT_FALLBACKS.LOCATION), pinned: true },
-                { key: INFO_CARD_KEYS.EQUIPMENT, title: resolveText(oController, INFO_CARD_TEXT_KEYS.EQUIPMENT, INFO_CARD_TEXT_FALLBACKS.EQUIPMENT), pinned: true },
-                { key: INFO_CARD_KEYS.OBSERVER, title: resolveText(oController, INFO_CARD_TEXT_KEYS.OBSERVER, INFO_CARD_TEXT_FALLBACKS.OBSERVER), pinned: true },
-                { key: INFO_CARD_KEYS.OBSERVED, title: resolveText(oController, INFO_CARD_TEXT_KEYS.OBSERVED, INFO_CARD_TEXT_FALLBACKS.OBSERVED), pinned: true },
-                { key: INFO_CARD_KEYS.PROFESSION, title: resolveText(oController, INFO_CARD_TEXT_KEYS.PROFESSION, INFO_CARD_TEXT_FALLBACKS.PROFESSION), pinned: false },
-                { key: INFO_CARD_KEYS.LPC, title: resolveText(oController, INFO_CARD_TEXT_KEYS.LPC, INFO_CARD_TEXT_FALLBACKS.LPC), pinned: false }
+                { key: INFO_CARD_KEYS.DATETIME, title: resolveText(oController, INFO_CARD_TEXT_KEYS.DATETIME), pinned: true },
+                { key: INFO_CARD_KEYS.LOCATION, title: resolveText(oController, INFO_CARD_TEXT_KEYS.LOCATION), pinned: true },
+                { key: INFO_CARD_KEYS.EQUIPMENT, title: resolveText(oController, INFO_CARD_TEXT_KEYS.EQUIPMENT), pinned: true },
+                { key: INFO_CARD_KEYS.OBSERVER, title: resolveText(oController, INFO_CARD_TEXT_KEYS.OBSERVER), pinned: true },
+                { key: INFO_CARD_KEYS.OBSERVED, title: resolveText(oController, INFO_CARD_TEXT_KEYS.OBSERVED), pinned: true },
+                { key: INFO_CARD_KEYS.PROFESSION, title: resolveText(oController, INFO_CARD_TEXT_KEYS.PROFESSION), pinned: false },
+                { key: INFO_CARD_KEYS.LPC, title: resolveText(oController, INFO_CARD_TEXT_KEYS.LPC), pinned: false }
             ])
         };
     }

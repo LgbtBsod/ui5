@@ -121,7 +121,7 @@ sap.ui.define([
             checks: ODataAdapterUtils.asArray(oChecks).map(ChecklistSnapshotMapper.mapCheckRow),
             barriers: ODataAdapterUtils.asArray(oBarriers).map(ChecklistSnapshotMapper.mapBarrierRow),
             attachments: [],
-            meta: { source: "GatewayODataClient", aggChangedOn: sAggChangedOn, versionNumber: iVersionNumber }
+            meta: { source: "GatewayClient", aggChangedOn: sAggChangedOn, versionNumber: iVersionNumber }
         };
     }
 

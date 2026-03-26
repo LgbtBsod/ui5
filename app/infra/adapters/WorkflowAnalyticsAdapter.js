@@ -1,10 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ODataAdapterUtils, AnalyticsContracts, NullishPick, GatewayContractConstants) {
+], function (GatewayClient, ODataAdapterUtils, AnalyticsContracts, NullishPick, GatewayContractConstants) {
     "use strict";
 
     function toNumber(vValue) {
@@ -190,7 +190,7 @@ sap.ui.define([
         }
 
     function fetchSummary(mInput) {
-        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.SIMPLE_ANALYTICAL, readParams(mInput), {
+        return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.SIMPLE_ANALYTICAL, readParams(mInput), {
             responseGuardKey: "analytics.summary"
         }).then(normalizeSummary);
     }
@@ -205,20 +205,20 @@ sap.ui.define([
                     selectedSource: mInput && mInput.selectedSource
                 });
                 var pCompareBreakdown = iCompareYear === iSelectedYear
-            ? GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.WORKFLOW_ANALYTICS_BREAKDOWN, { "$filter": sBreakdownFilter }, {
+            ? GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.WORKFLOW_ANALYTICS_BREAKDOWN, { "$filter": sBreakdownFilter }, {
                         responseGuardKey: "analytics.breakdown.compare"
                     })
-            : GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.WORKFLOW_ANALYTICS_BREAKDOWN, { "$filter": sCompareBreakdownFilter }, {
+            : GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.WORKFLOW_ANALYTICS_BREAKDOWN, { "$filter": sCompareBreakdownFilter }, {
                         responseGuardKey: "analytics.breakdown.compare"
                     });
-        var pRefreshState = GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.ANALYTICS_REFRESH_STATE + "('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
+        var pRefreshState = GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.ANALYTICS_REFRESH_STATE + "('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
                     responseGuardKey: "analytics.refreshState"
                 }).catch(function () { return null; });
                 return Promise.all([
-            GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.SIMPLE_ANALYTICAL, mParams, {
+            GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.SIMPLE_ANALYTICAL, mParams, {
                         responseGuardKey: "analytics.summary"
                     }),
-            GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.WORKFLOW_ANALYTICS_BREAKDOWN, { "$filter": sBreakdownFilter }, {
+            GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.WORKFLOW_ANALYTICS_BREAKDOWN, { "$filter": sBreakdownFilter }, {
                         responseGuardKey: "analytics.breakdown.primary"
                     }),
                     pRefreshState,
@@ -234,7 +234,7 @@ sap.ui.define([
     }
 
     function fetchRefreshState() {
-        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.ANALYTICS_REFRESH_STATE + "('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
+        return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.ANALYTICS_REFRESH_STATE + "('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
             responseGuardKey: "analytics.refreshState"
         })
             .then(normalizeRefreshState)
@@ -242,11 +242,11 @@ sap.ui.define([
     }
 
     function requestRefresh(mInput) {
-        return GatewayODataClient.postFunction(GatewayContractConstants.FUNCTION_IMPORTS.ANALYTICS_REFRESH_TRIGGER, {
+        return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.ANALYTICS_REFRESH_TRIGGER, {
             TaskKey: AnalyticsContracts.REFRESH.TASK_KEY,
             RequestedBy: String(mInput && mInput.requestedBy || "")
         }).then(function () {
-        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.ANALYTICS_REFRESH_STATE + "('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
+        return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.ANALYTICS_REFRESH_STATE + "('" + AnalyticsContracts.REFRESH.TASK_KEY + "')", {}, {
                 responseGuardKey: "analytics.refreshState"
             }).catch(function () { return null; });
         }).then(normalizeRefreshState);

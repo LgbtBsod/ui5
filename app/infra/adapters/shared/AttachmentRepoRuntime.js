@@ -1,11 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ODataKeyNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, ODataKeyNormalizer, GatewayContractConstants) {
+], function (GatewayClient, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, ODataKeyNormalizer, GatewayContractConstants) {
     "use strict";
 
     function normalizeRootKey(sRootId) {
@@ -21,7 +21,7 @@ sap.ui.define([
         if (!sRootId) {
             return Promise.resolve({ attachments: [] });
         }
-        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
+        return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
             "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY),
             "$select": ODataKeyContracts.SELECTS.ATTACHMENT
         }).then(function (oResult) {
@@ -31,10 +31,36 @@ sap.ui.define([
 
     function deleteAttachment(mArgs) {
         var sAttachmentId = String((mArgs && (mArgs.attachmentId || mArgs.attachmentKey)) || "").trim().toUpperCase();
-        return Promise.resolve({
-            attachmentId: sAttachmentId,
-            deferred: !!sAttachmentId,
-            deleted: !!sAttachmentId
+        var sRootId = normalizeRootKey(mArgs && mArgs.rootId);
+        if (!sAttachmentId || !sRootId) {
+            return Promise.resolve({
+                attachmentId: sAttachmentId,
+                deleted: false
+            });
+        }
+        return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES, {
+            Payload: {
+                root: {
+                    pcct_uuid: sRootId,
+                    edit_mode: "U"
+                },
+                checks: [],
+                barriers: [],
+                participants: [],
+                attachments: [{
+                    attach_uuid: sAttachmentId,
+                    AttachmentKey: sAttachmentId,
+                    edit_mode: "D"
+                }],
+                session_guid: String((mArgs && mArgs.sessionGuid) || "").trim() || null,
+                client_version: Number((mArgs && mArgs.clientVersion) || 0) || 0
+            },
+            ClientVersion: Number((mArgs && mArgs.clientVersion) || 0) || 0
+        }).then(function () {
+            return {
+                attachmentId: sAttachmentId,
+                deleted: true
+            };
         });
     }
 

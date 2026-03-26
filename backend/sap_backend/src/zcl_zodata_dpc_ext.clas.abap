@@ -15,6 +15,7 @@ CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE
     METHODS lockacquire_create_entity REDEFINITION.
     METHODS lockheartbeat_create_entity REDEFINITION.
     METHODS lockrelease_create_entity REDEFINITION.
+    METHODS lockstatusset_get_entity REDEFINITION.
     METHODS autosave_create_entity REDEFINITION.
     METHODS savechanges_create_entity REDEFINITION.
     METHODS createchecklist_create_entity REDEFINITION.
@@ -185,8 +186,8 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_create
       iv_bukrs    = ls_source_root-bukrs
-      iv_text     = zif_zodata_contract_constants=>c_msg_no_create_auth_copy
-      iv_code     = zif_zodata_contract_constants=>c_code_no_create_auth ).
+      iv_text     = zif_zodata_message_texts=>c_msg_no_create_auth_copy
+      iv_code     = zif_zodata_message_codes=>no_create_auth ).
     rs_request = mo_save_service->build_copy_request(
       is_request     = is_request
       is_source_root = ls_source_root
@@ -213,7 +214,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_create
       ID 'BUKRS' FIELD '*'.
     IF sy-subrc <> 0.
-      raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_no_create_auth iv_code = zif_zodata_contract_constants=>c_code_no_create_auth ).
+      raise_busi_exception( iv_text = zif_zodata_message_texts=>c_msg_no_create_auth iv_code = zif_zodata_message_codes=>no_create_auth ).
     ENDIF.
     ensure_deps( ).
     ls_req = read_save_request( io_data_provider ).
@@ -280,7 +281,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     GET TIME STAMP FIELD ls_result-changed_on.
     ls_result-ok = abap_true.
     ls_result-success = abap_true.
-    ls_result-reason_code = zif_zodata_contract_constants=>c_msg_analytics_triggered.
+    ls_result-reason_code = zif_zodata_message_codes=>triggered.
     copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
   ENDMETHOD.
 
@@ -290,26 +291,27 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
     IF ls_req-object_uuid IS INITIAL OR ls_req-session_guid IS INITIAL.
-      raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_lock_acquire_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
+      raise_busi_exception( iv_text = zif_zodata_message_texts=>c_msg_lock_acquire_required iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     DATA(ls_auth_lock) = mo_read_service->read_root_row( ls_req-object_uuid ).
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_change
       iv_bukrs    = ls_auth_lock-bukrs
-      iv_text     = zif_zodata_contract_constants=>c_msg_no_edit_auth
-      iv_code     = zif_zodata_contract_constants=>c_code_no_edit_auth ).
+      iv_text     = zif_zodata_message_texts=>c_msg_no_edit_auth
+      iv_code     = zif_zodata_message_codes=>no_edit_auth ).
     TRY.
         mo_lock_manager->acquire(
           EXPORTING
             is_key   = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = ls_req-object_uuid )
             is_owner = VALUE zif_zodata_lock_manager=>ty_owner( uname = sy-uname session_guid = ls_req-session_guid tab_session_id = ls_req-tab_session_id )
+            iv_force_takeover = xsdbool( ls_req-force_takeover = abap_true )
           CHANGING
             cs_result = ls_result ).
         copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
       CATCH zcx_zodata_error INTO DATA(lx_lock_error).
         raise_busi_exception( iv_text = lx_lock_error->get_message_text( ) iv_code = lx_lock_error->get_code( ) ).
       CATCH zcx_lock_error INTO DATA(lx_lock).
-        raise_busi_exception( iv_text = lx_lock->get_text( ) iv_code = zif_zodata_contract_constants=>c_code_lock_stolen ).
+        raise_busi_exception( iv_text = lx_lock->get_text( ) iv_code = zif_zodata_message_codes=>lock_stolen ).
     ENDTRY.
   ENDMETHOD.
 
@@ -319,7 +321,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
     IF ls_req-object_uuid IS INITIAL OR ls_req-session_guid IS INITIAL.
-      raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_lock_heartbeat_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
+      raise_busi_exception( iv_text = zif_zodata_message_texts=>c_msg_lock_heartbeat_required iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     TRY.
         mo_lock_manager->heartbeat(
@@ -341,7 +343,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
     IF ls_req-object_uuid IS INITIAL OR ls_req-session_guid IS INITIAL.
-      raise_busi_exception( iv_text = zif_zodata_contract_constants=>c_msg_lock_release_required iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
+      raise_busi_exception( iv_text = zif_zodata_message_texts=>c_msg_lock_release_required iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     TRY.
         mo_lock_manager->unlock(
@@ -349,7 +351,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
             is_key          = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = ls_req-object_uuid )
             iv_session_guid = ls_req-session_guid ).
       CATCH zcx_lock_error INTO DATA(lx_release_lock).
-        raise_busi_exception( iv_text = lx_release_lock->get_text( ) iv_code = zif_zodata_contract_constants=>c_code_lock_not_owned_by_session ).
+        raise_busi_exception( iv_text = lx_release_lock->get_text( ) iv_code = zif_zodata_message_codes=>lock_not_owned_by_session ).
       CATCH zcx_zodata_error INTO DATA(lx_release_error).
         raise_busi_exception( iv_text = lx_release_error->get_message_text( ) iv_code = lx_release_error->get_code( ) ).
     ENDTRY.
@@ -358,7 +360,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     mo_contract->fill_lock_release_result(
       EXPORTING
         iv_ok                  = abap_true
-        iv_code                = zif_zodata_contract_constants=>c_code_lock_ok
+        iv_code                = zif_zodata_message_codes=>lock_ok
         iv_object_uuid         = ls_req-object_uuid
         iv_owner_session       = ls_req-session_guid
         iv_server_now          = lv_now_ts
@@ -367,6 +369,29 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       CHANGING
         cs_result              = ls_result ).
     copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
+  ENDMETHOD.
+
+  METHOD lockstatusset_get_entity.
+    DATA ls_result TYPE zstr_pcct_lock_acquire_rs.
+    DATA lv_rootkey TYPE sysuuid_x16.
+    DATA lv_session_guid TYPE string.
+    ensure_deps( ).
+    lv_rootkey = read_root_key( it_key_tab ).
+    READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_session_guid>) WITH KEY name = 'SessionGuid'.
+    IF sy-subrc = 0.
+      lv_session_guid = <ls_session_guid>-value.
+    ENDIF.
+    TRY.
+        mo_lock_manager->status(
+          EXPORTING
+            is_key          = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = lv_rootkey )
+            iv_session_guid = lv_session_guid
+          CHANGING
+            cs_result       = ls_result ).
+        copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
+      CATCH zcx_zodata_error INTO DATA(lx_status_error).
+        raise_busi_exception( iv_text = lx_status_error->get_message_text( ) iv_code = lx_status_error->get_code( ) ).
+    ENDTRY.
   ENDMETHOD.
 
   METHOD mpltreeset_get_entityset.
@@ -393,8 +418,8 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_view
       iv_bukrs    = ls_row-bukrs
-      iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
-      iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
+      iv_text     = zif_zodata_message_texts=>c_msg_permission_no_view
+      iv_code     = zif_zodata_message_codes=>no_view_auth ).
     copy_data_to_ref( EXPORTING is_data = ls_row CHANGING cr_data = er_entity ).
   ENDMETHOD.
 
@@ -422,8 +447,8 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_view
       iv_bukrs    = ls_root_auth-bukrs
-      iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
-      iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
+      iv_text     = zif_zodata_message_texts=>c_msg_permission_no_view
+      iv_code     = zif_zodata_message_codes=>no_view_auth ).
     lt_rows = mo_read_service->read_check_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
   ENDMETHOD.
@@ -441,8 +466,8 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_view
       iv_bukrs    = ls_root_auth-bukrs
-      iv_text     = zif_zodata_contract_constants=>c_msg_permission_no_view
-      iv_code     = zif_zodata_contract_constants=>c_code_no_view_auth ).
+      iv_text     = zif_zodata_message_texts=>c_msg_permission_no_view
+      iv_code     = zif_zodata_message_codes=>no_view_auth ).
     lt_rows = mo_read_service->read_barrier_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
   ENDMETHOD.
@@ -528,6 +553,6 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD raise_crud_not_allowed.
-    raise_busi_exception( iv_text = |{ iv_context }: { zif_zodata_contract_constants=>c_msg_crud_not_allowed }| iv_code = zif_zodata_contract_constants=>c_code_technical_error ).
+    raise_busi_exception( iv_text = |{ iv_context }: { zif_zodata_message_texts=>c_msg_crud_not_allowed }| iv_code = zif_zodata_message_codes=>technical_error ).
   ENDMETHOD.
 ENDCLASS.

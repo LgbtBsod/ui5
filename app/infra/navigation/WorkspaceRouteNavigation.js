@@ -3,13 +3,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "sap/ui/core/routing/HashChanger",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, RootIdRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger, JsRuntime) {
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger, JsRuntime) {
     "use strict";
 
     var TYPEOF = JsRuntime.TYPEOF;
@@ -56,9 +55,9 @@ sap.ui.define([
         var sHash = oHashChanger && typeof oHashChanger[HASH_CHANGER.GET_HASH] === TYPEOF.FUNCTION
             ? String(oHashChanger[HASH_CHANGER.GET_HASH]() || "")
             : "";
-        var sRootId = isDetailIntent(oIntent)
-            ? String(RootIdRuntime.resolveFromStateModel(oStateModel) || "").trim()
-            : "";
+        var sActiveObjectId = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
+        var sSelectedId = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "") || "").trim();
+        var sRootId = isDetailIntent(oIntent) ? (sActiveObjectId || sSelectedId) : "";
 
         if (!sHash) {
             sHash = buildHashFromIntent(oRouter, oIntent);
@@ -66,13 +65,15 @@ sap.ui.define([
 
         return {
             hash: sHash,
-            rootId: sRootId
+            activeObjectId: sRootId,
+            selectedId: sRootId
         };
     }
 
     function buildCurrentIntent(oStateModel, oShellModel) {
         var sRouteName = String(ModelStateRuntime.readOnModel(oStateModel, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-        var sActiveId = RootIdRuntime.resolveActiveFromStateModel(oStateModel);
+        var sActiveId = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim() ||
+            String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "") || "").trim();
         var sLayout = LayoutStateRuntime.readLayout(oShellModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
 
         if (sRouteName === NavigationContracts.ROUTES.ANALYTICS && sLayout === NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN
@@ -101,11 +102,12 @@ sap.ui.define([
         var oSnapshot = buildAnalyticsReturnSnapshot(oStateModel, oShellModel, oRouter);
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
         var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
-        var bRestoreEdit = !!(oSnapshot.rootId && WorkflowContracts.isEditLocked(sMode, sLockState));
+        var bRestoreEdit = !!(oSnapshot.activeObjectId && WorkflowContracts.isEditLocked(sMode, sLockState));
 
         ModelStateRuntime.writeOnModel(oStateModel, "/analyticsNavReturn", {
             hash: oSnapshot.hash,
-            rootId: oSnapshot.rootId,
+            activeObjectId: oSnapshot.activeObjectId,
+            selectedId: oSnapshot.selectedId,
             restoreEdit: bRestoreEdit
         });
 
@@ -135,10 +137,11 @@ sap.ui.define([
         var sTargetRootId;
         var sTargetHash = String((oReturn && oReturn.hash) || "").trim();
 
-        sTargetRootId = String((oReturn && oReturn.rootId) || "").trim();
+        sTargetRootId = String((oReturn && (oReturn.activeObjectId || oReturn.selectedId)) || "").trim();
         if (oReturn && oReturn.restoreEdit && sTargetRootId) {
             ModelStateRuntime.writeOnModel(oStateModel, "/analyticsReturnRestoreEdit", {
-                rootId: sTargetRootId,
+                activeObjectId: sTargetRootId,
+                selectedId: sTargetRootId,
                 requestedAt: new Date().toISOString()
             });
         } else {

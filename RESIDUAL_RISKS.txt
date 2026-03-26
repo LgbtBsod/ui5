@@ -1,30 +1,4 @@
-RESIDUAL RISKS
-
-1. Key contract is not fully canonical yet
-- Command flow still accepts and emits pcct_uuid/id/Key fallback chains.
-- DB_KEY / RootKey / PARENT_KEY are not yet the sole proven command-flow canon in frontend serialization.
-
-2. Detail loading depends on a successful second-phase child read
-- Initial detail open is phased now: root/basic first, checks/barriers second.
-- If deferred child hydration fails, the screen remains operable but child sections stay empty until the user refreshes or reopens the detail.
-
-3. Attachment contract still has Value as a live compatibility tail
-- Value is still part of SELECTS, normalization, staged upload serialization, and open fallback path.
-- Attachment contract must not be described as fully metadata-first while this remains true.
-
-4. Attachment metadata-first contract is still only partial
-- Persisted/session state split is now closed in frontend state and UI.
-- Remaining gap is strictly the Value-centric compatibility tail in select/open/save normalization.
-
-5. SAPUI5 internal CSS / DOM debt remains high
-- Multiple stylesheet modules still patch internal sap* classes.
-- Some runtime flows still depend on DOM geometry/query patterns that should be treated as residual exceptions until reduced.
-
-6. Backend proof remains limited
-- Real ABAP mapper to lt_modification is not provable from this frontend repo.
-- Real BOPF modify pipeline and productive ArchiveLink stream/provider are not provable from this repo.
-- Productive analytics persistence/background job topology is not provable from this repo.
-
-7. Official SAPUI5 framework build still requires SAP registry access
-- Local fallback build is reproducible.
-- Official framework-resolved build remains environment-dependent.
+1. `RootId` compatibility tail still exists in boundary plumbing and must remain ingress/egress only.
+2. Component/runtime and detail controller ownership is cleaner, but some clusters still have more than one true owner.
+3. UI5 private selector usage is still present in a few documented override points.
+4. Full regression test suite was not run in this pass.

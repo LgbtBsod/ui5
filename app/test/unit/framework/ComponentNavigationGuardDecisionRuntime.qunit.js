@@ -1,8 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationGuardRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationGuardDecisionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (ComponentNavigationGuardRuntime, StatePaths, WorkflowContracts) {
+], function (ComponentNavigationGuardDecisionRuntime, StatePaths, WorkflowContracts) {
     "use strict";
 
     function createStateModel(mSeed) {
@@ -77,7 +77,7 @@ sap.ui.define([
             }
         };
 
-        ComponentNavigationGuardRuntime.attachBeforeRouteMatched({
+        ComponentNavigationGuardDecisionRuntime.handleBeforeRouteMatched({
             component: oComponent,
             stateModel: oStateModel,
             statePaths: {
@@ -127,7 +127,7 @@ sap.ui.define([
             },
             resetDetailAccessGuard: function () {},
             resetDetailNavigationState: function () {}
-        });
+        }, oRouteEvent);
 
         return {
             counts: mCounts,
@@ -139,7 +139,7 @@ sap.ui.define([
         };
     }
 
-    QUnit.module("ComponentNavigationGuardRuntime");
+    QUnit.module("ComponentNavigationGuardDecisionRuntime");
 
     QUnit.test("dirty save flow delegates resume ownership to guarded save", function (assert) {
         var done = assert.async();

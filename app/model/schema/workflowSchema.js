@@ -44,11 +44,13 @@ sap.ui.define([
         readiness: {
             app: { status: WorkflowContracts.READINESS_STATUS.PENDING, ready: false, readyAt: "", error: "" },
             search: { status: WorkflowContracts.READINESS_STATUS.PENDING, ready: false, readyAt: "", error: "" },
-            detail: { status: WorkflowContracts.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "", rootId: "", mode: WorkflowContracts.EDIT_MODES.READ, permissionKnown: false, lockKnown: false },
+            detail: { status: WorkflowContracts.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "", rootId: "", activeObjectId: "", selectedId: "", mode: WorkflowContracts.EDIT_MODES.READ, permissionKnown: false, lockKnown: false },
             analytics: { status: WorkflowContracts.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "" }
         },
         detailMeta: {
             rootId: "",
+            activeObjectId: "",
+            selectedId: "",
             readiness: { status: WorkflowContracts.READINESS_STATUS.IDLE, ready: false, readyAt: "", error: "" },
             mode: WorkflowContracts.EDIT_MODES.READ,
             lock: { state: WorkflowContracts.LOCK_STATES.READ_ONLY, known: false },

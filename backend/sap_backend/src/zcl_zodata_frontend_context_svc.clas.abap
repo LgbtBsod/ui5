@@ -57,8 +57,8 @@ CLASS zcl_zodata_frontend_context_svc IMPLEMENTATION.
     DATA lv_can_edit TYPE abap_bool VALUE abap_true.
     DATA lv_can_delete TYPE abap_bool VALUE abap_true.
     DATA lv_can_create TYPE abap_bool VALUE abap_true.
-    DATA lv_reason TYPE string VALUE zif_zodata_contract_constants=>c_code_authorized.
-    DATA lv_message TYPE string VALUE zif_zodata_contract_constants=>c_msg_permission_authorized.
+    DATA lv_reason TYPE string VALUE zif_zodata_message_codes=>authorized.
+    DATA lv_message TYPE string VALUE zif_zodata_message_texts=>c_msg_permission_authorized.
 
     ensure_contract( ).
 
@@ -74,17 +74,17 @@ CLASS zcl_zodata_frontend_context_svc IMPLEMENTATION.
     ENDIF.
 
     IF lv_can_view = abap_false.
-      lv_reason = zif_zodata_contract_constants=>c_code_no_view_auth.
-      lv_message = zif_zodata_contract_constants=>c_msg_permission_no_view.
+      lv_reason = zif_zodata_message_codes=>no_view_auth.
+      lv_message = zif_zodata_message_texts=>c_msg_permission_no_view.
     ELSEIF lv_can_edit = abap_false AND lv_can_delete = abap_false.
-      lv_reason = zif_zodata_contract_constants=>c_code_read_only_auth.
-      lv_message = zif_zodata_contract_constants=>c_msg_permission_read_only.
+      lv_reason = zif_zodata_message_codes=>read_only_auth.
+      lv_message = zif_zodata_message_texts=>c_msg_permission_read_only.
     ELSEIF lv_can_edit = abap_false.
-      lv_reason = zif_zodata_contract_constants=>c_code_no_edit_auth.
-      lv_message = zif_zodata_contract_constants=>c_msg_permission_no_edit.
+      lv_reason = zif_zodata_message_codes=>no_edit_auth.
+      lv_message = zif_zodata_message_texts=>c_msg_permission_no_edit.
     ELSEIF lv_can_delete = abap_false.
-      lv_reason = zif_zodata_contract_constants=>c_code_no_delete_auth.
-      lv_message = zif_zodata_contract_constants=>c_msg_permission_no_delete.
+      lv_reason = zif_zodata_message_codes=>no_delete_auth.
+      lv_message = zif_zodata_message_texts=>c_msg_permission_no_delete.
     ENDIF.
 
     mo_contract->fill_permission_result(
@@ -131,7 +131,7 @@ CLASS zcl_zodata_frontend_context_svc IMPLEMENTATION.
     ENDIF.
 
     lv_rules = iv_permission_rules_json.
-    lv_summary = |{ zif_zodata_contract_constants=>c_msg_permission_summary_prefix } { lv_csv }|.
+    lv_summary = |{ zif_zodata_message_texts=>c_msg_permission_summary_prefix } { lv_csv }|.
 
     mo_contract->fill_current_user(
       EXPORTING

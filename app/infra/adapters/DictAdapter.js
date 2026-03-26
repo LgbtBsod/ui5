@@ -1,8 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants) {
+], function (GatewayClient, ODataAdapterUtils, GatewayContractConstants) {
     "use strict";
 
     var DOMAIN_FETCH_LIMIT = 500;
@@ -48,7 +48,7 @@ sap.ui.define([
     }
 
     function loadDomain(sDomain) {
-        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.DICTIONARY_ITEM, {
+        return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.DICTIONARY_ITEM, {
             "$filter": "Domain eq '" + String(sDomain || "").replace(/'/g, "''") + "'",
             "$orderby": "Key asc",
             "$top": DOMAIN_FETCH_LIMIT

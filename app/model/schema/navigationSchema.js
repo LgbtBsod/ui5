@@ -14,12 +14,13 @@ sap.ui.define([
         navGuardBypass: false,
         analyticsNavReturn: {
             hash: "",
-            rootId: "",
+            activeObjectId: "",
+            selectedId: "",
             restoreEdit: false
         },
         analyticsReturnRestoreEdit: null,
         detailAccessGuard: {
-            rootId: "",
+            activeObjectId: "",
             userId: "",
             canView: true,
             canEdit: false,

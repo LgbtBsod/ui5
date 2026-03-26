@@ -10,7 +10,14 @@ sap.ui.define([
 
     function initModel(oController, vState) {
         var vData = typeof vState === "function" ? vState() : vState;
-        oController.setModel(new JSONModel(vData || {}), VIEW_MODEL);
+        var oModel = ControllerModelRuntime.viewState(oController);
+        if (oModel && typeof oModel.setData === "function") {
+            oModel.setData(vData || {});
+            return oModel;
+        }
+        if (oController && typeof oController.setModel === "function") {
+            oController.setModel(new JSONModel(vData || {}), VIEW_MODEL);
+        }
         return ControllerModelRuntime.viewState(oController);
     }
 
@@ -27,14 +34,7 @@ sap.ui.define([
     }
 
     function replace(oController, vState) {
-        var oModel = ControllerModelRuntime.viewState(oController);
-        var vData = typeof vState === "function" ? vState() : vState;
-
-        if (!oModel || typeof oModel.setData !== "function") {
-            return initModel(oController, vData);
-        }
-        oModel.setData(vData || {});
-        return oModel;
+        return initModel(oController, vState);
     }
 
     function setFlag(oController, sPath, vValue) {
@@ -46,16 +46,16 @@ sap.ui.define([
         return ModelStateRuntime.withFlag(oController, VIEW_MODEL, sPath, fnWork, vBegin, vEnd);
     }
 
-    return {
+    return Object.freeze({
         initModel: initModel,
-        viewState: function (oController) {
-            return ControllerModelRuntime.viewState(oController);
-        },
         get: get,
         set: set,
         setMany: setMany,
         replace: replace,
         setFlag: setFlag,
-        withFlag: withFlag
-    };
+        withFlag: withFlag,
+        viewState: function (oController) {
+            return ControllerModelRuntime.viewState(oController);
+        }
+    });
 });

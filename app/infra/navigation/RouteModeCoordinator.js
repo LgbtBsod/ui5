@@ -25,14 +25,16 @@ sap.ui.define([
         }
         if (sRoute === NavigationContracts.ROUTES.ANALYTICS) {
             return normalizeId(
-                ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "") ||
                 ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
             );
         }
         if (NavigationContracts.isDetailRoute(sRoute) && sArgId) {
             return sArgId;
         }
-        return normalizeId(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, ""));
+        return normalizeId(
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") ||
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
+        );
     }
 
     function resolveActiveObjectId(sRouteName, mArgs, oStateModel) {

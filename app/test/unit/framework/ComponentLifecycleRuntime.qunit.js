@@ -1,10 +1,10 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootRuntime"
-], function (JSONModel, ComponentBootRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLifecycleRuntime"
+], function (JSONModel, ComponentLifecycleRuntime) {
     "use strict";
 
-    QUnit.module("framework/ComponentBootRuntime");
+    QUnit.module("framework/ComponentLifecycleRuntime.boot");
 
     QUnit.test("finalizeBootSuccess does not overwrite cache state with synthetic empty snapshot", function (assert) {
         var oStateModel = new JSONModel({});
@@ -14,7 +14,7 @@ sap.ui.define([
             keyMapping: { keep: true }
         };
 
-        ComponentBootRuntime.finalizeBootSuccess({
+        ComponentLifecycleRuntime.finalizeBootSuccess({
             stateModel: oStateModel,
             cacheState: oCacheState,
             cacheAt: "cache-at",

@@ -9,8 +9,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ShellMessageKeyConstants"
-], function (LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, ShellMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -18,10 +18,10 @@ sap.ui.define([
     var STATE_MODEL = MODELS.STATE;
     var SHELL_MODEL = MODELS.SHELL;
     var PERMISSION_TEXT_KEY_MAP = {
-        "01": ShellMessageKeyConstants.PERMISSION_CREATE,
-        "02": ShellMessageKeyConstants.PERMISSION_CHANGE,
-        "03": ShellMessageKeyConstants.PERMISSION_DISPLAY,
-        "06": ShellMessageKeyConstants.PERMISSION_DELETE
+        "01": MessageKeyConstants.SHELL.PERMISSION_CREATE,
+        "02": MessageKeyConstants.SHELL.PERMISSION_CHANGE,
+        "03": MessageKeyConstants.SHELL.PERMISSION_DISPLAY,
+        "06": MessageKeyConstants.SHELL.PERMISSION_DELETE
     };
 
     function resolveText(mHooks, oController, sKey, aArgs) {
@@ -43,11 +43,11 @@ sap.ui.define([
                 var sScopeKind = String(oRule && oRule.scopeKind || "all").trim().toLowerCase() || "all";
                 var sScopeValue = String(oRule && oRule.scopeValue || "ALL").trim() || "ALL";
                 return sScopeKind === "bukrs" && sScopeValue.toUpperCase() !== "ALL"
-                    ? resolveText(mHooks, oController, ShellMessageKeyConstants.PERMISSION_SCOPE_BUKRS, [sScopeValue])
-                    : resolveText(mHooks, oController, ShellMessageKeyConstants.PERMISSION_SCOPE_ALL);
+                    ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.PERMISSION_SCOPE_BUKRS, [sScopeValue])
+                    : resolveText(mHooks, oController, MessageKeyConstants.SHELL.PERMISSION_SCOPE_ALL);
             },
             codeLabel: function (oRule) {
-                return resolveText(mHooks, oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || ShellMessageKeyConstants.PERMISSION_UNKNOWN, [oRule.code]);
+                return resolveText(mHooks, oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || MessageKeyConstants.SHELL.PERMISSION_UNKNOWN, [oRule.code]);
             }
         });
     }
@@ -56,7 +56,7 @@ sap.ui.define([
         return PermissionPresentation.buildSummaryText(
             sBackendSummary,
             aPermissionSheets,
-            resolveText(mHooks, oController, ShellMessageKeyConstants.USER_PERMISSIONS_EMPTY)
+            resolveText(mHooks, oController, MessageKeyConstants.SHELL.USER_PERMISSIONS_EMPTY)
         );
     }
 
@@ -189,7 +189,7 @@ sap.ui.define([
         oCurrentUser = ModelStateRuntime.read(oController, STATE_MODEL, "/currentUser", {}) || {};
         sFullName = hasResolvedCurrentUser(oCurrentUser)
             ? String(oCurrentUser.fullName || "")
-            : resolveText(mHooks, oController, ShellMessageKeyConstants.USER_LOADING);
+            : resolveText(mHooks, oController, MessageKeyConstants.SHELL.USER_LOADING);
         aPermissions = Array.isArray(oCurrentUser.permissions) ? oCurrentUser.permissions.slice() : [];
         aPermissionRules = Array.isArray(oCurrentUser.permissionRules) ? oCurrentUser.permissionRules.slice() : [];
         aPermissionSheets = buildPermissionSheets(oController, aPermissionRules, mHooks);
@@ -204,24 +204,24 @@ sap.ui.define([
         bEditWorkspace = !bSearchWorkspace && sMode === WorkflowContracts.EDIT_MODES.EDIT;
 
         mShellPatch["/shell/eyebrow"] = bSearchWorkspace
-            ? resolveText(mHooks, oController, ShellMessageKeyConstants.APP_TITLE)
-            : resolveText(mHooks, oController, ShellMessageKeyConstants.DETAIL_WORKSPACE_SECTION_TITLE);
+            ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.APP_TITLE)
+            : resolveText(mHooks, oController, MessageKeyConstants.SHELL.DETAIL_WORKSPACE_SECTION_TITLE);
         mShellPatch["/shell/productName"] = sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS
-            ? resolveText(mHooks, oController, ShellMessageKeyConstants.PRODUCT_NAME_ANALYTICS)
-            : resolveText(mHooks, oController, ShellMessageKeyConstants.PRODUCT_NAME_SEARCH);
+            ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.PRODUCT_NAME_ANALYTICS)
+            : resolveText(mHooks, oController, MessageKeyConstants.SHELL.PRODUCT_NAME_SEARCH);
         mShellPatch["/shell/routeLabel"] = sCurrentRouteName;
         mShellPatch["/shell/contextSubtitle"] = sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS
-            ? resolveText(mHooks, oController, ShellMessageKeyConstants.CONTEXT_ANALYTICS)
-            : (!sSelectedId ? resolveText(mHooks, oController, ShellMessageKeyConstants.CONTEXT_SEARCH)
-                : (CreateSentinel.isCreateId(sSelectedId) ? resolveText(mHooks, oController, ShellMessageKeyConstants.CONTEXT_DRAFT)
-                    : resolveText(mHooks, oController, ShellMessageKeyConstants.CONTEXT_DETAIL, [sSelectedId])));
+            ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_ANALYTICS)
+            : (!sSelectedId ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_SEARCH)
+                : (CreateSentinel.isCreateId(sSelectedId) ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_DRAFT)
+                    : resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_DETAIL, [sSelectedId])));
         mShellPatch["/shell/userLabel"] = buildHeaderUserLabel(sFullName, aPermissionSheets);
         mShellPatch["/shell/userMeta"] = sFullName;
         mShellPatch["/shell/userLoginLabel"] = "";
         mShellPatch["/shell/userEnvironmentLabel"] = sFrontendSource;
         mShellPatch["/shell/userPermissions"] = aPermissionSheets;
         mShellPatch["/shell/userSummaryText"] = sUserSummaryText;
-        mShellPatch["/shell/userSessionLabel"] = resolveText(mHooks, oController, ShellMessageKeyConstants.USER_SESSION_MANAGED);
+        mShellPatch["/shell/userSessionLabel"] = resolveText(mHooks, oController, MessageKeyConstants.SHELL.USER_SESSION_MANAGED);
         mShellPatch["/shell/userSessionState"] = hasResolvedCurrentUser(oCurrentUser)
             ? (aPermissionRules.length || aPermissions.length ? "Success" : "Warning")
             : "Information";
@@ -230,9 +230,9 @@ sap.ui.define([
         mShellPatch["/shell/userActionIcon"] = "sap-icon://employee";
         mShellPatch["/shell/userActionType"] = "Transparent";
         mShellPatch["/shell/userActionKind"] = "";
-        mShellPatch["/shell/userActionPassiveText"] = bEditWorkspace ? resolveText(mHooks, oController, ShellMessageKeyConstants.LOCK_LOCKED) : "";
-        mShellPatch["/shell/userActionHint"] = resolveText(mHooks, oController, ShellMessageKeyConstants.USER_HINT_RUNTIME);
-        mShellPatch["/shell/userTooltip"] = sUserSummaryText || resolveText(mHooks, oController, ShellMessageKeyConstants.USER_TOOLTIP_STANDALONE);
+        mShellPatch["/shell/userActionPassiveText"] = bEditWorkspace ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.LOCK_LOCKED) : "";
+        mShellPatch["/shell/userActionHint"] = resolveText(mHooks, oController, MessageKeyConstants.SHELL.USER_HINT_RUNTIME);
+        mShellPatch["/shell/userTooltip"] = sUserSummaryText || resolveText(mHooks, oController, MessageKeyConstants.SHELL.USER_TOOLTIP_STANDALONE);
         mShellPatch["/shell/userIcon"] = "sap-icon://employee";
         mShellPatch["/shell/showHints"] = bShowHints;
         mShellPatch[MODEL_PATHS.SHELL_CURRENT_ROOT_KEY] = oShellLockState.currentRootKey;
@@ -250,3 +250,5 @@ sap.ui.define([
         syncShellState: syncShellState
     };
 });
+
+

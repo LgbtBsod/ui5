@@ -1,11 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistSnapshotRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataEntityContracts, ChecklistSnapshotMapper, GatewayContractConstants) {
+], function (GatewayClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataEntityContracts, ChecklistSnapshotMapper, GatewayContractConstants) {
     "use strict";
 
     /* Этот блок задает размер чанка для догрузки строк detail-разделов.
@@ -41,7 +41,7 @@ sap.ui.define([
         if (!sRequestedId) {
             return Promise.resolve("");
         }
-        return GatewayODataClient.get(GatewayContractConstants.ENTITY_SETS.CHECKLIST_SEARCH, {
+        return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.CHECKLIST_SEARCH, {
             "$filter": buildStringEqFilter("Id", sRequestedId),
             "$top": 1
         }).then(function (oResponse) {
@@ -59,12 +59,12 @@ sap.ui.define([
         var sRootId = mDeps.rootId(mArgs);
         var bIncludeChildren = !mArgs || mArgs.includeChildren !== false;
         var oBasicFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BASIC_INFO;
-        var pRoot = GatewayODataClient.get(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
+        var pRoot = GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
             type: ODataEntityContracts.TYPES.ROOT_KEY
-        }).replace(/^\//, ""));
+        }));
         // ChecklistBasicInfoSet is a separate CDS-backed read model.
         // Keep it independent from ChecklistRootSet and read it via its own entity set.
-        var pBasic = GatewayODataClient.get(oBasicFilter.entitySet, {
+        var pBasic = GatewayClient.rawRead("/" + oBasicFilter.entitySet, {
             "$filter": buildDetailFilter(oBasicFilter, sRootId),
             "$select": ODataEntityContracts.SELECTS.CHECKLIST_BASIC_INFO
         });
@@ -87,7 +87,7 @@ sap.ui.define([
         var aRows = [];
 
         function loadPage(iSkip) {
-            return GatewayODataClient.get(oFilterContract.entitySet, {
+            return GatewayClient.rawRead("/" + oFilterContract.entitySet, {
                 "$filter": buildDetailFilter(oFilterContract, sRootId),
                 "$select": sSelect,
                 "$top": DETAIL_ROW_CHUNK_SIZE,

@@ -1,8 +1,8 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/infra/odata/GatewayODataClient",
+    "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayODataClient, ODataAdapterUtils, GatewayContractConstants) {
+], function (GatewayClient, ODataAdapterUtils, GatewayContractConstants) {
     "use strict";
 
     function normalizeNode(oItem) {
@@ -55,7 +55,7 @@ sap.ui.define([
             sDateCheck = new Date().toISOString().slice(0, 10);
         }
 
-        return GatewayODataClient.getFunction(GatewayContractConstants.FUNCTION_IMPORTS.GET_HIERARCHY, { Method: "location_tree", DateCheck: sDateCheck }).then(function (oData) {
+        return GatewayClient.callGetFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.GET_HIERARCHY, { Method: "location_tree", DateCheck: sDateCheck }).then(function (oData) {
             var oPayload = ODataAdapterUtils.unwrap(oData);
             var aNodes = Array.isArray(oPayload)
                 ? oPayload

@@ -1,5 +1,8 @@
-MERGED FILES
-
-- app/service/domain/detail/DetailService.js -> app/service/domain/detail/DetailFacade.js
-- app/service/domain/detail/DetailUseCaseRegistry.js -> app/service/domain/detail/DetailFacade.js
-- app/service/domain/detail/DetailEntryAdapterRuntime.js -> app/service/domain/detail/DetailFacade.js
+- ShellMessageKeyConstants -> MessageKeyConstants
+  - why: shell message keys were a subset/proxy of the canonical frontend message-key owner
+- ComponentBootRuntime -> ComponentLifecycleRuntime
+  - why: boot sequencing is lifecycle bootstrap responsibility, not a separate runtime owner
+- ComponentListenerBindingRuntime -> ComponentLockEventsRuntime
+  - why: listener binding was pure wiring and now lives beside canonical lock/runtime binding
+- ComponentNavigationGuardRuntime -> ComponentNavigationGuardDecisionRuntime
+  - why: wrapper only; decision runtime owns the actual route-guard logic

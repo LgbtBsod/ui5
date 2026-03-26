@@ -1231,25 +1231,33 @@ def _check_client_version(payload: dict, root: ChecklistRoot):
 
 
 def _save_request_root(payload: dict | None) -> dict:
-    root = (payload or {}).get("root")
+    body = payload or {}
+    if isinstance(body.get("Payload"), dict):
+        body = body.get("Payload")
+    root = body.get("root")
     return root if isinstance(root, dict) else {}
 
 
 def _save_request_root_key(payload: dict | None) -> str:
+    body = payload or {}
+    if isinstance(body.get("Payload"), dict):
+        body = body.get("Payload")
     root = _save_request_root(payload)
     return str(
         root.get("pcct_uuid")
         or root.get("RootKey")
         or root.get("root_id")
         or root.get("RootId")
-        or (payload or {}).get("RootKey")
-        or (payload or {}).get("root_id")
+        or body.get("RootKey")
+        or body.get("root_id")
         or ""
     )
 
 
 def _save_request_session(payload: dict | None) -> str:
     body = payload or {}
+    if isinstance(body.get("Payload"), dict):
+        body = body.get("Payload")
     root = _save_request_root(body)
     return str(
         body.get("SessionGuid")
@@ -2052,7 +2060,14 @@ def lock_control(payload: dict, db: Session):
         return _err(404, "NOT_FOUND", "Checklist not found")
 
     if action == "ACQUIRE":
-        r = LockService.acquire(db, root_uuid, session, uname, payload.get("StealFrom"))
+        r = LockService.acquire(
+            db,
+            root_uuid,
+            session,
+            uname,
+            payload.get("StealFrom"),
+            force_takeover=bool(payload.get("ForceTakeover"))
+        )
         ok = bool(r.get("success"))
         return _lock_entity(
             ok,
@@ -2120,10 +2135,10 @@ async def lock_acquire_function_import(request: Request, root_id: str | None = Q
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
+    resolved_root_id = root_id or merged.get("ObjectUuid") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
-        return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
+        return _err(400, "VALIDATION_ERROR", "ObjectUuid and SessionGuid are required")
     return lock_control(_lock_import_payload("ACQUIRE", resolved_root_id, resolved_session_guid, merged), db)
 
 
@@ -2136,10 +2151,10 @@ async def lock_heartbeat_function_import(request: Request, root_id: str | None =
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
+    resolved_root_id = root_id or merged.get("ObjectUuid") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
-        return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
+        return _err(400, "VALIDATION_ERROR", "ObjectUuid and SessionGuid are required")
     return lock_control(_lock_import_payload("HEARTBEAT", resolved_root_id, resolved_session_guid, merged), db)
 
 
@@ -2152,15 +2167,16 @@ async def lock_release_function_import(request: Request, root_id: str | None = Q
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
+    resolved_root_id = root_id or merged.get("ObjectUuid") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
-        return _err(400, "VALIDATION_ERROR", "RootId and SessionGuid are required")
+        return _err(400, "VALIDATION_ERROR", "ObjectUuid and SessionGuid are required")
     return lock_control(_lock_import_payload("RELEASE", resolved_root_id, resolved_session_guid, merged), db)
 
 
 @router.post(f"{SERVICE_ROOT}/AutoSave")
 def auto_save(payload: dict, response: Response, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
+    body = payload.get("Payload") if isinstance(payload.get("Payload"), dict) else payload
     root, err = _load_root_or_error(db, _save_request_root_key(payload))
     if err:
         return err
@@ -2175,8 +2191,8 @@ def auto_save(payload: dict, response: Response, if_match: str | None = Header(N
         return _err(409, "LOCK_EXPIRED", "Lock expired")
 
     _apply_save_root(root, _save_request_root(payload), db)
-    _apply_save_checks(db, root, payload.get("checks"))
-    _apply_save_barriers(db, root, payload.get("barriers"))
+    _apply_save_checks(db, root, body.get("checks"))
+    _apply_save_barriers(db, root, body.get("barriers"))
     active_lock = LockService._active_lock(db, root.id)
     lock_refreshed_at = now_utc()
     if active_lock and str(active_lock.session_guid or "").strip() == str(session_guid or "").strip():
@@ -2206,7 +2222,8 @@ def auto_save(payload: dict, response: Response, if_match: str | None = Header(N
 
 @router.post(f"{SERVICE_ROOT}/CreateChecklist")
 def create_checklist(payload: dict, response: Response, db: Session = Depends(get_db)):
-    full = payload.get("FullPayload") or payload
+    body = payload.get("Payload") if isinstance(payload.get("Payload"), dict) else payload
+    full = body.get("FullPayload") or body
     root_block = full.get("root") if isinstance(full, dict) else {}
     basic_values = _normalize_basic_payload(full.get("basic"), db)
     requested_id = _pick_text(root_block, "Id", "RequestId")
@@ -2297,6 +2314,7 @@ async def copy_checklist(request: Request, root_id: str | None = Query(None, ali
 
 @router.post(f"{SERVICE_ROOT}/SaveChanges")
 def save_changes(payload: dict, response: Response, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
+    body = payload.get("Payload") if isinstance(payload.get("Payload"), dict) else payload
     root, err = _load_root_or_error(db, _save_request_root_key(payload))
     if err:
         return err
@@ -2311,10 +2329,10 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
         return _err(409, "LOCK_EXPIRED", "Lock expired")
 
     _apply_save_root(root, _save_request_root(payload), db)
-    _apply_save_checks(db, root, payload.get("checks"))
-    _apply_save_barriers(db, root, payload.get("barriers"))
+    _apply_save_checks(db, root, body.get("checks"))
+    _apply_save_barriers(db, root, body.get("barriers"))
     try:
-        _apply_save_attachments(db, root, payload.get("attachments"))
+        _apply_save_attachments(db, root, body.get("attachments"))
     except ValueError:
         db.rollback()
         return _err(400, "INVALID_ATTACHMENT_PAYLOAD", "Attachment payload is invalid")

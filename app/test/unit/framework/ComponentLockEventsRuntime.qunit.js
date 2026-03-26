@@ -1,37 +1,56 @@
 sap.ui.define([
+    "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockEventsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ComponentLockEventsRuntime, StatePaths, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (JSONModel, ComponentLockEventsRuntime, StatePaths) {
     "use strict";
 
-    function createStateModel(mSeed) {
-        var mState = Object.assign({}, mSeed || {});
-        return {
-            getProperty: function (sPath) {
-                return mState[sPath];
-            },
-            setProperty: function (sPath, vValue) {
-                mState[sPath] = vValue;
+    QUnit.module("framework/ComponentLockEventsRuntime.lifecycleBindings");
+
+    QUnit.test("listener does not auto-resume pending navigation on settled save state", function (assert) {
+        var iResumeCalls = 0;
+        var oStateModel = new JSONModel({
+            activeObjectId: "CHK-1",
+            saveInFlight: false,
+            isDirty: false,
+            pendingNavigationIntent: {
+                routeName: "analytics",
+                routeArgs: {},
+                owner: "navigationGuard",
+                resumeMode: "afterGuardedSave"
             }
-        };
-    }
-
-    QUnit.module("ComponentLockEventsRuntime");
-
-    QUnit.test("probe lock invalidation revokes autosave lock eligibility", function (assert) {
-        var oStateModel = createStateModel({
-            "/hasConflict": false,
-            "/persistence/hasValidLock": true,
-            "/persistence/lockOwnerSessionMatches": true
         });
-        var oShellModel = createStateModel({});
+        var oComponent = {};
 
-        ComponentLockEventsRuntime.invalidateProbeLockHealth(oStateModel, oShellModel, StatePaths, ModelContracts.MODEL_PATHS);
+        ComponentLockEventsRuntime.attachLifecycleBindings({
+            component: oComponent,
+            stateModel: oStateModel,
+            shellModel: new JSONModel({}),
+            statePaths: StatePaths,
+            emitTelemetry: function () {},
+            publishTabSignal: function () {},
+            resumePendingNavigationIntent: function () { iResumeCalls += 1; },
+            telemetryRuntime: {
+                stateValue: function () { return {}; }
+            },
+            layoutStateRuntime: {
+                readMode: function () { return "READ"; },
+                readLockState: function () { return "READ_ONLY"; }
+            }
+        });
 
-        assert.strictEqual(oStateModel.getProperty("/hasConflict"), true, "conflict flag is raised");
-        assert.strictEqual(oStateModel.getProperty(StatePaths.PERSISTENCE_HAS_VALID_LOCK), false, "valid lock flag is revoked");
-        assert.strictEqual(oStateModel.getProperty(StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES), false, "session ownership flag is revoked");
-        assert.strictEqual(oShellModel.getProperty(ModelContracts.MODEL_PATHS.SHELL_LOCK).ok, false, "shell lock state becomes unhealthy");
+        oComponent._fnStateModelPropertyChange({
+            getParameter: function (sName) {
+                if (sName === "path") {
+                    return StatePaths.SAVE_IN_FLIGHT;
+                }
+                if (sName === "value") {
+                    return false;
+                }
+                return undefined;
+            }
+        });
+
+        assert.strictEqual(iResumeCalls, 0, "listener does not resume navigation implicitly");
     });
 });

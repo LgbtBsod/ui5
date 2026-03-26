@@ -1,13 +1,13 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (ModelStateRuntime, RootIdRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, DetailPersistenceRuntime, WorkflowContracts) {
+], function (ModelStateRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, ModelPathContracts, DetailPersistenceRuntime, WorkflowContracts) {
     "use strict";
 
     var BANNER_DETAIL = ComponentSaveGuardContracts.BANNER_DETAIL;
@@ -61,7 +61,7 @@ sap.ui.define([
             if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SAVE_IN_FLIGHT, false)) {
                 return oComponent._pGuardedSavePromise || Promise.resolve(false);
             }
-            sRootId = RootIdRuntime.resolveFromStateModel(oStateModel);
+            sRootId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
             if (!sRootId) {
                 return Promise.resolve(false);
             }

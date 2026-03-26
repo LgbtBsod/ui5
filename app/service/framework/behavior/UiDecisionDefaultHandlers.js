@@ -3,8 +3,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ShellMessageKeyConstants"
-], function (UiDecisionBehaviorHelpers, BehaviorRegistry, DetailMessageKeyConstants, SearchMessageKeyConstants, ShellMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (UiDecisionBehaviorHelpers, BehaviorRegistry, DetailMessageKeyConstants, SearchMessageKeyConstants, MessageKeyConstants) {
     "use strict";
 
     var UI_DECISION_SCOPE = "uiDecision";
@@ -14,9 +14,9 @@ sap.ui.define([
     var TEXT_OPEN_USES_FIRST = SearchMessageKeyConstants.OPEN_USES_FIRST_HINT;
     var TEXT_COPY_SINGLE_SELECTION = SearchMessageKeyConstants.COPY_SINGLE_SELECTION_HINT;
     var TEXT_SELECT_VISIBLE_EMPTY = SearchMessageKeyConstants.SELECT_VISIBLE_EMPTY;
-    var TEXT_SHELL_REFRESH_SUCCESS = ShellMessageKeyConstants.CONTEXT_REFRESHED;
-    var TEXT_SHELL_REFRESH_FAILURE = ShellMessageKeyConstants.USER_REFRESH_FAILED;
-    var TEXT_CORRELATION_COPIED = ShellMessageKeyConstants.CORRELATION_COPIED;
+    var TEXT_SHELL_REFRESH_SUCCESS = MessageKeyConstants.SHELL.CONTEXT_REFRESHED;
+    var TEXT_SHELL_REFRESH_FAILURE = MessageKeyConstants.SHELL.USER_REFRESH_FAILED;
+    var TEXT_CORRELATION_COPIED = MessageKeyConstants.SHELL.CORRELATION_COPIED;
     var bDefaultsRegistered = false;
 
     function runOptionalHandler(fnHandler) {
@@ -117,3 +117,5 @@ sap.ui.define([
         ensureRegistered: ensureRegistered
     };
 });
+
+

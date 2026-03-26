@@ -20,7 +20,7 @@ sap.ui.define([
             FLAGS: Object.freeze({
                 FORCE_REFRESH_ON_RETURN: "/searchForceRefreshOnReturn"
             }),
-            LOAD_ERROR_MESSAGE: "Search request failed",
+            LOAD_ERROR_MESSAGE: "loadErrorMessage",
             STARTUP_EVENTS: Object.freeze({
                 ANALYTICS_STARTED: "analyticsStarted",
                 FIRST_ROUTE_READY: "firstRouteReady"

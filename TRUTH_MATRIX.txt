@@ -1,110 +1,50 @@
 TRUTH MATRIX
 
 1. Key contract / canonical technical identity
-- Expected by TZ:
-  - DB_KEY / RootKey / PARENT_KEY are primary command-flow keys.
-  - pcct_uuid / RootId / ObjectUuid are compatibility aliases only at boundaries.
-- Actual in code:
-  - ODataEntityContracts centralizes alias field lists, but command payload and delta serialization still build root identity around pcct_uuid and broad fallback chains.
-  - ODataChecklistPayloadMapper.normalizeSavePayload writes root.pcct_uuid as the active save identity.
-  - DeltaFieldMappers.mapRootFields writes pcct_uuid, not DB_KEY/RootKey, as the outbound root key field.
-  - DeltaPayloadBuilder.resolveRootKey still accepts RootKey, id, Key, pcct_uuid as near-equal command-flow candidates.
-  - LockAdapter still maps rootId into ObjectUuid at the Gateway boundary, which is acceptable only as last-mile contract mapping.
+- Current state:
+  - `activeObjectId` and `selectedId` are the working frontend/runtime keys.
+  - `RootId` is compatibility-only at the boundary and should not be promoted as a productive model key.
 - Status:
-  - Partial / compatibility-tail-heavy.
+  - Mostly aligned.
 
 2. Detail initial loading
-- Expected by TZ:
-  - Phase 1 = root + basic.
-  - Phase 2 = checks + barriers asynchronously after initial render, chunked.
-  - Phase 3 = attachments explicit only.
-- Actual in code:
-  - OpenDetailUseCase now requests root/basic only for initial open.
-  - ODataChecklistReadRuntime.loadDetailRows fetches checks/barriers separately with $top/$skip chunking in pages of 20.
-  - DetailPageFlow schedules second-phase row hydration after successful open without adding a new orchestration layer.
-  - Attachments remain excluded from initial snapshot.
+- Current state:
+  - root/basic open stays separate from later checks/barriers hydration.
+  - attachments remain explicit and non-default.
 - Status:
   - Match.
 
 3. Attachments metadata-first contract
-- Expected by TZ:
-  - Value is not an active source of truth.
-  - Download/open prefers DownloadUrl/document handle/stream.
-  - Persisted and session attachments are separated in state and UI.
-- Actual in code:
-  - DetailAttachmentOpenRuntime prefers DownloadUrl first, but still falls back to Value as a normal working path.
-  - ODataEntityContracts.SELECTS.ATTACHMENT and SELECTS.ATTACHMENT_CONTENT still include Value.
-  - ODataChecklistPayloadMapper.normalizeAttachmentRows filters rows by FileName && Value, making Value part of normal attachment normalization.
-  - DetailAttachmentDeltaRuntime serializes staged attachments into value base64.
-  - Persisted attachments now stay in detail>/current/attachments and session uploads stay in view>/sessionAttachments.
-  - DetailAttachmentsBody.fragment.xml now renders session and persisted sections separately.
-- Status:
-  - Partial / compatibility-tail-heavy.
-
-4. Attachment lazy loading
-- Expected by TZ:
-  - No attachments on initial detail open.
-  - Persisted attachments loaded only by explicit action.
-- Actual in code:
-  - OpenDetailUseCase excludes attachments from initial snapshot fetch.
-  - LoadAttachmentsUseCase is explicit.
-  - OpenDetailUseCase no longer hydrates persisted attachments into view>/sessionAttachments on normal reopen.
+- Current state:
+  - productive open/download uses `DownloadUrl` / `DocumentHandle`.
+  - `Value` is no longer part of default attachment normalization/selects.
 - Status:
   - Match.
 
-5. Delete pipeline
-- Expected by TZ:
-  - Canonical delete through aggregate modification pipeline.
-  - No target direct OData DELETE.
-- Actual in code:
-  - GatewayClient.deletePath is unsupported as target flow.
-  - AttachmentRepoRuntime.deleteAttachment is deferred only.
-  - Root/child save path still goes through delta/save pipeline.
+4. Delete pipeline
+- Current state:
+  - aggregate mutation flow remains canonical.
+  - no direct target delete flow was reintroduced.
 - Status:
   - Match.
 
-6. Lock flow
-- Expected by TZ:
-  - acquire/status/heartbeat/release with ForceTakeover on acquire only.
-  - ObjectUuid allowed only as Gateway contract field.
-- Actual in code:
-  - LockAdapter uses ObjectUuid, SessionGuid, optional TabSessionId and ForceTakeover on acquire.
-  - Heartbeat/release use ObjectUuid + SessionGuid.
-  - Component lock runtimes still compare rootId/ObjectUuid/RootId aliases during event handling.
-- Status:
-  - Partial but acceptable at Gateway boundary.
-
-7. Runtime settings source
-- Expected by TZ:
-  - masterData>/runtime/* is canonical.
-- Actual in code:
-  - still true in current runtime settings flow.
+5. Lock flow
+- Current state:
+  - ForceTakeover, lock status, heartbeat, and release remain intact.
+  - `ObjectUuid` / `RootKey` mappings stay boundary-local.
 - Status:
   - Match.
 
-8. Search semantics
-- Expected by TZ:
-  - exact = AND, loose/inexact = OR, backend fetch limit separate from visible chunk size.
-- Actual in code:
-  - preserved in current search behavior and request window handling.
+6. Overengineering / hidden framework
+- Current state:
+  - thin wrappers were removed from component bootstrap/listener/navigation guard paths.
+  - some controller and detail owners still remain as real behavior boundaries.
 - Status:
-  - Match.
+  - Improved, but not fully flat.
 
-9. Overengineering / hidden framework
-- Expected by TZ:
-  - one clear owner per responsibility, no micro pass-through layers.
-- Actual in code:
-  - search internal hidden-framework layer was heavily reduced.
-  - detail validation and attachment drop-zone micro-splits were reduced.
-  - large component runtime cluster and app/controller/app cluster still remain heavily fragmented.
+7. SAP CSS / DOM best practices
+- Current state:
+  - private selector usage is reduced, not eliminated.
+  - DOM hacks remain only where UI5 public APIs are insufficient.
 - Status:
-  - Partial.
-
-10. SAP CSS / DOM best practices
-- Expected by TZ:
-  - internal sap* selectors minimized and documented.
-- Actual in code:
-  - high debt still remains in page/detail/search/dialog/override CSS modules.
-  - search/detail viewport and drop-zone paths still use direct DOM access where supported APIs are insufficient.
-- Status:
-  - Partial / residual risk.
+  - Residual risk remains.

@@ -50,7 +50,8 @@ sap.ui.define([
             layout: NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN,
             analyticsNavReturn: {
                 hash: "checklist/CHK-STALE-1",
-                rootId: "CHK-STALE-1",
+                activeObjectId: "CHK-STALE-1",
+                selectedId: "CHK-STALE-1",
                 restoreEdit: true
             }
         });
@@ -107,7 +108,8 @@ sap.ui.define([
             ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", null),
             {
                 hash: "",
-                rootId: "",
+                activeObjectId: "",
+                selectedId: "",
                 restoreEdit: false
             },
             "search-origin analytics snapshot ignores stale detail root and restore-edit state"

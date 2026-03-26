@@ -11,19 +11,6 @@ sap.ui.define([
     var VIEW_MODEL = MODELS.VIEW;
     var DETAIL_MODEL = MODELS.DETAIL;
 
-    function base64ToBlob(sBase64, sMimeType) {
-        var sBinary = atob(String(sBase64 || "").trim());
-        var iLength = sBinary.length;
-        var aBytes = new Uint8Array(iLength);
-        var iIndex;
-        for (iIndex = 0; iIndex < iLength; iIndex += 1) {
-            aBytes[iIndex] = sBinary.charCodeAt(iIndex);
-        }
-        return new Blob([aBytes], {
-            type: String(sMimeType || "application/octet-stream").trim() || "application/octet-stream"
-        });
-    }
-
     function resolveAttachmentContext(oEvent) {
         var oSource = oEvent && oEvent.getSource && oEvent.getSource();
         return (oSource && oSource.getBindingContext && (oSource.getBindingContext(DETAIL_MODEL) || oSource.getBindingContext(VIEW_MODEL))) || null;
@@ -33,17 +20,17 @@ sap.ui.define([
         var oCtx = resolveAttachmentContext(oEvent);
         var oRow = oCtx && oCtx.getObject && oCtx.getObject();
         var sAttachmentId = String((oRow && (oRow.AttachmentKey || oRow.Key)) || "").trim();
-        var sLocalObjectUrl = String((oRow && oRow.localObjectUrl) || "").trim();
         var oMainService = oController && oController.getModel && oController.getModel("mainService");
         var sFileName = String((oRow && oRow.FileName) || "attachment").trim() || "attachment";
         var sEntityPath;
         var sDownloadUrl = String((oRow && oRow.DownloadUrl) || "").trim();
+        var sDocumentHandle = String((oRow && oRow.DocumentHandle) || "").trim();
 
-        if (sLocalObjectUrl) {
-            return DownloadRuntime.triggerDownload(sLocalObjectUrl, sFileName);
-        }
         if (sDownloadUrl) {
             return Promise.resolve(DownloadRuntime.triggerDownload(sDownloadUrl, sFileName));
+        }
+        if (sDocumentHandle) {
+            return Promise.resolve(DownloadRuntime.triggerDownload(sDocumentHandle, sFileName));
         }
         if (!sAttachmentId || !oMainService || typeof oMainService.read !== "function") {
             return Promise.resolve(false);
@@ -59,20 +46,16 @@ sap.ui.define([
                 },
                 success: function (oData) {
                     var sResolvedDownloadUrl = String((oData && oData.DownloadUrl) || "").trim();
-                    var sValue = String((oData && oData.Value) || "").trim();
-                    var oBlob;
+                    var sResolvedDocumentHandle = String((oData && oData.DocumentHandle) || "").trim();
                     if (sResolvedDownloadUrl) {
                         resolve(DownloadRuntime.triggerDownload(sResolvedDownloadUrl, sFileName));
                         return;
                     }
-                    if (!sValue) {
-                        resolve(false);
+                    if (sResolvedDocumentHandle) {
+                        resolve(DownloadRuntime.triggerDownload(sResolvedDocumentHandle, sFileName));
                         return;
                     }
-                    oBlob = base64ToBlob(sValue, oData && oData.MimeType);
-                    resolve(DownloadRuntime.withObjectUrl(oBlob, function (sObjectUrl) {
-                        return DownloadRuntime.triggerDownload(sObjectUrl, sFileName);
-                    }));
+                    resolve(false);
                 },
                 error: function () {
                     resolve(false);

@@ -28,7 +28,7 @@ sap.ui.define([
         };
     }
 
-function readCode(oLock) {
+    function readCode(oLock) {
         return String((oLock && oLock.code) || "").toUpperCase();
     }
 
@@ -87,14 +87,14 @@ function readCode(oLock) {
             ]));
         }
         if (!sSessionGuid) {
-            return Promise.resolve(Result.fail({ message: "Session unavailable", code: "SESSION_UNAVAILABLE" }, [Effects.warn("sessionUnavailableMessage")]));
+            return Promise.resolve(Result.fail({ message: DETAIL_MESSAGE_KEYS.LOCK_LOST, code: "SESSION_UNAVAILABLE" }, [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_LOST)]));
         }
         if (!sRootId || !oLockPort || typeof oLockPort.acquire !== "function") {
-            return Promise.resolve(Result.fail({ message: "Lock port unavailable", code: "PORT_UNAVAILABLE" }));
+            return Promise.resolve(Result.fail({ message: DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED, code: "PORT_UNAVAILABLE" }));
         }
         if (requiresIntegrationConfirm(mInput, mCtx)) {
             return Promise.resolve(Result.fail({
-                message: "Integration edit confirmation required",
+                message: DETAIL_MESSAGE_KEYS.INTEGRATION_EDIT_CONFIRM,
                 code: DETAIL_CODES.INTEGRATION_CONFIRM_REQUIRED
             }));
         }
@@ -108,19 +108,27 @@ function readCode(oLock) {
         return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sRootId, {
             activity: DetailAuthorizationRuntime.OPERATIONS.CHANGE
         }).then(function (oPermission) {
-            var pPrecheck;
             if (!oPermission.allowed) {
-                return Result.fail({ message: "No permission to edit checklist", code: DETAIL_CODES.NO_EDIT_PERMISSION }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailEditPermissionDenied", readOnlyEffects()));
+                return Result.fail({ message: DETAIL_MESSAGE_KEYS.DETAIL_VIEW_PERMISSION_DENIED, code: DETAIL_CODES.NO_EDIT_PERMISSION }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, "detailEditPermissionDenied", readOnlyEffects()));
             }
-            pPrecheck = (oCacheValidation && typeof oCacheValidation.execute === "function")
-                ? Promise.resolve(oCacheValidation.execute({ rootId: sRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; })
-                : Promise.resolve(null);
-            return pPrecheck.then(function (oValidation) {
-                var oValidationData = (oValidation && oValidation.ok && oValidation.data) ? oValidation.data : null;
-                if (oValidationData && oValidationData.invalidated) {
-            return Result.fail({ message: "Cache invalidated; retry edit", code: "CACHE_INVALIDATED" }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
+            return Promise.resolve(oLockPort.acquire(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).then(function (oLock) {
+                if (!oLock || !oLock.ok) {
+                    return {
+                        lock: oLock,
+                        permission: oPermission
+                    };
                 }
-                return Promise.resolve(oLockPort.acquire(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).then(function (oLock) {
+                if (!oCacheValidation || typeof oCacheValidation.execute !== "function") {
+                    return {
+                        lock: oLock,
+                        permission: oPermission
+                    };
+                }
+                return Promise.resolve(oCacheValidation.execute({ rootId: sRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; }).then(function (oValidation) {
+                    var oValidationData = (oValidation && oValidation.ok && oValidation.data) ? oValidation.data : null;
+                    if (oValidationData && oValidationData.invalidated) {
+                        return Result.fail({ message: DETAIL_MESSAGE_KEYS.PERSISTENCE_CONFLICT, code: "CACHE_INVALIDATED" }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
+                    }
                     return {
                         lock: oLock,
                         permission: oPermission
@@ -161,27 +169,27 @@ function readCode(oLock) {
                     stateModel: mCtx && mCtx.stateModel,
                     payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
                 });
-            return Result.fail({ message: "Lock held by own session", code: DETAIL_CODES.LOCKED_OWN_SESSION, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
+            return Result.fail({ message: DETAIL_MESSAGE_KEYS.LOCK_STEAL_OWN_SESSION_PROMPT, code: DETAIL_CODES.LOCKED_OWN_SESSION, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
             }
             if (sCode === DETAIL_CODES.EXPIRED) {
                 WorkflowTelemetry.emit("lock.acquire.failed", {
                     stateModel: mCtx && mCtx.stateModel,
                     payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
                 });
-            return Result.fail({ message: "Lock expired", code: DETAIL_CODES.EXPIRED, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
+            return Result.fail({ message: DETAIL_MESSAGE_KEYS.LOCK_EXPIRED_TAKEOVER_PROMPT, code: DETAIL_CODES.EXPIRED, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
             }
             if (sCode === DETAIL_CODES.KILLED) {
                 WorkflowTelemetry.emit("lock.acquire.failed", {
                     stateModel: mCtx && mCtx.stateModel,
                     payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
                 });
-            return Result.fail({ message: "Lock killed", code: DETAIL_CODES.KILLED, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_KILLED)]));
+            return Result.fail({ message: DETAIL_MESSAGE_KEYS.LOCK_KILLED, code: DETAIL_CODES.KILLED, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_KILLED)]));
             }
             WorkflowTelemetry.emit("lock.acquire.failed", {
                 stateModel: mCtx && mCtx.stateModel,
                 payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode || DETAIL_CODES.LOCKED }
             });
-            return Result.fail({ message: "Lock acquire failed", code: DETAIL_CODES.LOCKED, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED)]));
+            return Result.fail({ message: DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED, code: DETAIL_CODES.LOCKED, legacyCode: DETAIL_CODES.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED)]));
         }).catch(function (oError) {
             WorkflowTelemetry.emit("lock.acquire.failed", {
                 stateModel: mCtx && mCtx.stateModel,

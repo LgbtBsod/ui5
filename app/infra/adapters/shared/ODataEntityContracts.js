@@ -13,7 +13,6 @@ sap.ui.define([
 
     var IDENTITY = Object.freeze({
         ROOT_FILTER_BINARY: "RootKey",
-        ROOT_FILTER_ALIAS: "RootId",
         ROOT_CANONICAL_FIELDS: Object.freeze(["RootKey", "Key", "id"]),
         ROOT_ALIAS_FIELDS: Object.freeze(["rootKey", "key", "pcct_uuid", "Id"]),
         ATTACHMENT_KEY_FIELDS: Object.freeze(["AttachmentKey", "Key", "key", "attach_uuid"]),
@@ -22,7 +21,6 @@ sap.ui.define([
         FILE_NAME_FIELDS: Object.freeze(["FileName", "fileName", "Name", "name"]),
         MIME_TYPE_FIELDS: Object.freeze(["MimeType", "mimeType"]),
         FILE_SIZE_FIELDS: Object.freeze(["FileSize", "fileSize", "FileSizeContent", "fileSizeContent"]),
-        INLINE_VALUE_FIELDS: Object.freeze(["Value", "value"])
     });
 
     var DETAIL_ENTITY_FILTERS = Object.freeze({
@@ -33,11 +31,13 @@ sap.ui.define([
         }),
         CHECKLIST_CHECK: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK,
-            property: IDENTITY.ROOT_FILTER_ALIAS
+            property: IDENTITY.ROOT_FILTER_BINARY,
+            type: TYPES.ROOT_KEY
         }),
         CHECKLIST_BARRIER: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER,
-            property: IDENTITY.ROOT_FILTER_ALIAS
+            property: IDENTITY.ROOT_FILTER_BINARY,
+            type: TYPES.ROOT_KEY
         }),
         ATTACHMENT: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.ATTACHMENT,
@@ -47,8 +47,8 @@ sap.ui.define([
     });
 
     var SELECTS = Object.freeze({
-        ATTACHMENT: "AttachmentKey,Key,RootKey,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,DownloadUrl,DocumentHandle,Value,ScanStatus,ScannedOn,CreatedOn,ChangedOn",
-        ATTACHMENT_CONTENT: "AttachmentKey,FileName,MimeType,DownloadUrl,DocumentHandle,Value",
+        ATTACHMENT: "AttachmentKey,Key,RootKey,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,DownloadUrl,DocumentHandle,ScanStatus,ScannedOn,CreatedOn,ChangedOn",
+        ATTACHMENT_CONTENT: "AttachmentKey,FileName,MimeType,DownloadUrl,DocumentHandle",
         CHECKLIST_BASIC_INFO: "RootKey,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverFullname,ObservedPernr,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName",
         CHECKLIST_BARRIER: "Key,RootKey,BarriersNum,Text,Comment,Result,ChangedOn",
         CHECKLIST_CHECK: "Key,RootKey,ChecksNum,Text,Comment,Result,ChangedOn",

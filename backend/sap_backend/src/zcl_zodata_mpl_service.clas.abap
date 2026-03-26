@@ -27,8 +27,8 @@ CLASS zcl_zodata_mpl_service IMPLEMENTATION.
     IF sy-subrc <> 0.
       RAISE EXCEPTION TYPE zcx_zodata_error
         EXPORTING
-          iv_code = zif_zodata_contract_constants=>c_code_technical_error
-          iv_msg  = |{ zif_zodata_contract_constants=>c_msg_mpl_tree_read_failed_prefix } { iv_date }.|.
+          iv_code = zif_zodata_message_codes=>technical_error
+          iv_msg  = |{ zif_zodata_message_texts=>c_msg_mpl_tree_read_failed_prefix } { iv_date }.|.
     ENDIF.
   ENDMETHOD.
 ENDCLASS.

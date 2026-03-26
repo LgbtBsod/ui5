@@ -133,7 +133,7 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
       INTO CORRESPONDING FIELDS OF @rs_root
       WHERE pcct_uuid = @iv_rootkey.
     IF sy-subrc <> 0.
-      raise_busi_exception( iv_text = |ChecklistRoot not found for key { iv_rootkey }.| iv_code = zif_zodata_contract_constants=>c_code_validation_error ).
+    raise_busi_exception( iv_text = |ChecklistRoot not found for key { iv_rootkey }.| iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
 
     SELECT SINGLE pcct_uuid,

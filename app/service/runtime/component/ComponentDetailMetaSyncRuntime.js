@@ -17,6 +17,11 @@ sap.ui.define([
 
     function syncDetailMeta(oStateModel, StatePaths) {
         var oReadiness = ModelStateRuntime.readOnModel(oStateModel, StatePaths.READINESS_DETAIL, {}) || {};
+        var sActiveObjectId = String(
+            ModelStateRuntime.readOnModel(oStateModel, ComponentListenerContracts.PATHS.ACTIVE_OBJECT_ID, "") ||
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") ||
+            ""
+        ).trim();
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
         var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
         var sAutosaveState = WorkflowContracts.normalizeAutosaveState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE));
@@ -28,7 +33,7 @@ sap.ui.define([
         var bAllowed = bPermissionKnown && sReadinessStatus !== READINESS_STATUS.DENIED && sReadinessStatus !== READINESS_STATUS.ERROR;
 
         ModelStateRuntime.writeOnModel(oStateModel, StatePaths.DETAIL_META, {
-            rootId: String(oReadiness.rootId || ModelStateRuntime.readOnModel(oStateModel, PATHS.ACTIVE_OBJECT_ID, "") || "").trim(),
+            rootId: sActiveObjectId,
             readiness: { status: sReadinessStatus, ready: !!oReadiness.ready, readyAt: String(oReadiness.readyAt || ""), error: String(oReadiness.error || "") },
             mode: sMode,
             lock: { state: sLockState, known: !!oReadiness.lockKnown },
