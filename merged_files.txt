@@ -21,3 +21,6 @@ app/service/features/detail/runtime/AttachmentValueCodec.js -> app/infra/adapter
 2026-03-27 final production-readiness delta:
 app/controller/search/SearchCommandPolicy.js -> app/controller/Search.controller.js
 why: deleted pass-through wrapper; search command dispatch now lives in the real controller owner and uses ControllerRuntime directly.
+2026-03-27 production-readiness implementation delta:
+app/service/framework/execution/behavior/OverrideHandlerFactory.js -> app/service/framework/execution/behavior/BehaviorScopes.js
+why: deleted pass-through override wrapper; override registration now lives in the actual behavior scope owner.

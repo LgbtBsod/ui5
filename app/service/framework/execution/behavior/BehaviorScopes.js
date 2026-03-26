@@ -1,7 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorRuntimeCore",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/OverrideHandlerFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/WorkflowDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/NavigationDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DialogHandlers",
@@ -14,7 +13,6 @@ sap.ui.define([
 ], function (
     BehaviorRuntimeCore,
     BehaviorResolver,
-    OverrideHandlerFactory,
     WorkflowDefaultHandlers,
     NavigationDefaultHandlers,
     DialogHandlers,
@@ -29,6 +27,23 @@ sap.ui.define([
 
     var detailRuntimeDefaultsRegistered = false;
     var detailRuntimeHandlers = {};
+
+    function createOverrideHandlers(sScope) {
+        return Object.freeze({
+            ensureRegistered: function () {
+                return undefined;
+            },
+            register: function (sOperation, fnHandler, sBehaviorId) {
+                return BehaviorRegistry.registerOverride(sScope, sOperation, fnHandler, sBehaviorId);
+            },
+            unregister: function (sOperation, sBehaviorId) {
+                return BehaviorRegistry.unregisterOverride(sScope, sOperation, sBehaviorId);
+            },
+            clear: function () {
+                return BehaviorRegistry.clearOverrides(sScope);
+            }
+        });
+    }
 
     function resolveAnalyticsEditRestorePlan() {
         return {
@@ -69,7 +84,7 @@ sap.ui.define([
             scope: sScope,
             resolver: BehaviorResolver,
             defaultHandlers: oHandlers,
-            overrideHandlers: oOverrides || OverrideHandlerFactory.create(sScope)
+            overrideHandlers: oOverrides || createOverrideHandlers(sScope)
         });
     }
 

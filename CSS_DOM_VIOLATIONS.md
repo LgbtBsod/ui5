@@ -1,5 +1,16 @@
 # CSS DOM Violations
 
+## 2026-03-27 Production-Readiness Implementation Delta
+- Contract and ownership cleanup was completed ahead of visual cleanup.
+- `cmd /c npm run validate:local` now fails only after reaching `sap-internal-css-gate`, which confirms CSS debt is the dominant unresolved release blocker.
+- No new `.sap*` selector usage was introduced by this implementation delta.
+- Active blocker remains concentrated in:
+  - `app/styles/modules/23_dialogs.css`
+  - `app/styles/modules/40_page_search.css`
+  - `app/styles/modules/41_page_detail.css`
+  - `app/styles/modules/controls/30_action_and_shell_buttons.css`
+  - `app/styles/modules/controls/32_switch_parity.css`
+
 ## Closed In This Pass
 - No direct CSS/DOM rewrite was completed in the final production-readiness pass.
 - Governance was still strengthened indirectly by keeping CSS/DOM debt explicit while closing attachment/lock/bootstrap blockers first.

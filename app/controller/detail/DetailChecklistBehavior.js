@@ -90,10 +90,14 @@ sap.ui.define([
             oViewModel.setProperty("/hasPersistedObject", !!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId));
         },
 
-        _currentRootId: function () {
+        _currentChecklistDbKey: function () {
             return ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "")
                 || ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.SELECTED_ID, "")
                 || "";
+        },
+
+        _currentRootId: function () {
+            return this._currentChecklistDbKey();
         },
 
         _applyDetailFieldChange: function (oEvent, mOptions) {

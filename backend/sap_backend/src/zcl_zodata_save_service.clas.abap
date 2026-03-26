@@ -94,40 +94,40 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
 
   METHOD validate_save_request.
     IF is_request-root-pcct_uuid IS INITIAL.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>c_msg_save_root_required iv_code = zif_zodata_message_codes=>validation_error ).
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_root_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     IF is_request-session_guid IS INITIAL.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>c_msg_save_session_required iv_code = zif_zodata_message_codes=>validation_error ).
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_session_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     IF is_request-root-edit_mode IS NOT INITIAL
        AND is_request-root-edit_mode <> zif_zodata_contract_constants=>c_edit_mode_create
        AND is_request-root-edit_mode <> zif_zodata_contract_constants=>c_edit_mode_update
        AND is_request-root-edit_mode <> zif_zodata_contract_constants=>c_edit_mode_delete.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>c_msg_save_root_mode_invalid iv_code = zif_zodata_message_codes=>validation_error ).
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_root_mode_invalid ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     LOOP AT is_request-checks ASSIGNING FIELD-SYMBOL(<ls_check>).
       validate_edit_mode(
         iv_edit_mode = <ls_check>-edit_mode
-        iv_required_text = zcl_zodata_message_texts=>c_msg_save_checks_mode_required
-        iv_invalid_text = zcl_zodata_message_texts=>c_msg_save_checks_mode_invalid ).
+        iv_required_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_checks_mode_required )
+        iv_invalid_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_checks_mode_invalid ) ).
     ENDLOOP.
     LOOP AT is_request-barriers ASSIGNING FIELD-SYMBOL(<ls_barrier>).
       validate_edit_mode(
         iv_edit_mode = <ls_barrier>-edit_mode
-        iv_required_text = zcl_zodata_message_texts=>c_msg_save_barriers_mode_required
-        iv_invalid_text = zcl_zodata_message_texts=>c_msg_save_barriers_mode_invalid ).
+        iv_required_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_barriers_mode_required )
+        iv_invalid_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_barriers_mode_invalid ) ).
     ENDLOOP.
     LOOP AT is_request-participants ASSIGNING FIELD-SYMBOL(<ls_participant>).
       validate_edit_mode(
         iv_edit_mode = <ls_participant>-edit_mode
-        iv_required_text = zcl_zodata_message_texts=>c_msg_save_participants_mode_required
-        iv_invalid_text = zcl_zodata_message_texts=>c_msg_save_participants_mode_invalid ).
+        iv_required_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_participants_mode_required )
+        iv_invalid_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_participants_mode_invalid ) ).
     ENDLOOP.
     LOOP AT is_request-attachments ASSIGNING FIELD-SYMBOL(<ls_attachment>).
       validate_edit_mode(
         iv_edit_mode = <ls_attachment>-edit_mode
-        iv_required_text = zcl_zodata_message_texts=>c_msg_save_attachments_mode_required
-        iv_invalid_text = zcl_zodata_message_texts=>c_msg_save_attachments_mode_invalid ).
+        iv_required_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_attachments_mode_required )
+        iv_invalid_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_attachments_mode_invalid ) ).
     ENDLOOP.
   ENDMETHOD.
 
@@ -146,7 +146,7 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
       ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_change
       ID 'BUKRS' FIELD iv_bukrs.
     IF sy-subrc <> 0.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>c_msg_no_edit_auth_save iv_code = zif_zodata_message_codes=>no_edit_auth ).
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_no_edit_auth_save ) iv_code = zif_zodata_message_codes=>no_edit_auth ).
     ENDIF.
 
     TRY.
@@ -161,7 +161,7 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
     ENDTRY.
 
     IF ls_lock_hb-success <> abap_true AND ls_lock_hb-ok <> abap_true.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>c_msg_lock_session_required iv_code = zif_zodata_message_codes=>lock_not_owned_by_session ).
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_session_required ) iv_code = zif_zodata_message_codes=>lock_not_owned_by_session ).
     ENDIF.
 
     lt_change = mo_mapper->build_change_list( is_request ).

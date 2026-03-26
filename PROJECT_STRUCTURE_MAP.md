@@ -58,3 +58,10 @@
 - `app/infra/adapters/LockAdapter.js` is the canonical frontend lock boundary and now owns `dbKey` semantics for acquire/heartbeat/status/release.
 - `app/service/features/shell/runtime/ShellStateRuntime.js` is the shell owner for active checklist key projection into UI state.
 - `app/infra/adapters/shared/AttachmentRepoRuntime.js` remains the only frontend attachment upload/read boundary allowed to speak compatibility upload transport.
+## 2026-03-27 Production-Readiness Implementation Delta
+- `app/service/framework/execution/behavior/BehaviorScopes.js`
+  owns behavior override registration directly after `OverrideHandlerFactory.js` removal
+- `app/service/framework/FeedbackCoordinator.js`
+  remains the feedback execution owner for controller/mixin consumers
+- `app/service/framework/ControllerRouteRuntime.js`
+  remains the route attachment lifecycle owner for controllers still using matched-route registration

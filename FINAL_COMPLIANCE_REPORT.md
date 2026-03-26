@@ -1,5 +1,30 @@
 # Final Compliance Report
 
+## 2026-03-27 Production-Readiness Implementation Delta
+- Backend human-readable texts no longer live as public text constants:
+  - `backend/sap_backend/src/zcl_zodata_message_texts.clas.abap` now exposes text keys plus `get_text( )`
+  - DPC/save/frontend-context/MPL owners now resolve backend texts through the provider instead of reading human text constants directly
+- Canonical lock and detail naming were tightened in active frontend owners:
+  - `app/infra/adapters/LockAdapter.js` keeps `dbKey` as canonical surface and `rootId` only as compatibility fallback
+  - detail controller behaviors now expose `_currentChecklistDbKey()` and pass `dbKey` through active interaction/state flows
+  - `app/service/domain/shared/DetailRuntimePayload.js` now resolves canonical `dbKey` first and keeps `rootId` only as compatibility alias
+- Attachment upload remained compatibility-boundary only:
+  - `app/infra/adapters/shared/AttachmentRepoRuntime.js` explicitly confines base64 encoding to the adapter boundary
+  - persisted attachment state remains metadata-only (`DownloadUrl` / `DocumentHandle`) after save/read
+  - `app/service/domain/detail/DetailAttachmentDeltaRuntime.js` now uses canonical `dbKey/parentKey` terminology in staged upload tracking
+- Overengineering cleanup continued without adding new facades:
+  - merged `app/service/framework/execution/behavior/OverrideHandlerFactory.js` into `BehaviorScopes.js`
+  - restored missing real owners for search command dispatch, route attachment lifecycle, and feedback execution so the source tree is internally consistent again
+- Verification in this delta:
+  - `node scripts/attachment-contract-gate.js`
+  - `node scripts/lock-contract-naming-gate.js`
+  - `node scripts/wrapper-sprawl-gate.js`
+  - `node scripts/broken-import-gate.js`
+  - `cmd /c npm run validate:local`
+- Honest result:
+  - contract, naming, transport and wrapper gates now pass
+  - `validate:local` still fails on `sap-internal-css-gate` due widespread legacy `.sap*` styling debt
+
 ## 2026-03-27 Canonical Naming And Attachment Boundary Delta
 - Frontend lock surface now treats `dbKey` as the canonical owner for lock operations:
   - `app/infra/adapters/LockAdapter.js` accepts `dbKey` first and keeps `rootId` only as compatibility fallback

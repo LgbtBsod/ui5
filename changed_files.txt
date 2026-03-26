@@ -125,3 +125,24 @@ TRUTH_MATRIX.md
 OWNER_MATRIX.md
 PROJECT_STRUCTURE_MAP.md
 CSS_DOM_VIOLATIONS.md
+2026-03-27 production-readiness implementation delta:
+app/controller/detail/DetailChecklistBehavior.js
+app/controller/detail/DetailInteractionRuntime.js
+app/controller/detail/internal/DetailChecklistStateBehavior.js
+app/controller/search/SearchCommandPolicy.js
+app/infra/adapters/LockAdapter.js
+app/infra/adapters/shared/AttachmentRepoRuntime.js
+app/infra/adapters/shared/ODataChecklistReadRuntime.js
+app/service/domain/detail/DetailAttachmentDeltaRuntime.js
+app/service/domain/detail/usecases/AttachmentUploadUseCase.js
+app/service/domain/shared/DetailRuntimePayload.js
+app/service/framework/ControllerRouteRuntime.js
+app/service/framework/FeedbackCoordinator.js
+app/service/framework/RuntimePayloadNormalizer.js
+app/service/framework/execution/behavior/BehaviorScopes.js
+backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap
+backend/sap_backend/src/zcl_zodata_frontend_context_svc.clas.abap
+backend/sap_backend/src/zcl_zodata_message_texts.clas.abap
+backend/sap_backend/src/zcl_zodata_mpl_service.clas.abap
+backend/sap_backend/src/zcl_zodata_save_service.clas.abap
+scripts/wrapper-sprawl-gate.js

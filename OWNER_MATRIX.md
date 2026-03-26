@@ -48,3 +48,12 @@
 - Shell active root/db key owner: `app/service/features/shell/runtime/ShellStateRuntime.js`
 - Attachment transport boundary owner: `app/infra/adapters/shared/AttachmentRepoRuntime.js`
 - Attachment staged UI state owner: `app/service/domain/detail/DetailAttachmentDeltaRuntime.js`
+## 2026-03-27 Production-Readiness Implementation Delta
+- root key owner: `app/service/domain/shared/DetailRuntimePayload.js`
+- child relation owner: `app/infra/adapters/shared/ODataEntityContracts.js`
+- attachment owner: `app/infra/adapters/shared/AttachmentRepoRuntime.js`
+- frontend message-key owner: `app/constants/MessageKeyConstants.js`
+- frontend message-code owner: `app/constants/MessageCodeConstants.js`
+- backend message-code owner: `backend/sap_backend/src/zif_zodata_message_codes.intf.abap`
+- backend human-readable text owner: `backend/sap_backend/src/zcl_zodata_message_texts.clas.abap`
+- framework behavior override owner: `app/service/framework/execution/behavior/BehaviorScopes.js`

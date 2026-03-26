@@ -25,3 +25,5 @@ app/service/framework/AppShellCoordinator.js
 app/controller/search/SearchCommandPolicy.js
 app/service/framework/ControllerRouteRuntime.js
 app/service/framework/FeedbackCoordinator.js
+2026-03-27 production-readiness implementation delta:
+app/service/framework/execution/behavior/OverrideHandlerFactory.js

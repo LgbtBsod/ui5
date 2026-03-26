@@ -15,9 +15,10 @@ sap.ui.define([
         VALIDATION_SUMMARY: "/validationSummary"
     });
 
-    function withCurrentRootId(oController, mInput) {
+    function withCurrentDbKey(oController, mInput) {
         var oNormalized = Object.assign({}, mInput || {});
-        oNormalized.rootId = oNormalized.rootId || (oController && typeof oController._currentRootId === "function" ? oController._currentRootId() : "");
+        oNormalized.dbKey = oNormalized.dbKey || oNormalized.rootId || (oController && typeof oController._currentChecklistDbKey === "function" ? oController._currentChecklistDbKey() : "");
+        delete oNormalized.rootId;
         return oNormalized;
     }
 
@@ -25,7 +26,7 @@ sap.ui.define([
         onToggleEdit: function (oEvent) {
             return DetailStateActionRuntime.toggleEdit(this, oEvent, {
                 enterEdit: function (mInput) {
-                    return DetailCommandPolicy.enterEdit(this, withCurrentRootId(this, mInput)).then(function (vResult) {
+                    return DetailCommandPolicy.enterEdit(this, withCurrentDbKey(this, mInput)).then(function (vResult) {
                         var oDetailModel = this.getModel && this.getModel(ModelContracts.MODELS.DETAIL);
                         DetailPersonInputRuntime.syncDrafts(this, oDetailModel, "/current");
                         return vResult;
@@ -37,7 +38,7 @@ sap.ui.define([
         onSaveDetail: function () {
             return DetailStateActionRuntime.save(this, {
                 saveDetail: function () {
-                    return DetailCommandPolicy.save(this, withCurrentRootId(this));
+                    return DetailCommandPolicy.save(this, withCurrentDbKey(this));
                 }.bind(this)
             }, {
                 saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT
@@ -47,12 +48,12 @@ sap.ui.define([
         onCloseDetail: function () {
             return DetailStateActionRuntime.close(this, {
                 closeDetail: function (mInput) {
-                    return DetailCommandPolicy.close(this, withCurrentRootId(this, mInput));
+                    return DetailCommandPolicy.close(this, withCurrentDbKey(this, mInput));
                 }.bind(this),
                 saveDetail: function () {
                     return DetailStateActionRuntime.save(this, {
                         saveDetail: function () {
-                            return DetailCommandPolicy.save(this, withCurrentRootId(this));
+                            return DetailCommandPolicy.save(this, withCurrentDbKey(this));
                         }.bind(this)
                     }, {
                         saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT
@@ -68,7 +69,7 @@ sap.ui.define([
         onConfirmDeleteChecklist: function () {
             return DetailStateActionRuntime.confirmDelete(this, {
                 deleteChecklist: function () {
-                    return DetailCommandPolicy.deleteChecklist(this, withCurrentRootId(this));
+                    return DetailCommandPolicy.deleteChecklist(this, withCurrentDbKey(this));
                 }.bind(this)
             });
         },
@@ -95,12 +96,12 @@ sap.ui.define([
         },
 
         onCancelEditFromDetail: function () {
-            DetailCommandPolicy.discardChanges(this, withCurrentRootId(this));
+            DetailCommandPolicy.discardChanges(this, withCurrentDbKey(this));
         },
 
         onValidateChecklist: function () {
             this._recomputeValidationSummary("manualValidate", true);
-            return DetailCommandPolicy.validate(this, withCurrentRootId(this)).then(function (oResult) {
+            return DetailCommandPolicy.validate(this, withCurrentDbKey(this)).then(function (oResult) {
                 this._recomputeValidationSummary("validateResult", true);
                 if (ModelStateRuntime.read(this, STATE_MODEL, STATE_PATHS.VALIDATION_SUMMARY + "/hasErrors", false)) {
                     this._focusFirstInvalidField();
@@ -124,7 +125,7 @@ sap.ui.define([
                 return Promise.resolve(false);
             }
 
-            return DetailCommandPolicy.validate(this, withCurrentRootId(this)).then(function () {
+            return DetailCommandPolicy.validate(this, withCurrentDbKey(this)).then(function () {
                 this._recomputeValidationSummary("statusChange", true);
                 if (ModelStateRuntime.read(this, STATE_MODEL, STATE_PATHS.VALIDATION_SUMMARY + "/hasErrors", false)) {
                     this._focusFirstInvalidField();
@@ -137,7 +138,7 @@ sap.ui.define([
                 }
                 return DetailStateActionRuntime.save(this, {
                     saveDetail: function () {
-                        return DetailCommandPolicy.save(this, withCurrentRootId(this));
+                        return DetailCommandPolicy.save(this, withCurrentDbKey(this));
                     }.bind(this)
                 }, {
                     saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT

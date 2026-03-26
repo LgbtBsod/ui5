@@ -32,11 +32,7 @@ sap.ui.define([
     /* Этот блок собирает канонический фильтр для detail entity set.
      * Результат: все children/read запросы используют один и тот же boundary-контракт. */
     function buildDetailFilter(oFilterContract, sRootId) {
-        return ODataAdapterUtils.buildEqFilter(
-            oFilterContract.property,
-            ODataKeyNormalizer.normalizeBinaryKey(sRootId),
-            oFilterContract.type
-        );
+        return ODataAdapterUtils.buildEqFilter(oFilterContract.property, ODataKeyNormalizer.normalizeBinaryKey(sRootId), oFilterContract.type);
     }
 
     /* Этот блок разрешает входной route/id в реальный backend root key.

@@ -186,7 +186,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_create
       iv_bukrs    = ls_source_root-bukrs
-        iv_text     = zcl_zodata_message_texts=>c_msg_no_create_auth_copy
+        iv_text     = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_no_create_auth_copy )
       iv_code     = zif_zodata_message_codes=>no_create_auth ).
     rs_request = mo_save_service->build_copy_request(
       is_request     = is_request
@@ -214,7 +214,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_create
       ID 'BUKRS' FIELD '*'.
     IF sy-subrc <> 0.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>c_msg_no_create_auth iv_code = zif_zodata_message_codes=>no_create_auth ).
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_no_create_auth ) iv_code = zif_zodata_message_codes=>no_create_auth ).
     ENDIF.
     ensure_deps( ).
     ls_req = read_save_request( io_data_provider ).
@@ -293,13 +293,13 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
     lv_root_key = COND #( WHEN ls_req-db_key IS NOT INITIAL THEN ls_req-db_key ELSE ls_req-object_uuid ).
     IF lv_root_key IS INITIAL OR ls_req-session_guid IS INITIAL.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>c_msg_lock_acquire_required iv_code = zif_zodata_message_codes=>validation_error ).
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_acquire_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     DATA(ls_auth_lock) = mo_read_service->read_root_row( lv_root_key ).
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_change
       iv_bukrs    = ls_auth_lock-bukrs
-        iv_text     = zcl_zodata_message_texts=>c_msg_no_edit_auth
+        iv_text     = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_no_edit_auth )
       iv_code     = zif_zodata_message_codes=>no_edit_auth ).
     TRY.
         mo_lock_manager->acquire(
@@ -325,7 +325,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
     lv_root_key = COND #( WHEN ls_req-db_key IS NOT INITIAL THEN ls_req-db_key ELSE ls_req-object_uuid ).
     IF lv_root_key IS INITIAL OR ls_req-session_guid IS INITIAL.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>c_msg_lock_heartbeat_required iv_code = zif_zodata_message_codes=>validation_error ).
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_heartbeat_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     TRY.
         mo_lock_manager->heartbeat(
@@ -349,7 +349,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
     lv_root_key = COND #( WHEN ls_req-db_key IS NOT INITIAL THEN ls_req-db_key ELSE ls_req-object_uuid ).
     IF lv_root_key IS INITIAL OR ls_req-session_guid IS INITIAL.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>c_msg_lock_release_required iv_code = zif_zodata_message_codes=>validation_error ).
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_release_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     TRY.
         mo_lock_manager->unlock(
@@ -424,7 +424,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_view
       iv_bukrs    = ls_row-bukrs
-        iv_text     = zcl_zodata_message_texts=>c_msg_permission_no_view
+        iv_text     = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_permission_no_view )
       iv_code     = zif_zodata_message_codes=>no_view_auth ).
     copy_data_to_ref( EXPORTING is_data = ls_row CHANGING cr_data = er_entity ).
   ENDMETHOD.
@@ -453,7 +453,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_view
       iv_bukrs    = ls_root_auth-bukrs
-        iv_text     = zcl_zodata_message_texts=>c_msg_permission_no_view
+        iv_text     = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_permission_no_view )
       iv_code     = zif_zodata_message_codes=>no_view_auth ).
     lt_rows = mo_read_service->read_check_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
@@ -472,7 +472,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_view
       iv_bukrs    = ls_root_auth-bukrs
-        iv_text     = zcl_zodata_message_texts=>c_msg_permission_no_view
+        iv_text     = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_permission_no_view )
       iv_code     = zif_zodata_message_codes=>no_view_auth ).
     lt_rows = mo_read_service->read_barrier_rows( lv_rootkey ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
@@ -559,6 +559,6 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD raise_crud_not_allowed.
-      raise_busi_exception( iv_text = |{ iv_context }: { zcl_zodata_message_texts=>c_msg_crud_not_allowed }| iv_code = zif_zodata_message_codes=>technical_error ).
+      raise_busi_exception( iv_text = |{ iv_context }: { zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_crud_not_allowed ) }| iv_code = zif_zodata_message_codes=>technical_error ).
   ENDMETHOD.
 ENDCLASS.

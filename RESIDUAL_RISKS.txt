@@ -1,5 +1,10 @@
 Residual risks after final residual cleanup + key-model completion pass:
 
+Update after 2026-03-27 production-readiness implementation delta:
+- Backend human-readable text ownership is improved, but it still uses a central resolver class rather than a full ABAP message class. This is a governance improvement, not the end-state localization model.
+- Frontend canonical naming now prefers `dbKey` in active lock/detail flows, but broad repo-wide `rootId` naming still exists in older search/detail/runtime surfaces outside the lock boundary.
+- `cmd /c npm run validate:local` now reaches the CSS governance stage and fails there honestly. Remaining release blocker is still large-scale `.sap*` selector debt rather than contract drift.
+
 Update after 2026-03-27 final production-readiness delta:
 - Search wrapper-sprawl was reduced again by deleting `app/controller/search/SearchCommandPolicy.js` and routing command dispatch straight through `app/controller/Search.controller.js`.
 - `ControllerRouteRuntime.js` and `FeedbackCoordinator.js` were also removed as dead pass-through owners.

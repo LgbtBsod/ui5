@@ -21,19 +21,20 @@ sap.ui.define([
 ) {
     "use strict";
 
-    function withCurrentRootId(oController, mInput) {
+    function withCurrentDbKey(oController, mInput) {
         var oNormalized = Object.assign({}, mInput || {});
-        oNormalized.rootId = oNormalized.rootId || (oController && typeof oController._currentRootId === "function" ? oController._currentRootId() : "");
+        oNormalized.dbKey = oNormalized.dbKey || oNormalized.rootId || (oController && typeof oController._currentChecklistDbKey === "function" ? oController._currentChecklistDbKey() : "");
+        delete oNormalized.rootId;
         return oNormalized;
     }
 
     function attachmentSectionHooks(oController) {
         return {
             attachmentDelete: function (mInput) {
-                return DetailCommandPolicy.attachmentDelete(oController, withCurrentRootId(oController, mInput));
+                return DetailCommandPolicy.attachmentDelete(oController, withCurrentDbKey(oController, mInput));
             },
             attachmentLoad: function () {
-                return DetailCommandPolicy.attachmentLoad(oController, withCurrentRootId(oController));
+                return DetailCommandPolicy.attachmentLoad(oController, withCurrentDbKey(oController));
             },
             scheduleAttachmentDropZoneBind: function () {
                 if (typeof oController._scheduleAttachmentDropZoneBind === "function") {
@@ -52,7 +53,7 @@ sap.ui.define([
         return {
             autosave: function (mInput) {
                 return DetailCommandPolicy.autosave(oController, {
-                    rootId: oController._currentRootId(),
+                    dbKey: oController._currentChecklistDbKey(),
                     field: mInput.field,
                     value: mInput.value
                 });
@@ -132,10 +133,10 @@ sap.ui.define([
 
         return {
             attachmentDelete: function (oController, mInput) {
-            return DetailCommandPolicy.attachmentDelete(oController, withCurrentRootId(oController, mInput));
+            return DetailCommandPolicy.attachmentDelete(oController, withCurrentDbKey(oController, mInput));
         },
         attachmentLoad: function (oController, mInput) {
-            return DetailCommandPolicy.attachmentLoad(oController, withCurrentRootId(oController, mInput));
+            return DetailCommandPolicy.attachmentLoad(oController, withCurrentDbKey(oController, mInput));
         },
         openWorkflowAnalytics: function (oController) {
             NavigationIntentService.navigateToAnalytics(oController);

@@ -63,3 +63,13 @@
 - Child relation canonical owner: `PARENT_KEY`
 - Persisted attachment read/open contract: `DownloadUrl` + `DocumentHandle`
 - Attachment upload compatibility boundary: `AttachmentRepoRuntime` + mock gateway only
+## 2026-03-27 Production-Readiness Implementation Delta
+| Area | State |
+| --- | --- |
+| Backend human-readable texts | Centralized in `zcl_zodata_message_texts=>get_text( )`; no longer consumed as public text constants |
+| Frontend lock canonical key | `dbKey` |
+| Detail active root owner | `_currentChecklistDbKey()` in `DetailChecklistBehavior.js` |
+| Attachment productive persisted contract | Metadata only (`DownloadUrl` / `DocumentHandle`) |
+| Attachment upload compatibility boundary | `app/infra/adapters/shared/AttachmentRepoRuntime.js` |
+| Removed thin wrapper | `app/service/framework/execution/behavior/OverrideHandlerFactory.js` |
+| Validation status | Contract gates pass; CSS selector gate still fails |

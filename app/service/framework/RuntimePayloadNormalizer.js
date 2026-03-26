@@ -4,6 +4,7 @@ sap.ui.define([
     "use strict";
 
     var STRING_KEYS = Object.freeze([
+        "dbKey",
         "rootId",
         "selectedRowId",
         "intent",

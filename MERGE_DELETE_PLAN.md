@@ -47,3 +47,8 @@
 
 - No extra file deletions were executed in this pass because the remaining wrapper-sprawl candidates are still cross-wired through controller/runtime tests and require a broader semantic merge, not blind removal.
 - No extra file merges were executed in this pass for the same reason; contract drift remediation was prioritized over risky structural churn.
+## 2026-03-27 Production-Readiness Implementation Delta
+- Merge `app/service/framework/execution/behavior/OverrideHandlerFactory.js` into `app/service/framework/execution/behavior/BehaviorScopes.js`
+  reason: override registration was a pass-through helper with no boundary value
+- Keep `app/service/framework/ControllerRouteRuntime.js`, `app/service/framework/FeedbackCoordinator.js`, and `app/controller/search/SearchCommandPolicy.js` as restored semantic owners until all direct consumers are refactored
+  reason: source tree still had live imports; removing them without consumer migration left the repo in a broken state

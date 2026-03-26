@@ -19,7 +19,7 @@ sap.ui.define([
         );
     }
 
-    function serializeStagedAttachments(aAttachments, sRootId) {
+    function serializeStagedAttachments(aAttachments, sRootDbKey) {
         return Promise.resolve([]);
     }
 
@@ -52,11 +52,11 @@ sap.ui.define([
         return oPayload;
     }
 
-    function refreshAttachments(oRepo, sRootId, aCurrentAttachments, bForceReload) {
-        if (!sRootId || !oRepo || typeof oRepo.loadAttachments !== JsRuntime.TYPEOF.FUNCTION || !bForceReload) {
+    function refreshAttachments(oRepo, sRootDbKey, aCurrentAttachments, bForceReload) {
+        if (!sRootDbKey || !oRepo || typeof oRepo.loadAttachments !== JsRuntime.TYPEOF.FUNCTION || !bForceReload) {
             return Promise.resolve(Array.isArray(aCurrentAttachments) ? aCurrentAttachments : []);
         }
-            return oRepo.loadAttachments({ dbKey: sRootId }).then(function (oLoaded) {
+            return oRepo.loadAttachments({ dbKey: sRootDbKey }).then(function (oLoaded) {
                 return (oLoaded && oLoaded.attachments) || [];
             }).catch(function () {
             return Array.isArray(aCurrentAttachments) ? aCurrentAttachments : [];
@@ -85,13 +85,13 @@ sap.ui.define([
         });
     }
 
-    function listPendingStagedAttachments(aAttachments, sRootId) {
+    function listPendingStagedAttachments(aAttachments, sRootDbKey) {
         return (Array.isArray(aAttachments) ? aAttachments : []).filter(hasStagedFile).map(function (oAttachment) {
             return {
                 attachmentId: readAttachmentKey(oAttachment),
                 dbKey: String((oAttachment && (oAttachment.DB_KEY || oAttachment.dbKey)) || "").trim(),
-                parentKey: String((oAttachment && (oAttachment.PARENT_KEY || oAttachment.parentKey || oAttachment.ParentKey)) || sRootId || "").trim(),
-                folderKey: String((oAttachment && (oAttachment.FolderKey || oAttachment.folderKey)) || sRootId || "").trim(),
+                parentKey: String((oAttachment && (oAttachment.PARENT_KEY || oAttachment.parentKey || oAttachment.ParentKey)) || sRootDbKey || "").trim(),
+                folderKey: String((oAttachment && (oAttachment.FolderKey || oAttachment.folderKey)) || sRootDbKey || "").trim(),
                 categoryKey: String((oAttachment && (oAttachment.CategoryKey || oAttachment.categoryKey || oAttachment.Type || oAttachment.type)) || "GEN").trim() || "GEN",
                 fileName: String((oAttachment && (oAttachment.FileName || oAttachment.fileName || oAttachment.Name || oAttachment.name)) || "").trim(),
                 mimeType: String((oAttachment && (oAttachment.MimeType || oAttachment.mimeType)) || "application/octet-stream").trim() || "application/octet-stream",

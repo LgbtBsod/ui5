@@ -77,8 +77,8 @@ sap.ui.define([
     }
 
     function execute(mInput, mCtx) {
-        var sRootId = String((mInput && mInput.rootId) || "").trim();
-        if (!sRootId && !CreateSentinel.isCreateId(sRootId)) {
+        var sDbKey = String((mInput && (mInput.dbKey || mInput.rootId)) || "").trim();
+        if (!sDbKey && !CreateSentinel.isCreateId(sDbKey)) {
             return Promise.resolve(Result.fail({
                 code: DETAIL_MESSAGE_CODES.INVALID_INPUT,
                 messageKey: DETAIL_MESSAGE_KEYS.ATTACHMENT_TARGET_MISSING

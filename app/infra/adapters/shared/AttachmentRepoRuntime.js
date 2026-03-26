@@ -12,7 +12,7 @@ sap.ui.define([
         return String(sValue || "").replace(/^data:.*?;base64,/i, "").trim();
     }
 
-    function readTransientUploadPayload(oFile) {
+    function encodeUploadBoundaryPayload(oFile) {
         return new Promise(function (resolve, reject) {
             var oReader;
             if (!oFile || typeof FileReader === "undefined" || typeof Blob === "undefined" || !(oFile instanceof Blob)) {
@@ -30,7 +30,7 @@ sap.ui.define([
         });
     }
 
-    function normalizeDbKey(sDbKey) {
+    function normalizeRootKey(sDbKey) {
         return ODataKeyNormalizer.normalizeBinaryKey(sDbKey);
     }
 
@@ -39,12 +39,12 @@ sap.ui.define([
     }
 
     function loadAttachments(mArgs) {
-        var sDbKey = normalizeDbKey(mArgs && (mArgs.dbKey || mArgs.rootId));
-        if (!sDbKey) {
+        var sRootId = normalizeRootKey(mArgs && (mArgs.dbKey || mArgs.rootId));
+        if (!sRootId) {
             return Promise.resolve({ attachments: [] });
         }
         return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
-            "$filter": ODataAdapterUtils.buildEqFilter("PARENT_KEY", sDbKey, ODataKeyContracts.TYPES.PARENT_KEY),
+            "$filter": ODataAdapterUtils.buildEqFilter("PARENT_KEY", sRootId, ODataKeyContracts.TYPES.PARENT_KEY),
             "$select": ODataKeyContracts.SELECTS.ATTACHMENT
         }).then(function (oResult) {
             return { attachments: mapAttachmentResult(oResult) };
@@ -53,7 +53,7 @@ sap.ui.define([
 
     function deleteAttachment(mArgs) {
         var sAttachmentId = String((mArgs && (mArgs.attachmentId || mArgs.attachmentKey)) || "").trim().toUpperCase();
-        var sDbKey = normalizeDbKey(mArgs && (mArgs.dbKey || mArgs.rootId));
+        var sDbKey = normalizeRootKey(mArgs && (mArgs.dbKey || mArgs.rootId));
         if (!sAttachmentId || !sDbKey) {
             return Promise.resolve({
                 attachmentId: sAttachmentId,
@@ -88,18 +88,20 @@ sap.ui.define([
 
     function uploadAttachment(mArgs) {
         var oAttachment = (mArgs && mArgs.attachment) || {};
-        var sDbKey = normalizeDbKey((mArgs && (mArgs.dbKey || mArgs.rootId)) || oAttachment.parentKey);
+        var sDbKey = normalizeRootKey((mArgs && (mArgs.dbKey || mArgs.rootId)) || oAttachment.parentKey);
         var sAttachmentId = String(oAttachment.attachmentId || oAttachment.AttachmentKey || "").trim().toUpperCase();
+        var sParentKey = normalizeRootKey(oAttachment.parentKey || sDbKey);
         if (!sDbKey || !oAttachment.file) {
             return Promise.resolve(null);
         }
-        return readTransientUploadPayload(oAttachment.file).then(function (sBase64) {
-            // Canonical persisted attachment state stays on DownloadUrl/DocumentHandle after save.
+        return encodeUploadBoundaryPayload(oAttachment.file).then(function (sBase64) {
+            // Base64 stays confined to this transport adapter boundary.
+            // Persisted frontend attachment state remains canonical metadata only.
             return GatewayClient.create("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
                 AttachmentKey: sAttachmentId || undefined,
                 DB_KEY: sDbKey,
-                PARENT_KEY: normalizeDbKey(oAttachment.parentKey || sDbKey),
-                FolderKey: String(oAttachment.folderKey || normalizeDbKey(oAttachment.parentKey || sDbKey) || sDbKey).trim(),
+                PARENT_KEY: normalizeRootKey(oAttachment.parentKey || sDbKey),
+                FolderKey: String(oAttachment.folderKey || sParentKey || sDbKey).trim(),
                 CategoryKey: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
                 Type: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
                 FileName: String(oAttachment.fileName || "").trim(),
@@ -116,7 +118,8 @@ sap.ui.define([
     }
 
     return {
-        normalizeDbKey: normalizeDbKey,
+        normalizeDbKey: normalizeRootKey,
+        normalizeRootKey: normalizeRootKey,
         loadAttachments: loadAttachments,
         deleteAttachment: deleteAttachment,
         uploadAttachment: uploadAttachment
