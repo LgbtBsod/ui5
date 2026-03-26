@@ -182,7 +182,7 @@ CLASS zcl_zodata_mpc_ext IMPLEMENTATION.
     lo_fi = model->create_function_import( iv_function_import_name = 'ReportExport' ).
     lo_fi->set_http_method( /iwbep/if_mgw_odata_func_imp=>gcs_http_method-post ).
     lo_fi->set_return_entity_set( 'ExportRowSet' ).
-    add_fi_param( io_fi = lo_fi iv_name = 'RootKeys'    iv_edm_type = 'String'  iv_nullable = abap_true ).
+    add_fi_param( io_fi = lo_fi iv_name = 'DBKeys'      iv_edm_type = 'String'  iv_nullable = abap_true ).
     add_fi_param( io_fi = lo_fi iv_name = 'ExportMode'  iv_edm_type = 'String'  iv_nullable = abap_true ).
 
   ENDMETHOD.

@@ -1,32 +1,37 @@
-- app/infra/navigation/WorkspaceRouteNavigation.js
-- app/infra/adapters/shared/ChecklistSnapshotMapper.js
-- app/infra/adapters/LockAdapter.js
-- app/infra/adapters/shared/ODataChecklistPayloadMapper.js
-- app/infra/adapters/shared/ODataEntityContracts.js
-- app/localService/metadata.xml
-- app/model/schema/navigationSchema.js
-- app/controller/detail/DetailInteractionRuntime.js
-- app/controller/detail/internal/DetailChecklistStateBehavior.js
-- app/service/framework/ComponentAppRuntime.js
-- app/service/runtime/component/ComponentLockReleaseRuntime.js
-- app/service/features/detail/runtime/DetailAttachmentOpenRuntime.js
-- app/service/runtime/component/ComponentLifecycleRuntime.js
-- app/service/runtime/component/ComponentLockEventsRuntime.js
-- app/service/runtime/component/ComponentInitListenersRuntime.js
-- app/test/unit/AllTests.js
-- app/test/unit/framework/ComponentLifecycleRuntime.qunit.js
-- app/test/unit/framework/ComponentLockEventsRuntime.qunit.js
-- app/test/unit/framework/ComponentNavigationGuardDecisionRuntime.qunit.js
-- app/test/unit/framework/WorkspaceRouteNavigation.qunit.js
-- backend/sap_backend/src/zif_zodata_contract_constants.intf.abap
-- backend/sap_backend/src/zif_zodata_message_codes.intf.abap
-- backend/sap_backend/src/zif_zodata_message_texts.intf.abap
-- backend/mock_gateway/tests/test_closeout_invariants.py
-- backend/mock_gateway/api/gateway_canonical_api.py
-- backend/mock_gateway/services/metadata_builder.py
-- backend/mock_gateway/README_ODATA.md
-- backend/mock_gateway/tests/test_gateway_contract_frontend_aliases.py
-- backend/mock_gateway/tests/test_attachment_upload_policy.py
-- scripts/final-residual-cleanup-gate.js
-- scripts/gates/framework-token-drift-gate.js
-- scripts/private-ui5-selectors-allowlist.json
+app/controller/Search.controller.js
+app/controller/App.controller.js
+app/controller/detail/DetailControllerRuntime.js
+app/controller/detail/DetailValidationSummaryRuntime.js
+app/controller/search/SearchActionBehavior.js
+app/controller/search/SearchCommandPolicy.js
+app/service/framework/ComponentBootstrap.js
+app/service/framework/behavior/UiDecisionDefaultHandlers.js
+app/service/framework/behavior/NavigationDefaultHandlers.js
+app/service/framework/execution/behavior/BehaviorScopes.js
+app/service/features/detail/runtime/DetailStateActionRuntime.js
+app/service/runtime/component/ComponentBootstrapDependencyBuilder.js
+app/service/runtime/component/ComponentLifecycleRuntime.js
+app/service/runtime/component/ComponentModelInitRuntime.js
+app/service/framework/CtxRuntimeFactory.js
+app/service/runtime/component/ComponentSaveGuardRuntime.js
+app/styles/modules/controls/31_feedback_runtime.css
+app/test/unit/AllTests.js
+backend/mock_gateway/api/gateway_canonical_api.py
+scripts/attachment-contract-gate.js
+scripts/broken-import-gate.js
+scripts/detail-contracts-owner-gate.js
+scripts/key-model-gate.js
+scripts/metadata-contract-gate.js
+scripts/proxy-constants-gate.js
+scripts/sap-internal-css-allowlist.json
+scripts/sap-internal-css-gate.js
+FINAL_COMPLIANCE_REPORT.md
+RESIDUAL_RISKS.txt
+TRUTH_MATRIX.md
+TRUTH_MATRIX.txt
+MERGE_DELETE_PLAN.md
+MERGE_DELETE_PLAN.txt
+OWNER_MATRIX.md
+OWNER_MATRIX.txt
+PROJECT_STRUCTURE_MAP.md
+CSS_DOM_VIOLATIONS.md

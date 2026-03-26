@@ -15,7 +15,7 @@ sap.ui.define([
         var oResolved = oPermission || {};
         var oOptions = mDefaults || {};
         return {
-            rootId: text(oResolved.rootId || oResolved.RootKey, sRootId),
+        rootId: text(oResolved.rootId || oResolved.DB_KEY, sRootId),
             userId: text(oResolved.userId || oResolved.UserId, ""),
             canCreate: !!(oResolved.canCreate || oResolved.CanCreate || oOptions.canCreate),
             canView: !!(oResolved.canView || oResolved.CanView || oOptions.canView),

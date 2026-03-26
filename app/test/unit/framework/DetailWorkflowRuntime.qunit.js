@@ -1,7 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailWorkflowRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (DetailWorkflowRuntime, DetailContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (DetailWorkflowRuntime, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     QUnit.module("framework/DetailWorkflowRuntime");
@@ -11,7 +13,7 @@ sap.ui.define([
             ok: false,
             effects: [],
             error: {
-                code: DetailContracts.CODES.EXPIRED
+                code: MessageCodeConstants.DETAIL.EXPIRED
             }
         }, {
             rootId: "CHK-1"
@@ -21,7 +23,7 @@ sap.ui.define([
         })[0];
 
         assert.ok(oConfirmEffect, "confirm effect is added");
-        assert.strictEqual(oConfirmEffect.textKey, DetailContracts.LOCK_EXPIRED_TAKEOVER_PROMPT, "expired lock prompt is used");
+        assert.strictEqual(oConfirmEffect.textKey, MessageKeyConstants.DETAIL.LOCK_EXPIRED_TAKEOVER_PROMPT, "expired lock prompt is used");
     });
 
     QUnit.test("decorateEnterEditResult adds integration confirmation before edit flow", function (assert) {
@@ -29,7 +31,7 @@ sap.ui.define([
             ok: false,
             effects: [],
             error: {
-                code: DetailContracts.CODES.INTEGRATION_CONFIRM_REQUIRED
+                code: MessageCodeConstants.DETAIL.INTEGRATION_CONFIRM_REQUIRED
             }
         }, {
             rootId: "CHK-2"
@@ -39,7 +41,7 @@ sap.ui.define([
         })[0];
 
         assert.ok(oConfirmEffect, "integration confirm effect is added");
-        assert.strictEqual(oConfirmEffect.textKey, DetailContracts.INTEGRATION_EDIT_CONFIRM, "integration prompt key is used");
+        assert.strictEqual(oConfirmEffect.textKey, MessageKeyConstants.DETAIL.INTEGRATION_EDIT_CONFIRM, "integration prompt key is used");
         assert.strictEqual(oConfirmEffect.payload.confirmedIntegration, true, "confirm payload bypasses second prompt");
     });
 

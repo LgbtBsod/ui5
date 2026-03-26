@@ -1,10 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver"
-], function (EffectTextResolver) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime"
+], function (ControllerTextRuntime) {
     "use strict";
 
     function resolveText(oController, sTextKey, aArgs, sFallback) {
-        return EffectTextResolver.getText(
+        return ControllerTextRuntime.getText(
             oController,
             sTextKey,
             aArgs || [],

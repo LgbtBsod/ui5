@@ -1,9 +1,10 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailViewBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailChecklistStateBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailChecklistRowBehavior",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailInfoCardFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailEditRestoreRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailSelectedFieldRuntime",
@@ -18,7 +19,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts"
-], function (DialogOrchestrator, DetailViewBehavior, DetailCommandPolicy, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, ModelPathContracts, StatePaths, FeedbackCoordinator, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
+], function (DialogOrchestrator, DetailLayoutRuntime, DetailCommandPolicy, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardFactory, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, ModelPathContracts, StatePaths, FeedbackCoordinator, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -54,7 +55,7 @@ sap.ui.define([
         },
 
         infoCardFactory: function (sId, oContext) {
-            return DetailViewBehavior.buildInfoCard(this, sId, oContext);
+            return DetailInfoCardFactory.buildInfoCard(this, sId, oContext);
         },
 
         _focusInfoCardByKey: function (sKey) {
@@ -72,7 +73,7 @@ sap.ui.define([
         },
 
         _applyLayoutState: function (sLayout, mOptions) {
-            DetailViewBehavior.applyLayoutState(this, sLayout, mOptions);
+            DetailLayoutRuntime.applyLayoutState(this, sLayout, mOptions);
         },
 
         _syncComputedEditFlags: function () {

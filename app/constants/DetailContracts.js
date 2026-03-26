@@ -59,26 +59,11 @@ sap.ui.define([], function () {
             SAVED: "saved",
             SAVING: "saving"
         }),
-        TAXONOMY: Object.freeze({
-            PERMISSION_DENIED: "PERMISSION_DENIED",
-            LOCK_EXPIRED: "LOCK_EXPIRED",
-            LOCK_NOT_OWNED_BY_SESSION: "LOCK_NOT_OWNED_BY_SESSION",
-            LOCK_STOLEN: "LOCK_STOLEN",
-            LOCK_MISSING: "LOCK_MISSING",
-            VERSION_CONFLICT: "VERSION_CONFLICT",
-            VALIDATION_ERROR: "VALIDATION_ERROR",
-            NETWORK_ERROR: "NETWORK_ERROR",
-            TECHNICAL_ERROR: "TECHNICAL_ERROR"
-        }),
         ACCESS_OPERATIONS: Object.freeze({
             CREATE: "01",
             CHANGE: "02",
             DISPLAY: "03",
             DELETE: "06"
-        }),
-        ACCESS_REASON_CODES: Object.freeze({
-            AUTHORIZED: "AUTHORIZED",
-            CREATE_DRAFT: "CREATE_DRAFT"
         }),
         MODEL_PATHS: Object.freeze({
             ATTACHMENTS: "/current/attachments",
@@ -94,11 +79,6 @@ sap.ui.define([], function () {
             CREATE_DRAFT_PENDING: "createDraftPending",
             DETAIL_DELETE_COMPLETED: "detailDeleteCompleted",
             DETAIL_SAVE_COMPLETED: "detailSaveCompleted"
-        }),
-        ATTACHMENT_DELETED: "attachmentDeleted",
-        ATTACHMENT_UPLOADED: "attachmentUploaded",
-        CHECKLIST_DELETED: "checklistDeleted",
-        DELETE_CHECKLIST_CONFIRM: "deleteChecklistConfirmText",
-        ATTACHMENT_DRAFT_STAGE_HINT: "attachmentDraftStageHint"
+        })
     });
 });

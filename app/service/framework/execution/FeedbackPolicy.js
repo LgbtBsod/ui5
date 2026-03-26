@@ -5,8 +5,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Effects, NormalizedError, ComponentSaveGuardContracts, EffectFeedbackContracts, FeedbackConstants, ModelContracts, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Effects, NormalizedError, ComponentSaveGuardContracts, EffectFeedbackContracts, FeedbackConstants, ModelContracts, MessageKeyConstants) {
     "use strict";
 
     var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
@@ -57,7 +57,7 @@ sap.ui.define([
             {
                 match: function () { return /validation/i.test(sMessage); },
                 map: function () {
-                    return { kind: NormalizedError.KINDS.VALIDATION, code: sCode, messageKey: DetailMessageKeyConstants.REQUIRED_FIELD_HINT, severity: FeedbackConstants.SEVERITY.INFO };
+                    return { kind: NormalizedError.KINDS.VALIDATION, code: sCode, messageKey: MessageKeyConstants.DETAIL.REQUIRED_FIELD_HINT, severity: FeedbackConstants.SEVERITY.INFO };
                 }
             },
             {

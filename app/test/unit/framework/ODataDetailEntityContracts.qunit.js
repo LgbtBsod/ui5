@@ -11,10 +11,10 @@ sap.ui.define([
         var oCheck = ODataDetailEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_CHECK;
         var oBarrier = ODataDetailEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BARRIER;
 
-        assert.strictEqual(oBasic.property, "RootKey", "basic info stays on binary RootKey");
+        assert.strictEqual(oBasic.property, "DB_KEY", "basic info uses canonical DB_KEY");
         assert.strictEqual(oBasic.type, "Edm.Binary", "basic info filter keeps binary type");
-        assert.strictEqual(oCheck.property, "RootId", "checks keep RootId filter alias");
-        assert.strictEqual(oBarrier.property, "RootId", "barriers keep RootId filter alias");
+        assert.strictEqual(oCheck.property, "PARENT_KEY", "checks use canonical parent key");
+        assert.strictEqual(oBarrier.property, "PARENT_KEY", "barriers use canonical parent key");
     });
 
     QUnit.test("buildDetailFilter formats according to the declared entity contract", function (assert) {
@@ -24,13 +24,13 @@ sap.ui.define([
 
         assert.strictEqual(
             ODataChecklistReadRuntime.buildDetailFilter(oBasic, sRootId),
-            "RootKey eq binary'00112233445566778899AABBCCDDEEFF'",
+            "DB_KEY eq binary'00112233445566778899AABBCCDDEEFF'",
             "basic info uses binary literal"
         );
         assert.strictEqual(
             ODataChecklistReadRuntime.buildDetailFilter(oCheck, sRootId),
-            "RootId eq '00112233445566778899AABBCCDDEEFF'",
-            "check rows keep string alias literal"
+            "PARENT_KEY eq binary'00112233445566778899AABBCCDDEEFF'",
+            "check rows use canonical binary parent key"
         );
     });
 });

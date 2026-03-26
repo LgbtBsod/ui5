@@ -1,21 +1,21 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/WorkflowBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
 ], function (
     LockAdapter,
     StatePaths,
-    RootIdRuntime,
     ModelStateRuntime,
     WorkflowBehaviorHelpers,
     CreateSentinel,
     ModelContracts,
-    DetailContracts
+    MessageCodeConstants,
+    ModelPathContracts
 ) {
     "use strict";
 
@@ -23,7 +23,7 @@ sap.ui.define([
         SAVE: "SAVE",
         DISCARD: "DISCARD",
         CANCEL: "CANCEL",
-        NO_CHANGES: DetailContracts.CODES.NO_CHANGES,
+        NO_CHANGES: MessageCodeConstants.FLOW.NO_CHANGES,
         SAVE_FAILED: "SAVE_FAILED"
     });
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -32,7 +32,12 @@ sap.ui.define([
      * Результат: при выходе или отказе от изменений backend-lock корректно снимается. */
     function releaseActiveLock(mContext) {
         var oController = mContext && mContext.controller;
-        var sRootId = RootIdRuntime.resolveFromStateModel(ModelStateRuntime.model(oController, STATE_MODEL));
+        var oStateModel = ModelStateRuntime.model(oController, STATE_MODEL);
+        var sRootId = String(
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
+            || ""
+        ).trim();
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(null);

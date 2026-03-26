@@ -24,8 +24,8 @@ sap.ui.define([
         return AttachmentValueCodec.fileToBase64(oAttachment && oAttachment._file).then(function (sValue) {
             return {
                 client_row_id: readAttachmentKey(oAttachment),
-                root_key: String((oAttachment && (oAttachment.RootKey || oAttachment.rootKey)) || sRootId || "").trim(),
-                parent_key: String((oAttachment && (oAttachment.ParentKey || oAttachment.parentKey || oAttachment.RootKey || oAttachment.rootKey)) || sRootId || "").trim(),
+        root_key: String((oAttachment && (oAttachment.DB_KEY || oAttachment.dbKey)) || sRootId || "").trim(),
+        parent_key: String((oAttachment && (oAttachment.PARENT_KEY || oAttachment.parentKey || oAttachment.ParentKey)) || sRootId || "").trim(),
                 folder_key: String((oAttachment && (oAttachment.FolderKey || oAttachment.folderKey || oAttachment.ParentKey || oAttachment.parentKey)) || sRootId || "").trim(),
                 category_key: String((oAttachment && (oAttachment.CategoryKey || oAttachment.categoryKey || oAttachment.Type || oAttachment.type)) || "GEN").trim() || "GEN",
                 file_name: String((oAttachment && (oAttachment.FileName || oAttachment.fileName || oAttachment.Name || oAttachment.name)) || "").trim(),

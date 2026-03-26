@@ -1,13 +1,27 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LazyDialogRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (LazyDialogRuntime, EffectActionRouting, DialogContracts, JsRuntime) {
+], function (LazyDialogRuntime, RuntimeInput, DialogContracts, JsRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
+
+    function normalizeEffectVerb(vAction) {
+        return RuntimeInput.asString(vAction).trim().toLowerCase();
+    }
+
+    function dispatchEffectAction(oOptions, oEffect) {
+        var oDispatcher = oOptions && oOptions.actionDispatcher;
+        var sActionName = RuntimeInput.asString(oEffect && oEffect.actionName).trim();
+        var oPayload = RuntimeInput.asObject((oEffect && oEffect.payload) || {});
+        if (!oDispatcher || typeof oDispatcher.dispatch !== "function" || !sActionName) {
+            return Promise.resolve(false);
+        }
+        return oDispatcher.dispatch(sActionName, oPayload);
+    }
 
     var DIALOG_ACTIONS = {
         open: function (oDialog) {
@@ -61,7 +75,7 @@ sap.ui.define([
     }
 
     function applyDialogAction(oDialog, sAction) {
-        var sNormalizedAction = EffectActionRouting.normalizeEffectVerb(sAction);
+        var sNormalizedAction = normalizeEffectVerb(sAction);
         var fn = DIALOG_ACTIONS[sNormalizedAction];
         if (typeof fn !== TYPE_FUNCTION) {
             return false;
@@ -70,13 +84,13 @@ sap.ui.define([
     }
 
     function runDialogEffect(oController, oEffect, oOptions) {
-        var sAction = EffectActionRouting.normalizeEffectVerb(oEffect && oEffect.action);
+        var sAction = normalizeEffectVerb(oEffect && oEffect.action);
         if (oController && typeof oController.shouldAllowDialogEffect === TYPE_FUNCTION &&
             oController.shouldAllowDialogEffect(oEffect && oEffect.id, sAction, oEffect) === false) {
             return Promise.resolve(false);
         }
         if (sAction === "dispatch") {
-            return EffectActionRouting.dispatchEffectAction(oController, oOptions, oEffect);
+            return dispatchEffectAction(oOptions, oEffect);
         }
         return resolveDialogAsync(oController, oEffect && oEffect.id).then(function (oDialog) {
             if (!oDialog) {

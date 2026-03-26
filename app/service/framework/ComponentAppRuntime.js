@@ -149,8 +149,7 @@ sap.ui.define([
             return false;
         }
         oComponent._bLeaveReleaseSent = LockAdapter.releaseOnPageLeave({
-            dbKey: oPayload.DB_KEY || oPayload.RootId,
-            objectUuid: oPayload.DB_KEY || oPayload.RootId,
+            dbKey: oPayload.DB_KEY,
             sessionGuid: oPayload.SessionGuid,
             model: oMainServiceModel
         });

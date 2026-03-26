@@ -8,8 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/RetryHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiBehaviorHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/DetailRuntimeHandlers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/UiBehaviorConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimeConstants"
 ], function (
@@ -22,12 +21,48 @@ sap.ui.define([
     FeedbackDefaultHandlers,
     RetryHandlers,
     UiBehaviorHandlers,
-    UiDecisionDefaultHandlers,
-    DetailRuntimeHandlers,
+    BehaviorRegistry,
     UiBehaviorConstants,
     DetailRuntimeConstants
 ) {
     "use strict";
+
+    var detailRuntimeDefaultsRegistered = false;
+    var detailRuntimeHandlers = {};
+
+    function resolveAnalyticsEditRestorePlan() {
+        return {
+            maxAttempts: 3,
+            retryDelayMs: 220
+        };
+    }
+
+    detailRuntimeHandlers[DetailRuntimeConstants.OP_ANALYTICS_EDIT_RESTORE] = resolveAnalyticsEditRestorePlan;
+
+    function ensureDetailRuntimeRegistered() {
+        if (detailRuntimeDefaultsRegistered) {
+            return;
+        }
+        Object.keys(detailRuntimeHandlers).forEach(function (sOperation) {
+            BehaviorRegistry.registerDefault(DetailRuntimeConstants.SCOPE, sOperation, detailRuntimeHandlers[sOperation]);
+        });
+        detailRuntimeDefaultsRegistered = true;
+    }
+
+    var detailRuntimeOverrides = {
+        ensureRegistered: function () {
+            return true;
+        },
+        register: function (sId, fnHandler) {
+            return BehaviorRegistry.registerOverride(DetailRuntimeConstants.SCOPE, sId, fnHandler);
+        },
+        unregister: function (sId) {
+            return BehaviorRegistry.unregisterOverride(DetailRuntimeConstants.SCOPE, sId);
+        },
+        clear: function () {
+            return BehaviorRegistry.clearOverrides(DetailRuntimeConstants.SCOPE);
+        }
+    };
 
     function make(sScope, oHandlers, oOverrides) {
         return BehaviorRuntimeCore.create({
@@ -45,7 +80,9 @@ sap.ui.define([
         feedback: make("feedback", FeedbackDefaultHandlers),
         retry: make("retry", RetryHandlers.defaults, RetryHandlers.overrides),
         ui: make(UiBehaviorConstants.SCOPE, UiBehaviorHandlers.defaults, UiBehaviorHandlers.overrides),
-        uiDecision: make("uiDecision", UiDecisionDefaultHandlers),
-        detailRuntime: make(DetailRuntimeConstants.SCOPE, DetailRuntimeHandlers.defaults, DetailRuntimeHandlers.overrides)
+        detailRuntime: make(DetailRuntimeConstants.SCOPE, {
+            handlers: detailRuntimeHandlers,
+            ensureRegistered: ensureDetailRuntimeRegistered
+        }, detailRuntimeOverrides)
     });
 });

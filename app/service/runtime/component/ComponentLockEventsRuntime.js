@@ -5,17 +5,18 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts, DetailContracts, ShellStateRuntime, RuntimeEventContracts, ComponentDetailMetaSyncRuntime, ComponentListenerContracts) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts, MessageCodeConstants, MessageKeyConstants, ShellStateRuntime, RuntimeEventContracts, ComponentDetailMetaSyncRuntime, ComponentListenerContracts) {
     "use strict";
 
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
-    var DETAIL_CODES = DetailContracts.CODES;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
+    var DETAIL_CODES = MessageCodeConstants.FLOW;
     var PATHS = ComponentListenerContracts.PATHS;
     var TELEMETRY_EVENT = ComponentListenerContracts.TELEMETRY_EVENT;
     var VALUES = ComponentListenerContracts.VALUES;
@@ -35,7 +36,7 @@ sap.ui.define([
 
     function shouldIgnoreProbePayload(oPayload, oStateModel, oStatePaths) {
         var oScope = readCurrentLockScope(oStateModel, oStatePaths);
-        var sPayloadRootId = String((oPayload && (oPayload.rootId || oPayload.RootId || oPayload.objectUuid || oPayload.ObjectUuid)) || "").trim();
+    var sPayloadRootId = String((oPayload && (oPayload.rootId || oPayload.dbKey || oPayload.objectUuid || oPayload.ObjectUuid)) || "").trim();
         var sPayloadSessionGuid = String((oPayload && (oPayload.sessionGuid || oPayload.SessionGuid)) || "").trim();
 
         if (!isActiveEditLockScope(oScope)) {

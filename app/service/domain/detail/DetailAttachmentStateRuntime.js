@@ -5,13 +5,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Effects, AttachmentIdentity, DetailStateAccess, ViewPathContracts, StatePaths, ModelContracts, DetailContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Effects, AttachmentIdentity, DetailStateAccess, ViewPathContracts, StatePaths, ModelContracts, DetailContracts, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
 
     function buildAttachmentBusyResetEffects() {
         return [Effects.modelPatch(MODELS.VIEW, "/attachmentBusy", false)];

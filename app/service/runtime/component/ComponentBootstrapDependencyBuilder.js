@@ -4,8 +4,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentModelInitRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentMainServiceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentModelBootstrap",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLifecycleRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeSettingsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentPollingRuntime",
@@ -18,8 +16,6 @@ sap.ui.define([
     ComponentLockReleaseRuntime,
     ComponentSaveGuardRuntime,
     ComponentModelInitRuntime,
-    ComponentMainServiceRuntime,
-    ComponentModelBootstrap,
     ComponentLifecycleRuntime,
     ComponentRuntimeSettingsRuntime,
     ComponentPollingRuntime,
@@ -74,15 +70,12 @@ sap.ui.define([
                 ComponentLockReleaseRuntime: ComponentLockReleaseRuntime,
                 ComponentSaveGuardRuntime: ComponentSaveGuardRuntime,
                 ComponentModelInitRuntime: ComponentModelInitRuntime,
-                ComponentMainServiceRuntime: ComponentMainServiceRuntime,
                 ComponentRuntimeSettingsRuntime: ComponentRuntimeSettingsRuntime,
                 ComponentPollingRuntime: ComponentPollingRuntime,
                 ComponentCrossTabRuntime: ComponentCrossTabRuntime,
                 ComponentInitListenersRuntime: ComponentInitListenersRuntime,
                 ComponentLockEventsRuntime: ComponentLockEventsRuntime,
-                ComponentModelBootstrap: ComponentModelBootstrap,
-                ComponentLifecycleRuntime: ComponentLifecycleRuntime,
-                ComponentNavigationRuntime: mStaticDeps.ComponentNavigationRuntime
+                ComponentLifecycleRuntime: ComponentLifecycleRuntime
             },
             theme: {
                 ThemeRuntime: mStaticDeps.ThemeService

@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchAnalyticsIntentBehavior",

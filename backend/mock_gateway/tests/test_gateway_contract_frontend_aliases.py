@@ -147,13 +147,13 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
                     "Type": "GEN",
                     "FileName": "create-note.txt",
                     "Name": "create-note.txt",
-                    "MimeType": "text/plain",
-                    "Description": "Created with checklist",
-                    "FileSize": 12,
-                    "FileSizeContent": 12,
-                    "Value": "aGVsbG8gY3JlYXRl"
-                }],
-            }
+                "MimeType": "text/plain",
+                "Description": "Created with checklist",
+                "FileSize": 12,
+                "FileSizeContent": 12,
+                "ContentBase64": "aGVsbG8gY3JlYXRl"
+            }],
+        }
         }
         created = client.post(f"{SERVICE_ROOT}/CreateChecklist", json=create_payload, headers={"X-CSRF-Token": token})
         assert created.status_code == 200
@@ -206,7 +206,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
                 "Description": "Saved with checklist",
                 "FileSize": 10,
                 "FileSizeContent": 10,
-                "Value": "c2F2ZSBub3Rl"
+                "ContentBase64": "c2F2ZSBub3Rl"
             }],
             "client_version": 1,
             "SessionGuid": "S2",
@@ -342,14 +342,14 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         assert 'Property Name="Uname"' not in metadata
         assert 'EntityType Name="SaveChangesResponse"' in metadata
         assert 'Property Name="code" Type="Edm.String"' in metadata
-        assert 'Property Name="reason_code" Type="Edm.String"' in metadata
+        assert 'Property Name="reason_code" Type="Edm.String"' not in metadata
         assert 'Property Name="lock_refreshed" Type="Edm.Boolean"' in metadata
         assert 'Property Name="lock_expires_at" Type="Edm.DateTime"' in metadata
         assert 'Property Name="server_now" Type="Edm.DateTime"' in metadata
         assert 'Property Name="request_id" Type="Edm.String"' in metadata
         assert 'FunctionImport Name="AutoSave" ReturnType="' + ODATA_NS + '.SaveChangesResponse"' in metadata
         assert 'FunctionImport Name="SaveChanges" ReturnType="' + ODATA_NS + '.SaveChangesResponse"' in metadata
-        for name in ["CreateChecklist", "CopyChecklist", "AutoSave", "SaveChanges", "SetChecklistStatus", "LockAcquire", "LockHeartbeat", "LockRelease"]:
+        for name in ["CreateChecklist", "CopyChecklist", "AutoSave", "SaveChanges", "LockAcquire", "LockHeartbeat", "LockRelease"]:
             assert f'FunctionImport Name="{name}"' in metadata
         for name in ["AutosaveChecklist", "UpdateChecklist", "LockStatus", "LockControl"]:
             assert f'FunctionImport Name="{name}"' not in metadata

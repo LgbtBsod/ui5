@@ -27,15 +27,16 @@ sap.ui.define([
         var aCurrent = (oSnapshot && oSnapshot.attachments) || [];
         var oFile = mInput && mInput.file;
         var oMeta = (mInput && mInput.fileMeta) || {};
-        var sRootKey = String((((oSnapshot || {}).root || {}).id) || (((oSnapshot || {}).root || {}).Key) || "").trim() || DraftChecklistFactory.createTempKey();
+        var sParentKey = String((((oSnapshot || {}).root || {}).id) || (((oSnapshot || {}).root || {}).DB_KEY) || "").trim() || DraftChecklistFactory.createTempKey();
         var sAttachmentKey = DraftChecklistFactory.createTempKey();
         return AttachmentValueCodec.fileToBase64(oFile).then(function (sFileBase64) {
             var oAttachment = {
                 AttachmentKey: sAttachmentKey,
                 Key: sAttachmentKey,
                 client_row_id: sAttachmentKey,
-                RootKey: sRootKey,
-                FolderKey: sRootKey,
+                DB_KEY: sAttachmentKey,
+                PARENT_KEY: sParentKey,
+                FolderKey: sParentKey,
                 FileName: oMeta.fileName || (oFile && oFile.name) || "",
                 fileName: oMeta.fileName || (oFile && oFile.name) || "",
                 MimeType: oMeta.mimeType || (oFile && oFile.type) || "application/octet-stream",

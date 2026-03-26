@@ -1,7 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/PermissionPresentation",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
@@ -10,7 +9,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (LayoutStateRuntime, ControllerModelRuntime, RootIdRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants) {
+], function (LayoutStateRuntime, ControllerModelRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -183,7 +182,11 @@ sap.ui.define([
 
         ensureShellDefaults(oController);
         oShellLockState = resolveShellLockState(oState);
-        sSelectedId = RootIdRuntime.resolveFromStateModel(oState);
+        sSelectedId = String(
+            ModelStateRuntime.readOnModel(oState, ModelPathContracts.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, "")
+            || ""
+        ).trim();
         sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
         sMode = LayoutStateRuntime.readMode(oState, WorkflowContracts.EDIT_MODES.READ);
         oCurrentUser = ModelStateRuntime.read(oController, STATE_MODEL, "/currentUser", {}) || {};

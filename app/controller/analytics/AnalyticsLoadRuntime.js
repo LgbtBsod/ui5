@@ -1,33 +1,29 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
 ], function (
     ControllerViewStateRuntime,
     ModelStateRuntime,
     StatePaths,
     AnalyticsContracts,
-    AnalyticsUiContracts,
     ReadinessTelemetryContracts,
     ReadinessTelemetryRuntime,
     ModelContracts,
     AnalyticsViewStateReader,
-    YearValue,
-    AnalyticsStateConstants
+    YearValue
 ) {
     "use strict";
 
-    var LOAD_REASONS = AnalyticsUiContracts.LOAD_REASONS;
-    var MESSAGES = AnalyticsUiContracts.MESSAGES;
-    var PATHS = AnalyticsUiContracts.PATHS;
+    var LOAD_REASONS = AnalyticsContracts.LOAD_REASONS;
+    var MESSAGES = AnalyticsContracts.MESSAGES;
+    var PATHS = AnalyticsContracts.PATHS;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function setReadinessState(oController, sStatus, bReady, sReadyAt, sError) {
@@ -64,7 +60,7 @@ sap.ui.define([
             return true;
         }
         ControllerViewStateRuntime.set(oController, PATHS.ERROR, MESSAGES.INVALID_YEAR);
-        setReadinessState(oController, AnalyticsStateConstants.LOAD_STATUS.ERROR, false, "", MESSAGES.INVALID_YEAR);
+        setReadinessState(oController, AnalyticsContracts.LOAD_STATUS.ERROR, false, "", MESSAGES.INVALID_YEAR);
         return false;
     }
 
@@ -100,7 +96,7 @@ sap.ui.define([
     function finalizeAnalyticsLoad(oController, mHooks) {
         ControllerViewStateRuntime.set(oController, PATHS.AVAILABLE_YEARS, mHooks.buildYearOptions(oController));
         ControllerViewStateRuntime.set(oController, PATHS.COMPARE_YEAR_OPTIONS, mHooks.buildCompareYearOptions(oController));
-        mHooks.setCompareYearValidation(oController, AnalyticsUiContracts.VALIDATION_STATES.NONE, "");
+        mHooks.setCompareYearValidation(oController, AnalyticsContracts.VALIDATION_STATES.NONE, "");
         mHooks.applyComparisonMetricSelection(oController);
         mHooks.applyBuilderSelection(oController);
         mHooks.syncAnalyticsContextHints(oController);
@@ -111,7 +107,7 @@ sap.ui.define([
         var sReadyAt = new Date().toISOString();
         syncAnalyticsSelectionState(oController, mHooks, oAnalytics);
         finalizeAnalyticsLoad(oController, mHooks);
-        setReadinessState(oController, AnalyticsStateConstants.LOAD_STATUS.READY, true, sReadyAt, "");
+        setReadinessState(oController, AnalyticsContracts.LOAD_STATUS.READY, true, sReadyAt, "");
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.ANALYTICS_READY, {
             reason: oLoadInput.resolvedReason,
             source: oLoadInput.selectionState.selectedSource
@@ -122,7 +118,7 @@ sap.ui.define([
     function handleLoadFailure(oController, oError) {
         var sErrorMessage = String((oError && oError.message) || MESSAGES.ANALYTICS_LOAD_FAILED);
         ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
-        setReadinessState(oController, AnalyticsStateConstants.LOAD_STATUS.ERROR, false, "", sErrorMessage);
+        setReadinessState(oController, AnalyticsContracts.LOAD_STATUS.ERROR, false, "", sErrorMessage);
         throw oError;
     }
 
@@ -147,7 +143,7 @@ sap.ui.define([
                 return Promise.resolve(false);
             }
 
-            setReadinessState(oController, AnalyticsStateConstants.LOAD_STATUS.LOADING, false, "", "");
+            setReadinessState(oController, AnalyticsContracts.LOAD_STATUS.LOADING, false, "", "");
             setControllerBusy(oController, true, "");
 
             return executeAnalyticsLoad(oController, oLoadInput, mHooks).then(function (oResult) {

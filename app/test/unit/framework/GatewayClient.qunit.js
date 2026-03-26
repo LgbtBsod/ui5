@@ -23,7 +23,7 @@ sap.ui.define([
         return assert.rejects(
             GatewayClient.callFunctionImport(
                 GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE,
-                { RootId: "4711", SessionGuid: "SESSION-1" },
+                { DB_KEY: "4711", SessionGuid: "SESSION-1" },
                 { async: false }
             ),
             /Synchronous function imports are not supported/,
@@ -41,7 +41,7 @@ sap.ui.define([
 
         return GatewayClient.callFunctionImport(
             GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE,
-            { RootId: "4711", SessionGuid: "SESSION-1" },
+            { DB_KEY: "4711", SessionGuid: "SESSION-1" },
             {}
         ).then(function () {
             assert.ok(true, "request resolves");

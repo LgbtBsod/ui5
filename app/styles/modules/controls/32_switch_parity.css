@@ -163,6 +163,40 @@ html.chkAppRoot.appThemeSwitching .chkApp .searchFilterCardDense {
   box-shadow: 0 1px 4px rgba(0, 112, 242, 0.28);
 }
 
+.chkApp .shellThemeSwitch .sapMSwtText,
+.chkApp .shellThemeSwitch .sapMSwtLabel,
+.chkApp .searchModeToggleSwitch .sapMSwtText,
+.chkApp .searchModeToggleSwitch .sapMSwtLabel,
+.chkApp .shellSettingsSwitch .sapMSwtText,
+.chkApp .shellSettingsSwitch .sapMSwtLabel,
+.chkApp .detailResultSwitch .sapMSwtText,
+.chkApp .detailResultSwitch .sapMSwtLabel {
+  display: none;
+}
+
+.chkApp .shellThemeSwitch .sapMSwtInner,
+.chkApp .searchModeToggleSwitch .sapMSwtInner,
+.chkApp .shellSettingsSwitch .sapMSwtInner,
+.chkApp .detailResultSwitch .sapMSwtInner {
+  padding-inline: 0;
+}
+
+.chkApp .shellThemeSwitch.sapMSwtCont,
+.chkApp .shellSettingsSwitch.sapMSwtCont,
+.chkApp .detailResultSwitch.sapMSwtCont {
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.chkApp .detailResultSwitch.sapMSwtCont {
+  justify-content: center;
+}
+
+.chkApp .detailResultSwitch .sapMSwt {
+  min-width: 3.75rem;
+}
+
 .chkApp .flatEditorTable .sapMSwtHandle {
   width: 1.05rem;
   height: 1.05rem;

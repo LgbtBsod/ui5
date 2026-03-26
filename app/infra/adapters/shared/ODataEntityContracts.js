@@ -46,7 +46,7 @@ sap.ui.define([
     });
 
     var SELECTS = Object.freeze({
-        ATTACHMENT: "AttachmentKey,Key,DB_KEY,PARENT_KEY,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,DownloadUrl,DocumentHandle,ScanStatus,ScannedOn,CreatedOn,ChangedOn",
+        ATTACHMENT: "AttachmentKey,DB_KEY,PARENT_KEY,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,DownloadUrl,DocumentHandle,ScanStatus,ScannedOn,CreatedOn,ChangedOn",
         ATTACHMENT_CONTENT: "AttachmentKey,FileName,MimeType,DownloadUrl,DocumentHandle",
         CHECKLIST_BASIC_INFO: "DB_KEY,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverFullname,ObservedPernr,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName",
         CHECKLIST_BARRIER: "DB_KEY,PARENT_KEY,BarriersNum,Text,Comment,Result,ChangedOn",

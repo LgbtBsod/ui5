@@ -1,23 +1,42 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/UiDecisionBehaviorHelpers",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (UiDecisionBehaviorHelpers, BehaviorRegistry, DetailMessageKeyConstants, SearchMessageKeyConstants, MessageKeyConstants) {
+], function (DialogOrchestrator, FeedbackBehaviorHelpers, BehaviorRegistry, MessageKeyConstants) {
     "use strict";
 
     var UI_DECISION_SCOPE = "uiDecision";
     var ACTION_DELETE = "Delete";
-    var TEXT_DELETE_CHECKLIST_CONFIRM = DetailMessageKeyConstants.DELETE_CHECKLIST_CONFIRM;
-    var TEXT_NOTHING_TO_OPEN = SearchMessageKeyConstants.NOTHING_TO_OPEN;
-    var TEXT_OPEN_USES_FIRST = SearchMessageKeyConstants.OPEN_USES_FIRST_HINT;
-    var TEXT_COPY_SINGLE_SELECTION = SearchMessageKeyConstants.COPY_SINGLE_SELECTION_HINT;
-    var TEXT_SELECT_VISIBLE_EMPTY = SearchMessageKeyConstants.SELECT_VISIBLE_EMPTY;
+    var TEXT_DELETE_CHECKLIST_CONFIRM = MessageKeyConstants.DETAIL.DELETE_CHECKLIST_CONFIRM;
+    var TEXT_NOTHING_TO_OPEN = MessageKeyConstants.SEARCH.NOTHING_TO_OPEN;
+    var TEXT_OPEN_USES_FIRST = MessageKeyConstants.SEARCH.OPEN_USES_FIRST_HINT;
+    var TEXT_COPY_SINGLE_SELECTION = MessageKeyConstants.SEARCH.COPY_SINGLE_SELECTION_HINT;
+    var TEXT_SELECT_VISIBLE_EMPTY = MessageKeyConstants.SEARCH.SELECT_VISIBLE_EMPTY;
     var TEXT_SHELL_REFRESH_SUCCESS = MessageKeyConstants.SHELL.CONTEXT_REFRESHED;
     var TEXT_SHELL_REFRESH_FAILURE = MessageKeyConstants.SHELL.USER_REFRESH_FAILED;
     var TEXT_CORRELATION_COPIED = MessageKeyConstants.SHELL.CORRELATION_COPIED;
     var bDefaultsRegistered = false;
+
+    function showToast(oController, sTextKey, aArgs) {
+        if (oController && typeof oController.showI18nToast === "function") {
+            oController.showI18nToast(sTextKey, aArgs || []);
+        }
+    }
+
+    function showError(oController, sTextKey, aArgs) {
+        if (oController && typeof oController.showI18nError === "function") {
+            oController.showI18nError(sTextKey, aArgs || []);
+        }
+    }
+
+    function confirmDelete(oController, sTextKey) {
+        return DialogOrchestrator.promptWarning(
+            FeedbackBehaviorHelpers.resolveText(oController, sTextKey || TEXT_DELETE_CHECKLIST_CONFIRM, [], sTextKey || TEXT_DELETE_CHECKLIST_CONFIRM),
+            [DialogOrchestrator.actions.DELETE, DialogOrchestrator.actions.CANCEL],
+            DialogOrchestrator.actions.CANCEL
+        );
+    }
 
     function runOptionalHandler(fnHandler) {
         if (typeof fnHandler !== "function") {
@@ -30,7 +49,7 @@ sap.ui.define([
         if (!mContext || !mContext.armed || mContext.busy) {
             return Promise.resolve(false);
         }
-        return UiDecisionBehaviorHelpers.confirmDelete(
+        return confirmDelete(
             mContext && mContext.controller,
             String((mContext && mContext.textKey) || TEXT_DELETE_CHECKLIST_CONFIRM)
         ).then(function (sAction) {
@@ -50,12 +69,12 @@ sap.ui.define([
         var iSelectionCount = Number(mContext && mContext.selectionCount || 0);
         var sSelectedRowId = String((mContext && mContext.selectedRowId) || "").trim();
         if (!sSelectedRowId) {
-            UiDecisionBehaviorHelpers.showError(oController, TEXT_NOTHING_TO_OPEN);
+            showError(oController, TEXT_NOTHING_TO_OPEN);
             runOptionalHandler(mContext && mContext.onMissingSelection);
             return false;
         }
         if (iSelectionCount > 1) {
-            UiDecisionBehaviorHelpers.showToast(oController, TEXT_OPEN_USES_FIRST, [iSelectionCount]);
+            showToast(oController, TEXT_OPEN_USES_FIRST, [iSelectionCount]);
         }
         return true;
     }
@@ -64,7 +83,7 @@ sap.ui.define([
         var oController = mContext && mContext.controller;
         var iSelectionCount = Number(mContext && mContext.selectionCount || 0);
         if (iSelectionCount > 1) {
-            UiDecisionBehaviorHelpers.showError(oController, TEXT_COPY_SINGLE_SELECTION);
+            showError(oController, TEXT_COPY_SINGLE_SELECTION);
             runOptionalHandler(mContext && mContext.onBlockedSelection);
             return false;
         }
@@ -72,23 +91,23 @@ sap.ui.define([
     }
 
     function notifySelectVisibleEmpty(mContext) {
-        UiDecisionBehaviorHelpers.showError(mContext && mContext.controller, TEXT_SELECT_VISIBLE_EMPTY);
+        showError(mContext && mContext.controller, TEXT_SELECT_VISIBLE_EMPTY);
         return false;
     }
 
     function notifyShellRefreshSuccess(mContext) {
-        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, TEXT_SHELL_REFRESH_SUCCESS);
+        showToast(mContext && mContext.controller, TEXT_SHELL_REFRESH_SUCCESS);
         return true;
     }
 
     function notifyShellRefreshFailure(mContext) {
         var oError = mContext && mContext.error;
-        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, TEXT_SHELL_REFRESH_FAILURE, [String((oError && oError.message) || "")]);
+        showToast(mContext && mContext.controller, TEXT_SHELL_REFRESH_FAILURE, [String((oError && oError.message) || "")]);
         return false;
     }
 
     function notifyCorrelationCopied(mContext) {
-        UiDecisionBehaviorHelpers.showToast(mContext && mContext.controller, TEXT_CORRELATION_COPIED);
+        showToast(mContext && mContext.controller, TEXT_CORRELATION_COPIED);
         return true;
     }
 
@@ -117,5 +136,4 @@ sap.ui.define([
         ensureRegistered: ensureRegistered
     };
 });
-
 

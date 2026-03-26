@@ -1,5 +1,16 @@
-# CSS/DOM Violations
+# CSS DOM Violations
 
-- Reduced private UI5 selector usage in search/detail/analytics/shell styling surfaces.
-- Remaining private selector usage is intentionally whitelisted only where UI5 1.71 lacks a stable public alternative.
-- The allowlist was tightened to remove stale CSS exceptions that are no longer needed.
+## Closed In This Pass
+- Removed stale SAP-selector allowlist entries for:
+  - `app/styles/modules/controls/24_switches_and_toggles.css`
+  - `app/styles/modules/controls/33_overflow_and_badges.css`
+  - `app/styles/modules/controls/31_feedback_runtime.css`
+- Tightened `scripts/sap-internal-css-gate.js` so unused allowlist entries fail instead of silently persisting.
+
+## Remaining Active Private Selector Debt
+- `app/styles/modules/controls/26_controls.css`
+
+## Policy
+- Prefer app-owned classes.
+- Prefer public UI5 APIs and theme-safe wrappers.
+- Keep allowlist entries only while a file still contains justified private selectors.

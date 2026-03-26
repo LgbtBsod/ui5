@@ -7,15 +7,17 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiAssetPaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, WorkflowContracts, UiAssetPaths, ModelContracts, DetailContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Effects, ViewPathContracts, AccessPayload, StatePaths, WorkflowTelemetry, WorkflowContracts, UiAssetPaths, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     var OPERATIONS = DetailContracts.ACCESS_OPERATIONS;
-    var ACCESS_REASON_CODES = DetailContracts.ACCESS_REASON_CODES;
-    var DETAIL_CODES = DetailContracts.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
+    var DETAIL_CODES = MessageCodeConstants.DETAIL;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
+    var DETAIL_VIEW_KEYS = MessageKeyConstants.VIEW;
     var MODELS = ModelContracts.MODELS;
 
     function resolveRequestedActivity(mOptions) {
@@ -55,7 +57,7 @@ sap.ui.define([
     function normalizePermission(oPermission, sRootId, mOptions) {
         var sRequestedActivity = resolveRequestedActivity(mOptions);
         var oResolved = AccessPayload.normalizePermission(oPermission, sRootId, {
-            reasonCode: ACCESS_REASON_CODES.AUTHORIZED,
+            reasonCode: DETAIL_CODES.AUTHORIZED,
             requestedActivity: sRequestedActivity
         });
         var bAllowed = activityAllowed(oResolved, sRequestedActivity);
@@ -112,8 +114,8 @@ sap.ui.define([
             canDelete: !!oResolved.canDelete,
             reasonCode: oResolved.reasonCode,
             message: oResolved.message,
-            titleKey: bDenied ? "detailAccessDeniedTitle" : "",
-            messageKey: bDenied ? "detailAccessDeniedText" : "",
+            titleKey: bDenied ? DETAIL_MESSAGE_KEYS.DETAIL_ACCESS_DENIED_TITLE : "",
+            messageKey: bDenied ? DETAIL_MESSAGE_KEYS.DETAIL_ACCESS_DENIED_MESSAGE : "",
             illustrationSrc: UiAssetPaths.DETAIL_ACCESS_DENIED_LIGHT
         };
     }
@@ -140,7 +142,7 @@ sap.ui.define([
             Effects.modelPatch(MODELS.DETAIL, DETAIL_MODEL_PATHS.BASE, {}),
             Effects.modelPatch(MODELS.VIEW, ViewPathContracts.DETAIL_SKELETON_BUSY, false),
             Effects.modelPatch(MODELS.VIEW, ViewPathContracts.ACCESS_STATE, buildAccessState(oResolved, true)),
-            Effects.toast(DETAIL_MESSAGE_KEYS.DETAIL_VIEW_PERMISSION_DENIED, "warning")
+            Effects.toast(DETAIL_VIEW_KEYS.PERSISTENCE_PERMISSION_DENIED, "warning")
         ];
     }
 
@@ -160,7 +162,7 @@ sap.ui.define([
                 sResolvedRootId,
                 sRequestedActivity,
                 DETAIL_CODES.PERMISSION_CHECK_UNAVAILABLE,
-                "Permission backend is unavailable"
+                ""
             );
             emitPermissionDenied(mCtx, oMissingPermission, sRequestedActivity);
             return Promise.resolve(oMissingPermission);
@@ -180,7 +182,7 @@ sap.ui.define([
                 sResolvedRootId,
                 sRequestedActivity,
                 DETAIL_CODES.PERMISSION_CHECK_FAILED,
-                "Permission could not be confirmed"
+                ""
             );
             emitPermissionDenied(mCtx, oFailedPermission, sRequestedActivity);
             return oFailedPermission;

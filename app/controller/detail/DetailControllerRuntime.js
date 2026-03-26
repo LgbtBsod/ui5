@@ -1,33 +1,39 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailControllerBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailValidationSummaryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailActionDialogRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailChecklistBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentDropZoneRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailAdaptiveViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailInteractionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailObserverCardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailSimpleCardRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerReturnFocusRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFormatters",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
 ], function (
     DetailControllerBehavior,
     DetailValidationSummaryRuntime,
-    DetailActionDialogRuntime,
     DetailChecklistBehavior,
     AttachmentDropZoneRuntime,
     AttachmentUploadCore,
-    DetailAdaptiveViewportRuntime,
     DetailInteractionRuntime,
     DetailObserverCardRuntime,
     DetailPersonInputRuntime,
     DetailSimpleCardRuntime,
+    ControllerReturnFocusRuntime,
     DetailFormatters,
     DetailAttachmentViewState,
-    DetailRowBindingRuntime
+    DetailRowBindingRuntime,
+    ControllerViewStateRuntime,
+    FocusRuntime,
+    SchedulingRuntime,
+    JsRuntime
 ) {
     "use strict";
 
@@ -35,17 +41,131 @@ sap.ui.define([
         SAVE_IN_FLIGHT: "/saveInFlight",
         VALIDATION_SUMMARY: "/validationSummary"
     });
+    var DETAIL_NARROW_VIEWPORT_REM = 70;
+    var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var METHODS = JsRuntime.METHODS;
 
     function hasRows(aRows) {
         return Array.isArray(aRows) && aRows.length > 0;
     }
 
+    function remToPx(fRem) {
+        var iRootSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize || "16");
+        return Math.round(Number(fRem || 0) * (Number.isFinite(iRootSize) && iRootSize > 0 ? iRootSize : 16));
+    }
+
+    function syncAdaptiveDetailViewport(oController) {
+        var oView = oController && typeof oController.getView === TYPE_FUNCTION && oController.getView();
+        var oObjectPage = oController.byId("detailObjectPage");
+        var oDom = (oObjectPage && typeof oObjectPage[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oObjectPage[METHODS.GET_DOM_REF]())
+            || (oView && typeof oView[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oView[METHODS.GET_DOM_REF]());
+        var iWidth;
+        var bNarrow;
+        if (!oDom) {
+            return;
+        }
+        iWidth = Math.round((oDom.getBoundingClientRect && oDom.getBoundingClientRect().width) || 0);
+        bNarrow = iWidth > 0 && iWidth <= remToPx(DETAIL_NARROW_VIEWPORT_REM);
+        ControllerViewStateRuntime.setFlag(oController, "/narrowDetailViewport", bNarrow);
+        DetailAttachmentViewState.sync(oController);
+        if (oView && typeof oView.toggleStyleClass === TYPE_FUNCTION) {
+            oView.toggleStyleClass("detailViewportNarrow", bNarrow);
+        }
+        if (oController && typeof oController._syncViewportPinnedControlRail === TYPE_FUNCTION) {
+            oController._syncViewportPinnedControlRail();
+        }
+    }
+
+    function bindAdaptiveDetailViewport(oController) {
+        var oView = oController && typeof oController.getView === TYPE_FUNCTION && oController.getView();
+        var oDom = oView && typeof oView[METHODS.GET_DOM_REF] === TYPE_FUNCTION && oView[METHODS.GET_DOM_REF]();
+        if (!oDom) {
+            return;
+        }
+        if (!oController._fnAdaptiveViewportSync) {
+            oController._fnAdaptiveViewportSync = syncAdaptiveDetailViewport.bind(null, oController);
+        }
+        unbindAdaptiveDetailViewport(oController);
+        if (typeof ResizeObserver === TYPE_FUNCTION) {
+            oController._oAdaptiveViewportResizeObserver = new ResizeObserver(oController._fnAdaptiveViewportSync);
+            oController._oAdaptiveViewportResizeObserver.observe(oDom);
+        }
+        window.addEventListener("resize", oController._fnAdaptiveViewportSync, true);
+        syncAdaptiveDetailViewport(oController);
+    }
+
+    function unbindAdaptiveDetailViewport(oController) {
+        if (oController._oAdaptiveViewportResizeObserver && typeof oController._oAdaptiveViewportResizeObserver.disconnect === TYPE_FUNCTION) {
+            oController._oAdaptiveViewportResizeObserver.disconnect();
+        }
+        if (oController._fnAdaptiveViewportSync) {
+            window.removeEventListener("resize", oController._fnAdaptiveViewportSync, true);
+        }
+        oController._oAdaptiveViewportResizeObserver = null;
+    }
+
     return Object.assign(
         {},
         DetailControllerBehavior,
-        DetailActionDialogRuntime,
         DetailChecklistBehavior,
         {
+            _withViewFlag: function (sPath, fnWork) {
+                return ControllerViewStateRuntime.withFlag(this, sPath, fnWork, true, false);
+            },
+            _clearLocationValueHelpSearchTimer: function () {
+                this._iLocationVhSearchTimer = SchedulingRuntime.clearTimer(this._iLocationVhSearchTimer);
+            },
+            _scheduleLocationValueHelpTableSync: function () {
+                this._iLocationVhTableSyncTimer = SchedulingRuntime.restartTimer(this._iLocationVhTableSyncTimer, function () {
+                    var oTreeTable = this.byId("locationValueHelpTreeTable");
+                    this._iLocationVhTableSyncTimer = null;
+                    if (!oTreeTable) {
+                        return;
+                    }
+                    if (typeof oTreeTable.clearSelection === TYPE_FUNCTION) {
+                        oTreeTable.clearSelection();
+                    }
+                    if (typeof oTreeTable.setFirstVisibleRow === TYPE_FUNCTION) {
+                        oTreeTable.setFirstVisibleRow(0);
+                    }
+                    if (typeof oTreeTable.invalidate === TYPE_FUNCTION) {
+                        oTreeTable.invalidate();
+                    }
+                }.bind(this), 90);
+            },
+            _rememberDialogReturnFocus: function (sKey, oControl) {
+                var oFallback = oControl;
+                if (!sKey) {
+                    return;
+                }
+                if (!oFallback) {
+                    oFallback = FocusRuntime.createActiveElementFallback();
+                }
+                ControllerReturnFocusRuntime.remember(this, sKey, oFallback, {
+                    storeProperty: "_mDialogReturnFocus"
+                });
+            },
+            _restoreDialogFocus: function (sKey) {
+                ControllerReturnFocusRuntime.restore(this, sKey, {
+                    storeProperty: "_mDialogReturnFocus"
+                });
+            },
+            _onDialogAfterOpen: function (sKey) {
+                var oSearchField;
+                var oFocusTarget;
+                if (sKey !== "locationValueHelp") {
+                    return;
+                }
+                oSearchField = this.byId("locationValueHelpSearchField");
+                SchedulingRuntime.restartTimer(0, function () {
+                    oFocusTarget = oSearchField && typeof oSearchField[METHODS.GET_FOCUS_DOM_REF] === TYPE_FUNCTION ? oSearchField[METHODS.GET_FOCUS_DOM_REF]() : null;
+                    if (oFocusTarget && typeof oFocusTarget[METHODS.FOCUS] === TYPE_FUNCTION) {
+                        oFocusTarget[METHODS.FOCUS]();
+                        return;
+                    }
+                    FocusRuntime.focusSoon(oSearchField);
+                }, 60);
+            },
             _bindAttachmentDropZone: function () {
                 AttachmentDropZoneRuntime.bindAttachmentDropZone(this);
             },
@@ -56,13 +176,13 @@ sap.ui.define([
                 AttachmentDropZoneRuntime.scheduleAttachmentDropZoneBind(this, iAttempt);
             },
             _bindAdaptiveDetailViewport: function () {
-                DetailAdaptiveViewportRuntime.bindAdaptiveDetailViewport(this);
+                bindAdaptiveDetailViewport(this);
             },
             _unbindAdaptiveDetailViewport: function () {
-                DetailAdaptiveViewportRuntime.unbindAdaptiveDetailViewport(this);
+                unbindAdaptiveDetailViewport(this);
             },
             _syncAdaptiveDetailViewport: function () {
-                DetailAdaptiveViewportRuntime.syncAdaptiveDetailViewport(this);
+                syncAdaptiveDetailViewport(this);
             },
             _clearViewportPinnedControlRailRetry: function () {},
             _scheduleViewportPinnedControlRailBind: function () {

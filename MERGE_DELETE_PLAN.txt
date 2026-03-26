@@ -1,28 +1,38 @@
-MERGE DELETE PLAN
+Merge/Delete Plan
 
-1. Completed component wrapper consolidation
-- Merged:
-  - `ComponentBootRuntime.js` -> `ComponentLifecycleRuntime.js`
-  - `ComponentListenerBindingRuntime.js` -> `ComponentLockEventsRuntime.js`
-  - `ComponentNavigationGuardRuntime.js` -> `ComponentNavigationGuardDecisionRuntime.js`
+Completed:
+- `app/service/runtime/component/ComponentMainServiceRuntime.js` -> `app/service/framework/ComponentBootstrap.js`
+- `app/service/runtime/component/ComponentModelBootstrap.js` -> `app/service/framework/ComponentBootstrap.js`
+- `app/service/runtime/component/ComponentGuardedSaveRuntime.js` -> `app/service/runtime/component/ComponentSaveGuardRuntime.js`
+- `app/service/runtime/component/ComponentRuntimeOptionsFactory.js` -> `app/service/framework/ComponentBootstrap.js` + `app/service/runtime/component/ComponentLifecycleRuntime.js`
+- `app/service/runtime/component/ComponentNavigationRuntime.js` -> `app/service/runtime/component/ComponentLifecycleRuntime.js`
+- `app/service/runtime/component/ComponentInternalRuntimeState.js` -> `app/service/runtime/component/ComponentModelInitRuntime.js`
+- `app/service/framework/ControllerActionBusyRuntime.js` -> `app/controller/search/SearchActionBehavior.js`
+- `app/controller/detail/internal/DetailValidationHelperRuntime.js` -> `app/controller/detail/DetailValidationSummaryRuntime.js`
+- `app/controller/detail/DetailActionDialogRuntime.js` -> `app/controller/detail/DetailControllerRuntime.js`
+- `app/controller/detail/DetailAdaptiveViewportRuntime.js` -> `app/controller/detail/DetailControllerRuntime.js`
+- `app/service/framework/execution/behavior/NavigationBehaviorHelpers.js` -> `app/service/framework/behavior/NavigationDefaultHandlers.js`
+- `app/service/framework/execution/behavior/UiDecisionBehaviorHelpers.js` -> `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
+- `app/service/framework/execution/UiDecisionCoordinator.js` -> direct consumer use of `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
+- `app/service/framework/CtxModelResolver.js` -> `app/service/framework/CtxRuntimeFactory.js`
+- `app/service/framework/CtxCacheRuntimeFactory.js` -> `app/service/framework/CtxRuntimeFactory.js`
 
-2. Completed shell/message ownership cleanup
-- Merged:
-  - `ShellMessageKeyConstants` -> `MessageKeyConstants`
+Why:
+- first two were bootstrap pass-through wrappers
+- third duplicated the save-guard owner with a one-function delegate
+- fourth only assembled runtime option objects for two direct consumers
+- fifth only forwarded navigation intent calls for one direct consumer
+- sixth only seeded internal runtime state for one direct consumer
+- seventh only wrapped a single busy-flag helper for one direct consumer
+- eighth only hosted validation-summary-local helpers for one direct consumer
+- ninth only hosted controller-local dialog focus helpers for one direct consumer
+- tenth only hosted controller-local adaptive viewport syncing for one direct consumer
+- eleventh only re-exported navigation helpers for one direct consumer
+- twelfth only hosted ui-decision helper calls for one direct consumer
+- thirteenth only added an unused ui-decision dispatch layer over the same canonical owner
+- last two were single-consumer context assembly shims
 
-3. Completed detail thin-wrapper removal
-- Deleted:
-  - `DetailActionViewportBehavior.js`
-  - `DetailActionPinnedRailRuntime.js`
-
-4. Still open only as real owners
-- `ComponentPollingRuntime.js`
-- `ComponentAutosaveRuntime.js`
-- `DetailInfoCardFactory.js`
-- `DetailObserverCardRuntime.js`
-- `DetailSimpleCardRuntime.js`
-
-5. Next cleanup candidates
-- app shell cluster
-- analytics/search controller clusters
-- any remaining CSS selectors that still depend on UI5 internals
+Remaining high-value candidates:
+- `app/controller/detail/*`
+- `app/controller/search/*`
+- pass-through `app/service/framework/*`

@@ -10,11 +10,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiAssetPaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, DetailContracts, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts) {
+], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -22,10 +24,11 @@ sap.ui.define([
     var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
-    var DETAIL_ACCESS_REASON_CODES = DetailContracts.ACCESS_REASON_CODES;
-    var DETAIL_CODES = DetailContracts.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_ACCESS_REASON_CODES = MessageCodeConstants.DETAIL;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
+    var DETAIL_CODES = MessageCodeConstants.DETAIL;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
+    var DETAIL_VIEW_KEYS = MessageKeyConstants.VIEW;
     var VIEW_BUSY_PATHS = Object.freeze({
         CHECKS: "/checksBusy",
         BARRIERS: "/barriersBusy",
@@ -58,7 +61,7 @@ sap.ui.define([
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
             Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE, {
                 state: DetailContracts.STATES.IDLE,
-                messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE,
+                messageKey: DETAIL_VIEW_KEYS.PERSISTENCE_IDLE,
                 lastSavedAt: null,
                 lastSaveError: null,
                 taxonomy: "",
@@ -154,7 +157,7 @@ sap.ui.define([
                 activity: DetailAuthorizationRuntime.OPERATIONS.CREATE
             }).then(function (oPermission) {
                 if (!oPermission.allowed) {
-                    return Result.fail({ message: "No permission to create checklist", code: DETAIL_CODES.NO_CREATE_PERMISSION }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, DETAIL_MESSAGE_KEYS.DETAIL_CREATE_PERMISSION_DENIED, [
+                    return Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.DETAIL_CREATE_PERMISSION_DENIED, code: DETAIL_CODES.NO_CREATE_PERMISSION }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, DETAIL_MESSAGE_KEYS.DETAIL_CREATE_PERMISSION_DENIED, [
                         Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                             status: WorkflowContracts.READINESS_STATUS.DENIED,
                             ready: false,
@@ -213,7 +216,7 @@ sap.ui.define([
         }
 
         if (!sRootId || !oRepo || typeof oRepo.loadDetailSnapshot !== "function") {
-            return Promise.resolve(Result.fail({ message: "Open detail input invalid", code: DETAIL_CODES.INVALID_INPUT }));
+            return Promise.resolve(Result.fail({ messageKey: DETAIL_VIEW_KEYS.GENERIC_OPERATION_FAILED, code: DETAIL_CODES.INVALID_INPUT }));
         }
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;
@@ -224,7 +227,7 @@ sap.ui.define([
             }).then(function (oPermission) {
             var pValidation;
             if (!oPermission.allowed) {
-                return Result.fail({ message: "No permission to open checklist", code: DETAIL_CODES.NO_VIEW_PERMISSION }, resetTransientDetailIncidentEffects().concat([
+                return Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.DETAIL_VIEW_PERMISSION_DENIED, code: DETAIL_CODES.NO_VIEW_PERMISSION }, resetTransientDetailIncidentEffects().concat([
                     Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
                         status: WorkflowContracts.READINESS_STATUS.DENIED,
                         ready: false,

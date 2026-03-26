@@ -2,19 +2,20 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (ODataAdapterUtils, GatewayContractConstants, GatewayClient, DetailContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (ODataAdapterUtils, GatewayContractConstants, GatewayClient, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
-    var DETAIL_CODES = DetailContracts.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_CODES = MessageCodeConstants.FLOW;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
 
     function normalizeLockToken(mArgs) {
         return (mArgs && (mArgs.sessionGuid || mArgs.lockToken)) || "";
     }
 
     function normalizeLockObjectId(mArgs) {
-        return String((mArgs && (mArgs.dbKey || mArgs.DB_KEY || mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId || mArgs.RootId || mArgs.RootKey)) || "").trim();
+        return String((mArgs && (mArgs.dbKey || mArgs.DB_KEY)) || "").trim();
     }
 
     function resolveOwner(oResult) {
@@ -103,11 +104,11 @@ sap.ui.define([
         return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(
             GatewayContractConstants.ENTITY_SETS.LOCK_STATUS,
             {
-                RootKey: sRootId,
+                DB_KEY: sRootId,
                 SessionGuid: sToken
             },
             {
-                RootKey: { type: "Edm.Binary" },
+                DB_KEY: { type: "Edm.Binary" },
                 SessionGuid: { type: "Edm.String" }
             }
         )).then(function (oResult) {

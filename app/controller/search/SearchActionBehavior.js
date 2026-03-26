@@ -1,8 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerActionBusyRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/UiDecisionCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
@@ -21,10 +20,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
 ], function (
-    ControllerActionBusyRuntime,
     ControllerViewStateRuntime,
     ModelStateRuntime,
-    UiDecisionCoordinator,
+    UiDecisionDefaultHandlers,
     NavigationIntentService,
     SearchCommandPolicy,
     SearchSelectionRuntime,
@@ -48,6 +46,16 @@ sap.ui.define([
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var SEARCH_MODE = SearchContracts.SEARCH_MODE;
+
+    function withActionBusy(oController, sPath, fnAction, fnBusyChange) {
+        var fnWork = typeof fnAction === "function" ? fnAction : function () { return null; };
+        var fnToggle = typeof fnBusyChange === "function" ? fnBusyChange : function () { return null; };
+
+        fnToggle(true);
+        return Promise.resolve(ControllerViewStateRuntime.withFlag(oController, sPath, fnWork, true, false)).finally(function () {
+            fnToggle(false);
+        });
+    }
 
     function dispatchSelectionChanged(oController, mInput) {
         return SearchCommandPolicy.selectionChanged(oController, mInput);
@@ -93,10 +101,6 @@ sap.ui.define([
         }
     }
 
-    function withActionBusy(oController, sPath, fnAction) {
-        return ControllerActionBusyRuntime.withActionBusy(oController, sPath, fnAction);
-    }
-
     function onSmartSearch(oController) {
         var bLoose = String(ModelStateRuntime.read(oController, STATE_MODEL, "/search/searchMode", "") || "").trim().toUpperCase() === SEARCH_MODE.LOOSE;
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.SEARCH_INTERACTION_READY, {
@@ -107,7 +111,7 @@ sap.ui.define([
             return Promise.resolve();
         }
         SearchLoadRuntime.markLoading(oController);
-        return ControllerActionBusyRuntime.withActionBusy(oController, "/searchActionBusy", function () {
+        return withActionBusy(oController, "/searchActionBusy", function () {
             return SearchCommandPolicy.executeSearch(oController, { source: SEARCH_SOURCES.SMART_SEARCH, state: bLoose });
         }, function (bBusy) {
             setSearchActionBusy(oController, bBusy);
@@ -163,7 +167,7 @@ sap.ui.define([
 
     function onCreate(oController) {
         SearchViewportRuntime.captureSearchScrollPosition(oController);
-        return ControllerActionBusyRuntime.withActionBusy(oController, "/createActionBusy", function () {
+        return withActionBusy(oController, "/createActionBusy", function () {
             NavigationIntentService.navigateToDetail(oController, CreateSentinel.toRouteId());
             return Promise.resolve(true);
         });
@@ -171,13 +175,13 @@ sap.ui.define([
 
     function onCopy(oController) {
         var iSelectionCount = Number(ControllerViewStateRuntime.get(oController, "/selectionCount", 0));
-        return UiDecisionCoordinator.guardCopySelection({
+        return Promise.resolve(UiDecisionDefaultHandlers.handlers.guardCopySelection({
             controller: oController,
             selectionCount: iSelectionCount,
             onBlockedSelection: function () {
                 focusSearchToolbar(oController);
             }
-        }).then(function (bAllowed) {
+        })).then(function (bAllowed) {
             if (!bAllowed) {
                 return false;
             }
@@ -188,7 +192,7 @@ sap.ui.define([
     function onSelectVisibleRows(oController) {
         return selectVisibleRows(oController).then(function (mResult) {
             if (!mResult || !mResult.count) {
-                return UiDecisionCoordinator.notifySelectVisibleEmpty({ controller: oController });
+                return UiDecisionDefaultHandlers.handlers.notifySelectVisibleEmpty({ controller: oController });
             }
             return true;
         });

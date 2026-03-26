@@ -1,11 +1,11 @@
 sap.ui.define([
     "sap/ui/core/Fragment",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
-], function (Fragment, EffectTextResolver, ControllerViewStateRuntime, AnalyticsContracts, DialogContracts, YearValue) {
+], function (Fragment, ControllerTextRuntime, ControllerViewStateRuntime, AnalyticsContracts, DialogContracts, YearValue) {
     "use strict";
 
     var PATHS = AnalyticsContracts.PATHS;
@@ -103,7 +103,7 @@ sap.ui.define([
         }
         fnSetValidation(
             VALIDATION_STATES.ERROR,
-            EffectTextResolver.getText(oController, TEXT_KEYS.COMPARE_YEAR_INVALID, [], "Enter a valid four-digit year")
+            ControllerTextRuntime.getText(oController, TEXT_KEYS.COMPARE_YEAR_INVALID, [], "Enter a valid four-digit year")
         );
         return Promise.resolve();
     }

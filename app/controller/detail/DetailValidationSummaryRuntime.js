@@ -1,13 +1,13 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailValidationHelperRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/ValidationPathMap",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
 ], function (
     FocusRuntime,
@@ -18,7 +18,7 @@ sap.ui.define([
     ModelContracts,
     StatePaths,
     DetailPersonInputRuntime,
-    DetailValidationHelperRuntime,
+    ValidationPathMap,
     JsRuntime
 ) {
     "use strict";
@@ -30,6 +30,64 @@ sap.ui.define([
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
 
+    function validationSummaryPath(mStatePaths) {
+        return (mStatePaths && mStatePaths.VALIDATION_SUMMARY) || "/validationSummary";
+    }
+
+    function setValidationMissing(oController, vValue) {
+        ControllerViewStateRuntime.set(oController, "/validationMissing", vValue || {});
+    }
+
+    function setValidationMissingKey(oController, sKey, bMissing) {
+        ControllerViewStateRuntime.set(oController, "/validationMissing/" + sKey, !!bMissing);
+    }
+
+    function showValidation(oController, bShowValidation) {
+        if (bShowValidation || ControllerViewStateRuntime.get(oController, "/validationShown")) {
+            ControllerViewStateRuntime.set(oController, "/validationShown", true);
+        }
+    }
+
+    function isFilledValidationValue(vValue) {
+        if (Array.isArray(vValue)) {
+            return vValue.length > 0;
+        }
+        if (typeof vValue === "boolean") {
+            return true;
+        }
+        return String(vValue == null ? "" : vValue).trim().length > 0;
+    }
+
+    function normalizeRequiredPath(sPath) {
+        return ("/" + String(sPath || "").replace(/^\//, "")).replace(/^\/current(?=\/|$)/, "") || "/";
+    }
+
+    function toDetailModelPath(sPath) {
+        var sNormalized = normalizeRequiredPath(sPath);
+        if (sNormalized === "/") {
+            return "/current";
+        }
+        return "/current" + sNormalized;
+    }
+
+    function shouldTrackSelectedDirtyPath(sModelPath) {
+        var sPath = normalizeRequiredPath(sModelPath);
+        if (sPath === "/") {
+            return false;
+        }
+        if (/^\/attachments(?:\/|$)/.test(sPath)) {
+            return false;
+        }
+        if (/^\/(?:root|meta)(?:\/|$)/.test(sPath)) {
+            return false;
+        }
+        return /^\/(?:basic|checks|barriers)(?:\/|$)/.test(sPath);
+    }
+
+    function toValidationKey(sRequiredPath) {
+        return ValidationPathMap.toValidationKey(sRequiredPath);
+    }
+
     function compute(oController) {
         var oDetailModel = ModelStateRuntime.model(oController, DETAIL_MODEL);
         var aRequired = ModelStateRuntime.read(oController, STATE_MODEL, "/requiredFields", []) || [];
@@ -38,10 +96,10 @@ sap.ui.define([
         var aMissingKeys = [];
 
         (Array.isArray(aRequired) ? aRequired : []).forEach(function (sRequiredPath) {
-            var sPath = DetailValidationHelperRuntime.normalizeRequiredPath(sRequiredPath);
-            var sKey = DetailValidationHelperRuntime.toValidationKey(sPath);
-            var vCurrent = oDetailModel ? ModelStateRuntime.read(oController, DETAIL_MODEL, DetailValidationHelperRuntime.toDetailModelPath(sPath), undefined) : undefined;
-            var bMissing = !DetailValidationHelperRuntime.isFilledValidationValue(vCurrent);
+            var sPath = normalizeRequiredPath(sRequiredPath);
+            var sKey = toValidationKey(sPath);
+            var vCurrent = oDetailModel ? ModelStateRuntime.read(oController, DETAIL_MODEL, toDetailModelPath(sPath), undefined) : undefined;
+            var bMissing = !isFilledValidationValue(vCurrent);
             mMissing[sKey] = bMissing;
             if (bMissing) {
                 aMissingPaths.push(sPath);
@@ -66,9 +124,9 @@ sap.ui.define([
             return { hasErrors: false, missingPaths: [], missingKeys: [], firstMissingPath: "", firstMissingKey: "" };
         }
         oSummary = compute(oController);
-        DetailValidationHelperRuntime.setValidationMissing(oController, oSummary.missingMap);
-        DetailValidationHelperRuntime.showValidation(oController, bShowValidation);
-        ModelStateRuntime.write(oController, STATE_MODEL, DetailValidationHelperRuntime.validationSummaryPath(mStatePaths), {
+        setValidationMissing(oController, oSummary.missingMap);
+        showValidation(oController, bShowValidation);
+        ModelStateRuntime.write(oController, STATE_MODEL, validationSummaryPath(mStatePaths), {
             hasErrors: !!oSummary.hasErrors,
             missingPaths: oSummary.missingPaths || [],
             missingKeys: oSummary.missingKeys || [],
@@ -112,7 +170,7 @@ sap.ui.define([
     }
 
     function focusFirstInvalidField(oController, mStatePaths) {
-        var sSummaryPath = DetailValidationHelperRuntime.validationSummaryPath(mStatePaths);
+        var sSummaryPath = validationSummaryPath(mStatePaths);
         var oSummary = ModelStateRuntime.read(oController, STATE_MODEL, sSummaryPath, {}) || {};
         var aMissingKeys = (oSummary && oSummary.missingKeys) || [];
         var oView = oController.getView && oController.getView();
@@ -171,8 +229,8 @@ sap.ui.define([
         DetailPersonInputRuntime.syncDrafts(oController, oDetailModel, sModelPath);
 
         sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, ""), "");
-        sRequiredPath = DetailValidationHelperRuntime.normalizeRequiredPath(sModelPath);
-        if (DetailValidationHelperRuntime.shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE") && aRequired.indexOf(sRequiredPath) < 0) {
+        sRequiredPath = normalizeRequiredPath(sModelPath);
+        if (shouldTrackSelectedDirtyPath(sModelPath) && (sMode === "EDIT" || sMode === "CREATE") && aRequired.indexOf(sRequiredPath) < 0) {
             recompute(oController, "selectedSync", false, mStatePaths);
             return;
         }
@@ -181,9 +239,9 @@ sap.ui.define([
             return;
         }
 
-        sValidationKey = DetailValidationHelperRuntime.toValidationKey(sRequiredPath);
-        vCurrent = ModelStateRuntime.read(oController, DETAIL_MODEL, DetailValidationHelperRuntime.toDetailModelPath(sRequiredPath), undefined);
-        DetailValidationHelperRuntime.setValidationMissingKey(oController, sValidationKey, !DetailValidationHelperRuntime.isFilledValidationValue(vCurrent));
+        sValidationKey = toValidationKey(sRequiredPath);
+        vCurrent = ModelStateRuntime.read(oController, DETAIL_MODEL, toDetailModelPath(sRequiredPath), undefined);
+        setValidationMissingKey(oController, sValidationKey, !isFilledValidationValue(vCurrent));
         recompute(oController, "fieldChange", false, mStatePaths);
     }
 

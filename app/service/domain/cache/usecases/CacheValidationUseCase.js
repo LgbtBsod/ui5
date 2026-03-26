@@ -33,7 +33,7 @@ sap.ui.define([
         var aChecks = Array.isArray(oSnap && oSnap.checks) ? oSnap.checks : [];
         var aBarriers = Array.isArray(oSnap && oSnap.barriers) ? oSnap.barriers : [];
         var oMeta = oSnap && oSnap.meta || {};
-        var bHasRootId = !!String(oRoot.id || oRoot.Key || oRoot.RootKey || "").trim();
+        var bHasRootId = !!String(oRoot.id || oRoot.DB_KEY || "").trim();
         var bCreateDraft = CreateSentinel.isCreateId(oRoot.id);
         var bHasBasicPayload = Object.keys(oBasic).some(function (sKey) {
             return !!String(oBasic[sKey] || "").trim();

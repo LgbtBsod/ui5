@@ -6,14 +6,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, ModelContracts, DetailContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, ModelContracts, DetailContracts, MessageKeyConstants) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var DETAIL_MODEL = ModelContracts.MODELS.DETAIL;
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.VIEW;
 
     function RowOpsUseCase() {
         return {

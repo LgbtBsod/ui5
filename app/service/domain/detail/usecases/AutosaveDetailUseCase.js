@@ -15,15 +15,17 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ModelContracts, DetailContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL = MODELS.DETAIL;
     var STATE_MODEL = MODELS.STATE;
-    var DETAIL_CODES = DetailContracts.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_CODES = MessageCodeConstants.DETAIL;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.VIEW;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
     var DETAIL_REASONS = DetailContracts.REASONS;
 

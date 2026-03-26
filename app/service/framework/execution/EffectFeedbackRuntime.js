@@ -3,12 +3,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectToastRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectBannerRouter",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectDialogFeedbackRuntime",
     "sap/ui/core/routing/HashChanger",
     "sap/ui/core/Component",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (DebugLogger, EffectFeedbackContracts, EffectToastRuntime, EffectBannerRouter, EffectActionRouting, EffectDialogFeedbackRuntime, HashChanger, UIComponent, JsRuntime) {
+], function (DebugLogger, EffectFeedbackContracts, EffectToastRuntime, EffectBannerRouter, ActionContract, RuntimeInput, EffectDialogFeedbackRuntime, HashChanger, UIComponent, JsRuntime) {
     "use strict";
 
     var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
@@ -101,15 +102,31 @@ sap.ui.define([
         });
     }
 
+    function resolveActionPayload(sActionName, oPayload) {
+        if (ActionContract && typeof ActionContract.normalizeActionPayload === TYPE_FUNCTION) {
+            return ActionContract.normalizeActionPayload(sActionName, oPayload || {});
+        }
+        return RuntimeInput.asObject(oPayload);
+    }
+
+    function dispatchByName(oOptions, sActionName, oPayload) {
+        var oDispatcher = oOptions && oOptions.actionDispatcher;
+        var sResolvedAction = RuntimeInput.asString(sActionName).trim();
+        if (!oDispatcher || typeof oDispatcher.dispatch !== TYPE_FUNCTION || !sResolvedAction) {
+            return Promise.resolve(false);
+        }
+        return oDispatcher.dispatch(sResolvedAction, resolveActionPayload(sResolvedAction, oPayload));
+    }
+
     function dispatchConfirmAction(oController, oOptions, oPayload, sAction, sConfirm, sCancel) {
         var sActionName = "";
-        var oDispatchPayload = EffectActionRouting.resolveActionPayload({ payload: oPayload });
+        var oDispatchPayload = RuntimeInput.asObject(oPayload);
         if (sAction === sConfirm) {
             sActionName = oPayload.confirmAction;
         } else if (sAction === sCancel) {
             sActionName = oPayload.cancelAction;
         }
-        EffectActionRouting.dispatchByName(oController, oOptions, sActionName, oDispatchPayload);
+        dispatchByName(oOptions, sActionName, oDispatchPayload);
     }
 
     function confirm(oController, oEffect, oOptions) {

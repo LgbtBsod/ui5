@@ -25,15 +25,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentModelInitRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentMainServiceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentModelBootstrap",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLifecycleRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeSettingsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentPollingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentCrossTabRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentInitListenersRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockEventsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionDispatcher",
@@ -42,7 +39,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/InteractionFX",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeOptionsFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFacadeEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/SearchUiConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/usecases/ApplyRuntimeSettingsUseCase",
@@ -78,15 +75,12 @@ sap.ui.define([
     ComponentLockReleaseRuntime,
     ComponentSaveGuardRuntime,
     ComponentModelInitRuntime,
-    ComponentMainServiceRuntime,
-    ComponentModelBootstrap,
     ComponentLifecycleRuntime,
     ComponentRuntimeSettingsRuntime,
     ComponentPollingRuntime,
     ComponentCrossTabRuntime,
     ComponentInitListenersRuntime,
     ComponentLockEventsRuntime,
-    ComponentNavigationRuntime,
     TelemetryRuntime,
     LayoutStateRuntime,
     ActionDispatcher,
@@ -95,7 +89,7 @@ sap.ui.define([
     InteractionFX,
     ThemeService,
     ComponentAppRuntime,
-    ComponentRuntimeOptionsFactory,
+    ComponentFacadeEffectRuntime,
     DetailFacade,
     SearchUiConfig,
     ApplyRuntimeSettingsUseCase,
@@ -106,6 +100,51 @@ sap.ui.define([
     BackendModeContracts
 ) {
     "use strict";
+
+    function buildActionRuntimeOptions(oComponent, mDeps, mModels) {
+        return {
+            bundleText: ComponentFacadeEffectRuntime.createBundleText(oComponent),
+            emitTelemetry: function (sEventName, oPayload) {
+                return mDeps.WorkflowTelemetry.emit(sEventName, {
+                    stateModel: mModels.stateModel,
+                    payload: oPayload || {}
+                });
+            }
+        };
+    }
+
+    function buildRuntimeModels(mModelBootstrap) {
+        return Object.assign({}, mModelBootstrap.models, {
+            mainServiceModel: mModelBootstrap.mainServiceModel
+        });
+    }
+
+    function createMainServiceModel(oComponent, mDeps) {
+        var oMainServiceModel = oComponent && oComponent.getModel ? oComponent.getModel("mainService") : null;
+        var sManifestUri = oComponent && oComponent.getManifestEntry
+            ? oComponent.getManifestEntry("/sap.app/dataSources/mainService/uri")
+            : "";
+        var sResolvedServiceUrl;
+
+        if (!sManifestUri) {
+            throw new Error("Manifest-driven mainService dataSource is missing. Check sap.app/dataSources/mainService/uri in manifest.json.");
+        }
+        if (!oMainServiceModel) {
+            throw new Error("Manifest-owned mainService model is missing on the component");
+        }
+
+        sResolvedServiceUrl = String((oMainServiceModel && oMainServiceModel.sServiceUrl) || sManifestUri || "").replace(/\/+$/, "");
+        mDeps.GatewayClient.setModel(oMainServiceModel, { serviceUrl: sResolvedServiceUrl || sManifestUri });
+
+        return oMainServiceModel;
+    }
+
+    function bootstrapModels(oComponent, mDeps) {
+        return {
+            models: mDeps.ComponentModelInitRuntime.initializeModels(oComponent, mDeps),
+            mainServiceModel: createMainServiceModel(oComponent, mDeps)
+        };
+    }
 
     function createBootstrapDeps() {
         var mStaticDeps = {
@@ -139,7 +178,6 @@ sap.ui.define([
             ComponentRuntimeSettingsRuntime: ComponentRuntimeSettingsRuntime,
             ComponentPollingRuntime: ComponentPollingRuntime,
             ThemeService: ThemeService,
-            ComponentNavigationRuntime: ComponentNavigationRuntime,
             SearchUiConfig: SearchUiConfig,
             DetailFacade: DetailFacade,
             ApplyRuntimeSettingsUseCase: ApplyRuntimeSettingsUseCase,
@@ -202,13 +240,14 @@ sap.ui.define([
         oBootstrap = createBootstrapDeps();
         mBootstrapDeps = oBootstrap.deps;
 
-        oModelBootstrap = ComponentModelBootstrap.bootstrap(oComponent, mBootstrapDeps);
+        oModelBootstrap = bootstrapModels(oComponent, mBootstrapDeps);
         ModelStateRuntime.writeOnModel(oModelBootstrap.models.stateModel, BackendModeContracts.PATHS.BACKEND_MODE, oBootstrap.getBackendMode());
         runDiagnostics(DiagnosticsUseCase, mBootstrapDeps, oModelBootstrap);
         ComponentModelInitRuntime.registerModels(oComponent, oModelBootstrap.models);
         oComponent.setModel(oModelBootstrap.mainServiceModel);
-        mRuntimeModels = ComponentRuntimeOptionsFactory.buildRuntimeModels(oModelBootstrap);
-        mActionRuntimeOptions = ComponentRuntimeOptionsFactory.buildActionRuntimeOptions(oComponent, {
+        oComponent._detailFacade = oComponent._detailFacade || new DetailFacade();
+        mRuntimeModels = buildRuntimeModels(oModelBootstrap);
+        mActionRuntimeOptions = buildActionRuntimeOptions(oComponent, {
             WorkflowTelemetry: WorkflowTelemetry
         }, oModelBootstrap.models);
         oNavigationRuntime = ComponentLifecycleRuntime.attachRuntime(

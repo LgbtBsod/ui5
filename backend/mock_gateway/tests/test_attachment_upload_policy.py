@@ -37,7 +37,7 @@ def _attachment_payload(file_name: str, mime_type: str, body: bytes, category_ke
         "Description": "embedded upload",
         "FileSize": len(body),
         "FileSizeContent": len(body),
-        "Value": base64.b64encode(body).decode("ascii"),
+        "ContentBase64": base64.b64encode(body).decode("ascii"),
     }
 
 

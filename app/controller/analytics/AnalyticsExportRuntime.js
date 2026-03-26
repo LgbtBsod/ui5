@@ -1,8 +1,7 @@
 sap.ui.define([
     "sap/ui/core/Fragment",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
@@ -12,10 +11,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
-], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, AnalyticsUiContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, SpreadsheetExport, DebugLogger, FeedbackConstants) {
+], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, SpreadsheetExport, DebugLogger, FeedbackConstants) {
     "use strict";
 
-    var PATHS = AnalyticsUiContracts.PATHS;
+    var PATHS = AnalyticsContracts.PATHS;
 
     function getLoggerPayload(oError, sFallbackMessage) {
         return {

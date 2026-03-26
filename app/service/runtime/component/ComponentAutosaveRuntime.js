@@ -7,13 +7,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, ModelPathContracts, DetailMessageKeyConstants, RuntimeEventContracts) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, ModelPathContracts, MessageKeyConstants, RuntimeEventContracts) {
     "use strict";
 
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
     var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
+    var VIEW_MESSAGE_KEYS = MessageKeyConstants.VIEW;
 
     function createUiStateAdapter(oStateModel) {
         return {
@@ -145,7 +146,7 @@ sap.ui.define([
             if (ModelStateRuntime.readOnModel(oStateModel, StatePaths.PERSISTENCE_STATE, "") !== DetailPersistenceRuntime.STATES.LOCK_LOST) {
                 fnSetGlobalBanner(FeedbackBannerRuntime.createRetryBannerInput(BANNER_LEVEL.ERROR, BANNER_TEXT_KEY.OBJECT_SAVE_FAILED, {
                     scope: "global",
-                    textArgs: [fnBundleText(DetailMessageKeyConstants.AUTOSAVE_ERROR)],
+                    textArgs: [fnBundleText(VIEW_MESSAGE_KEYS.AUTOSAVE_ERROR)],
                     retryAction: ActionContract.RETRY_ACTIONS.SAVE,
                     retryTextKey: BANNER_TEXT_KEY.RETRY_NOW
                 }));

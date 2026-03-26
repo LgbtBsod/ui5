@@ -22,7 +22,7 @@ sap.ui.define([
             return Promise.resolve({ attachments: [] });
         }
         return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
-            "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY),
+            "$filter": ODataAdapterUtils.buildEqFilter("PARENT_KEY", sRootId, ODataKeyContracts.TYPES.PARENT_KEY),
             "$select": ODataKeyContracts.SELECTS.ATTACHMENT
         }).then(function (oResult) {
             return { attachments: mapAttachmentResult(oResult) };

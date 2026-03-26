@@ -1,7 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimePayloadNormalizer",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FacadeCommandConstants"
 ], function (ControllerCommandRuntime, RuntimePayloadNormalizer, ControllerCommandContextRuntime, FacadeCommandConstants) {
     "use strict";
@@ -13,12 +13,12 @@ sap.ui.define([
     }
 
     function execute(oController, sMethod, mInput) {
-        return ControllerCommandRuntime.executeUseCaseCommand(
+        return ControllerCommandRuntime.executeCommand(
             oController,
             oController && oController._detailService,
             sMethod,
             normalizePayload(mInput || {}),
-            ControllerCommandContextRuntime.buildDefaultCtx(oController)
+            ControllerCommandContextRuntime.buildCtx(oController)
         );
     }
 

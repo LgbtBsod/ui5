@@ -236,7 +236,7 @@ CLASS zcl_zodata_contract_service IMPLEMENTATION.
           ELSE lv_granted_operations && ',' && zif_zodata_contract_constants=>c_op_delete ) ).
     ENDIF.
 
-    cs_result-rootkey = iv_root_key.
+    cs_result-db_key = iv_root_key.
     cs_result-userid = iv_user_id.
     cs_result-authobject = zif_zodata_contract_constants=>c_auth_object_checklist.
     cs_result-createoperation = zif_zodata_contract_constants=>c_op_create.

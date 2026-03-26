@@ -23,7 +23,6 @@
   "service/framework/ComponentRuntimeSupport",
   "service/framework/LayoutStateRuntime",
   "service/framework/ModelStateRuntime",
-  "service/framework/RootIdRuntime",
   "service/framework/ControlStyleRuntime",
   "service/framework/CtxFactory",
   "service/framework/DraftChecklistFactory",

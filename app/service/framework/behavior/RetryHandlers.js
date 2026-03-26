@@ -1,17 +1,25 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (ActionContract, EffectActionRouting, BehaviorRegistry) {
+], function (ActionContract, RuntimeInput, BehaviorRegistry) {
     "use strict";
 
     var RETRY_SCOPE = "retry";
     var bDefaultsRegistered = false;
 
+    function dispatchByName(oOptions, sActionName, oPayload) {
+        var oDispatcher = oOptions && oOptions.actionDispatcher;
+        var sResolvedAction = RuntimeInput.asString(sActionName).trim();
+        if (!oDispatcher || typeof oDispatcher.dispatch !== "function" || !sResolvedAction) {
+            return Promise.resolve(false);
+        }
+        return oDispatcher.dispatch(sResolvedAction, oPayload || {});
+    }
+
     function runSaveRetry(mContext) {
-        return EffectActionRouting.dispatchByName(
-            mContext.controller,
-            null,
+        return dispatchByName(
+            mContext,
             ActionContract.ACTIONS.DETAIL_RETRY_GUARDED_SAVE,
             {}
         );

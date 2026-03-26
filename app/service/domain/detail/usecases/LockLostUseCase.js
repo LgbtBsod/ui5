@@ -2,11 +2,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/ForceReadOnlyUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, ForceReadOnlyUseCase, WorkflowContracts, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Result, ForceReadOnlyUseCase, WorkflowContracts, MessageKeyConstants) {
     "use strict";
 
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
 
     function LockLostUseCase() {
         var oForceReadOnly = ForceReadOnlyUseCase();

@@ -47,7 +47,7 @@ sap.ui.define([
         }).then(function (oResponse) {
             var aRows = ODataAdapterUtils.asArray(oResponse);
             var oFirst = aRows[0] || {};
-            return String(oFirst.Key || oFirst.RootKey || oFirst.Id || sRequestedId).trim();
+            return String(oFirst.DB_KEY || oFirst.Id || sRequestedId).trim();
         }).catch(function () {
             return sRequestedId;
         });
@@ -60,7 +60,7 @@ sap.ui.define([
         var bIncludeChildren = !mArgs || mArgs.includeChildren !== false;
         var oBasicFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BASIC_INFO;
         var pRoot = GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
-            type: ODataEntityContracts.TYPES.ROOT_KEY
+            type: ODataEntityContracts.TYPES.DB_KEY
         }));
         // ChecklistBasicInfoSet is a separate CDS-backed read model.
         // Keep it independent from ChecklistRootSet and read it via its own entity set.

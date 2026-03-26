@@ -107,7 +107,7 @@ function pick(v, fallback) {
         return (aRows || []).map(function (oRow) {
             var o = oRow || {};
             return {
-                RootKey: pick(pickFirstDefined(o.RootKey, o.rootKey, o.Key, o.key), ""),
+                DB_KEY: pick(pickFirstDefined(o.DB_KEY, o.dbKey), ""),
                 Id: pick(pickFirstDefined(o.Id, o.id), ""),
                 Lpc: pick(pickFirstDefined(o.LpcText, o.Lpc, o.lpc), ""),
                 Profession: pick(pickFirstDefined(o.ProfessionText, o.Profession, o.profession), ""),

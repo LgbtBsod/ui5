@@ -1,9 +1,13 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
 ], function (
-    EffectTextResolver
+    ModelContracts,
+    ControllerModelRuntime
 ) {
     "use strict";
+
+    var I18N_MODEL = ModelContracts.MODELS.I18N;
 
     function normalizeActionPayload(ActionContract, sAction, mPayload) {
         var fnNormalize = ActionContract && ActionContract.normalizeActionPayload;
@@ -17,7 +21,16 @@ sap.ui.define([
 
     function createBundleText(oComponent) {
         return function (sKey, aArgs) {
-            return EffectTextResolver.getText(oComponent, sKey, aArgs || [], sKey);
+            var oI18nModel = ControllerModelRuntime.model(oComponent, I18N_MODEL, true);
+            var oBundle = oI18nModel && typeof oI18nModel.getResourceBundle === "function" ? oI18nModel.getResourceBundle() : null;
+            if (!oBundle || typeof oBundle.getText !== "function") {
+                return String(sKey || "");
+            }
+            try {
+                return String(oBundle.getText(sKey, aArgs || []) || sKey || "");
+            } catch (_bundleError) {
+                return String(sKey || "");
+            }
         };
     }
 

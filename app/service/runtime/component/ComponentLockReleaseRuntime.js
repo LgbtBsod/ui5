@@ -22,8 +22,6 @@ sap.ui.define([
         }
         return {
             DB_KEY: sRootId,
-            ObjectUuid: sRootId,
-            RootKey: sRootId,
             SessionGuid: sSessionGuid
         };
     }

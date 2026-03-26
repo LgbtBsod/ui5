@@ -1,14 +1,14 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsPayloadNormalizer",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader"
-], function (EffectTextResolver, AnalyticsPayloadNormalizer, ControllerViewStateRuntime, AnalyticsContracts, AnalyticsUiContracts, AnalyticsViewStateReader) {
+], function (ControllerTextRuntime, AnalyticsPayloadNormalizer, ControllerViewStateRuntime, AnalyticsContracts, AnalyticsUiContracts, AnalyticsViewStateReader) {
     "use strict";
 
-    var getText = EffectTextResolver.getText;
+    var getText = ControllerTextRuntime.getText;
     var BUILDER_DIMENSION_RULES = AnalyticsContracts.BUILDER.DIMENSION_RULES;
     var BUILDER_DIMENSION_TEXT_KEY_MAP = AnalyticsContracts.BUILDER.DIMENSION_TEXT_KEYS;
     var BUILDER_METRIC_TEXT_KEY_MAP = AnalyticsContracts.BUILDER.METRIC_TEXT_KEYS;

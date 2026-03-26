@@ -1,50 +1,37 @@
-TRUTH MATRIX
+Truth Matrix
 
-1. Key contract / canonical technical identity
-- Current state:
-  - `activeObjectId` and `selectedId` are the working frontend/runtime keys.
-  - `RootId` is compatibility-only at the boundary and should not be promoted as a productive model key.
-- Status:
-  - Mostly aligned.
-
-2. Detail initial loading
-- Current state:
-  - root/basic open stays separate from later checks/barriers hydration.
-  - attachments remain explicit and non-default.
-- Status:
-  - Match.
-
-3. Attachments metadata-first contract
-- Current state:
-  - productive open/download uses `DownloadUrl` / `DocumentHandle`.
-  - `Value` is no longer part of default attachment normalization/selects.
-- Status:
-  - Match.
-
-4. Delete pipeline
-- Current state:
-  - aggregate mutation flow remains canonical.
-  - no direct target delete flow was reintroduced.
-- Status:
-  - Match.
-
-5. Lock flow
-- Current state:
-  - ForceTakeover, lock status, heartbeat, and release remain intact.
-  - `ObjectUuid` / `RootKey` mappings stay boundary-local.
-- Status:
-  - Match.
-
-6. Overengineering / hidden framework
-- Current state:
-  - thin wrappers were removed from component bootstrap/listener/navigation guard paths.
-  - some controller and detail owners still remain as real behavior boundaries.
-- Status:
-  - Improved, but not fully flat.
-
-7. SAP CSS / DOM best practices
-- Current state:
-  - private selector usage is reduced, not eliminated.
-  - DOM hacks remain only where UI5 public APIs are insufficient.
-- Status:
-  - Residual risk remains.
+- Root entity key: `DB_KEY`
+- Root entity parent field: absent
+- Child entity own key: `DB_KEY`
+- Child entity parent field: `PARENT_KEY`
+- Root filter alias compatibility: boundary-only helper in `backend/mock_gateway/api/gateway_canonical_api.py`
+- Child parent compatibility: `PARENT_KEY` only; child `DB_KEY` is not accepted as parent fallback anymore
+- Frontend i18n owner: `app/constants/MessageKeyConstants.js`
+- Frontend machine-readable code owner: `app/constants/MessageCodeConstants.js`
+- Detail domain/workflow constants owner: `app/constants/DetailContracts.js`
+- Attachment canonical fields: `AttachmentKey`, `DB_KEY`, `PARENT_KEY`, `DownloadUrl`, `DocumentHandle`
+- Attachment upload-only payload field: `ContentBase64`
+- Metadata source of truth: `app/localService/metadata.xml`
+- Mock metadata source: `backend/mock_gateway/services/metadata_builder.py`
+- Productive ABAP root key boundary: `DB_KEY` with `ObjectUuid` fallback
+- Component bootstrap runtime-option owner: `app/service/framework/ComponentBootstrap.js` and `app/service/runtime/component/ComponentLifecycleRuntime.js`
+- Navigation intent runtime owner: `app/service/runtime/component/ComponentLifecycleRuntime.js`
+- Internal component runtime state owner: `app/service/runtime/component/ComponentModelInitRuntime.js`
+- Search action busy owner: `app/controller/search/SearchActionBehavior.js`
+- Detail validation summary owner: `app/controller/detail/DetailValidationSummaryRuntime.js`
+- Detail controller runtime owner: `app/controller/detail/DetailControllerRuntime.js`
+- Navigation default handler owner: `app/service/framework/behavior/NavigationDefaultHandlers.js`
+- UI decision default handler owner: `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
+- UI decision dispatch owner: direct `UiDecisionDefaultHandlers.handlers.*` calls from consumers
+- Deleted legacy bootstrap wrappers: `ComponentMainServiceRuntime.js`, `ComponentModelBootstrap.js`, `ComponentGuardedSaveRuntime.js`
+- Deleted thin runtime-option wrapper: `ComponentRuntimeOptionsFactory.js`
+- Deleted thin navigation wrapper: `ComponentNavigationRuntime.js`
+- Deleted thin runtime-state wrapper: `ComponentInternalRuntimeState.js`
+- Deleted thin search busy wrapper: `ControllerActionBusyRuntime.js`
+- Deleted thin detail validation helper: `DetailValidationHelperRuntime.js`
+- Deleted thin detail dialog helper: `DetailActionDialogRuntime.js`
+- Deleted thin adaptive viewport helper: `DetailAdaptiveViewportRuntime.js`
+- Deleted thin navigation behavior helper: `NavigationBehaviorHelpers.js`
+- Deleted thin UI decision helper: `UiDecisionBehaviorHelpers.js`
+- Deleted thin UI decision coordinator: `UiDecisionCoordinator.js`
+- Deleted legacy context wrappers: `CtxModelResolver.js`, `CtxCacheRuntimeFactory.js`

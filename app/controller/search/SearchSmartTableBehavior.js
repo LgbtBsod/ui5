@@ -1,5 +1,5 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
@@ -8,7 +8,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchLoadingFeedbackRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLocationSuggestRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchRateProgress",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
@@ -30,7 +29,6 @@ sap.ui.define([
     SearchLoadRuntime,
     SearchLoadingFeedbackRuntime,
     SearchReturnRediscoveryRuntime,
-    SearchLocationSuggestRuntime,
     SearchViewStateRuntime,
     SearchRateProgress,
     SearchCommandPolicy,
@@ -402,7 +400,9 @@ sap.ui.define([
     return {
         onSmartFilterInitialise: function (oController, fnApplyAnalyticsDrilldownIntent) {
             ControllerViewStateRuntime.set(oController, "/smartFilterReady", true);
-            SearchLocationSuggestRuntime.bindLocationSuggest(oController);
+            if (oController && typeof oController._bindLocationSuggest === "function") {
+                oController._bindLocationSuggest();
+            }
             bindClearHandler(oController);
             deferCustomSegmentReset(oController);
             SearchCommandPolicy.buildFilter(oController, { source: SEARCH_SOURCES.SMART_FILTER_INIT });
@@ -413,7 +413,9 @@ sap.ui.define([
             if (!oSmartFilterBar || (typeof oSmartFilterBar.isInitialised === "function" && !oSmartFilterBar.isInitialised())) {
                 return;
             }
-            SearchLocationSuggestRuntime.bindLocationSuggest(oController);
+            if (oController && typeof oController._bindLocationSuggest === "function") {
+                oController._bindLocationSuggest();
+            }
             SearchCommandPolicy.buildFilter(oController, { source: SEARCH_SOURCES.SMART_FILTER_CHANGED });
         },
         onSmartFilterClear: function (oController) {

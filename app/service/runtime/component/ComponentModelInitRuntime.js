@@ -1,10 +1,46 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentInternalRuntimeState"
-], function (ModelContracts, ComponentInternalRuntimeState) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
+], function (ModelContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
+
+    function createCacheState() {
+        return {
+            byRootKey: {},
+            pristineSnapshot: null,
+            keyMapping: {},
+            lastServerState: null
+        };
+    }
+
+    function createEnvState() {
+        return {
+            source: "",
+            loadedAt: "",
+            variables: {},
+            timers: {}
+        };
+    }
+
+    function resetStateObject(oState, fnCreateState) {
+        var oSeed = fnCreateState();
+
+        Object.keys(oState || {}).forEach(function (sKey) {
+            delete oState[sKey];
+        });
+        Object.keys(oSeed).forEach(function (sKey) {
+            oState[sKey] = oSeed[sKey];
+        });
+        return oState;
+    }
+
+    function reuseState(oExistingState, fnCreateState) {
+        if (oExistingState && typeof oExistingState === "object") {
+            return resetStateObject(oExistingState, fnCreateState);
+        }
+        return fnCreateState();
+    }
 
     function reuseJsonModel(oExistingModel, fnCreateModel) {
         var oModel = oExistingModel || fnCreateModel();
@@ -31,8 +67,8 @@ sap.ui.define([
             shellModel: reuseJsonModel(oComponent.getModel(MODELS.SHELL), ModelFactory.createShellModel),
             detailModel: oDetailModel,
             masterDataModel: reuseJsonModel(oComponent.getModel(MODELS.MASTER_DATA), ModelFactory.createMasterDataModel),
-            cacheState: ComponentInternalRuntimeState.reuseState(oInternalRuntimeState.cache, ComponentInternalRuntimeState.createCacheState),
-            envState: ComponentInternalRuntimeState.reuseState(oInternalRuntimeState.env, ComponentInternalRuntimeState.createEnvState),
+            cacheState: reuseState(oInternalRuntimeState.cache, createCacheState),
+            envState: reuseState(oInternalRuntimeState.env, createEnvState),
             deviceModel: new JSONModel(Device)
         };
     }

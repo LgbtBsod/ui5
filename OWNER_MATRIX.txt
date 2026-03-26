@@ -1,39 +1,26 @@
-OWNER MATRIX
+Owner Matrix
 
-1. Key normalization
-- Current owner:
-  - `app/infra/adapters/shared/ODataEntityContracts.js`
-- Boundary helpers:
-  - `app/infra/adapters/shared/ODataChecklistPayloadMapper.js`
-  - `app/service/shared/DeltaPayloadBuilder.js`
-  - `app/service/shared/delta/DeltaFieldMappers.js`
-
-2. Detail loading
-- Current owners:
-  - `app/infra/adapters/shared/ODataChecklistReadRuntime.js`
-  - `app/service/domain/detail/usecases/OpenDetailUseCase.js`
-
-3. Attachment state
-- Current owners:
-  - `app/service/domain/detail/DetailAttachmentStateRuntime.js`
-  - `app/service/domain/detail/DetailAttachmentSaveRuntime.js`
-  - `app/service/domain/detail/DetailAttachmentDeltaRuntime.js`
-  - `app/service/features/detail/runtime/DetailAttachmentOpenRuntime.js`
-  - `app/service/domain/detail/usecases/LoadAttachmentsUseCase.js`
-
-4. Search screen
-- Current owners:
-  - `app/controller/search/SearchControllerBehavior.js`
-  - `app/controller/search/SearchActionBehavior.js`
-  - `app/controller/search/SearchSmartTableBehavior.js`
-  - `app/controller/search/SearchLifecycleBehavior.js`
-
-5. Component bootstrap / lifecycle
-- Current owners:
-  - `app/service/runtime/component/ComponentLifecycleRuntime.js`
-  - `app/service/runtime/component/ComponentLockEventsRuntime.js`
-  - `app/service/runtime/component/ComponentInitListenersRuntime.js`
-
-6. App shell
-- Current owners:
-  - `app/controller/app/AppShellRuntime.js` if present, otherwise the surviving shell runtime/controller owner
+- Root key owner: canonical `DB_KEY`
+- Child parent-key owner: canonical `PARENT_KEY`
+- Attachment owner: `Attachment` entity contract with `DownloadUrl` and `DocumentHandle`
+- Frontend message-key owner: `app/constants/MessageKeyConstants.js`
+- Frontend message-code owner: `app/constants/MessageCodeConstants.js`
+- Backend message-code owner: `backend/sap_backend/src/zif_zodata_message_codes.intf.abap`
+- Backend message-text owner: `backend/sap_backend/src/zif_zodata_message_texts.intf.abap`
+- Detail domain constants owner: `app/constants/DetailContracts.js`
+- App shell owner: `app/controller/App.controller.js`
+- Search owner: `app/controller/Search.controller.js`
+- Analytics owner: `app/controller/Analytics.controller.js`
+- Framework bootstrap owner: `app/service/framework/ComponentBootstrap.js`
+- Framework context owner: `app/service/framework/CtxRuntimeFactory.js`
+- Component lifecycle owner: `app/service/runtime/component/ComponentLifecycleRuntime.js`
+- Runtime option owner: `app/service/framework/ComponentBootstrap.js` and `app/service/runtime/component/ComponentLifecycleRuntime.js`
+- Navigation intent runtime owner: `app/service/runtime/component/ComponentLifecycleRuntime.js`
+- Internal runtime state owner: `app/service/runtime/component/ComponentModelInitRuntime.js`
+- Search action busy owner: `app/controller/search/SearchActionBehavior.js`
+- Detail validation summary owner: `app/controller/detail/DetailValidationSummaryRuntime.js`
+- Detail controller runtime owner: `app/controller/detail/DetailControllerRuntime.js`
+- Navigation default handler owner: `app/service/framework/behavior/NavigationDefaultHandlers.js`
+- UI decision default handler owner: `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
+- UI decision dispatch owner: direct consumer calls into `UiDecisionDefaultHandlers.handlers.*`
+- Save guard owner: `app/service/runtime/component/ComponentSaveGuardRuntime.js`

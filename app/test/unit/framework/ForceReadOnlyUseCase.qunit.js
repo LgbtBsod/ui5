@@ -2,9 +2,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/ForceReadOnlyUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (ForceReadOnlyUseCase, StatePaths, WorkflowContracts, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (ForceReadOnlyUseCase, StatePaths, WorkflowContracts, MessageKeyConstants) {
     "use strict";
+
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
 
     QUnit.module("ForceReadOnlyUseCase");
 
@@ -22,7 +24,7 @@ sap.ui.define([
 
         oUseCase.execute({
             reason: "IDLE_TIMEOUT",
-            messageKey: DetailMessageKeyConstants.LOCK_IDLE_TIMEOUT,
+            messageKey: DETAIL_MESSAGE_KEYS.LOCK_IDLE_TIMEOUT,
             preserveDirty: true,
             rootId: "CHK-1",
             sessionGuid: "SESSION-1"

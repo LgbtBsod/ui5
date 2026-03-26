@@ -2,20 +2,23 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchSelectionEffects",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DetailPostOpenRuntime, NavigationContracts, ModelContracts, DetailUseCaseConstants, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Result, Effects, SearchSelectionEffects, CreateSentinel, StatePaths, DetailPostOpenRuntime, NavigationContracts, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var DETAIL_CODES = DetailUseCaseConstants.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailMessageKeyConstants;
-    var ACCESS_OPERATIONS = DetailUseCaseConstants.ACCESS_OPERATIONS;
+    var DETAIL_CODES = MessageCodeConstants.DETAIL;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
+    var DETAIL_VIEW_KEYS = MessageKeyConstants.VIEW;
+    var SEARCH_MESSAGE_KEYS = MessageKeyConstants.SEARCH;
+    var ACCESS_OPERATIONS = DetailContracts.ACCESS_OPERATIONS;
 
     function readSessionGuid(mCtx) {
         var oUiState = mCtx && mCtx.uiState;
@@ -26,8 +29,8 @@ sap.ui.define([
         return String(
             (((oSnapshot || {}).root || {}).id) ||
             (((oSnapshot || {}).root || {}).Key) ||
-            (((oSnapshot || {}).root || {}).RootKey) ||
-            (oSnapshot && oSnapshot.RootKey) ||
+            (((oSnapshot || {}).root || {}).DB_KEY) ||
+            (oSnapshot && oSnapshot.DB_KEY) ||
             (oSnapshot && oSnapshot.Key) ||
             ""
         ).trim();
@@ -39,7 +42,7 @@ sap.ui.define([
         };
     }
 
-function execute(mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sIntent = String((mInput && mInput.intent) || "open");
         var oSmart = mCtx && mCtx.smartControls;
         var oRepo = mCtx && mCtx.repo;
@@ -50,20 +53,20 @@ function execute(mInput, mCtx) {
         }
 
         if (!sRootId) {
-            var sMissingKey = sIntent === "delete" ? "nothingToDelete" : "nothingToCopy";
-            return Promise.resolve(Result.fail({ message: "No selected row", code: "NO_SELECTION" }, [Effects.toast(sMissingKey, "warning")]));
+            var sMissingKey = sIntent === "delete" ? DETAIL_VIEW_KEYS.NOTHING_TO_DELETE : SEARCH_MESSAGE_KEYS.NOTHING_TO_COPY;
+            return Promise.resolve(Result.fail({ messageKey: sMissingKey, code: "NO_SELECTION" }, [Effects.toast(sMissingKey, "warning")]));
         }
 
         if (sIntent === "delete") {
             if (!oRepo || typeof oRepo.deleteChecklist !== "function") {
-                return Promise.resolve(Result.fail({ message: "Delete unavailable", code: "DELETE_UNAVAILABLE" }));
+                return Promise.resolve(Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, code: "DELETE_UNAVAILABLE" }));
             }
             return Promise.resolve(oRepo.checkChecklistPermission({
                 rootId: sRootId,
                 activity: ACCESS_OPERATIONS.DELETE
             })).then(function (oPermission) {
                 if (!oPermission || oPermission.canDelete !== true) {
-                    return Result.fail({ message: "No permission to delete checklist", code: DETAIL_CODES.NO_DELETE_PERMISSION }, [
+                    return Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, code: DETAIL_CODES.NO_DELETE_PERMISSION }, [
                         Effects.toast(DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, "warning")
                     ]);
                 }
@@ -83,16 +86,16 @@ function execute(mInput, mCtx) {
         if (sIntent === "copy") {
             var sSessionGuid = readSessionGuid(mCtx);
             if (!sSessionGuid) {
-                return Promise.resolve(Result.fail({ message: "Session unavailable", code: "SESSION_UNAVAILABLE" }, [Effects.warn("sessionUnavailableMessage")]));
+                return Promise.resolve(Result.fail({ messageKey: DETAIL_VIEW_KEYS.SESSION_UNAVAILABLE, code: "SESSION_UNAVAILABLE" }, [Effects.warn(DETAIL_VIEW_KEYS.SESSION_UNAVAILABLE)]));
             }
             if (!oRepo || typeof oRepo.copyChecklist !== "function") {
-                return Promise.resolve(Result.fail({ message: "Copy unavailable", code: "COPY_UNAVAILABLE" }));
+                return Promise.resolve(Result.fail({ messageKey: DETAIL_VIEW_KEYS.GENERIC_OPERATION_FAILED, code: "COPY_UNAVAILABLE" }));
             }
             return Promise.resolve(oRepo.copyChecklist({ rootId: sRootId, sessionGuid: sSessionGuid })).then(function (oCopyResult) {
                 var oSnapshot = (oCopyResult && oCopyResult.serverSnapshot) || {};
                 var sCopiedRootId = resolveCopiedRootId(oSnapshot);
                 if (!sCopiedRootId) {
-                    return Result.fail({ message: "Copied checklist id missing", code: "COPY_INVALID_RESPONSE" });
+                    return Result.fail({ messageKey: DETAIL_VIEW_KEYS.GENERIC_OPERATION_FAILED, code: "COPY_INVALID_RESPONSE" });
                 }
                 if (oSmart && typeof oSmart.rebindSearchTable === "function") {
                     oSmart.rebindSearchTable();
@@ -100,7 +103,7 @@ function execute(mInput, mCtx) {
                 return Result.ok({ selectedRootId: sRootId, intent: sIntent }, DetailPostOpenRuntime.buildEditableDetailEffects(sCopiedRootId, {
                     snapshot: oSnapshot
                 }).concat([
-                    Effects.toast("checklistCopied", "success"),
+                    Effects.toast(SEARCH_MESSAGE_KEYS.CHECKLIST_COPIED, "success"),
                     Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sCopiedRootId }, false)
                 ]));
             }).catch(function (oError) {

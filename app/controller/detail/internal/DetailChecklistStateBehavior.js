@@ -100,7 +100,7 @@ sap.ui.define([
 
         onValidateChecklist: function () {
             this._recomputeValidationSummary("manualValidate", true);
-            return DetailCommandPolicy.validate(this, RootIdRuntime.withCurrentRootId(this)).then(function (oResult) {
+            return DetailCommandPolicy.validate(this, withCurrentRootId(this)).then(function (oResult) {
                 this._recomputeValidationSummary("validateResult", true);
                 if (ModelStateRuntime.read(this, STATE_MODEL, STATE_PATHS.VALIDATION_SUMMARY + "/hasErrors", false)) {
                     this._focusFirstInvalidField();

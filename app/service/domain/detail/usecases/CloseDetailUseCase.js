@@ -9,15 +9,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, ModelContracts, DetailContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Result, Effects, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowTelemetry, ModelPathContracts, NavigationContracts, WorkflowContracts, ModelContracts, DetailContracts, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var STATE_MODEL = MODELS.STATE;
     var SHELL_MODEL = MODELS.SHELL;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
 
     function CloseDetailUseCase() {
         return {

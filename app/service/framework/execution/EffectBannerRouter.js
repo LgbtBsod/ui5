@@ -1,8 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectActionRouting",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
-], function (FeedbackBannerRuntime, EffectActionRouting, ControllerModelRuntime) {
+], function (FeedbackBannerRuntime, RuntimeInput, ControllerModelRuntime) {
     "use strict";
 
     function readStateModel(oController) {
@@ -22,13 +22,27 @@ sap.ui.define([
         return String(fnResolveTextKey(sTextKey, oController, oEffect) || "");
     }
 
+    function normalizeEffectVerb(vAction) {
+        return RuntimeInput.asString(vAction).trim().toLowerCase();
+    }
+
+    function dispatchEffectAction(oRuntimeOptions, oEffect) {
+        var oDispatcher = oRuntimeOptions && oRuntimeOptions.actionDispatcher;
+        var sActionName = RuntimeInput.asString(oEffect && oEffect.actionName).trim();
+        var oPayload = RuntimeInput.asObject((oEffect && oEffect.payload) || {});
+        if (!oDispatcher || typeof oDispatcher.dispatch !== "function" || !sActionName) {
+            return Promise.resolve(false);
+        }
+        return oDispatcher.dispatch(sActionName, oPayload);
+    }
+
     function handleEffect(oController, oEffect, oRuntimeOptions, mOptions) {
         var oState = readStateModel(oController);
         var oLocalOptions = mOptions || {};
-        var sAction = EffectActionRouting.normalizeEffectVerb(oEffect && oEffect.action);
+        var sAction = normalizeEffectVerb(oEffect && oEffect.action);
 
         if (sAction === "dispatch") {
-            return EffectActionRouting.dispatchEffectAction(oController, oRuntimeOptions, oEffect);
+            return dispatchEffectAction(oRuntimeOptions, oEffect);
         }
         if (sAction === "clear") {
             return FeedbackBannerRuntime.clearFromEffect(oState, oEffect);

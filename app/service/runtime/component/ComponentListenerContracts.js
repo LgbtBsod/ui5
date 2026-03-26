@@ -3,8 +3,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (ModelContracts, NavigationContracts, ModelPathContracts, StatePaths, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
+], function (ModelContracts, NavigationContracts, ModelPathContracts, StatePaths, MessageCodeConstants) {
     "use strict";
 
     return Object.freeze({
@@ -27,7 +27,7 @@ sap.ui.define([
             FULL_SAVE_EVENT: "pcct:fullSave",
             LOCK_OWNED: "LOCK_OWNED",
             LOCK_RELEASED: "LOCK_RELEASED",
-            NO_CHANGES: DetailUseCaseConstants.CODES.NO_CHANGES,
+            NO_CHANGES: MessageCodeConstants.FLOW.NO_CHANGES,
             ONE_COLUMN: NavigationContracts.LAYOUTS.ONE_COLUMN,
             SAVE: "SAVE",
             UNSAVED_CHANGES_MESSAGE: "unsavedChangesPrompt"

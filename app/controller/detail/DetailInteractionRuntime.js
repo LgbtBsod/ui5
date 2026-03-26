@@ -5,7 +5,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentOpenRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInputAssistRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (

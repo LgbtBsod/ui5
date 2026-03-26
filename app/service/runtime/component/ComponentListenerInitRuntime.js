@@ -4,10 +4,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/SearchUiConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, DetailContracts, SearchUiConfig, ShellStateRuntime, ModelContracts) {
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, DetailContracts, MessageKeyConstants, SearchUiConfig, ShellStateRuntime, ModelContracts) {
     "use strict";
 
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
@@ -25,7 +26,7 @@ sap.ui.define([
             return;
         }
         ModelStateRuntime.writeOnModel(oStateModel, "/persistence/state", bDirty ? DetailContracts.STATES.DIRTY : DetailContracts.STATES.IDLE);
-        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/messageKey", bDirty ? DetailContracts.PERSISTENCE_DIRTY : DetailContracts.PERSISTENCE_IDLE);
+        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/messageKey", bDirty ? MessageKeyConstants.VIEW.PERSISTENCE_DIRTY : MessageKeyConstants.VIEW.PERSISTENCE_IDLE);
     }
 
     function createBeforeUnloadHandler(oStateModel, mOptions) {

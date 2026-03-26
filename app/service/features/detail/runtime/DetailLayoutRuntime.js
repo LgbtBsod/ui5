@@ -1,12 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CanonicalRootKeyRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts"
-], function (LayoutStateRuntime, NavigationIntentService, RootIdRuntime, ControllerModelRuntime, ModelStateRuntime, ModelContracts, NavigationContracts) {
+], function (LayoutStateRuntime, NavigationIntentService, CanonicalRootKeyRuntime, ControllerModelRuntime, ModelStateRuntime, ModelContracts, NavigationContracts) {
     "use strict";
 
     var SHELL_MODEL = ModelContracts.MODELS.SHELL;
@@ -23,7 +23,7 @@ sap.ui.define([
                 return;
             }
 
-            sRootId = RootIdRuntime.resolveFromController(oController);
+            sRootId = CanonicalRootKeyRuntime.resolveFromController(oController);
             sLayout = LayoutStateRuntime.normalizeLayout(vLayout);
             ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, sLayout);
             if (!bSyncRoute || !oRouter) {

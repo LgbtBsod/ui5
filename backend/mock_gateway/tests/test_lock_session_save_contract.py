@@ -30,7 +30,7 @@ def test_save_changes_requires_active_session_lock_but_not_client_version():
 
         acquire = client.post(
             f"{SERVICE_ROOT}/LockAcquire",
-            params={"RootId": root_key, "SessionGuid": "SAVE-S1"},
+            params={"DB_KEY": root_key, "SessionGuid": "SAVE-S1"},
             headers={"X-CSRF-Token": token}
         )
         assert acquire.status_code == 200
@@ -63,11 +63,11 @@ def test_autosave_requires_active_session_lock_but_not_client_version():
 
         copied = client.post(
             f"{SERVICE_ROOT}/CopyChecklist",
-            params={"RootId": root_key, "SessionGuid": "AUTO-S1"},
+            params={"DB_KEY": root_key, "SessionGuid": "AUTO-S1"},
             headers={"X-CSRF-Token": token}
         )
         assert copied.status_code == 200
-        copied_key = copied.json().get("d", {}).get("RootKey")
+        copied_key = copied.json().get("d", {}).get("DB_KEY")
         assert copied_key
 
         autosave_resp = client.post(

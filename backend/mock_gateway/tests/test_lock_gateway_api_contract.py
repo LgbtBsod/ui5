@@ -50,14 +50,14 @@ def test_lock_heartbeat_wrong_session_returns_locked_by_other_not_expired():
         token = _csrf(client)
         acquire = client.post(
             f"{SERVICE_ROOT}/LockAcquire",
-            params={"RootId": root_id, "SessionGuid": "S1"},
+            params={"DB_KEY": root_id, "SessionGuid": "S1"},
             headers={"X-CSRF-Token": token}
         )
         assert acquire.status_code == 200
 
         heartbeat = client.post(
             f"{SERVICE_ROOT}/LockHeartbeat",
-            params={"RootId": root_id, "SessionGuid": "S2"},
+            params={"DB_KEY": root_id, "SessionGuid": "S2"},
             headers={"X-CSRF-Token": token}
         )
         assert heartbeat.status_code == 200
@@ -76,14 +76,14 @@ def test_lock_release_wrong_session_does_not_report_free():
         token = _csrf(client)
         acquire = client.post(
             f"{SERVICE_ROOT}/LockAcquire",
-            params={"RootId": root_id, "SessionGuid": "S1"},
+            params={"DB_KEY": root_id, "SessionGuid": "S1"},
             headers={"X-CSRF-Token": token}
         )
         assert acquire.status_code == 200
 
         release = client.post(
             f"{SERVICE_ROOT}/LockRelease",
-            params={"RootId": root_id, "SessionGuid": "S2"},
+            params={"DB_KEY": root_id, "SessionGuid": "S2"},
             headers={"X-CSRF-Token": token}
         )
         assert release.status_code == 200

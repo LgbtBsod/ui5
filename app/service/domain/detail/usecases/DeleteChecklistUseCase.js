@@ -11,8 +11,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -21,9 +23,10 @@ sap.ui.define([
     var SHELL_MODEL = MODELS.SHELL;
     var STATE_MODEL = MODELS.STATE;
     var VIEW_MODEL = MODELS.VIEW;
-    var DETAIL_ACCESS_REASON_CODES = DetailContracts.ACCESS_REASON_CODES;
-    var DETAIL_CODES = DetailContracts.CODES;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_ACCESS_REASON_CODES = MessageCodeConstants.DETAIL;
+    var DETAIL_CODES = MessageCodeConstants.DETAIL;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
+    var DETAIL_VIEW_KEYS = MessageKeyConstants.VIEW;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
     var DETAIL_REASONS = DetailContracts.REASONS;
 
@@ -38,14 +41,14 @@ sap.ui.define([
         var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
 
         if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
-            return Promise.resolve(Result.fail({ message: "No checklist to delete", code: DETAIL_CODES.NO_CHECKLIST }, [
-                Effects.toast(DETAIL_MESSAGE_KEYS.NOTHING_TO_DELETE, "warning"),
+            return Promise.resolve(Result.fail({ messageKey: DETAIL_VIEW_KEYS.NOTHING_TO_DELETE, code: DETAIL_CODES.NO_CHECKLIST }, [
+                Effects.toast(DETAIL_VIEW_KEYS.NOTHING_TO_DELETE, "warning"),
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false)
             ]));
         }
 
         if (!oRepo || typeof oRepo.deleteChecklist !== "function") {
-            return Promise.resolve(Result.fail({ message: "Delete unavailable", code: DETAIL_CODES.DELETE_UNAVAILABLE }, [
+            return Promise.resolve(Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, code: DETAIL_CODES.DELETE_UNAVAILABLE }, [
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false)
             ]));
         }
@@ -54,7 +57,7 @@ sap.ui.define([
             activity: DetailAuthorizationRuntime.OPERATIONS.DELETE
         }).then(function (oPermission) {
             if (!oPermission.allowed) {
-                return Result.fail({ message: "No permission to delete checklist", code: DETAIL_CODES.NO_DELETE_PERMISSION }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, [
+                return Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, code: DETAIL_CODES.NO_DELETE_PERMISSION }, DetailAuthorizationRuntime.deniedActionEffects(oPermission, DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, [
                     Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false)
                 ]));
             }

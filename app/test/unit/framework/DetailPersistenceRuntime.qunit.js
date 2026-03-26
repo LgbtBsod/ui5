@@ -1,7 +1,7 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (DetailPersistenceRuntime, DetailMessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (DetailPersistenceRuntime, MessageKeyConstants) {
     "use strict";
 
     QUnit.module("DetailPersistenceRuntime");
@@ -14,7 +14,7 @@ sap.ui.define([
 
         assert.strictEqual(oResult.taxonomy, DetailPersistenceRuntime.TAXONOMY.LOCK_EXPIRED, "lock expiry taxonomy is preserved");
         assert.strictEqual(oResult.persistenceState, DetailPersistenceRuntime.STATES.LOCK_LOST, "lock expiry forces lock-lost UI state");
-        assert.strictEqual(oResult.messageKey, DetailMessageKeyConstants.PERSISTENCE_LOCK_EXPIRED, "lock expiry gets dedicated message key");
+        assert.strictEqual(oResult.messageKey, MessageKeyConstants.VIEW.PERSISTENCE_LOCK_EXPIRED, "lock expiry gets dedicated message key");
     });
 
     QUnit.test("failureEffects clears in-flight flags and stores error taxonomy", function (assert) {

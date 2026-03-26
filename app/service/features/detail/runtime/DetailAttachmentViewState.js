@@ -2,12 +2,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CanonicalRootKeyRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (ModelContracts, StatePaths, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, RootIdRuntime, WorkflowContracts, DetailUseCaseConstants) {
+], function (ModelContracts, StatePaths, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, CanonicalRootKeyRuntime, WorkflowContracts, DetailUseCaseConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -17,7 +17,7 @@ sap.ui.define([
     function hasActiveRoot(oController) {
         var oDetailModel = ControllerModelRuntime.detail(oController);
         var sDetailRootId = String(ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ROOT_ID, "") || "").trim();
-        var sCanonicalRootId = RootIdRuntime.resolveFromController(oController);
+        var sCanonicalRootId = CanonicalRootKeyRuntime.resolveFromController(oController);
         var aSessionAttachments = ControllerViewStateRuntime.get(oController, "/sessionAttachments", []);
         var aPersistedAttachments = ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ATTACHMENTS, []);
 

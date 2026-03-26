@@ -24,14 +24,13 @@ sap.ui.define([
         return ClientKeyGenerator.createHex32();
     }
 
-    function rootNode(oSource, sRootKey) {
+    function rootNode(oSource, sRootDbKey) {
         var o = oSource || {};
         var sStatus = String(o.status || o.Status || CHECKLIST_STATUSES.DRAFT).toUpperCase() || CHECKLIST_STATUSES.DRAFT;
         return {
-            id: sRootKey,
-            Key: sRootKey,
-            RootKey: sRootKey,
-            client_row_id: sRootKey,
+            id: sRootDbKey,
+            Key: sRootDbKey,
+            client_row_id: sRootDbKey,
             status: sStatus,
             Status: sStatus,
             overall_result: null,
@@ -45,14 +44,13 @@ sap.ui.define([
         };
     }
 
-    function basicNode(oSource, sRootKey) {
+    function basicNode(oSource, sRootDbKey) {
         var oParts = nowParts();
         var o = oSource || {};
         var sBasicKey = tempKey();
         return Object.assign({}, o, {
             id: sBasicKey,
             Key: sBasicKey,
-            RootKey: sRootKey,
             client_row_id: sBasicKey,
             date: o.date || oParts.date,
             time: o.time || oParts.time,
@@ -81,10 +79,10 @@ sap.ui.define([
     }
 
     function createEmptyDraft() {
-        var sRootKey = tempKey();
+        var sRootDbKey = tempKey();
         return {
-            root: rootNode({}, sRootKey),
-            basic: basicNode({}, sRootKey),
+            root: rootNode({}, sRootDbKey),
+            basic: basicNode({}, sRootDbKey),
             checks: [],
             barriers: [],
             participants: [],
@@ -92,7 +90,7 @@ sap.ui.define([
             meta: {
                 aggChangedOn: "",
                 versionNumber: 0,
-                draftRootKey: sRootKey
+                draftDbKey: sRootDbKey
             }
         };
     }

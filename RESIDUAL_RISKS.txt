@@ -1,5 +1,23 @@
-1. `RootId` compatibility tail still exists in boundary plumbing and must remain ingress/egress only.
-2. Component/runtime and detail controller ownership is cleaner, but some clusters still have more than one true owner.
-3. UI5 private selector usage is still present in a few documented override points.
-4. Full regression test suite was not run in this pass.
-5. Backend/mock transport boundary still accepts a few legacy aliases for ingress compatibility, but productive payloads now use `DB_KEY` / `PARENT_KEY`.
+Residual risks after final residual cleanup + key-model completion pass:
+
+1. Local browser click-through validation is still blocked by environment-level SAPUI5 package resolution.
+   `npm.cmd run start` fails because `@sapui5/distribution-metadata@1.71.70` is not resolvable here.
+
+2. Productive ABAP deeper contract layers were not mutated in this pass because the reachable DPC boundary already reads `DB_KEY` and falls back only to `ObjectUuid`.
+   If DDIC structures or downstream mappers still expose `RootKey`/`RootId`, that drift is outside the files directly proven here.
+
+3. Controller and framework micro-fragmentation is reduced but not exhausted.
+   The highest remaining cleanup hotspots are still:
+   - `app/controller/detail/*`
+   - `app/controller/search/*`
+   - `app/service/framework/*`
+   The former thin wrapper `app/service/runtime/component/ComponentRuntimeOptionsFactory.js` is now removed.
+   `app/service/runtime/component/ComponentNavigationRuntime.js` and `app/service/runtime/component/ComponentInternalRuntimeState.js` are also removed.
+   `app/service/framework/ControllerActionBusyRuntime.js` is also removed.
+   `app/controller/detail/internal/DetailValidationHelperRuntime.js` is also removed.
+   `app/controller/detail/DetailActionDialogRuntime.js`, `app/controller/detail/DetailAdaptiveViewportRuntime.js`, and `app/service/framework/execution/behavior/NavigationBehaviorHelpers.js` are also removed.
+   `app/service/framework/execution/behavior/UiDecisionBehaviorHelpers.js` is also removed.
+   `app/service/framework/execution/UiDecisionCoordinator.js` is also removed.
+
+4. SAP internal CSS debt is reduced at the allowlist level, but active private-selector use still remains in:
+   - `app/styles/modules/controls/26_controls.css`

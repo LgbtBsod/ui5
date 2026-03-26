@@ -24,7 +24,7 @@ sap.ui.define([
             repo: {
                 exportSearchResults: function () {
                     return Promise.resolve([{
-                        RootKey: "ROOT-1",
+                        DB_KEY: "ROOT-1",
                         ItemType: "CHECK",
                         Result: false,
                         Text: "Failed item"
@@ -83,7 +83,7 @@ sap.ui.define([
                 getBoundRows: function () {
                     bBoundRowsCalled = true;
                     return Promise.resolve([{
-                        RootKey: "ROOT-77",
+                        DB_KEY: "ROOT-77",
                         ItemType: "ROOT",
                         Result: false
                     }]);
@@ -98,7 +98,7 @@ sap.ui.define([
             assert.strictEqual(oResult.ok, true, "use case succeeds");
             assert.strictEqual(bBoundRowsCalled, true, "current bound rows are used");
             assert.strictEqual(bRepoCalled, false, "backend export is skipped for complex date range");
-            assert.strictEqual(oCaptured[0].RootKey, "ROOT-77", "bound rows are exported");
+            assert.strictEqual(oCaptured[0].DB_KEY, "ROOT-77", "bound rows are exported with canonical root key");
             SpreadsheetExport.download = fnOriginalDownload;
             done();
         }).catch(function () {

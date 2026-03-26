@@ -38,13 +38,13 @@ sap.ui.define([
 
     function readAggChangedOnAdapter(sRootId) {
         return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.LAST_CHANGE_SET, sRootId, {
-            name: "RootKey",
-            type: ODataKeyContracts.TYPES.ROOT_KEY
+            name: "DB_KEY",
+            type: ODataKeyContracts.TYPES.DB_KEY
         })).then(function (oRes) {
             return readAggChangedOn(oRes);
         }).catch(function () {
             return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.LAST_CHANGE_SET, {
-                "$filter": ODataAdapterUtils.buildEqFilter("RootKey", sRootId, ODataKeyContracts.TYPES.ROOT_KEY),
+                "$filter": ODataAdapterUtils.buildEqFilter("DB_KEY", sRootId, ODataKeyContracts.TYPES.DB_KEY),
                 "$top": 1
             }).then(function (oRes) {
                 return readAggChangedOn(oRes);

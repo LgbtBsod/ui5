@@ -7,14 +7,14 @@ sap.ui.define([
     "use strict";
 
     function exportSearchResults(mArgs) {
-        var aRootIds = ChecklistIdentity.normalizeChecklistIds((mArgs && (mArgs.rootIds || mArgs.RootKeys)) || []);
+        var aRootIds = ChecklistIdentity.normalizeChecklistIds((mArgs && (mArgs.rootIds || mArgs.DBKeys || mArgs.RootKeys)) || []);
         var oPayload = {
             Entity: String((mArgs && mArgs.entity) || "screen").trim() || "screen",
             Limit: Math.max(1, Number((mArgs && mArgs.limit) || 0) || 200000),
             SelectionMode: String((mArgs && mArgs.selectionMode) || (aRootIds.length ? "selected" : "all")).trim() || "all"
         };
         if (aRootIds.length) {
-            oPayload.RootKeys = aRootIds;
+            oPayload.DBKeys = aRootIds;
         }
         if (!aRootIds.length && mArgs && mArgs.searchContract) {
             oPayload.SearchContract = Object.assign({}, mArgs.searchContract);

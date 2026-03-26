@@ -44,8 +44,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentAppRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentListenerInitRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailWorkflowRuntime.qunit",
-    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentModelBootstrap.qunit",
-    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ComponentMainServiceRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/GatewayClient.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ActionDispatcher.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SmartControlsAdapter.qunit",

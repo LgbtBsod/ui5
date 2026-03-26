@@ -1,7 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentRuntimeOptionsFactory",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
@@ -10,8 +9,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
 ], function (
     ComponentBootstrapContracts,
-    ComponentRuntimeOptionsFactory,
-    ComponentNavigationRuntime,
+    NavigationIntentService,
     ModelStateRuntime,
     CloneUtil,
     WorkflowTelemetry,
@@ -26,6 +24,79 @@ sap.ui.define([
     var READINESS_STATUS = ComponentBootstrapContracts.READINESS_STATUS;
     var CONFIG_SOURCE = ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE;
     var FALLBACK_TEXT_KEYS = EffectFeedbackContracts.FALLBACK_TEXT_KEYS;
+
+    function buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport) {
+        return {
+            component: oComponent,
+            stateModel: mModels.stateModel,
+            shellModel: mModels.shellModel,
+            detailModel: mModels.detailModel,
+            timerDefaults: mTelemetry.timerDefaults,
+            managers: mDeps.managers,
+            statePaths: mDeps.StatePaths,
+            deltaPayloadBuilder: mDeps.DeltaPayloadBuilder,
+            buildLatestCtx: mHandlers.buildLatestCtx,
+            resolveDetailCurrent: mHandlers.resolveDetailCurrent,
+            applyFacadeResult: mHandlers.applyFacadeResult,
+            setGlobalBanner: mHandlers.setGlobalBanner,
+            emitTelemetry: mTelemetry.emitTelemetry,
+            debugLogger: mDeps.DebugLogger,
+            actionContract: mDeps.ActionContract,
+            bundleText: mTelemetry.bundleText,
+            componentRuntimeSupport: oRuntimeSupport,
+            telemetryRuntime: mDeps.TelemetryRuntime
+        };
+    }
+
+    function buildLockRuntimeOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport) {
+        return {
+            component: oComponent,
+            mainServiceModel: mModels.mainServiceModel,
+            stateModel: mModels.stateModel,
+            shellModel: mModels.shellModel,
+            cacheState: mModels.cacheState,
+            statePaths: mDeps.StatePaths,
+            componentRuntimeSupport: oRuntimeSupport,
+            timeConfigService: mDeps.TimeConfigService,
+            debugLogger: mDeps.DebugLogger,
+            bundleText: mTelemetry.bundleText,
+            emitTelemetry: mTelemetry.emitTelemetry,
+            setGlobalBanner: mHandlers.setGlobalBanner,
+            handleForceReadOnly: mHandlers.handleForceReadOnly,
+            applyFacadeResult: mHandlers.applyFacadeResult,
+            telemetryRuntime: mDeps.TelemetryRuntime
+        };
+    }
+
+    function buildInitListenerOptions(oComponent, mDeps, mModels, mHandlers, mServices, mTelemetry, oRuntimeSupport) {
+        return {
+            component: oComponent,
+            stateModel: mModels.stateModel,
+            shellModel: mModels.shellModel,
+            detailModel: mModels.detailModel,
+            masterDataModel: mModels.masterDataModel,
+            statePaths: mDeps.StatePaths,
+            searchConfig: mServices.searchConfig,
+            componentRuntimeSupport: oRuntimeSupport,
+            timeConfigService: mDeps.TimeConfigService,
+            workflowCoordinator: mDeps.WorkflowCoordinator,
+            bundleText: mTelemetry.bundleText,
+            setGlobalBanner: mHandlers.setGlobalBanner,
+            clearGlobalBanner: mHandlers.clearGlobalBanner,
+            handleForceReadOnly: mHandlers.handleForceReadOnly,
+            runGuardedSave: mHandlers.runGuardedSave,
+            queuePendingNavigationIntent: mHandlers.queuePendingNavigationIntent,
+            clearPendingNavigationIntent: mHandlers.clearPendingNavigationIntent,
+            revertPendingNavigationIntent: mHandlers.revertPendingNavigationIntent,
+            resumePendingNavigationIntent: mHandlers.resumePendingNavigationIntent,
+            restorePendingNavigationIntent: mHandlers.restorePendingNavigationIntent,
+            emitTelemetry: mTelemetry.emitTelemetry,
+            publishTabSignal: mHandlers.publishTabSignal,
+            telemetryRuntime: mDeps.TelemetryRuntime,
+            layoutStateRuntime: mDeps.LayoutStateRuntime,
+            actionContract: mDeps.ActionContract
+        };
+    }
 
     function initializeRouter(oComponent) {
         var oRouter = oComponent && oComponent.getRouter && oComponent.getRouter();
@@ -253,14 +324,39 @@ sap.ui.define([
     }
 
     function attachRuntime(oComponent, mDeps, oRuntimeContext) {
-        var mModels = oRuntimeContext.models;
-        var mHandlers = oRuntimeContext.handlers;
-        var mServices = oRuntimeContext.services;
-        var mTelemetry = oRuntimeContext.telemetry;
+        var mModels = oRuntimeContext.models || oRuntimeContext;
+        var mServices = oRuntimeContext.services || {
+            componentRuntimeSupport: oRuntimeContext.ComponentRuntimeSupport || oRuntimeContext.componentRuntimeSupport,
+            searchConfig: oRuntimeContext.SearchUiConfig || oRuntimeContext.searchConfig
+        };
+        var mTelemetry = oRuntimeContext.telemetry || {
+            timerDefaults: ModelStateRuntime.readOnModel(mModels.stateModel, "/timers", {}) || {},
+            emitTelemetry: oRuntimeContext.emitTelemetry || function () { return null; },
+            bundleText: oRuntimeContext.bundleText || function (sKey) { return String(sKey || ""); }
+        };
+        var mHandlers = oRuntimeContext.handlers || {
+            buildLatestCtx: function () { return oComponent._ctx; },
+            resolveDetailCurrent: function () {
+                return mServices.componentRuntimeSupport && typeof mServices.componentRuntimeSupport.resolveDetailCurrent === "function"
+                    ? mServices.componentRuntimeSupport.resolveDetailCurrent(oComponent)
+                    : {};
+            },
+            applyFacadeResult: function () { return null; },
+            setGlobalBanner: function () { return null; },
+            clearGlobalBanner: function () { return null; },
+            handleForceReadOnly: function () { return null; },
+            runGuardedSave: function () { return Promise.resolve(false); },
+            queuePendingNavigationIntent: function () { return null; },
+            clearPendingNavigationIntent: function () { return null; },
+            revertPendingNavigationIntent: function () { return Promise.resolve(false); },
+            resumePendingNavigationIntent: function () { return Promise.resolve(false); },
+            restorePendingNavigationIntent: function () { return Promise.resolve(false); },
+            publishTabSignal: function () { return null; }
+        };
         var oRuntimeSupport = mServices.componentRuntimeSupport;
 
         mDeps.ComponentPollingRuntime.createHeartbeatManager(
-            ComponentRuntimeOptionsFactory.buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
+            buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
         );
         mDeps.ComponentPollingRuntime.createSupportManagers({
             component: oComponent,
@@ -268,21 +364,37 @@ sap.ui.define([
             managers: mDeps.managers
         });
         mDeps.ComponentAutosaveRuntime.createAutoSaveManager(
-            ComponentRuntimeOptionsFactory.buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
+            buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
         );
         mDeps.ComponentPollingRuntime.createLockStatusManager(
-            ComponentRuntimeOptionsFactory.buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
+            buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
         );
 
         mDeps.ComponentLockEventsRuntime.attachLockRuntime(
-            ComponentRuntimeOptionsFactory.buildLockRuntimeOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
+            buildLockRuntimeOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
         );
         mDeps.ComponentInitListenersRuntime.attachInitListeners(
-            ComponentRuntimeOptionsFactory.buildInitListenerOptions(oComponent, mDeps, mModels, mHandlers, mServices, mTelemetry, oRuntimeSupport)
+            buildInitListenerOptions(oComponent, mDeps, mModels, mHandlers, mServices, mTelemetry, oRuntimeSupport)
         );
 
         initializeRouter(oComponent);
-        return ComponentNavigationRuntime.createRuntime(oComponent, mModels.stateModel, mDeps.StatePaths);
+        return {
+            queuePendingNavigationIntent: function (oRouteEvent, mIntentOptions) {
+                NavigationIntentService.queuePendingIntent(oComponent, mModels.stateModel, mDeps.StatePaths, oRouteEvent, mIntentOptions);
+            },
+            clearPendingNavigationIntent: function () {
+                NavigationIntentService.clearPendingIntent(mModels.stateModel, mDeps.StatePaths);
+            },
+            revertPendingNavigationIntent: function () {
+                return NavigationIntentService.revertPendingIntent(oComponent, mModels.stateModel, mDeps.StatePaths);
+            },
+            resumePendingNavigationIntent: function () {
+                return NavigationIntentService.resumePendingIntent(oComponent, mModels.stateModel, mDeps.StatePaths);
+            },
+            restorePendingNavigationIntent: function () {
+                return NavigationIntentService.restorePendingIntent(oComponent, mModels.stateModel, mDeps.StatePaths);
+            }
+        };
     }
 
     return {

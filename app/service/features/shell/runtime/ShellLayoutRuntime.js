@@ -1,12 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (LayoutStateRuntime, RootIdRuntime, ModelStateRuntime, ThemeDomRuntime, NavigationContracts, ModelContracts, ModelPathContracts) {
+], function (LayoutStateRuntime, ModelStateRuntime, ThemeDomRuntime, NavigationContracts, ModelContracts, ModelPathContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -18,7 +17,11 @@ sap.ui.define([
         var oShellModel = ModelStateRuntime.model(oController, SHELL_MODEL);
         var sCurrentLayout = LayoutStateRuntime.readLayout(oShellModel, NavigationContracts.LAYOUTS.ONE_COLUMN);
         var sRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-        var sSelectedId = RootIdRuntime.resolveFromStateModel(oStateModel);
+        var sSelectedId = String(
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
+            || ""
+        ).trim();
 
         if (sRouteName === NavigationContracts.ROUTES.SEARCH) {
             return NavigationContracts.LAYOUTS.ONE_COLUMN;

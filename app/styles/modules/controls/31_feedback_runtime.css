@@ -23,7 +23,7 @@
   }
 }
 
-.chkApp .chkFeedbackStrip.sapMMsgStrip {
+.chkApp .chkFeedbackStrip {
   --feedback-current-bg: var(--feedback-info-bg);
   --feedback-current-border: var(--feedback-info-border);
   --feedback-current-glow: var(--feedback-info-glow);
@@ -40,7 +40,7 @@
   transition: border-color 180ms ease, box-shadow 220ms ease, background 220ms ease;
 }
 
-.chkApp .chkFeedbackStrip.sapMMsgStrip::before {
+.chkApp .chkFeedbackStrip::before {
   content: "";
   position: absolute;
   inset: 0 auto 0 0;
@@ -51,8 +51,7 @@
   pointer-events: none;
 }
 
-.chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripSuccess,
-.chkApp .chkFeedbackStrip.chkFeedbackSuccess.sapMMsgStrip {
+.chkApp .chkFeedbackStrip.chkFeedbackSuccess {
   --feedback-current-bg: var(--feedback-success-bg);
   --feedback-current-border: var(--feedback-success-border);
   --feedback-current-glow: var(--feedback-success-glow);
@@ -61,8 +60,7 @@
   box-shadow: 0 12px 24px var(--feedback-success-glow);
 }
 
-.chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripWarning,
-.chkApp .chkFeedbackStrip.chkFeedbackWarning.sapMMsgStrip {
+.chkApp .chkFeedbackStrip.chkFeedbackWarning {
   --feedback-current-bg: var(--feedback-warning-bg);
   --feedback-current-border: var(--feedback-warning-border);
   --feedback-current-glow: var(--feedback-warning-glow);
@@ -71,8 +69,7 @@
   box-shadow: 0 12px 24px var(--feedback-warning-glow);
 }
 
-.chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripError,
-.chkApp .chkFeedbackStrip.chkFeedbackError.sapMMsgStrip {
+.chkApp .chkFeedbackStrip.chkFeedbackError {
   --feedback-current-bg: var(--feedback-error-bg);
   --feedback-current-border: var(--feedback-error-border);
   --feedback-current-glow: var(--feedback-error-glow);
@@ -81,44 +78,12 @@
   box-shadow: 0 12px 24px var(--feedback-error-glow);
 }
 
-.chkApp .chkFeedbackStrip.sapMMsgStrip .sapMMsgStripMessage,
-.chkApp .chkFeedbackStrip.sapMMsgStrip .sapMMsgStripIcon,
-.chkApp .chkFeedbackStrip.sapMMsgStrip .sapMMsgStripCloseButton {
-  color: var(--feedback-current-text);
-}
-
-.chkApp .chkFeedbackStrip.sapMMsgStrip .sapMMsgStripMessage {
-  font-weight: 650;
-  letter-spacing: 0.01em;
-}
-
-.chkApp .chkFeedbackStrip.sapMMsgStrip .sapMLnk {
-  color: rgba(var(--accent-rgb), 0.96);
-  text-decoration-color: rgba(var(--accent-rgb), 0.5);
-}
-
-html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip {
+html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip {
   animation: chkFeedbackEnter var(--feedback-enter-duration) var(--feedback-enter-ease) both;
 }
 
-.chkApp .chkFeedbackStrip.sapMMessageStrip,
-.chkApp .chkFeedbackError.sapMMessageStrip {
-  border-radius: calc(var(--radius-sm) - 0.1rem);
-  border: 1px solid var(--feedback-info-border);
-  background: var(--feedback-info-bg);
-  color: var(--feedback-info-text);
-  box-shadow: 0 12px 24px var(--feedback-info-glow);
-}
-
-.chkApp .chkFeedbackError.sapMMessageStrip {
-  border-color: var(--feedback-error-border);
-  background: var(--feedback-error-bg);
-  color: var(--feedback-error-text);
-  box-shadow: 0 12px 24px var(--feedback-error-glow);
-}
-
-html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripWarning,
-html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripError {
+html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.chkFeedbackWarning,
+html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.chkFeedbackError {
   animation:
     chkFeedbackEnter var(--feedback-enter-duration) var(--feedback-enter-ease) both,
     chkFeedbackAttention var(--feedback-attention-duration) ease-in-out 1 120ms;
@@ -132,20 +97,16 @@ html:not(.theme-motion-disabled) .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgS
   box-shadow: var(--theme-rail-shadow);
 }
 
-.chkApp .appFeedbackCorrelation .sapMInputBaseContentWrapper {
-  border-radius: 999px;
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .chkApp .chkFeedbackStrip.sapMMsgStrip,
-  .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripWarning,
-  .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripError {
+  .chkApp .chkFeedbackStrip,
+  .chkApp .chkFeedbackStrip.chkFeedbackWarning,
+  .chkApp .chkFeedbackStrip.chkFeedbackError {
     animation: none;
   }
 }
 
-html.theme-motion-disabled .chkApp .chkFeedbackStrip.sapMMsgStrip,
-html.theme-motion-disabled .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripWarning,
-html.theme-motion-disabled .chkApp .chkFeedbackStrip.sapMMsgStrip.sapMMsgStripError {
+html.theme-motion-disabled .chkApp .chkFeedbackStrip,
+html.theme-motion-disabled .chkApp .chkFeedbackStrip.chkFeedbackWarning,
+html.theme-motion-disabled .chkApp .chkFeedbackStrip.chkFeedbackError {
   animation: none;
 }

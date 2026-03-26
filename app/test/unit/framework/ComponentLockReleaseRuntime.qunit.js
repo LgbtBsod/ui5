@@ -44,7 +44,7 @@ sap.ui.define([
         };
 
         assert.deepEqual(ComponentLockReleaseRuntime.readActiveLockPayload(oStateModel), {
-            RootId: "4711",
+            DB_KEY: "4711",
             SessionGuid: "SESSION-1"
         }, "Owned edit lock payload is exposed");
     });

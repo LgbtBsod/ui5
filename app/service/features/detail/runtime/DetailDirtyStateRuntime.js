@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime"
-], function (ModelPathContracts, ModelStateRuntime, ModelContracts, DetailContracts, DetailPersistenceRuntime) {
+], function (ModelPathContracts, ModelStateRuntime, ModelContracts, DetailContracts, MessageKeyConstants, DetailPersistenceRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -24,7 +25,7 @@ sap.ui.define([
         }
 
         ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/state", DetailContracts.STATES.DIRTY);
-        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/messageKey", DetailContracts.PERSISTENCE_DIRTY);
+        ModelStateRuntime.write(oController, STATE_MODEL, "/persistence/messageKey", MessageKeyConstants.VIEW.PERSISTENCE_DIRTY);
     }
 
     return {

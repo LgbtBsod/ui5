@@ -3,14 +3,25 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (Effects, StatePaths, WorkflowContracts, DetailContracts, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Effects, StatePaths, WorkflowContracts, DetailContracts, ModelContracts, MessageKeyConstants) {
     "use strict";
 
     var STATES = DetailContracts.STATES;
-    var TAXONOMY = DetailContracts.TAXONOMY;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.VIEW;
+    var TAXONOMY = Object.freeze({
+        PERMISSION_DENIED: "PERMISSION_DENIED",
+        LOCK_EXPIRED: "LOCK_EXPIRED",
+        LOCK_NOT_OWNED_BY_SESSION: "LOCK_NOT_OWNED_BY_SESSION",
+        LOCK_STOLEN: "LOCK_STOLEN",
+        LOCK_MISSING: "LOCK_MISSING",
+        VERSION_CONFLICT: "VERSION_CONFLICT",
+        VALIDATION_ERROR: "VALIDATION_ERROR",
+        NETWORK_ERROR: "NETWORK_ERROR",
+        TECHNICAL_ERROR: "TECHNICAL_ERROR"
+    });
 
     function upper(vValue) {
         return String(vValue || "").trim().toUpperCase();

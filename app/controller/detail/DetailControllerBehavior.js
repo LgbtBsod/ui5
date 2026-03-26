@@ -6,9 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerCommandContextRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
@@ -195,7 +195,7 @@ sap.ui.define([
         _onDetailMatched: function (oEvent) {
             return Promise.resolve(DetailPageFlow.onMatched(this, oEvent, {
                 applyLayoutState: this._applyLayoutState.bind(this),
-                buildCommandContext: ControllerCommandContextRuntime.buildDefaultCtx.bind(null, this),
+                buildCommandContext: ControllerCommandContextRuntime.buildCtx.bind(null, this),
                 scheduleAttachmentDropZoneBind: this._scheduleAttachmentDropZoneBind.bind(this),
                 validationSummaryPath: StatePaths.VALIDATION_SUMMARY
             })).then(function (vResult) {

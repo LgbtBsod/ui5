@@ -5,8 +5,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailResetRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/UiDecisionCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CanonicalRootKeyRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
@@ -22,8 +22,8 @@ sap.ui.define([
     ModelStateRuntime,
     DetailResetRuntime,
     NavigationIntentService,
-    RootIdRuntime,
-    UiDecisionCoordinator,
+    CanonicalRootKeyRuntime,
+    UiDecisionDefaultHandlers,
     WorkflowCoordinator,
     StatePaths,
     NavigationContracts,
@@ -86,7 +86,7 @@ sap.ui.define([
             });
         },
         confirmDelete: function (oController, mHooks) {
-            return UiDecisionCoordinator.confirmDeleteChecklist({
+            return UiDecisionDefaultHandlers.handlers.confirmDeleteChecklist({
                 controller: oController,
                 armed: !!ModelStateRuntime.read(oController, VIEW_MODEL, "/deleteChecklistConfirmArmed", false),
                 busy: ModelStateRuntime.any(oController, STATE_MODEL, [StatePaths.UI_BUSY_DETAIL, "/lockOperationPending"]),
@@ -126,7 +126,7 @@ sap.ui.define([
     var navigationActions = {
         copyDetailLink: function (oController, mHooks) {
             var oState = ControllerModelRuntime.state(oController);
-            var sId = RootIdRuntime.resolveActiveFromStateModel(oState);
+            var sId = CanonicalRootKeyRuntime.resolveActiveFromStateModel(oState);
             var sHash;
             var sUrl;
             if (!sId || mHooks.isCreateId(sId)) {

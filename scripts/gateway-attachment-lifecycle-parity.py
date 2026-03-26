@@ -27,7 +27,7 @@ def main() -> int:
         return fail('missing CSRF token')
 
     payload = {
-        'RootId': root,
+        'PARENT_KEY': root,
         'FileName': 'parity.txt',
         'MimeType': 'text/plain',
         'Value': base64.b64encode(b'parity').decode('ascii')

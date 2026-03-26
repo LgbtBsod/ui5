@@ -19,8 +19,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, NavigationContracts) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, NavigationContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -28,9 +30,12 @@ sap.ui.define([
     var SHELL_MODEL = MODELS.SHELL;
     var STATE_MODEL = MODELS.STATE;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
-    var DETAIL_CODES = DetailContracts.CODES;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
     var DETAIL_REASONS = DetailContracts.REASONS;
+    var DETAIL_CODES = MessageCodeConstants.DETAIL;
+    var DETAIL_FLOW_CODES = MessageCodeConstants.FLOW;
+    var DETAIL_DETAIL_KEYS = MessageKeyConstants.DETAIL;
+    var DETAIL_VIEW_KEYS = MessageKeyConstants.VIEW;
 
     function SaveDetailUseCase() {
         return {
@@ -105,10 +110,10 @@ sap.ui.define([
             return Promise.resolve(Result.fail({ message: "Create handler unavailable", code: DETAIL_CODES.CREATE_HANDLER_MISSING }));
         }
         if (!bCreate && !oDelta) {
-            return Promise.resolve(Result.ok({ saved: false, skipped: true, reason: DETAIL_CODES.NO_CHANGES }, [
+            return Promise.resolve(Result.ok({ saved: false, skipped: true, reason: DETAIL_FLOW_CODES.NO_CHANGES }, [
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false)
             ].concat(DetailPersistenceRuntime.dirtyEffects(false, {
-                messageKey: DetailContracts.PERSISTENCE_NO_CHANGES,
+                messageKey: DETAIL_VIEW_KEYS.PERSISTENCE_NO_CHANGES,
                 isManualSaveInFlight: false,
                 isAutoSaveInFlight: false,
                 currentWriteRequestId: ""
@@ -146,7 +151,7 @@ sap.ui.define([
                 var oInitialSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
                     DetailSaveRuntime.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot)
                 );
-                var sServerRootId = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.pcct_uuid || oInitialSavedSnapshot.RootKey || oInitialSavedSnapshot.rootKey || oInitialSavedSnapshot.Key || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
+            var sServerRootId = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.pcct_uuid || oInitialSavedSnapshot.DB_KEY || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
                 var pLockAcquire = Promise.resolve(null);
                 if (bCreate && sServerRootId && !CreateSentinel.isCreateId(sServerRootId) && oLock && typeof oLock.acquire === "function" && sSessionGuid) {
                     pLockAcquire = Promise.resolve(oLock.acquire(DetailRuntimePayload.lockRequest({
@@ -181,7 +186,7 @@ sap.ui.define([
                     var oSelectedSnapshot = CloneUtil.clone(oAttachmentSync.selectedSnapshot, {});
                     return writeDetailCache(oCacheWrite, sServerRootId, oSavedSnapshot, mCtx).then(function () {
                         var aEffects = [
-                            Effects.toast(DetailContracts.OBJECT_SAVED, "success"),
+                            Effects.toast(DETAIL_DETAIL_KEYS.OBJECT_SAVED, "success"),
                             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, false),
                             Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
                             Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, CloneUtil.clone(oSavedSnapshot, {}))

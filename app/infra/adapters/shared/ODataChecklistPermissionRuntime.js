@@ -60,7 +60,7 @@ sap.ui.define([
                     canEdit: false,
                     canDelete: false,
                     reasonCode: "INVALID_PERMISSION_TARGET",
-                    message: "RootKey is required for non-create permissions",
+                    message: "DB_KEY is required for non-create permissions",
                     requestedActivity: sActivity
                 }, "", {
                     requestedActivity: sActivity

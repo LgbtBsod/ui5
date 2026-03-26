@@ -5,14 +5,18 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (Effects, ActionContract, StatePaths, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
+], function (Effects, ActionContract, StatePaths, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
-    var DETAIL_CODES = DetailContracts.CODES;
     var DETAIL_MODEL_PATHS = DetailContracts.MODEL_PATHS;
-    var DETAIL_MESSAGE_KEYS = DetailContracts;
+    var DETAIL_CODES = MessageCodeConstants.DETAIL;
+    var DETAIL_FLOW_CODES = MessageCodeConstants.FLOW;
+    var DETAIL_MESSAGE_KEYS = MessageKeyConstants.DETAIL;
+    var DETAIL_VIEW_KEYS = MessageKeyConstants.VIEW;
 
     function buildDiscardEffects(oUiState) {
         var oSnapshot = (oUiState && oUiState.get(MODELS.DETAIL, DETAIL_MODEL_PATHS.BASE)) || {};
@@ -23,7 +27,7 @@ sap.ui.define([
             Effects.modelPatch(MODELS.STATE, StatePaths.PENDING_NAVIGATION_INTENT, null)
         ];
         return aEffects.concat(DetailPersistenceRuntime.dirtyEffects(false, {
-            messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_IDLE,
+            messageKey: DETAIL_VIEW_KEYS.PERSISTENCE_IDLE,
             lastSaveError: null,
             taxonomy: "",
             currentWriteRequestId: "",
@@ -50,7 +54,7 @@ sap.ui.define([
             ]);
             return Object.assign({}, oResult, { effects: aEffects });
         }
-        if (sCode !== DETAIL_CODES.LOCKED_OWN_SESSION && sCode !== DETAIL_CODES.EXPIRED) {
+        if (sCode !== DETAIL_FLOW_CODES.LOCKED_OWN_SESSION && sCode !== DETAIL_CODES.EXPIRED) {
             return oResult;
         }
         sTextKey = sCode === DETAIL_CODES.EXPIRED

@@ -1,8 +1,15 @@
-- ShellMessageKeyConstants -> MessageKeyConstants
-  - why: shell message keys were a subset/proxy of the canonical frontend message-key owner
-- ComponentBootRuntime -> ComponentLifecycleRuntime
-  - why: boot sequencing is lifecycle bootstrap responsibility, not a separate runtime owner
-- ComponentListenerBindingRuntime -> ComponentLockEventsRuntime
-  - why: listener binding was pure wiring and now lives beside canonical lock/runtime binding
-- ComponentNavigationGuardRuntime -> ComponentNavigationGuardDecisionRuntime
-  - why: wrapper only; decision runtime owns the actual route-guard logic
+app/service/runtime/component/ComponentMainServiceRuntime.js -> app/service/framework/ComponentBootstrap.js
+app/service/runtime/component/ComponentModelBootstrap.js -> app/service/framework/ComponentBootstrap.js
+app/service/runtime/component/ComponentGuardedSaveRuntime.js -> app/service/runtime/component/ComponentSaveGuardRuntime.js
+app/service/runtime/component/ComponentRuntimeOptionsFactory.js -> app/service/framework/ComponentBootstrap.js + app/service/runtime/component/ComponentLifecycleRuntime.js
+app/service/runtime/component/ComponentNavigationRuntime.js -> app/service/runtime/component/ComponentLifecycleRuntime.js
+app/service/runtime/component/ComponentInternalRuntimeState.js -> app/service/runtime/component/ComponentModelInitRuntime.js
+app/service/framework/ControllerActionBusyRuntime.js -> app/controller/search/SearchActionBehavior.js
+app/controller/detail/internal/DetailValidationHelperRuntime.js -> app/controller/detail/DetailValidationSummaryRuntime.js
+app/controller/detail/DetailActionDialogRuntime.js -> app/controller/detail/DetailControllerRuntime.js
+app/controller/detail/DetailAdaptiveViewportRuntime.js -> app/controller/detail/DetailControllerRuntime.js
+app/service/framework/execution/behavior/NavigationBehaviorHelpers.js -> app/service/framework/behavior/NavigationDefaultHandlers.js
+app/service/framework/execution/behavior/UiDecisionBehaviorHelpers.js -> app/service/framework/behavior/UiDecisionDefaultHandlers.js
+app/service/framework/execution/UiDecisionCoordinator.js -> direct consumers + app/service/framework/behavior/UiDecisionDefaultHandlers.js
+app/service/framework/CtxModelResolver.js -> app/service/framework/CtxRuntimeFactory.js
+app/service/framework/CtxCacheRuntimeFactory.js -> app/service/framework/CtxRuntimeFactory.js

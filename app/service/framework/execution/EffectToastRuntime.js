@@ -1,8 +1,8 @@
 sap.ui.define([
     "sap/m/MessageToast",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectTextResolver"
-], function (MessageToast, EffectFeedbackContracts, EffectTextResolver) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime"
+], function (MessageToast, EffectFeedbackContracts, ControllerTextRuntime) {
     "use strict";
 
     var CLASSES = EffectFeedbackContracts.CLASSES;
@@ -11,7 +11,7 @@ sap.ui.define([
     var mToastTimeline = {};
 
     function resolveTextKey(oController, oEffect, oOptions, sFallbackKey) {
-        var fnResolveTextKey = (oOptions && oOptions.resolveTextKey) || EffectTextResolver.resolve;
+        var fnResolveTextKey = (oOptions && oOptions.resolveTextKey) || ControllerTextRuntime.resolve;
         var oPayload = oEffect && oEffect.payload;
         var sKey = (oEffect && oEffect.textKey) || (oPayload && oPayload.messageKey) || sFallbackKey || "";
         return sKey ? fnResolveTextKey(sKey, oController) : "";
