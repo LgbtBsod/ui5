@@ -9,22 +9,10 @@ const TARGET_DIRS = [
   path.join(ROOT, 'app', 'service', 'domain'),
   path.join(ROOT, 'app', 'service', 'features')
 ];
-const ALLOWLIST = new Set([
-  'app/ui5-background-runtime.js',
-  'app/ui5-bootstrap-runtime.js',
-  'app/service/framework/ThemeDomRuntime.js',
-  'app/service/features/shell/runtime/AppShellDomRuntime.js',
-  'app/service/framework/SemanticDomRuntime.js',
-  'app/controller/detail/AttachmentDropZoneRuntime.js',
-  'app/controller/detail/DetailControllerRuntime.js',
-  'app/controller/detail/DetailInfoCardFactory.js',
-  'app/service/features/detail/runtime/DetailRowBehaviorRuntime.js',
-  'app/service/features/search/runtime/SearchReturnRediscoveryRuntime.js',
-  'app/service/features/search/runtime/SearchSelectionRuntime.js',
-  'app/service/features/search/runtime/SearchViewportRuntime.js',
-  'app/service/features/shell/runtime/ShellLayoutRuntime.js',
-  'app/service/features/shell/runtime/ShellViewportRuntime.js'
-]);
+const allowlistPath = path.join(ROOT, 'scripts', 'dom-hack-allowlist.json');
+const allowlist = fs.existsSync(allowlistPath) ? JSON.parse(fs.readFileSync(allowlistPath, 'utf8')) : {};
+const ALLOWLIST = new Set(Object.keys(allowlist));
+const MAX_ALLOWLIST_FILES = 14;
 const PATTERNS = [
   { regex: /\bquerySelector(All)?\s*\(/g, label: 'querySelector' },
   { regex: /\bclosest\s*\(/g, label: 'closest' },
@@ -64,6 +52,21 @@ function walk(dir) {
 }
 
 TARGET_DIRS.forEach(walk);
+
+Object.keys(allowlist).forEach((relative) => {
+  const reason = String(allowlist[relative] || '').trim();
+  if (!reason) {
+    issues.push(`${relative} missing DOM quarantine reason`);
+    return;
+  }
+  if (reason.length < 24) {
+    issues.push(`${relative} DOM quarantine reason is too vague; document why public UI5 APIs are insufficient`);
+  }
+});
+
+if (Object.keys(allowlist).length > MAX_ALLOWLIST_FILES) {
+  issues.push(`DOM allowlist grew to ${Object.keys(allowlist).length} files; keep quarantine at or below ${MAX_ALLOWLIST_FILES}`);
+}
 
 if (issues.length) {
   console.log(['FAIL dom-hack-gate', ...issues.map((issue) => `- ${issue}`)].join('\n'));

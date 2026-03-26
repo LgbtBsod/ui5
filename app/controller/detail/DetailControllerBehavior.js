@@ -3,7 +3,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPageFlow",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailViewStateFactory",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
@@ -23,7 +22,6 @@ sap.ui.define([
     DetailFacade,
     DetailPageFlow,
     DetailViewStateFactory,
-    ControllerRouteRuntime,
     StatePaths,
     ControllerModelRuntime,
     ControllerViewStateRuntime,
@@ -43,6 +41,48 @@ sap.ui.define([
 
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL = MODELS.DETAIL;
+
+    function getRouter(oController) {
+        return oController && oController.getRouter ? oController.getRouter() : null;
+    }
+
+    function getRouteRegistry(oController) {
+        oController._detailRouteRegistry = oController._detailRouteRegistry || [];
+        return oController._detailRouteRegistry;
+    }
+
+    function attachRouteHandlers(oController, aRoutes) {
+        var oRouter = getRouter(oController);
+        if (!oRouter || !Array.isArray(aRoutes)) {
+            return;
+        }
+        aRoutes.forEach(function (oRouteConfig) {
+            var sName = String(oRouteConfig && oRouteConfig.name || "").trim();
+            var fnHandler = oRouteConfig && oRouteConfig.handler;
+            var oRoute;
+            if (!sName || typeof fnHandler !== "function" || !oRouter.getRoute) {
+                return;
+            }
+            oRoute = oRouter.getRoute(sName);
+            if (!oRoute || !oRoute.attachPatternMatched) {
+                return;
+            }
+            oRoute.attachPatternMatched(fnHandler, oController);
+            getRouteRegistry(oController).push({
+                route: oRoute,
+                handler: fnHandler
+            });
+        });
+    }
+
+    function detachRouteHandlers(oController) {
+        getRouteRegistry(oController).forEach(function (oEntry) {
+            if (oEntry.route && oEntry.route.detachPatternMatched) {
+                oEntry.route.detachPatternMatched(oEntry.handler, oController);
+            }
+        });
+        oController._detailRouteRegistry = [];
+    }
 
     function syncSemanticRegions(oController) {
         SemanticDomRuntime.syncControllerTarget(oController, "detailControlActionRow", {
@@ -119,7 +159,7 @@ sap.ui.define([
             this._fnDetailResizeSync = null;
             this._oAdaptiveViewportResizeObserver = null;
             this._fnAdaptiveViewportSync = null;
-            ControllerRouteRuntime.attachMatched(this, [
+            attachRouteHandlers(this, [
                 { name: NavigationContracts.ROUTES.DETAIL, handler: this._onDetailMatched },
                 { name: NavigationContracts.ROUTES.SEARCH, handler: this._onDetailRouteLeave },
                 { name: NavigationContracts.ROUTES.ANALYTICS, handler: this._onDetailRouteLeave }
@@ -151,7 +191,7 @@ sap.ui.define([
             if (this._oStateValidationModel && this._fnStateValidationChange && this._oStateValidationModel.detachPropertyChange) {
                 this._oStateValidationModel.detachPropertyChange(this._fnStateValidationChange, this);
             }
-            ControllerRouteRuntime.detachAllMatched(this);
+            detachRouteHandlers(this);
             this._iAttachmentDropZoneBindTimer = SchedulingRuntime.clearTimer(this._iAttachmentDropZoneBindTimer);
             this._iDetailPhaseLoadTimer = SchedulingRuntime.clearTimer(this._iDetailPhaseLoadTimer);
             this._clearLocationValueHelpSearchTimer();
@@ -166,6 +206,7 @@ sap.ui.define([
             this._fnAdaptiveViewportSync = null;
             this._oStateValidationModel = null;
             this._fnStateValidationChange = null;
+            this._detailRouteRegistry = null;
         },
 
         _onDetailRouteLeave: function () {

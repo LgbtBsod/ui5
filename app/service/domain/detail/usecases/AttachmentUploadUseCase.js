@@ -77,7 +77,7 @@ sap.ui.define([
     }
 
     function execute(mInput, mCtx) {
-        var sDbKey = String((mInput && (mInput.dbKey || mInput.rootId)) || "").trim();
+        var sDbKey = String((mInput && (mInput.dbKey || mInput.DB_KEY || mInput.rootId)) || "").trim();
         if (!sDbKey && !CreateSentinel.isCreateId(sDbKey)) {
             return Promise.resolve(Result.fail({
                 code: DETAIL_MESSAGE_CODES.INVALID_INPUT,

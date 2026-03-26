@@ -6,12 +6,15 @@ const path = require("path");
 const ROOT = process.cwd();
 const TARGETS = [
   path.join(ROOT, "app", "controller"),
-  path.join(ROOT, "app", "service", "domain")
+  path.join(ROOT, "app", "service", "domain"),
+  path.join(ROOT, "app", "service", "features")
 ];
 const ALLOWLIST = new Set([]);
 const PATTERNS = [
   { regex: /message\s*:\s*"[^"]*[A-Za-z][^"]*\s+[A-Za-z][^"]*"/, label: "raw message text" },
-  { regex: /fallback\s*:\s*"[^"]*[A-Za-z][^"]*\s+[A-Za-z][^"]*"/, label: "raw fallback text" }
+  { regex: /fallback\s*:\s*"[^"]*[A-Za-z][^"]*\s+[A-Za-z][^"]*"/, label: "raw fallback text" },
+  { regex: /\b(?:ControllerTextRuntime\.)?getText\s*\([^)]*,\s*"[^"]+"\s*,\s*[^,)]*(?:,\s*"[^"]*[A-Za-z][^"]*")\s*\)/, label: "raw i18n fallback text" },
+  { regex: /\bfnGetText\s*\(\s*"[^"]+"\s*,\s*[^,)]*(?:,\s*"[^"]*[A-Za-z][^"]*")\s*\)/, label: "raw i18n fallback text" }
 ];
 const issues = [];
 
@@ -36,7 +39,7 @@ function walk(dir) {
         return;
       }
       PATTERNS.forEach((pattern) => {
-        if (pattern.regex.test(line) && !/messageKey|getText|i18n|^[^"]*"[^"]*[A-Z0-9_]{3,}[^"]*"/.test(line)) {
+        if (pattern.regex.test(line) && !/messageKey|i18n|^[^"]*"[^"]*[A-Z0-9_]{3,}[^"]*"/.test(line)) {
           issues.push(`${location} ${pattern.label} outside i18n/message-key owners`);
         }
       });

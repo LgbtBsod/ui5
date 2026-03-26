@@ -4,7 +4,12 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = process.cwd();
-const bannedFiles = [];
+const bannedFiles = [
+  "app/service/framework/ControllerRouteRuntime.js",
+  "app/service/framework/FeedbackCoordinator.js",
+  "app/controller/search/SearchCommandPolicy.js",
+  "app/controller/detail/DetailCommandPolicy.js"
+];
 const scanDirs = [
   path.join(ROOT, "app", "controller"),
   path.join(ROOT, "app", "service", "framework"),

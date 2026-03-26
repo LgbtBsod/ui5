@@ -1,7 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailLayoutRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailChecklistStateBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailChecklistRowBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailInfoCardFactory",
@@ -10,16 +9,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailSelectedFieldRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts"
-], function (DialogOrchestrator, DetailLayoutRuntime, DetailCommandPolicy, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardFactory, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, ModelPathContracts, StatePaths, FeedbackCoordinator, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
+], function (DialogOrchestrator, DetailLayoutRuntime, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardFactory, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, ModelPathContracts, StatePaths, FeedbackDefaultHandlers, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -69,7 +68,13 @@ sap.ui.define([
         },
 
         _showToast: function (sTextKey) {
-            return FeedbackCoordinator.showToast(this, sTextKey, [], "info");
+            return FeedbackDefaultHandlers.handlers.showToast({
+                controller: this,
+                textKey: sTextKey,
+                args: [],
+                severity: "info",
+                fallback: sTextKey
+            });
         },
 
         _applyLayoutState: function (sLayout, mOptions) {

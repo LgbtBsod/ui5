@@ -1,10 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/BindingContextReader",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBehaviorRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts"
-], function (BindingContextReader, DetailCommandPolicy, DetailInfoCardLayoutRuntime, DetailRowBehaviorRuntime, OperationSourceContracts) {
+], function (BindingContextReader, DetailInfoCardLayoutRuntime, DetailRowBehaviorRuntime, OperationSourceContracts) {
     "use strict";
 
     var DETAIL_SOURCES = OperationSourceContracts.DETAIL;
@@ -31,10 +30,17 @@ sap.ui.define([
         return sKind === "barrier" ? "barrier" : "check";
     }
 
+    function runDetailCommand(oController, sMethod, mInput) {
+        if (!oController || typeof oController._runDetailCommand !== "function") {
+            return Promise.resolve(false);
+        }
+        return oController._runDetailCommand(sMethod, mInput || {});
+    }
+
     function buildHooks(oController) {
         return {
             withViewFlag: function (sPath, fnTask) { return oController._withViewFlag(sPath, fnTask); },
-            rowOps: function (mInput) { return DetailCommandPolicy.rowOps(oController, mInput); },
+            rowOps: function (mInput) { return runDetailCommand(oController, "rowOps", mInput); },
             resolveRowInput: function (oEvent) { return oController._resolveRowInput(oEvent); },
             rememberDialogReturnFocus: function (sDialogKey, oSource) { oController._rememberDialogReturnFocus(sDialogKey, oSource); },
             writeCards: function (aCards, sDraggedKey) { DetailInfoCardLayoutRuntime.writeCards(oController, aCards, sDraggedKey); },
@@ -70,10 +76,10 @@ sap.ui.define([
         onToggleInfoCardPin: function (oEvent) { DetailRowBehaviorRuntime.onToggleInfoCardPin(this, oEvent, resolveHooks(this)); },
         onInfoCardPress: function (oEvent, sCardKey, oItem) { DetailRowBehaviorRuntime.onInfoCardPress(this, oEvent, sCardKey, oItem, resolveHooks(this)); },
         onInfoCardKeyDown: function (oEvent, sCardKey) { DetailRowBehaviorRuntime.onInfoCardKeyDown(this, oEvent, sCardKey, resolveHooks(this)); },
-        onConfirmTestUser: function () { DetailCommandPolicy.resolveConflict(this, { intent: DETAIL_SOURCES.TEST_USER }); },
-        onSelectionToggle: function () { DetailCommandPolicy.rowOps(this, { op: "selectionToggle" }); },
+        onConfirmTestUser: function () { runDetailCommand(this, "resolveConflict", { intent: DETAIL_SOURCES.TEST_USER }); },
+        onSelectionToggle: function () { runDetailCommand(this, "rowOps", { op: "selectionToggle" }); },
         onRowValueChange: function (oEvent) { this._applyDetailFieldChange(oEvent, { property: "value", parameter: "value" }); },
         onRowStateChange: function (oEvent) { this._applyDetailFieldChange(oEvent, { property: "state", parameter: "state" }); },
-        onDialogClosed: function () { DetailCommandPolicy.resolveConflict(this, { intent: DETAIL_SOURCES.DIALOG_CLOSED }); }
+        onDialogClosed: function () { runDetailCommand(this, "resolveConflict", { intent: DETAIL_SOURCES.DIALOG_CLOSED }); }
     };
 });

@@ -349,6 +349,9 @@ sap.ui.define([
     }
 
     return BaseController.extend("PRODUCTION_CONTROL_CHECKLIST.controller.Search", {
+        _runSearchCommand: function (sMethod, mInput) {
+            return executeSearchCommand(this, sMethod, mInput);
+        },
         _withActionBusy: function (sPath, fnAction) {
             return SearchActionBehavior.withActionBusy(this, sPath, fnAction);
         },

@@ -1,20 +1,35 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
-], function (FeedbackCoordinator, FeedbackConstants) {
+], function (FeedbackDefaultHandlers, FeedbackConstants) {
     "use strict";
 
     return {
         showI18nToast: function (sI18nKey, aArgs) {
-            return FeedbackCoordinator.showToast(this, sI18nKey, aArgs || [], FeedbackConstants.SEVERITY.INFO);
+            return FeedbackDefaultHandlers.handlers.showToast({
+                controller: this,
+                textKey: sI18nKey,
+                args: aArgs || [],
+                severity: FeedbackConstants.SEVERITY.INFO,
+                fallback: sI18nKey
+            });
         },
 
         showI18nError: function (sI18nKey, aArgs) {
-            return FeedbackCoordinator.showRouteMessage(this, FeedbackConstants.SEVERITY.ERROR, sI18nKey, aArgs || [], sI18nKey);
+            return FeedbackDefaultHandlers.handlers.showRouteMessage({
+                controller: this,
+                textKey: sI18nKey,
+                args: aArgs || [],
+                severity: FeedbackConstants.SEVERITY.ERROR,
+                fallback: sI18nKey
+            });
         },
 
         applyUseCaseEffects: function (oResult) {
-            return FeedbackCoordinator.applyUseCaseResult(this, oResult);
+            return FeedbackDefaultHandlers.handlers.applyUseCaseResult({
+                controller: this,
+                result: oResult
+            });
         },
 
         executeFacadeMethod: function (oFacade, sMethod, mInput, mCtx) {

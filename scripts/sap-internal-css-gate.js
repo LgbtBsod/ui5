@@ -6,6 +6,7 @@ const path = require('path');
 const ROOT = process.cwd();
 const allowlistPath = path.join(ROOT, 'scripts', 'sap-internal-css-allowlist.json');
 const allowlist = fs.existsSync(allowlistPath) ? JSON.parse(fs.readFileSync(allowlistPath, 'utf8')) : {};
+const MAX_ALLOWLIST_FILES = 14;
 const issues = [];
 
 function walk(dir) {
@@ -39,6 +40,21 @@ function walk(dir) {
 }
 
 walk(path.join(ROOT, 'app', 'styles'));
+
+Object.keys(allowlist).forEach((relative) => {
+  const reason = String(allowlist[relative] || '').trim();
+  if (!reason) {
+    issues.push(`${relative} missing quarantine reason for private selector allowlist`);
+    return;
+  }
+  if (reason.length < 24) {
+    issues.push(`${relative} quarantine reason is too vague; document the remaining SAP dependency`);
+  }
+});
+
+if (Object.keys(allowlist).length > MAX_ALLOWLIST_FILES) {
+  issues.push(`private selector allowlist grew to ${Object.keys(allowlist).length} files; keep quarantine at or below ${MAX_ALLOWLIST_FILES}`);
+}
 
 if (issues.length) {
   console.log(['FAIL sap-internal-css-gate', ...issues.map((issue) => `- ${issue}`)].join('\n'));

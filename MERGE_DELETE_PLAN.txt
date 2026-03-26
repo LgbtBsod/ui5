@@ -1,46 +1,30 @@
-Merge/Delete Plan
+2026-03-27 Merge / Delete Plan
 
-Completed:
-- `app/service/runtime/component/ComponentMainServiceRuntime.js` -> `app/service/framework/ComponentBootstrap.js`
-- `app/service/runtime/component/ComponentModelBootstrap.js` -> `app/service/framework/ComponentBootstrap.js`
-- `app/service/runtime/component/ComponentGuardedSaveRuntime.js` -> `app/service/runtime/component/ComponentSaveGuardRuntime.js`
-- `app/service/runtime/component/ComponentRuntimeOptionsFactory.js` -> `app/service/framework/ComponentBootstrap.js` + `app/service/runtime/component/ComponentLifecycleRuntime.js`
-- `app/service/runtime/component/ComponentNavigationRuntime.js` -> `app/service/runtime/component/ComponentLifecycleRuntime.js`
-- `app/service/runtime/component/ComponentInternalRuntimeState.js` -> `app/service/runtime/component/ComponentModelInitRuntime.js`
-- `app/service/framework/ControllerActionBusyRuntime.js` -> `app/controller/search/SearchActionBehavior.js`
-- `app/controller/detail/internal/DetailValidationHelperRuntime.js` -> `app/controller/detail/DetailValidationSummaryRuntime.js`
-- `app/controller/detail/DetailActionDialogRuntime.js` -> `app/controller/detail/DetailControllerRuntime.js`
-- `app/controller/detail/DetailAdaptiveViewportRuntime.js` -> `app/controller/detail/DetailControllerRuntime.js`
-- `app/service/framework/execution/behavior/NavigationBehaviorHelpers.js` -> `app/service/framework/behavior/NavigationDefaultHandlers.js`
-- `app/service/framework/execution/behavior/UiDecisionBehaviorHelpers.js` -> `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
-- `app/service/framework/execution/UiDecisionCoordinator.js` -> direct consumer use of `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
-- `app/service/framework/CtxModelResolver.js` -> `app/service/framework/CtxRuntimeFactory.js`
-- `app/service/framework/CtxCacheRuntimeFactory.js` -> `app/service/framework/CtxRuntimeFactory.js`
+- Final hardening addendum:
+  - deleted `app/controller/search/SearchCommandPolicy.js`
+  - deleted `app/controller/detail/DetailCommandPolicy.js`
+  - focus was targeted wrapper removal plus raw fallback removal and stricter CSS/DOM quarantine governance
 
-Why:
-- first two were bootstrap pass-through wrappers
-- third duplicated the save-guard owner with a one-function delegate
-- fourth only assembled runtime option objects for two direct consumers
-- fifth only forwarded navigation intent calls for one direct consumer
-- sixth only seeded internal runtime state for one direct consumer
-- seventh only wrapped a single busy-flag helper for one direct consumer
-- eighth only hosted validation-summary-local helpers for one direct consumer
-- ninth only hosted controller-local dialog focus helpers for one direct consumer
-- tenth only hosted controller-local adaptive viewport syncing for one direct consumer
-- eleventh only re-exported navigation helpers for one direct consumer
-- twelfth only hosted ui-decision helper calls for one direct consumer
-- thirteenth only added an unused ui-decision dispatch layer over the same canonical owner
-- last two were single-consumer context assembly shims
-
-Remaining high-value candidates:
-- `app/controller/detail/*`
-- `app/controller/search/*`
-- pass-through `app/service/framework/*`
-Completed:
-- AppShellCoordinator.js -> App.controller.js
-- AttachmentValueCodec.js -> AttachmentRepoRuntime.js
-Completed in final production-readiness pass:
-- app/service/framework/Ui5RuntimeFacade.js -> direct sap/ui/core/Core usage in consuming owners
-  Why: thin proxy over stable public UI5 Core API with no boundary value.
-- app/service/runtime/component/ComponentBootstrapDependencyBuilder.js -> app/service/framework/ComponentBootstrap.js
-  Why: single-caller dependency grouping wrapper with no stable semantic boundary.
+- Deleted files:
+  - `app/service/framework/ControllerRouteRuntime.js`
+  - `app/service/framework/FeedbackCoordinator.js`
+  - `app/controller/search/SearchCommandPolicy.js`
+  - `app/controller/detail/DetailCommandPolicy.js`
+- Merged files:
+  - `app/service/framework/ControllerRouteRuntime.js` -> `app/controller/analytics/AnalyticsLifecycleBehavior.js`
+  - `app/service/framework/ControllerRouteRuntime.js` -> `app/controller/detail/DetailControllerBehavior.js`
+  - `app/service/framework/ControllerRouteRuntime.js` -> `app/controller/search/SearchLifecycleBehavior.js`
+  - `app/service/framework/FeedbackCoordinator.js` -> `app/service/framework/behavior/FeedbackDefaultHandlers.js`
+  - `app/service/framework/FeedbackCoordinator.js` -> `app/service/framework/execution/behavior/FeedbackBehaviorHelpers.js`
+  - `app/controller/search/SearchCommandPolicy.js` -> `app/controller/Search.controller.js`
+  - `app/controller/search/SearchCommandPolicy.js` -> `app/controller/search/SearchActionBehavior.js`
+  - `app/controller/search/SearchCommandPolicy.js` -> `app/controller/search/SearchLifecycleBehavior.js`
+  - `app/controller/search/SearchCommandPolicy.js` -> `app/controller/search/internal/SearchAnalyticsIntentBehavior.js`
+  - `app/controller/detail/DetailCommandPolicy.js` -> `app/controller/detail/DetailControllerRuntime.js`
+  - `app/controller/detail/DetailCommandPolicy.js` -> `app/controller/detail/DetailInteractionRuntime.js`
+  - `app/controller/detail/DetailCommandPolicy.js` -> `app/controller/detail/DetailPageFlow.js`
+  - `app/controller/detail/DetailCommandPolicy.js` -> `app/controller/detail/internal/DetailChecklistRowBehavior.js`
+  - `app/controller/detail/DetailCommandPolicy.js` -> `app/controller/detail/internal/DetailChecklistStateBehavior.js`
+  - `app/controller/detail/DetailCommandPolicy.js` -> `app/service/features/detail/runtime/AttachmentUploadRuntime.js`
+- Remaining candidates:
+  - `app/service/framework/ControllerModelRuntime.js`

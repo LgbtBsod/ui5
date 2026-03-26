@@ -5,6 +5,7 @@ import json
 import mimetypes
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import unquote
 
 from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from sqlalchemy import asc, desc
@@ -291,6 +292,38 @@ def _normalize_attachment_key(value: str) -> str:
     return str(uuid.uuid4())
 
 
+def _decode_slug(value: str | None) -> str:
+    return unquote(str(value or "").strip())
+
+
+def _media_upload_payload(
+    db_key: str,
+    parent_key: str,
+    folder_key: str,
+    category_key: str,
+    file_name: str,
+    mime_type: str,
+    description: str,
+    body: bytes,
+    attachment_key: str = "",
+) -> dict:
+    return {
+        "AttachmentKey": attachment_key,
+        "DB_KEY": db_key,
+        "PARENT_KEY": parent_key,
+        "FolderKey": folder_key or parent_key or db_key,
+        "CategoryKey": category_key or "GEN",
+        "Type": category_key or "GEN",
+        "FileName": file_name,
+        "Name": file_name,
+        "MimeType": mime_type or "application/octet-stream",
+        "Description": description,
+        "FileSize": len(body or b""),
+        "FileSizeContent": len(body or b""),
+        "_media_content": body or b"",
+    }
+
+
 def _pick_attachment_text(payload: dict | None, *keys) -> str:
     return _pick_text(payload, *keys)
 
@@ -303,6 +336,7 @@ def _normalize_attachment_payload_rows(items, root_hex: str) -> list[dict]:
         normalized.append({
             "AttachmentKey": _pick_attachment_text(item, "AttachmentKey", "Key", "key"),
             "DB_KEY": _pick_attachment_text(item, "DB_KEY", "Key", "key"),
+            "EditMode": _pick_attachment_text(item, "edit_mode", "EditMode"),
             "PARENT_KEY": _boundary_parent_key(item) or root_hex,
             "FolderKey": _pick_attachment_text(item, "FolderKey", "folder_key") or (_boundary_parent_key(item) or root_hex),
             "CategoryKey": _pick_attachment_text(item, "CategoryKey", "category_key", "Type", "type") or "GEN",
@@ -311,49 +345,83 @@ def _normalize_attachment_payload_rows(items, root_hex: str) -> list[dict]:
             "Description": _pick_attachment_text(item, "Description", "description", "Desc", "desc"),
             "FileSize": _coerce_int(_pick_first_present(item, "FileSize", "file_size", "FileSizeContent", "filesize_content"), 0),
             "ContentBase64": _pick_attachment_text(item, "ContentBase64", "content_base64", "_fileBase64"),
+            "MediaContent": _pick_first_present(item, "_media_content"),
             "DocumentHandle": _pick_attachment_text(item, "DocumentHandle", "document_handle"),
             "DownloadUrl": _pick_attachment_text(item, "DownloadUrl", "download_url"),
         })
     return normalized
 
 
-def _apply_save_attachments(db: Session, root: ChecklistRoot, items) -> None:
+def _normalize_attachment_category_key(db: Session, category_key: str) -> str:
+    resolved = str(category_key or "GEN").strip() or "GEN"
+    category_item = db.query(DictionaryItem).filter(DictionaryItem.domain == "ATF_CAT", DictionaryItem.key == resolved).first()
+    return resolved if category_item else "GEN"
+
+
+def _persist_attachment_media(db: Session, root: ChecklistRoot, row: dict, media_content: bytes) -> AttachmentEntry:
+    file_name = str(row.get("FileName") or "").strip()
+    if not file_name or not isinstance(media_content, (bytes, bytearray)) or not media_content:
+        raise ValueError("INVALID_ATTACHMENT_PAYLOAD")
+    resolved_mime_type, validation_error = _validate_attachment_upload(db, file_name, row.get("MimeType") or "", len(media_content))
+    if validation_error:
+        raise RuntimeError(validation_error)
+
+    attachment_id = _normalize_attachment_key(row.get("AttachmentKey") or "")
+    file_path = _UPLOAD_DIR / attachment_id
+    file_path.write_bytes(bytes(media_content))
+    now = now_utc()
+    entry = AttachmentEntry(
+        id=attachment_id,
+        root_id=root.id,
+        folder_key=str(row.get("FolderKey") or _hex(root.id)).strip() or _hex(root.id),
+        category_key=_normalize_attachment_category_key(db, row.get("CategoryKey") or "GEN"),
+        file_name=file_name,
+        mime_type=resolved_mime_type,
+        file_size=len(media_content),
+        storage_path=str(file_path),
+        created_on=now,
+        changed_on=now,
+    )
+    db.add(entry)
+    return entry
+
+
+def _apply_attachment_metadata(entry: AttachmentEntry, row: dict, db: Session) -> None:
+    if row.get("Description") is not None:
+        entry.description = str(row.get("Description") or "").strip()
+    if row.get("CategoryKey"):
+        entry.category_key = _normalize_attachment_category_key(db, row.get("CategoryKey"))
+    if row.get("FileName"):
+        entry.file_name = str(row.get("FileName") or entry.file_name or "").strip()
+    entry.changed_on = now_utc()
+
+
+def _apply_save_attachments(db: Session, root: ChecklistRoot, items, allow_media_content: bool = False) -> None:
     rows = _normalize_attachment_payload_rows(items, _hex(root.id))
     if not rows:
         return
     for row in rows:
-        file_name = row.get("FileName") or ""
-        raw_value = row.get("ContentBase64") or ""
-        if not file_name or not raw_value:
-            continue
-        try:
-            payload = base64.b64decode(raw_value, validate=True)
-        except Exception:
-            raise ValueError("INVALID_ATTACHMENT_PAYLOAD")
-        resolved_mime_type, validation_error = _validate_attachment_upload(db, file_name, row.get("MimeType") or "", len(payload))
-        if validation_error:
-            raise RuntimeError(validation_error)
-        category_key = str(row.get("CategoryKey") or "GEN").strip() or "GEN"
-        category_item = db.query(DictionaryItem).filter(DictionaryItem.domain == "ATF_CAT", DictionaryItem.key == category_key).first()
-        if not category_item:
-            category_key = "GEN"
+        s_mode = str(row.get("EditMode") or "U").strip().upper() or "U"
         attachment_id = _normalize_attachment_key(row.get("AttachmentKey") or "")
-        file_path = _UPLOAD_DIR / attachment_id
-        file_path.write_bytes(payload)
-        now = now_utc()
-        entry = AttachmentEntry(
-            id=attachment_id,
-            root_id=root.id,
-            folder_key=str(row.get("FolderKey") or _hex(root.id)).strip() or _hex(root.id),
-            category_key=category_key,
-            file_name=file_name,
-            mime_type=resolved_mime_type,
-            file_size=len(payload),
-            storage_path=str(file_path),
-            created_on=now,
-            changed_on=now,
-        )
-        db.add(entry)
+        entry = db.query(AttachmentEntry).filter(AttachmentEntry.id == attachment_id, AttachmentEntry.root_id == root.id).first() if row.get("AttachmentKey") else None
+        media_content = row.get("MediaContent")
+        if row.get("ContentBase64"):
+            raise ValueError("ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN")
+
+        if s_mode == "D":
+            if entry:
+                path = Path(entry.storage_path or "")
+                if path.exists():
+                    path.unlink()
+                db.delete(entry)
+            continue
+
+        if allow_media_content and media_content:
+            _persist_attachment_media(db, root, row, media_content)
+            continue
+
+        if entry:
+            _apply_attachment_metadata(entry, row, db)
 
 
 
@@ -2384,8 +2452,10 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
     _apply_save_barriers(db, root, body.get("barriers"))
     try:
         _apply_save_attachments(db, root, body.get("attachments"))
-    except ValueError:
+    except ValueError as ex:
         db.rollback()
+        if str(ex) == "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN":
+            return _err(400, "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN", "Attachment upload must use media stream endpoint")
         return _err(400, "INVALID_ATTACHMENT_PAYLOAD", "Attachment payload is invalid")
     except RuntimeError as ex:
         db.rollback()
@@ -2655,14 +2725,50 @@ def attachment_value(entity_key: str, db: Session = Depends(get_db)):
 
 
 @router.post(f"{SERVICE_ROOT}/AttachmentSet")
-def attachment_create(payload: dict, db: Session = Depends(get_db)):
-    root, err = _load_root_or_error(db, _boundary_root_key(payload, payload.get("PARENT_KEY")))
+async def attachment_create(
+    request: Request,
+    db_key: str | None = Header(None, alias="X-DB-Key"),
+    parent_key: str | None = Header(None, alias="X-Parent-Key"),
+    folder_key: str | None = Header(None, alias="X-Folder-Key"),
+    category_key: str | None = Header(None, alias="X-Category-Key"),
+    attachment_key: str | None = Header(None, alias="X-Attachment-Key"),
+    description: str | None = Header(None, alias="X-Description"),
+    file_name: str | None = Header(None, alias="X-File-Name"),
+    slug: str | None = Header(None, alias="Slug"),
+    content_type: str | None = Header(None),
+    db: Session = Depends(get_db)
+):
+    body = {}
+    raw_body = await request.body()
+
+    if not raw_body:
+        try:
+            body = await request.json()
+        except Exception:
+            body = {}
+
+    if raw_body:
+        body = _media_upload_payload(
+            db_key=_boundary_root_key({"DB_KEY": db_key}, db_key),
+            parent_key=_boundary_parent_key({"PARENT_KEY": parent_key}, parent_key) or _boundary_root_key({"DB_KEY": db_key}, db_key),
+            folder_key=str(folder_key or "").strip(),
+            category_key=str(category_key or "").strip() or "GEN",
+            file_name=_decode_slug(slug) or str(file_name or "").strip() or "attachment",
+            mime_type=str(content_type or "application/octet-stream").split(";", 1)[0].strip() or "application/octet-stream",
+            description=str(description or "").strip(),
+            body=raw_body,
+            attachment_key=str(attachment_key or "").strip(),
+        )
+
+    root, err = _load_root_or_error(db, _boundary_root_key(body, body.get("PARENT_KEY")))
     if err:
         return err
     try:
-        _apply_save_attachments(db, root, [payload])
-    except ValueError:
+        _apply_save_attachments(db, root, [body], allow_media_content=True)
+    except ValueError as ex:
         db.rollback()
+        if str(ex) == "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN":
+            return _err(400, "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN", "Attachment upload must use media stream endpoint")
         return _err(400, "INVALID_ATTACHMENT_PAYLOAD", "Attachment payload is invalid")
     except RuntimeError as ex:
         db.rollback()

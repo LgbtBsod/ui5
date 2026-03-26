@@ -1,6 +1,5 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/contracts/AttachmentUploadPolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
@@ -8,7 +7,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (AttachmentUploadPolicy, DetailCommandPolicy, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts) {
+], function (AttachmentUploadPolicy, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts) {
     "use strict";
 
     var ATTACHMENT_CONSTANTS = DetailRuntimeContracts.ATTACHMENTS;
@@ -52,9 +51,12 @@ sap.ui.define([
     }
 
     function canUploadAttachments(oController) {
-        var sRootId = oController._currentRootId && oController._currentRootId();
+        var sDbKey = oController._currentChecklistDbKey && oController._currentChecklistDbKey();
+        if (!sDbKey && oController._currentRootId) {
+            sDbKey = oController._currentRootId();
+        }
         var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ), WorkflowContracts.EDIT_MODES.READ);
-        return !!sRootId && sMode !== WorkflowContracts.EDIT_MODES.READ;
+        return !!sDbKey && sMode !== WorkflowContracts.EDIT_MODES.READ;
     }
 
     function validateAttachmentFile(oController, oFile) {
@@ -90,8 +92,18 @@ sap.ui.define([
         };
     }
 
+    function runDetailCommand(oController, sMethod, mInput) {
+        if (!oController || typeof oController._runDetailCommand !== "function") {
+            return Promise.resolve(false);
+        }
+        return oController._runDetailCommand(sMethod, mInput || {});
+    }
+
     function uploadFiles(oController, aFiles, mHooks) {
-        var sRootId = oController._currentRootId && oController._currentRootId();
+        var sDbKey = oController._currentChecklistDbKey && oController._currentChecklistDbKey();
+        if (!sDbKey && oController._currentRootId) {
+            sDbKey = oController._currentRootId();
+        }
         var aUploadFiles = (Array.isArray(aFiles) ? aFiles : []).filter(Boolean);
         var oSequence;
 
@@ -113,8 +125,8 @@ sap.ui.define([
                     mHooks.showToast(oValidation.toastKey);
                     return Promise.resolve();
                 }
-                return DetailCommandPolicy.attachmentUpload(oController, {
-                    rootId: sRootId,
+                return runDetailCommand(oController, "attachmentUpload", {
+                    dbKey: sDbKey,
                     file: oFile,
                     fileMeta: buildAttachmentMeta(oController, oFile, oValidation.mimeType)
                 });

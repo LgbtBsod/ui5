@@ -1,13 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchFacade",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchAnalyticsIntentBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchAnalyticsRailRuntime",
@@ -23,13 +21,11 @@ sap.ui.define([
 ], function (
     ControllerResourceCleanup,
     SearchFacade,
-    ControllerRouteRuntime,
     ControllerViewStateRuntime,
     ModelStateRuntime,
     SchedulingRuntime,
     SearchAnalyticsIntentBehavior,
     ControllerTextRuntime,
-    SearchCommandPolicy,
     SearchSelectionRuntime,
     SearchViewportRuntime,
     SearchAnalyticsRailRuntime,
@@ -49,6 +45,55 @@ sap.ui.define([
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var TOKENS = ModelContracts.TOKENS;
     var PATHS = SearchToolbarContracts.PATHS;
+
+    function runSearchCommand(oController, sMethod, mInput) {
+        if (!oController || typeof oController._runSearchCommand !== "function") {
+            return Promise.resolve(false);
+        }
+        return oController._runSearchCommand(sMethod, mInput || {});
+    }
+
+    function getRouter(oController) {
+        return oController && oController.getRouter ? oController.getRouter() : null;
+    }
+
+    function getRouteRegistry(oController) {
+        oController._searchRouteRegistry = oController._searchRouteRegistry || [];
+        return oController._searchRouteRegistry;
+    }
+
+    function attachRouteHandlers(oController, aRoutes) {
+        var oRouter = getRouter(oController);
+        if (!oRouter || !Array.isArray(aRoutes)) {
+            return;
+        }
+        aRoutes.forEach(function (oRouteConfig) {
+            var sName = String(oRouteConfig && oRouteConfig.name || "").trim();
+            var fnHandler = oRouteConfig && oRouteConfig.handler;
+            var oRoute;
+            if (!sName || typeof fnHandler !== "function" || !oRouter.getRoute) {
+                return;
+            }
+            oRoute = oRouter.getRoute(sName);
+            if (!oRoute || !oRoute.attachPatternMatched) {
+                return;
+            }
+            oRoute.attachPatternMatched(fnHandler, oController);
+            getRouteRegistry(oController).push({
+                route: oRoute,
+                handler: fnHandler
+            });
+        });
+    }
+
+    function detachRouteHandlers(oController) {
+        getRouteRegistry(oController).forEach(function (oEntry) {
+            if (oEntry.route && oEntry.route.detachPatternMatched) {
+                oEntry.route.detachPatternMatched(oEntry.handler, oController);
+            }
+        });
+        oController._searchRouteRegistry = [];
+    }
 
     function syncSmartControlAvailability(oController) {
         SearchSelectionRuntime.syncSearchTableRuntimeState(oController, SearchSelectionRuntime.resolveSearchInnerTable(oController));
@@ -105,7 +150,7 @@ sap.ui.define([
         oController._sSearchUiSessionKey = SearchViewStateRuntime.resolveSearchUiSessionKey();
         oController.setModel(SearchViewStateRuntime.createViewModel(oController._sSearchUiSessionKey), VIEW_MODEL);
         initSearchToolbarState(oController);
-        ControllerRouteRuntime.attachMatched(oController, [
+        attachRouteHandlers(oController, [
             { name: NavigationContracts.ROUTES.SEARCH, handler: oController._onSearchMatched },
             { name: NavigationContracts.ROUTES.DETAIL, handler: oController._onDetailSearchContextMatched },
             { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched }
@@ -139,7 +184,7 @@ sap.ui.define([
     }
 
     function onExit(oController) {
-        ControllerRouteRuntime.detachAllMatched(oController);
+        detachRouteHandlers(oController);
         SearchViewportRuntime.unbindSearchViewportRuntime(oController);
         SearchAnalyticsRailRuntime.clearAnalyticsRefreshTimer(oController);
         oController._iAnalyticsRailPulseTimer = SchedulingRuntime.clearTimer(oController._iAnalyticsRailPulseTimer);
@@ -163,6 +208,7 @@ sap.ui.define([
         }
         oController._bSearchInitialRouteHandled = null;
         oController._bSearchRouteActive = null;
+        oController._searchRouteRegistry = null;
     }
 
     function onSearchMatched(oController, fnApplyAnalyticsDrilldownIntent) {
@@ -174,21 +220,21 @@ sap.ui.define([
             },
             bindSearchWorkingText: function () {
                 oController._resolveSearchWorkingText = function () {
-                    return ControllerTextRuntime.getText(oController, "workingMessageLong", [], "Working...");
+                    return ControllerTextRuntime.getText(oController, "workingMessageLong", []);
                 };
             },
             bootstrap: function (mInput) {
-                return SearchCommandPolicy.bootstrap(oController, mInput);
+                return runSearchCommand(oController, "bootstrap", mInput);
             },
             refreshAnalyticsRail: function () {
                 return SearchAnalyticsRailRuntime.refreshAnalyticsRail(oController, {
                     runAnalytics: function (mInput) {
-                        return SearchCommandPolicy.analytics(oController, mInput);
+                        return runSearchCommand(oController, "analytics", mInput);
                     }
                 });
             },
             rebind: function (mInput) {
-                return SearchCommandPolicy.rebind(oController, mInput);
+                return runSearchCommand(oController, "rebind", mInput);
             },
             rebindTableDirect: function () {
                 var oSmartTable = oController && oController.byId && oController.byId(UiControlIds.SEARCH.SMART_TABLE);

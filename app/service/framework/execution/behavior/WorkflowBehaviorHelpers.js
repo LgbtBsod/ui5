@@ -1,19 +1,19 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailResetRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (DialogOrchestrator, FeedbackCoordinator, ModelStateRuntime, DetailResetRuntime, StatePaths, WorkflowContracts, ModelPathContracts, ModelContracts) {
+], function (DialogOrchestrator, FeedbackBehaviorHelpers, ModelStateRuntime, DetailResetRuntime, StatePaths, WorkflowContracts, ModelPathContracts, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
 
     function resolveText(oController, sKey, aArgs, sFallback) {
-        return FeedbackCoordinator.resolveText(oController, sKey, aArgs || [], sFallback || sKey);
+        return FeedbackBehaviorHelpers.resolveText(oController, sKey, aArgs || [], sFallback || sKey);
     }
 
     function resetDetailWorkflowState(oController) {

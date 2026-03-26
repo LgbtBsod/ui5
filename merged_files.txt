@@ -1,26 +1,17 @@
-app/service/framework/Ui5RuntimeFacade.js -> direct sap/ui/core/Core usage in App.controller.js + ThemeMixin.js + ThemeService.js + DetailFormatters.js
-app/service/runtime/component/ComponentBootstrapDependencyBuilder.js -> app/service/framework/ComponentBootstrap.js
-app/service/runtime/component/ComponentMainServiceRuntime.js -> app/service/framework/ComponentBootstrap.js
-app/service/runtime/component/ComponentModelBootstrap.js -> app/service/framework/ComponentBootstrap.js
-app/service/runtime/component/ComponentGuardedSaveRuntime.js -> app/service/runtime/component/ComponentSaveGuardRuntime.js
-app/service/runtime/component/ComponentRuntimeOptionsFactory.js -> app/service/framework/ComponentBootstrap.js + app/service/runtime/component/ComponentLifecycleRuntime.js
-app/service/runtime/component/ComponentNavigationRuntime.js -> app/service/runtime/component/ComponentLifecycleRuntime.js
-app/service/runtime/component/ComponentInternalRuntimeState.js -> app/service/runtime/component/ComponentModelInitRuntime.js
-app/service/framework/ControllerActionBusyRuntime.js -> app/controller/search/SearchActionBehavior.js
-app/controller/detail/internal/DetailValidationHelperRuntime.js -> app/controller/detail/DetailValidationSummaryRuntime.js
-app/controller/detail/DetailActionDialogRuntime.js -> app/controller/detail/DetailControllerRuntime.js
-app/controller/detail/DetailAdaptiveViewportRuntime.js -> app/controller/detail/DetailControllerRuntime.js
-app/service/framework/execution/behavior/NavigationBehaviorHelpers.js -> app/service/framework/behavior/NavigationDefaultHandlers.js
-app/service/framework/execution/behavior/UiDecisionBehaviorHelpers.js -> app/service/framework/behavior/UiDecisionDefaultHandlers.js
-app/service/framework/execution/UiDecisionCoordinator.js -> direct consumers + app/service/framework/behavior/UiDecisionDefaultHandlers.js
-app/service/framework/CtxModelResolver.js -> app/service/framework/CtxRuntimeFactory.js
-app/service/framework/CtxCacheRuntimeFactory.js -> app/service/framework/CtxRuntimeFactory.js
-app/service/framework/AppShellCoordinator.js -> app/controller/App.controller.js
-app/service/features/detail/runtime/AttachmentValueCodec.js -> app/infra/adapters/shared/AttachmentRepoRuntime.js
-2026-03-27 final production-readiness delta: no additional safe merges in this pass.
-2026-03-27 final production-readiness delta:
+2026-03-27 Final Production-Readiness Pass
+
+app/service/framework/ControllerRouteRuntime.js -> app/controller/analytics/AnalyticsLifecycleBehavior.js
+app/service/framework/ControllerRouteRuntime.js -> app/controller/detail/DetailControllerBehavior.js
+app/service/framework/ControllerRouteRuntime.js -> app/controller/search/SearchLifecycleBehavior.js
+app/service/framework/FeedbackCoordinator.js -> app/service/framework/behavior/FeedbackDefaultHandlers.js
+app/service/framework/FeedbackCoordinator.js -> app/service/framework/execution/behavior/FeedbackBehaviorHelpers.js
 app/controller/search/SearchCommandPolicy.js -> app/controller/Search.controller.js
-why: deleted pass-through wrapper; search command dispatch now lives in the real controller owner and uses ControllerRuntime directly.
-2026-03-27 production-readiness implementation delta:
-app/service/framework/execution/behavior/OverrideHandlerFactory.js -> app/service/framework/execution/behavior/BehaviorScopes.js
-why: deleted pass-through override wrapper; override registration now lives in the actual behavior scope owner.
+app/controller/search/SearchCommandPolicy.js -> app/controller/search/SearchActionBehavior.js
+app/controller/search/SearchCommandPolicy.js -> app/controller/search/SearchLifecycleBehavior.js
+app/controller/search/SearchCommandPolicy.js -> app/controller/search/internal/SearchAnalyticsIntentBehavior.js
+app/controller/detail/DetailCommandPolicy.js -> app/controller/detail/DetailControllerRuntime.js
+app/controller/detail/DetailCommandPolicy.js -> app/controller/detail/DetailInteractionRuntime.js
+app/controller/detail/DetailCommandPolicy.js -> app/controller/detail/DetailPageFlow.js
+app/controller/detail/DetailCommandPolicy.js -> app/controller/detail/internal/DetailChecklistRowBehavior.js
+app/controller/detail/DetailCommandPolicy.js -> app/controller/detail/internal/DetailChecklistStateBehavior.js
+app/controller/detail/DetailCommandPolicy.js -> app/service/features/detail/runtime/AttachmentUploadRuntime.js

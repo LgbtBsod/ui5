@@ -1,12 +1,11 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailStateActionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailDirtyStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (DetailCommandPolicy, DetailPersonInputRuntime, ModelStateRuntime, DetailStateActionRuntime, CreateSentinel, DetailDirtyStateRuntime, ModelContracts) {
+], function (DetailPersonInputRuntime, ModelStateRuntime, DetailStateActionRuntime, CreateSentinel, DetailDirtyStateRuntime, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -22,11 +21,18 @@ sap.ui.define([
         return oNormalized;
     }
 
+    function runDetailCommand(oController, sMethod, mInput) {
+        if (!oController || typeof oController._runDetailCommand !== "function") {
+            return Promise.resolve(false);
+        }
+        return oController._runDetailCommand(sMethod, mInput || {});
+    }
+
     return {
         onToggleEdit: function (oEvent) {
             return DetailStateActionRuntime.toggleEdit(this, oEvent, {
                 enterEdit: function (mInput) {
-                    return DetailCommandPolicy.enterEdit(this, withCurrentDbKey(this, mInput)).then(function (vResult) {
+                    return runDetailCommand(this, "enterEdit", withCurrentDbKey(this, mInput)).then(function (vResult) {
                         var oDetailModel = this.getModel && this.getModel(ModelContracts.MODELS.DETAIL);
                         DetailPersonInputRuntime.syncDrafts(this, oDetailModel, "/current");
                         return vResult;
@@ -38,7 +44,7 @@ sap.ui.define([
         onSaveDetail: function () {
             return DetailStateActionRuntime.save(this, {
                 saveDetail: function () {
-                    return DetailCommandPolicy.save(this, withCurrentDbKey(this));
+                    return runDetailCommand(this, "save", withCurrentDbKey(this));
                 }.bind(this)
             }, {
                 saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT
@@ -48,12 +54,12 @@ sap.ui.define([
         onCloseDetail: function () {
             return DetailStateActionRuntime.close(this, {
                 closeDetail: function (mInput) {
-                    return DetailCommandPolicy.close(this, withCurrentDbKey(this, mInput));
+                    return runDetailCommand(this, "close", withCurrentDbKey(this, mInput));
                 }.bind(this),
                 saveDetail: function () {
                     return DetailStateActionRuntime.save(this, {
                         saveDetail: function () {
-                            return DetailCommandPolicy.save(this, withCurrentDbKey(this));
+                            return runDetailCommand(this, "save", withCurrentDbKey(this));
                         }.bind(this)
                     }, {
                         saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT
@@ -69,7 +75,7 @@ sap.ui.define([
         onConfirmDeleteChecklist: function () {
             return DetailStateActionRuntime.confirmDelete(this, {
                 deleteChecklist: function () {
-                    return DetailCommandPolicy.deleteChecklist(this, withCurrentDbKey(this));
+                    return runDetailCommand(this, "deleteChecklist", withCurrentDbKey(this));
                 }.bind(this)
             });
         },
@@ -96,12 +102,12 @@ sap.ui.define([
         },
 
         onCancelEditFromDetail: function () {
-            DetailCommandPolicy.discardChanges(this, withCurrentDbKey(this));
+            runDetailCommand(this, "discardChanges", withCurrentDbKey(this));
         },
 
         onValidateChecklist: function () {
             this._recomputeValidationSummary("manualValidate", true);
-            return DetailCommandPolicy.validate(this, withCurrentDbKey(this)).then(function (oResult) {
+            return runDetailCommand(this, "validate", withCurrentDbKey(this)).then(function (oResult) {
                 this._recomputeValidationSummary("validateResult", true);
                 if (ModelStateRuntime.read(this, STATE_MODEL, STATE_PATHS.VALIDATION_SUMMARY + "/hasErrors", false)) {
                     this._focusFirstInvalidField();
@@ -125,7 +131,7 @@ sap.ui.define([
                 return Promise.resolve(false);
             }
 
-            return DetailCommandPolicy.validate(this, withCurrentDbKey(this)).then(function () {
+            return runDetailCommand(this, "validate", withCurrentDbKey(this)).then(function () {
                 this._recomputeValidationSummary("statusChange", true);
                 if (ModelStateRuntime.read(this, STATE_MODEL, STATE_PATHS.VALIDATION_SUMMARY + "/hasErrors", false)) {
                     this._focusFirstInvalidField();
@@ -138,7 +144,7 @@ sap.ui.define([
                 }
                 return DetailStateActionRuntime.save(this, {
                     saveDetail: function () {
-                        return DetailCommandPolicy.save(this, withCurrentDbKey(this));
+                        return runDetailCommand(this, "save", withCurrentDbKey(this));
                     }.bind(this)
                 }, {
                     saveInFlightPath: STATE_PATHS.SAVE_IN_FLIGHT

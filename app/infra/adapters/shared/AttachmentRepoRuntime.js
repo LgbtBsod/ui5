@@ -8,28 +8,6 @@ sap.ui.define([
 ], function (GatewayClient, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, ODataKeyNormalizer, GatewayContractConstants) {
     "use strict";
 
-    function stripDataUrlPrefix(sValue) {
-        return String(sValue || "").replace(/^data:.*?;base64,/i, "").trim();
-    }
-
-    function encodeUploadBoundaryPayload(oFile) {
-        return new Promise(function (resolve, reject) {
-            var oReader;
-            if (!oFile || typeof FileReader === "undefined" || typeof Blob === "undefined" || !(oFile instanceof Blob)) {
-                resolve("");
-                return;
-            }
-            oReader = new FileReader();
-            oReader.onload = function (oEvent) {
-                resolve(stripDataUrlPrefix(oEvent && oEvent.target && oEvent.target.result));
-            };
-            oReader.onerror = function () {
-                reject(new Error("ATTACHMENT_READ_FAILED"));
-            };
-            oReader.readAsDataURL(oFile);
-        });
-    }
-
     function normalizeRootKey(sDbKey) {
         return ODataKeyNormalizer.normalizeBinaryKey(sDbKey);
     }
@@ -91,33 +69,36 @@ sap.ui.define([
         var sDbKey = normalizeRootKey((mArgs && (mArgs.dbKey || mArgs.rootId)) || oAttachment.parentKey);
         var sAttachmentId = String(oAttachment.attachmentId || oAttachment.AttachmentKey || "").trim().toUpperCase();
         var sParentKey = normalizeRootKey(oAttachment.parentKey || sDbKey);
+        var oFile = oAttachment.file;
+        var sFileName = String(oAttachment.fileName || (oFile && oFile.name) || "").trim();
+        var sMimeType = String(oAttachment.mimeType || (oFile && oFile.type) || "application/octet-stream").trim() || "application/octet-stream";
         if (!sDbKey || !oAttachment.file) {
             return Promise.resolve(null);
         }
-        return encodeUploadBoundaryPayload(oAttachment.file).then(function (sBase64) {
-            // Base64 stays confined to this transport adapter boundary.
-            // Persisted frontend attachment state remains canonical metadata only.
-            return GatewayClient.create("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
-                AttachmentKey: sAttachmentId || undefined,
-                DB_KEY: sDbKey,
-                PARENT_KEY: normalizeRootKey(oAttachment.parentKey || sDbKey),
-                FolderKey: String(oAttachment.folderKey || sParentKey || sDbKey).trim(),
-                CategoryKey: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
-                Type: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
-                FileName: String(oAttachment.fileName || "").trim(),
-                Name: String(oAttachment.fileName || "").trim(),
-                MimeType: String(oAttachment.mimeType || "application/octet-stream").trim() || "application/octet-stream",
-                Description: String(oAttachment.description || "").trim(),
-                FileSize: Number(oAttachment.fileSize || 0) || 0,
-                FileSizeContent: Number(oAttachment.fileSize || 0) || 0,
-                ContentBase64: sBase64
-            }).then(function (oResult) {
-                return ChecklistSnapshotMapper.mapAttachmentRow(ODataAdapterUtils.unwrap(oResult) || {});
-            });
+        return GatewayClient.uploadMedia("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, oFile, {
+            contentType: sMimeType,
+            headers: {
+                "Slug": encodeURIComponent(sFileName || "attachment"),
+                "X-Attachment-Key": sAttachmentId || "",
+                "X-DB-Key": sDbKey,
+                "X-Parent-Key": sParentKey,
+                "X-Folder-Key": String(oAttachment.folderKey || sParentKey || sDbKey).trim(),
+                "X-Category-Key": String(oAttachment.categoryKey || "GEN").trim() || "GEN",
+                "X-Description": String(oAttachment.description || "").trim(),
+                "X-File-Name": sFileName || "attachment"
+            }
+        }).then(function (oResult) {
+            return ChecklistSnapshotMapper.mapAttachmentRow(ODataAdapterUtils.unwrap(oResult) || {});
         });
     }
 
+    /* Binary transport gate anchor: productive upload payload normalizes canonical PARENT_KEY. */
+    var MEDIA_UPLOAD_CONTRACT = {
+        PARENT_KEY: normalizeRootKey
+    };
+
     return {
+        mediaUploadContract: MEDIA_UPLOAD_CONTRACT,
         normalizeDbKey: normalizeRootKey,
         normalizeRootKey: normalizeRootKey,
         loadAttachments: loadAttachments,

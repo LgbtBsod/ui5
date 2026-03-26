@@ -243,6 +243,66 @@ sap.ui.define([
                 });
             }, mOptions || {});
         },
+        uploadMedia: function (path, vBody, mOptions) {
+            var sPath = assertCanonicalPath(normalizePath(path));
+            var oOptions = mOptions || {};
+            return executeMutatingRequest(REQUEST.POST, function (resolve, reject, mHeaders) {
+                var oModel = ensureModel();
+                var sResolvedUrl = serviceUrl() + sPath;
+                var sCsrfToken = String((oModel && oModel.getSecurityToken && oModel.getSecurityToken()) || "").trim();
+                var mFetchHeaders = Object.assign({}, mHeaders || {}, oOptions.headers || {});
+
+                if (!sResolvedUrl || typeof window === "undefined" || typeof window.fetch !== "function") {
+                    reject({
+                        code: "MEDIA_UPLOAD_UNSUPPORTED",
+                        message: "Media upload requires fetch-capable browser runtime",
+                        path: sPath
+                    });
+                    return;
+                }
+
+                if (sCsrfToken) {
+                    mFetchHeaders["X-CSRF-Token"] = sCsrfToken;
+                }
+                if (oOptions.contentType) {
+                    mFetchHeaders["Content-Type"] = String(oOptions.contentType);
+                }
+
+                window.fetch(sResolvedUrl, {
+                    method: REQUEST.POST,
+                    credentials: "same-origin",
+                    headers: mFetchHeaders,
+                    body: vBody || null
+                }).then(function (oResponse) {
+                    return oResponse.text().then(function (sText) {
+                        var oPayload;
+                        if (!oResponse.ok) {
+                            reject({
+                                statusCode: oResponse.status,
+                                statusText: oResponse.statusText,
+                                responseText: sText,
+                                message: sText || oResponse.statusText || "Media upload failed",
+                                path: sPath
+                            });
+                            return;
+                        }
+                        if (!sText) {
+                            resolve({});
+                            return;
+                        }
+                        try {
+                            oPayload = JSON.parse(sText);
+                        } catch (_parseError) {
+                            resolve({ rawText: sText });
+                            return;
+                        }
+                        resolve(oPayload || {});
+                    });
+                }).catch(function (oError) {
+                    reject(oError);
+                });
+            }, oOptions);
+        },
         serviceUrl: serviceUrl,
         getModel: function () {
             return ensureModel();

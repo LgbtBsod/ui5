@@ -15,34 +15,34 @@ sap.ui.define([
         var sKey = coerceText(sMetricKey).toUpperCase();
 
         if (sKey === AnalyticsContracts.METRICS.TOTAL) {
-            return fnGetText("analyticsMetricTotal", [], "Total");
+            return fnGetText("analyticsMetricTotal", []);
         }
         if (sKey === AnalyticsContracts.METRICS.FAILED_CHECKS) {
-            return fnGetText("analyticsMetricFailedChecks", [], "Failed checks");
+            return fnGetText("analyticsMetricFailedChecks", []);
         }
         if (sKey === AnalyticsContracts.METRICS.FAILED_BARRIERS) {
-            return fnGetText("analyticsMetricFailedBarriers", [], "Failed barriers");
+            return fnGetText("analyticsMetricFailedBarriers", []);
         }
         if (sKey === AnalyticsContracts.METRICS.FAILED_CHECKLISTS) {
-            return fnGetText("analyticsMetricFailedChecklistCount", [], "Failed checklists");
+            return fnGetText("analyticsMetricFailedChecklistCount", []);
         }
         if (sKey === AnalyticsContracts.METRICS.FAILED_BARRIER_CHECKLISTS) {
-            return fnGetText("analyticsMetricFailedBarrierChecklistCount", [], "Failed barrier checklists");
+            return fnGetText("analyticsMetricFailedBarrierChecklistCount", []);
         }
         return sMetricKey;
     }
 
     function formatSourceContext(sSelectedSource, fnGetText) {
         var sSourceKey = coerceText(sSelectedSource).toUpperCase();
-        var sResolvedSourceText = fnGetText("analyticsSourceAll", [], "All");
+        var sResolvedSourceText = fnGetText("analyticsSourceAll", []);
 
         if (sSourceKey === AnalyticsContracts.SOURCES.WEB) {
-            sResolvedSourceText = fnGetText("analyticsSourceWeb", [], "Web");
+            sResolvedSourceText = fnGetText("analyticsSourceWeb", []);
         } else if (sSourceKey === AnalyticsContracts.SOURCES.INTEGRATION) {
-            sResolvedSourceText = fnGetText("analyticsSourceIntegration", [], "Integration");
+            sResolvedSourceText = fnGetText("analyticsSourceIntegration", []);
         }
 
-        return fnGetText("analyticsSourceFilterLabel", [], "Source") + ": " + sResolvedSourceText;
+        return fnGetText("analyticsSourceFilterLabel", []) + ": " + sResolvedSourceText;
     }
 
     function formatRefreshStatusState(oRefreshState) {
@@ -69,7 +69,7 @@ sap.ui.define([
             return sMessage;
         }
         if (!sStatus) {
-            return fnGetText("analyticsRefreshIdle", [], "Idle");
+            return fnGetText("analyticsRefreshIdle", []);
         }
         return sStatus;
     }

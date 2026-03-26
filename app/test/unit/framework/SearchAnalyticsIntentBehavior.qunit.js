@@ -1,8 +1,7 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchAnalyticsIntentBehavior",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy"
-], function (JSONModel, SearchAnalyticsIntentBehavior, SearchCommandPolicy) {
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/internal/SearchAnalyticsIntentBehavior"
+], function (JSONModel, SearchAnalyticsIntentBehavior) {
     "use strict";
 
     function createController(oIntent, bSmartTableReady) {
@@ -61,14 +60,9 @@ sap.ui.define([
         };
     }
 
-    function createCommandPolicySpy(aCalls) {
-        return {
-            buildFilter: function (_oController, mInput) {
-                aCalls.push({ type: "buildFilter", input: mInput });
-            },
-            rebind: function (_oController, mInput) {
-                aCalls.push({ type: "rebind", input: mInput });
-            }
+    function createExecuteCommandSpy(aCalls) {
+        return function (sMethod, mInput) {
+            aCalls.push({ type: sMethod, input: mInput });
         };
     }
 
@@ -90,7 +84,7 @@ sap.ui.define([
             smartTableReadyPath: "/smartTableReady",
             source: "ANALYTICS_DRILLDOWN",
             stateModel: "state",
-            commandPolicy: createCommandPolicySpy(aCalls)
+            executeCommand: createExecuteCommandSpy(aCalls)
         });
         var mFilterData = oFixture.applied.filterData;
 
@@ -123,7 +117,7 @@ sap.ui.define([
             smartTableReadyPath: "/smartTableReady",
             source: "ANALYTICS_DRILLDOWN",
             stateModel: "state",
-            commandPolicy: createCommandPolicySpy(aCalls)
+            executeCommand: createExecuteCommandSpy(aCalls)
         });
         var oRange = oFixture.applied.filterData.DateCheck.ranges[0];
 

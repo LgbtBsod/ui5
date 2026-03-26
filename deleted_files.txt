@@ -1,29 +1,6 @@
-app/service/framework/Ui5RuntimeFacade.js
-app/test/unit/framework/Ui5RuntimeFacade.qunit.js
-app/service/runtime/component/ComponentBootstrapDependencyBuilder.js
-app/service/runtime/component/ComponentMainServiceRuntime.js
-app/service/runtime/component/ComponentModelBootstrap.js
-app/service/runtime/component/ComponentGuardedSaveRuntime.js
-app/service/runtime/component/ComponentRuntimeOptionsFactory.js
-app/service/runtime/component/ComponentNavigationRuntime.js
-app/service/runtime/component/ComponentInternalRuntimeState.js
-app/service/framework/ControllerActionBusyRuntime.js
-app/controller/detail/internal/DetailValidationHelperRuntime.js
-app/controller/detail/DetailActionDialogRuntime.js
-app/controller/detail/DetailAdaptiveViewportRuntime.js
-app/service/framework/execution/behavior/NavigationBehaviorHelpers.js
-app/service/framework/execution/behavior/UiDecisionBehaviorHelpers.js
-app/service/framework/execution/UiDecisionCoordinator.js
-app/service/framework/CtxModelResolver.js
-app/service/framework/CtxCacheRuntimeFactory.js
-app/test/unit/framework/ComponentMainServiceRuntime.qunit.js
-app/test/unit/framework/ComponentModelBootstrap.qunit.js
-app/service/features/detail/runtime/AttachmentValueCodec.js
-app/service/framework/AppShellCoordinator.js
-2026-03-27 final production-readiness delta: no additional safe deletions in this pass.
-2026-03-27 final production-readiness delta:
-app/controller/search/SearchCommandPolicy.js
+2026-03-27 Final Production-Readiness Pass
+
 app/service/framework/ControllerRouteRuntime.js
 app/service/framework/FeedbackCoordinator.js
-2026-03-27 production-readiness implementation delta:
-app/service/framework/execution/behavior/OverrideHandlerFactory.js
+app/controller/search/SearchCommandPolicy.js
+app/controller/detail/DetailCommandPolicy.js

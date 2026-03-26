@@ -1,6 +1,5 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/AttachmentUploadCore",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPersonInputRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentOpenRuntime",
@@ -10,7 +9,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (
     AttachmentUploadCore,
-    DetailCommandPolicy,
     DetailPersonInputRuntime,
     DetailAttachmentRuntime,
     DetailAttachmentOpenRuntime,
@@ -20,6 +18,13 @@ sap.ui.define([
     SchedulingRuntime
 ) {
     "use strict";
+
+    function runDetailCommand(oController, sMethod, mInput) {
+        if (!oController || typeof oController._runDetailCommand !== "function") {
+            return Promise.resolve(false);
+        }
+        return oController._runDetailCommand(sMethod, mInput || {});
+    }
 
     function withCurrentDbKey(oController, mInput) {
         var oNormalized = Object.assign({}, mInput || {});
@@ -31,10 +36,10 @@ sap.ui.define([
     function attachmentSectionHooks(oController) {
         return {
             attachmentDelete: function (mInput) {
-                return DetailCommandPolicy.attachmentDelete(oController, withCurrentDbKey(oController, mInput));
+                return runDetailCommand(oController, "attachmentDelete", withCurrentDbKey(oController, mInput));
             },
             attachmentLoad: function () {
-                return DetailCommandPolicy.attachmentLoad(oController, withCurrentDbKey(oController));
+                return runDetailCommand(oController, "attachmentLoad", withCurrentDbKey(oController));
             },
             scheduleAttachmentDropZoneBind: function () {
                 if (typeof oController._scheduleAttachmentDropZoneBind === "function") {
@@ -52,7 +57,7 @@ sap.ui.define([
     function autosaveHooks(oController) {
         return {
             autosave: function (mInput) {
-                return DetailCommandPolicy.autosave(oController, {
+                return runDetailCommand(oController, "autosave", {
                     dbKey: oController._currentChecklistDbKey(),
                     field: mInput.field,
                     value: mInput.value
@@ -103,7 +108,7 @@ sap.ui.define([
                 ControllerViewStateRuntime.setFlag(oController, sPath, bValue);
             },
             valueHelpLocation: function (mInput) {
-                return DetailCommandPolicy.valueHelpLocation(oController, mInput);
+                return runDetailCommand(oController, "valueHelpLocation", mInput);
             },
             withViewFlag: function (sPath, fnTask) {
                 return oController._withViewFlag(sPath, fnTask);
@@ -120,7 +125,7 @@ sap.ui.define([
                 return oController._isEditMode();
             },
             personSuggest: function (mInput) {
-                return DetailCommandPolicy.personSuggest(oController, mInput);
+                return runDetailCommand(oController, "personSuggest", mInput);
             },
             personTargetFromSource: function (oSource) {
                 return DetailPersonInputRuntime.targetFromSource(oSource);
@@ -133,10 +138,10 @@ sap.ui.define([
 
         return {
             attachmentDelete: function (oController, mInput) {
-            return DetailCommandPolicy.attachmentDelete(oController, withCurrentDbKey(oController, mInput));
+            return runDetailCommand(oController, "attachmentDelete", withCurrentDbKey(oController, mInput));
         },
         attachmentLoad: function (oController, mInput) {
-            return DetailCommandPolicy.attachmentLoad(oController, withCurrentDbKey(oController, mInput));
+            return runDetailCommand(oController, "attachmentLoad", withCurrentDbKey(oController, mInput));
         },
         openWorkflowAnalytics: function (oController) {
             NavigationIntentService.navigateToAnalytics(oController);

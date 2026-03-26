@@ -1,3 +1,16 @@
 {
-  "app/styles/modules/controls/26_controls.css": "Temporary whitelist while shared form controls are migrated away from SAP internal selectors."
+  "app/styles/modules/22_skeleton.css": "Legacy skeleton loaders still rely on SAP renderer internals for placeholder parity; keep isolated until skeleton controls are rebuilt with app-owned wrappers.",
+  "app/styles/modules/23_dialogs.css": "Dialog and popover polish still depends on SAP dialog structure; migration target is app-owned wrapper classes on shell/dialog hosts.",
+  "app/styles/modules/40_page_search.css": "Search workbench sticky rails and SmartFilter/SmartTable composition still require SAP internal selectors; keep constrained while search surface is migrated to app-owned host classes.",
+  "app/styles/modules/41_page_detail.css": "Detail workspace card and form polish still relies on SAP renderer internals; planned migration target is app-owned field/card wrappers.",
+  "app/styles/modules/42_page_analytics.css": "Analytics viz and responsive layout styling still bridges SAP control internals until chart host wrappers replace them.",
+  "app/styles/modules/90_ui5_overrides.css": "Central override layer is the explicit quarantine zone for unavoidable SAP theme overrides.",
+  "app/styles/modules/controls/22_feedback_and_status.css": "Feedback strip/status styling still needs SAP internals for message strip parity; keep quarantined to feedback controls.",
+  "app/styles/modules/controls/23_shell_controls.css": "Shell chrome controls still rely on SAP renderer internals until shell toolbar wrappers are simplified.",
+  "app/styles/modules/controls/25_table_actions.css": "Table action affordances still hook SAP table internals; migration target is app-owned toolbar and row-action wrappers.",
+  "app/styles/modules/controls/26_controls.css": "Shared form controls remain the main temporary whitelist while input/select/button wrappers are normalized.",
+  "app/styles/modules/controls/27_chips_and_kpis.css": "KPI chips still depend on SAP object status and list internals for layout parity; migrate to app-owned chip components later.",
+  "app/styles/modules/controls/29_workflow_surfaces.css": "Workflow surfaces still bridge SAP layout internals during ongoing surface consolidation.",
+  "app/styles/modules/controls/30_action_and_shell_buttons.css": "Action and shell button theming still relies on SAP button internals until button variants are expressed through app-owned classes only.",
+  "app/styles/modules/controls/32_switch_parity.css": "Switch parity styling still depends on SAP switch internals; keep isolated until switches are restyled through supported APIs."
 }

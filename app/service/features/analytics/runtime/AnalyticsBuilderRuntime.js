@@ -139,12 +139,12 @@ sap.ui.define([
         var iSelectedYear = Number(oAnalytics.selectedYear || 0);
         var iCompareYear = Number(oSelectionState.compareYear || 0);
         var bCompareYearHasData = iSelectedYear === iCompareYear || !!oAnalytics.compareYearHasData;
-        var sCompareYearHintText = bCompareYearHasData ? "" : getText(oController, "analyticsCompareYearNoData", [String(iCompareYear || "")], "No aggregated data for compare year " + String(iCompareYear || ""));
+        var sCompareYearHintText = bCompareYearHasData ? "" : getText(oController, "analyticsCompareYearNoData", [String(iCompareYear || "")]);
         var sBuilderSourceHintText = "";
         if (oSelectionState.selectedSource === INTEGRATION_SOURCE) {
-            sBuilderSourceHintText = getText(oController, "analyticsIntegrationDimensionsNote", [], "Integration data can be analysed by month, LPC, profession, source and barrier number until enrichment fills BUKRS, location and observer org unit.");
+            sBuilderSourceHintText = getText(oController, "analyticsIntegrationDimensionsNote", []);
         } else if (oSelectionState.selectedSource === ALL_SOURCE && AnalyticsContracts.BUILDER.SOURCE_RESTRICTED_DIMENSIONS.indexOf(sBuilderDimension) >= 0) {
-            sBuilderSourceHintText = getText(oController, "analyticsWebEnrichedDimensionsNote", [], "Web-enriched dimensions exclude incomplete integration records until enrichment fills BUKRS, location and observer org unit.");
+            sBuilderSourceHintText = getText(oController, "analyticsWebEnrichedDimensionsNote", []);
         }
         ControllerViewStateRuntime.setMany(oController, {
             [PATHS.COMPARE_YEAR_HAS_DATA]: bCompareYearHasData,

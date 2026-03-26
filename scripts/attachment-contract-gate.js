@@ -36,6 +36,9 @@ const attachmentFieldNames = [...attachmentBlock.matchAll(/Property Name="([^"]+
     issues.push(`metadata attachment missing ${field}`);
   }
 });
+if (!/EntityType Name="Attachment"[^>]*HasStream="true"/.test(attachmentBlock)) {
+  issues.push('metadata attachment must be stream-capable (HasStream="true")');
+}
 if (/Name="Value"/.test(attachmentBlock)) {
   issues.push('metadata attachment still exposes Value');
 }
@@ -50,6 +53,20 @@ attachmentFieldNames.forEach((field) => {
 });
 if (/_boundary_parent_key\(item\)\s+or\s+root_hex/.test(mockApi) === false) {
   issues.push('mock attachment payload normalization no longer anchors child parent key to canonical PARENT_KEY/root fallback');
+}
+
+const attachmentRepoRuntime = fs.readFileSync(path.join(ROOT, 'app', 'infra', 'adapters', 'shared', 'AttachmentRepoRuntime.js'), 'utf8');
+if (!/uploadMedia\s*\(/.test(attachmentRepoRuntime)) {
+  issues.push('AttachmentRepoRuntime must use media upload boundary instead of generic JSON create');
+}
+if (/ContentBase64/.test(attachmentRepoRuntime)) {
+  issues.push('AttachmentRepoRuntime must not emit ContentBase64 on the frontend upload path');
+}
+if (!/ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN/.test(mockApi)) {
+  issues.push('mock gateway must explicitly reject base64 attachment payloads on SaveChanges');
+}
+if (!/allow_media_content=True/.test(mockApi)) {
+  issues.push('mock gateway attachment media endpoint must be the only allowed binary upload path');
 }
 
 walk(path.join(ROOT, 'app'));
@@ -79,7 +96,10 @@ appFiles.forEach((file) => {
     return;
   }
   const text = fs.readFileSync(file, 'utf8');
-  if (/ContentBase64/.test(text) && !/app\/infra\/adapters\/shared\/AttachmentRepoRuntime\.js$/.test(relative) && !/backend\/mock_gateway\//.test(relative)) {
+  const allowedContentBase64Owner =
+    /backend\/mock_gateway\/api\/gateway_canonical_api\.py$/.test(relative) ||
+    /backend\/mock_gateway\/tests\/test_attachment_upload_policy\.py$/.test(relative);
+  if (/ContentBase64/.test(text) && !allowedContentBase64Owner) {
     issues.push(`${relative} uses ContentBase64 outside the gateway attachment upload boundary`);
   }
 });

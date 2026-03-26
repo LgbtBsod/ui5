@@ -1,35 +1,22 @@
-Owner Matrix
+2026-03-27 Owner Matrix
 
-- Root key owner: canonical `DB_KEY`
-- Child parent-key owner: canonical `PARENT_KEY`
-- Attachment owner: `Attachment` entity contract with `DownloadUrl` and `DocumentHandle`
+- Root key owner: `app/service/domain/shared/DetailRuntimePayload.js` and frontend adapters on canonical `DB_KEY`
+- Child relation owner: `app/infra/adapters/shared/ODataEntityContracts.js` on canonical `PARENT_KEY`
+- Attachment owner: `app/infra/adapters/shared/AttachmentRepoRuntime.js`
+- Attachment upload transport owner: `app/service/backend/GatewayClient.js`
+- Attachment save-path enforcement owner: `backend/mock_gateway/api/gateway_canonical_api.py`
 - Frontend message-key owner: `app/constants/MessageKeyConstants.js`
 - Frontend message-code owner: `app/constants/MessageCodeConstants.js`
 - Backend message-code owner: `backend/sap_backend/src/zif_zodata_message_codes.intf.abap`
-- Backend message-text owner: `backend/sap_backend/src/zif_zodata_message_texts.intf.abap`
+- Backend human-readable text owner: `backend/sap_backend/src/zcl_zodata_message_texts.clas.abap`
 - Detail domain constants owner: `app/constants/DetailContracts.js`
+- UI constants owner: `app/constants/ModelConstants.js` plus UI contract owners
+- Gateway contract constants owner: `app/constants/GatewayContractConstants.js`
 - App shell owner: `app/controller/App.controller.js`
-- Search owner: `app/controller/Search.controller.js`
+- Search owner: `app/controller/Search.controller.js` including controller-owned search command dispatch
+- Detail owner: `app/controller/detail/DetailControllerRuntime.js` including controller-owned detail command dispatch
 - Analytics owner: `app/controller/Analytics.controller.js`
-- Framework bootstrap owner: `app/service/framework/ComponentBootstrap.js`
-- Framework context owner: `app/service/framework/CtxRuntimeFactory.js`
+- Framework owner: real runtime/handler owners only; removed thin wrappers must not return
 - Component lifecycle owner: `app/service/runtime/component/ComponentLifecycleRuntime.js`
-- Runtime option owner: `app/service/framework/ComponentBootstrap.js` and `app/service/runtime/component/ComponentLifecycleRuntime.js`
-- Navigation intent runtime owner: `app/service/runtime/component/ComponentLifecycleRuntime.js`
-- Internal runtime state owner: `app/service/runtime/component/ComponentModelInitRuntime.js`
-- Search action busy owner: `app/controller/search/SearchActionBehavior.js`
-- Detail validation summary owner: `app/controller/detail/DetailValidationSummaryRuntime.js`
-- Detail controller runtime owner: `app/controller/detail/DetailControllerRuntime.js`
-- Navigation default handler owner: `app/service/framework/behavior/NavigationDefaultHandlers.js`
-- UI decision default handler owner: `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
-- UI decision dispatch owner: direct consumer calls into `UiDecisionDefaultHandlers.handlers.*`
-- Save guard owner: `app/service/runtime/component/ComponentSaveGuardRuntime.js`
-root key owner: app/service/domain/shared/DetailRuntimePayload.js + app/infra/adapters/LockAdapter.js
-child relation owner: app/infra/adapters/shared/ODataChecklistPayloadMapper.js
-attachment owner: app/infra/adapters/shared/AttachmentRepoRuntime.js
-backend human-readable text owner: backend/sap_backend/src/zcl_zodata_message_texts.clas.abap
-app shell owner: app/controller/App.controller.js
-Final production-readiness pass:
-- UI5 core facade owner: removed; consumers call sap/ui/core/Core directly.
-- Attachment upload staging owner: app/infra/adapters/shared/AttachmentRepoRuntime.js for transient upload payload conversion only.
-- Lock contract naming gate owner: scripts/lock-contract-naming-gate.js.
+- CSS legacy quarantine owner: `scripts/sap-internal-css-allowlist.json`
+- DOM legacy quarantine owner: `scripts/dom-hack-allowlist.json`

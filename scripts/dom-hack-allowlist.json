@@ -1,0 +1,16 @@
+{
+  "app/ui5-background-runtime.js": "Bootstrap-owned background runtime still touches global DOM while UI5 shell classes are being attached at startup.",
+  "app/ui5-bootstrap-runtime.js": "Bootstrap runtime still coordinates document-level shell markers before the root component exists.",
+  "app/service/framework/ThemeDomRuntime.js": "Theme runtime is the single quarantined owner for document class and CSS variable writes.",
+  "app/service/framework/SemanticDomRuntime.js": "Semantic runtime still applies ARIA attributes where XML cannot express late-bound shell semantics.",
+  "app/controller/detail/AttachmentDropZoneRuntime.js": "Attachment drop zone still needs native drag-enter and drag-leave DOM boundaries around the upload surface.",
+  "app/controller/detail/DetailControllerRuntime.js": "Detail controller runtime still bridges focus and DOM measurement gaps not covered by public UI5 card APIs.",
+  "app/controller/detail/DetailInfoCardFactory.js": "Detail info cards still require DOM-level semantic enrichment until custom card wrappers replace generated internals.",
+  "app/service/features/detail/runtime/DetailRowBehaviorRuntime.js": "Detail row behavior still needs targeted DOM state sync while grid row wrappers remain legacy.",
+  "app/service/features/search/runtime/SearchReturnRediscoveryRuntime.js": "Search return flow still uses DOM anchors to restore focus after route transitions.",
+  "app/service/features/search/runtime/SearchSelectionRuntime.js": "Search selection runtime still resolves inner table DOM when SmartTable public APIs stop short.",
+  "app/service/features/search/runtime/SearchViewportRuntime.js": "Search viewport runtime still owns scroll host coordination until the workbench shell exposes a stable host control.",
+  "app/service/features/shell/runtime/AppShellDomRuntime.js": "App shell DOM runtime is the quarantined owner for shell geometry, resize cycle and focus handoff.",
+  "app/service/features/shell/runtime/ShellLayoutRuntime.js": "Shell layout runtime still reads rendered dimensions while FlexibleColumnLayout gaps remain in UI5 1.71.",
+  "app/service/features/shell/runtime/ShellViewportRuntime.js": "Shell viewport runtime still depends on document viewport measurements to keep responsive shell state aligned."
+}

@@ -2,58 +2,23 @@
 
 | Capability | Owner |
 | --- | --- |
-| Root key owner | Canonical `DB_KEY` across frontend metadata, mock gateway, and productive backend boundary |
-| Child parent-key owner | Canonical `PARENT_KEY` for child entity filters, payloads, and metadata |
-| Attachment owner | `Attachment` entity contract with `AttachmentKey`, `DB_KEY`, `PARENT_KEY`, `DownloadUrl`, `DocumentHandle` |
-| Attachment upload staging owner | `app/infra/adapters/shared/AttachmentRepoRuntime.js` for transient upload payload conversion only |
-| Frontend message-key owner | `app/constants/MessageKeyConstants.js` |
-| Frontend message-code owner | `app/constants/MessageCodeConstants.js` |
-| Backend message-code owner | `backend/sap_backend/src/zif_zodata_message_codes.intf.abap` |
-| Backend message-text owner | `backend/sap_backend/src/zif_zodata_message_texts.intf.abap` |
-| Detail domain constants owner | `app/constants/DetailContracts.js` |
-| App shell owner | `app/controller/App.controller.js` |
-| Search owner | `app/controller/Search.controller.js` |
-| Analytics owner | `app/controller/Analytics.controller.js` |
-| Framework bootstrap owner | `app/service/framework/ComponentBootstrap.js` |
-| Lock contract naming gate owner | `scripts/lock-contract-naming-gate.js` |
-| UI5 core facade owner | removed; consumers call `sap/ui/core/Core` directly |
-| Framework context owner | `app/service/framework/CtxRuntimeFactory.js` |
-| Component lifecycle owner | `app/service/runtime/component/ComponentLifecycleRuntime.js` |
-| Runtime option owner | `app/service/framework/ComponentBootstrap.js` and `app/service/runtime/component/ComponentLifecycleRuntime.js` |
-| Navigation intent runtime owner | `app/service/runtime/component/ComponentLifecycleRuntime.js` |
-| Internal runtime state owner | `app/service/runtime/component/ComponentModelInitRuntime.js` |
-| Search action busy owner | `app/controller/search/SearchActionBehavior.js` |
-| Detail validation summary owner | `app/controller/detail/DetailValidationSummaryRuntime.js` |
-| Detail controller runtime owner | `app/controller/detail/DetailControllerRuntime.js` |
-| Navigation default handler owner | `app/service/framework/behavior/NavigationDefaultHandlers.js` |
-| UI decision default handler owner | `app/service/framework/behavior/UiDecisionDefaultHandlers.js` |
-| UI decision dispatch owner | direct consumer calls into `UiDecisionDefaultHandlers.handlers.*` |
-| Save guard owner | `app/service/runtime/component/ComponentSaveGuardRuntime.js` |
-- root key owner: `app/service/domain/shared/DetailRuntimePayload.js` + `app/infra/adapters/LockAdapter.js` using canonical `DB_KEY`
-- child relation owner: `app/infra/adapters/shared/ODataChecklistPayloadMapper.js` on `PARENT_KEY`
-- attachment owner: `app/infra/adapters/shared/AttachmentRepoRuntime.js` for upload ingress, `DownloadUrl`/`DocumentHandle` for persisted read/open
-- backend human-readable text owner: `backend/sap_backend/src/zcl_zodata_message_texts.clas.abap`
-- app shell owner: `app/controller/App.controller.js`
-# Owner Matrix Delta
-
-- Root key owner: `app/constants/GatewayContractConstants.js` plus `app/localService/metadata.xml` for service contract exposure.
-- Binary key transport owner: `app/service/shared/ODataKeyNormalizer.js`, `app/infra/adapters/shared/ODataEntityContracts.js`, `app/localService/metadata.xml`, `backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap`.
-- Binary-safe adapter boundary owner: `app/service/shared/ODataKeyNormalizer.js` plus `app/infra/adapters/shared/ODataAdapterUtils.js`.
-- Copy/lock canonical transport owner: `app/infra/adapters/shared/ODataChecklistMutationRuntime.js`, `app/infra/adapters/LockAdapter.js`, `scripts/lock-contract-naming-gate.js`.
-- Backend compatibility owner: `backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap` and `backend/mock_gateway/api/gateway_canonical_api.py`.
-- Backend human-readable text owner: `backend/sap_backend/src/zcl_zodata_message_texts.clas.abap` remains the central non-interface text provider.
-## 2026-03-27 Owner Update
-- Root key owner: `app/service/domain/shared/DetailRuntimePayload.js` and `app/infra/adapters/shared/ODataChecklistPayloadMapper.js`
-- Lock frontend owner: `app/infra/adapters/LockAdapter.js`
-- Shell active root/db key owner: `app/service/features/shell/runtime/ShellStateRuntime.js`
-- Attachment transport boundary owner: `app/infra/adapters/shared/AttachmentRepoRuntime.js`
-- Attachment staged UI state owner: `app/service/domain/detail/DetailAttachmentDeltaRuntime.js`
-## 2026-03-27 Production-Readiness Implementation Delta
-- root key owner: `app/service/domain/shared/DetailRuntimePayload.js`
-- child relation owner: `app/infra/adapters/shared/ODataEntityContracts.js`
-- attachment owner: `app/infra/adapters/shared/AttachmentRepoRuntime.js`
-- frontend message-key owner: `app/constants/MessageKeyConstants.js`
-- frontend message-code owner: `app/constants/MessageCodeConstants.js`
-- backend message-code owner: `backend/sap_backend/src/zif_zodata_message_codes.intf.abap`
-- backend human-readable text owner: `backend/sap_backend/src/zcl_zodata_message_texts.clas.abap`
-- framework behavior override owner: `app/service/framework/execution/behavior/BehaviorScopes.js`
+| Root key owner | [`DetailRuntimePayload.js`](/Users/lgbtb/Desktop/ui5/app/service/domain/shared/DetailRuntimePayload.js) and frontend adapters on canonical `DB_KEY` |
+| Child relation owner | [`ODataEntityContracts.js`](/Users/lgbtb/Desktop/ui5/app/infra/adapters/shared/ODataEntityContracts.js) on canonical `PARENT_KEY` |
+| Attachment owner | [`AttachmentRepoRuntime.js`](/Users/lgbtb/Desktop/ui5/app/infra/adapters/shared/AttachmentRepoRuntime.js) for transport + metadata surface in `Attachment` entity |
+| Attachment upload transport owner | [`GatewayClient.js`](/Users/lgbtb/Desktop/ui5/app/service/backend/GatewayClient.js) `uploadMedia(...)` |
+| Attachment save-path enforcement owner | [`gateway_canonical_api.py`](/Users/lgbtb/Desktop/ui5/backend/mock_gateway/api/gateway_canonical_api.py) rejects base64 aggregate-save uploads |
+| Frontend message-key owner | [`MessageKeyConstants.js`](/Users/lgbtb/Desktop/ui5/app/constants/MessageKeyConstants.js) |
+| Frontend message-code owner | [`MessageCodeConstants.js`](/Users/lgbtb/Desktop/ui5/app/constants/MessageCodeConstants.js) |
+| Backend message-code owner | [`zif_zodata_message_codes.intf.abap`](/Users/lgbtb/Desktop/ui5/backend/sap_backend/src/zif_zodata_message_codes.intf.abap) |
+| Backend human-readable text owner | [`zcl_zodata_message_texts.clas.abap`](/Users/lgbtb/Desktop/ui5/backend/sap_backend/src/zcl_zodata_message_texts.clas.abap) |
+| Detail domain constants owner | [`DetailContracts.js`](/Users/lgbtb/Desktop/ui5/app/constants/DetailContracts.js) |
+| UI constants owner | [`ModelConstants.js`](/Users/lgbtb/Desktop/ui5/app/constants/ModelConstants.js) plus UI contract owners |
+| Gateway contract constants owner | [`GatewayContractConstants.js`](/Users/lgbtb/Desktop/ui5/app/constants/GatewayContractConstants.js) |
+| App shell owner | [`App.controller.js`](/Users/lgbtb/Desktop/ui5/app/controller/App.controller.js) |
+| Search owner | [`Search.controller.js`](/Users/lgbtb/Desktop/ui5/app/controller/Search.controller.js) including controller-owned search command dispatch |
+| Detail owner | [`DetailControllerRuntime.js`](/Users/lgbtb/Desktop/ui5/app/controller/detail/DetailControllerRuntime.js) including controller-owned detail command dispatch |
+| Analytics owner | [`Analytics.controller.js`](/Users/lgbtb/Desktop/ui5/app/controller/Analytics.controller.js) |
+| Framework owner | real runtime/handler owners only; removed thin wrappers must not return |
+| Component lifecycle owner | [`ComponentLifecycleRuntime.js`](/Users/lgbtb/Desktop/ui5/app/service/runtime/component/ComponentLifecycleRuntime.js) |
+| CSS legacy quarantine owner | [`sap-internal-css-allowlist.json`](/Users/lgbtb/Desktop/ui5/scripts/sap-internal-css-allowlist.json) |
+| DOM legacy quarantine owner | [`dom-hack-allowlist.json`](/Users/lgbtb/Desktop/ui5/scripts/dom-hack-allowlist.json) |

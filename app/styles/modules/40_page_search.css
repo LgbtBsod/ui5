@@ -998,9 +998,6 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 .chkApp .searchResultsInnerTable {
   min-height: 0;
   max-height: 100%;
-}
-
-.chkApp .searchResultsInnerTable {
   overflow-x: auto;
   overflow-y: auto;
   max-height: min(70vh, calc(100vh - var(--app-shell-offset) - 16rem)) !important;

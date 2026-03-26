@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRouteRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
@@ -8,7 +7,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (ControllerRouteRuntime, ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime, StatusChipClassRuntime, JsRuntime) {
+], function (ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime, StatusChipClassRuntime, JsRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -19,6 +18,48 @@ sap.ui.define([
             clearInterval(oController._iAnalyticsRouteRefreshTimer);
             oController._iAnalyticsRouteRefreshTimer = null;
         }
+    }
+
+    function getRouter(oController) {
+        return oController && oController.getRouter ? oController.getRouter() : null;
+    }
+
+    function getRouteRegistry(oController) {
+        oController._analyticsRouteRegistry = oController._analyticsRouteRegistry || [];
+        return oController._analyticsRouteRegistry;
+    }
+
+    function attachRouteHandlers(oController, aRoutes) {
+        var oRouter = getRouter(oController);
+        if (!oRouter || !Array.isArray(aRoutes)) {
+            return;
+        }
+        aRoutes.forEach(function (oRouteConfig) {
+            var sName = String(oRouteConfig && oRouteConfig.name || "").trim();
+            var fnHandler = oRouteConfig && oRouteConfig.handler;
+            var oRoute;
+            if (!sName || typeof fnHandler !== "function" || !oRouter.getRoute) {
+                return;
+            }
+            oRoute = oRouter.getRoute(sName);
+            if (!oRoute || !oRoute.attachPatternMatched) {
+                return;
+            }
+            oRoute.attachPatternMatched(fnHandler, oController);
+            getRouteRegistry(oController).push({
+                route: oRoute,
+                handler: fnHandler
+            });
+        });
+    }
+
+    function detachRouteHandlers(oController) {
+        getRouteRegistry(oController).forEach(function (oEntry) {
+            if (oEntry.route && oEntry.route.detachPatternMatched) {
+                oEntry.route.detachPatternMatched(oEntry.handler, oController);
+            }
+        });
+        oController._analyticsRouteRegistry = [];
     }
 
     function startRefreshTimer(oController) {
@@ -47,7 +88,7 @@ sap.ui.define([
             return AnalyticsBuilderRuntime.createInitialViewState(sRefreshTaskKey);
         });
         AnalyticsBuilderRuntime.applyBuilderSelection(oController);
-        ControllerRouteRuntime.attachMatched(oController, [
+        attachRouteHandlers(oController, [
             { name: NavigationContracts.ROUTES.ANALYTICS, handler: oController._onAnalyticsMatched },
             { name: NavigationContracts.ROUTES.SEARCH, handler: oController._onAnalyticsRouteLeave },
             { name: NavigationContracts.ROUTES.DETAIL, handler: oController._onAnalyticsRouteLeave }
@@ -70,7 +111,7 @@ sap.ui.define([
 
     function onExit(oController) {
         clearRefreshTimer(oController);
-        ControllerRouteRuntime.detachAllMatched(oController);
+        detachRouteHandlers(oController);
         if (oController._facade && typeof oController._facade[METHODS.DESTROY] === TYPE_FUNCTION) {
             oController._facade[METHODS.DESTROY]();
         }
@@ -88,6 +129,7 @@ sap.ui.define([
         oController._bAnalyticsInitialRouteHandled = null;
         oController._bAnalyticsRouteActive = null;
         oController._iAnalyticsRouteRefreshTimer = null;
+        oController._analyticsRouteRegistry = null;
     }
 
     function onRouteEnter(oController) {

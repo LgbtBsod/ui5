@@ -4,6 +4,7 @@ CLASS zcl_zodata_message_texts DEFINITION
   CREATE PRIVATE.
 
   PUBLIC SECTION.
+    CONSTANTS c_message_id TYPE symsgid VALUE 'ZPCCT_API'.
     CONSTANTS c_key_lock_acquire_required TYPE string VALUE 'LOCK_ACQUIRE_REQUIRED'.
     CONSTANTS c_key_lock_heartbeat_required TYPE string VALUE 'LOCK_HEARTBEAT_REQUIRED'.
     CONSTANTS c_key_lock_release_required TYPE string VALUE 'LOCK_RELEASE_REQUIRED'.
@@ -38,69 +39,95 @@ CLASS zcl_zodata_message_texts DEFINITION
         iv_key TYPE string
       RETURNING
         VALUE(rv_text) TYPE string.
+
+  PRIVATE SECTION.
+    CLASS-METHODS get_message_number
+      IMPORTING
+        iv_key TYPE string
+      RETURNING
+        VALUE(rv_msgno) TYPE symsgno.
+
+    CLASS-METHODS resolve_message_text
+      IMPORTING
+        iv_msgno TYPE symsgno
+      RETURNING
+        VALUE(rv_text) TYPE string.
 ENDCLASS.
 
 CLASS zcl_zodata_message_texts IMPLEMENTATION.
-  METHOD get_text.
+  METHOD get_message_number.
     CASE iv_key.
       WHEN c_key_lock_acquire_required.
-        rv_text = 'db_key and session_guid are required for lock acquire'.
+        rv_msgno = '001'.
       WHEN c_key_lock_heartbeat_required.
-        rv_text = 'db_key and session_guid are required for lock heartbeat'.
+        rv_msgno = '002'.
       WHEN c_key_lock_release_required.
-        rv_text = 'db_key and session_guid are required for lock release'.
+        rv_msgno = '003'.
       WHEN c_key_lock_session_required.
-        rv_text = 'Active session lock is required'.
+        rv_msgno = '004'.
       WHEN c_key_release_save_failed_prefix.
-        rv_text = 'Save succeeded but lock release failed:'.
+        rv_msgno = '005'.
       WHEN c_key_save_root_required.
-        rv_text = 'root.pcct_uuid is required'.
+        rv_msgno = '006'.
       WHEN c_key_save_session_required.
-        rv_text = 'session_guid is required'.
+        rv_msgno = '007'.
       WHEN c_key_save_root_mode_invalid.
-        rv_text = 'root.edit_mode must be C, U or D when provided'.
+        rv_msgno = '008'.
       WHEN c_key_save_checks_mode_required.
-        rv_text = 'checks.edit_mode is required'.
+        rv_msgno = '009'.
       WHEN c_key_save_checks_mode_invalid.
-        rv_text = 'checks.edit_mode must be C, U or D'.
+        rv_msgno = '010'.
       WHEN c_key_save_barriers_mode_required.
-        rv_text = 'barriers.edit_mode is required'.
+        rv_msgno = '011'.
       WHEN c_key_save_barriers_mode_invalid.
-        rv_text = 'barriers.edit_mode must be C, U or D'.
+        rv_msgno = '012'.
       WHEN c_key_save_participants_mode_required.
-        rv_text = 'participants.edit_mode is required'.
+        rv_msgno = '013'.
       WHEN c_key_save_participants_mode_invalid.
-        rv_text = 'participants.edit_mode must be C, U or D'.
+        rv_msgno = '014'.
       WHEN c_key_save_attachments_mode_required.
-        rv_text = 'attachments.edit_mode is required'.
+        rv_msgno = '015'.
       WHEN c_key_save_attachments_mode_invalid.
-        rv_text = 'attachments.edit_mode must be C, U or D'.
+        rv_msgno = '016'.
       WHEN c_key_permission_authorized.
-        rv_text = 'Authorized'.
+        rv_msgno = '017'.
       WHEN c_key_permission_no_view.
-        rv_text = 'No display authorization'.
+        rv_msgno = '018'.
       WHEN c_key_permission_read_only.
-        rv_text = 'Read-only authorization'.
+        rv_msgno = '019'.
       WHEN c_key_permission_no_edit.
-        rv_text = 'No edit authorization'.
+        rv_msgno = '020'.
       WHEN c_key_permission_no_delete.
-        rv_text = 'No delete authorization'.
+        rv_msgno = '021'.
       WHEN c_key_permission_summary_prefix.
-        rv_text = 'Granted operations:'.
+        rv_msgno = '022'.
       WHEN c_key_crud_not_allowed.
-        rv_text = 'Aggregate writes use function imports CreateChecklist, SaveChanges, AutoSave or CopyChecklist.'.
+        rv_msgno = '023'.
       WHEN c_key_no_create_auth.
-        rv_text = 'No create authorization'.
+        rv_msgno = '024'.
       WHEN c_key_no_create_auth_copy.
-        rv_text = 'No create authorization for copy'.
+        rv_msgno = '025'.
       WHEN c_key_no_edit_auth.
-        rv_text = 'No edit authorization'.
+        rv_msgno = '026'.
       WHEN c_key_no_edit_auth_save.
-        rv_text = 'No edit authorization for save'.
+        rv_msgno = '027'.
       WHEN c_key_mpl_tree_read_failed_prefix.
-        rv_text = 'MPL tree read failed for date'.
+        rv_msgno = '028'.
       WHEN OTHERS.
-        rv_text = iv_key.
+        CLEAR rv_msgno.
     ENDCASE.
+  ENDMETHOD.
+
+  METHOD resolve_message_text.
+    MESSAGE ID c_message_id TYPE 'S' NUMBER iv_msgno INTO rv_text.
+  ENDMETHOD.
+
+  METHOD get_text.
+    DATA(lv_msgno) = get_message_number( iv_key ).
+    IF lv_msgno IS INITIAL.
+      rv_text = iv_key.
+      RETURN.
+    ENDIF.
+    rv_text = resolve_message_text( lv_msgno ).
   ENDMETHOD.
 ENDCLASS.

@@ -12,6 +12,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailFormatters",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimePayloadNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
@@ -30,6 +32,8 @@ sap.ui.define([
     DetailFormatters,
     DetailAttachmentViewState,
     DetailRowBindingRuntime,
+    ControllerRuntime,
+    RuntimePayloadNormalizer,
     ControllerViewStateRuntime,
     FocusRuntime,
     SchedulingRuntime,
@@ -44,6 +48,16 @@ sap.ui.define([
     var DETAIL_NARROW_VIEWPORT_REM = 70;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
+
+    function runDetailCommand(oController, sMethod, mInput) {
+        return ControllerRuntime.executeCommand(
+            oController,
+            oController && oController._detailService,
+            sMethod,
+            RuntimePayloadNormalizer.normalize(mInput || {}),
+            ControllerRuntime.buildCtx(oController)
+        );
+    }
 
     function hasRows(aRows) {
         return Array.isArray(aRows) && aRows.length > 0;
@@ -109,6 +123,9 @@ sap.ui.define([
         DetailControllerBehavior,
         DetailChecklistBehavior,
         {
+            _runDetailCommand: function (sMethod, mInput) {
+                return runDetailCommand(this, sMethod, mInput);
+            },
             _withViewFlag: function (sPath, fnWork) {
                 return ControllerViewStateRuntime.withFlag(this, sPath, fnWork, true, false);
             },

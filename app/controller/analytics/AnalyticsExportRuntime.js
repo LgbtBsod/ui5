@@ -1,7 +1,7 @@
 sap.ui.define([
     "sap/ui/core/Fragment",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
@@ -11,7 +11,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
-], function (Fragment, ControllerViewStateRuntime, FeedbackCoordinator, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, SpreadsheetExport, DebugLogger, FeedbackConstants) {
+], function (Fragment, ControllerViewStateRuntime, FeedbackDefaultHandlers, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, SpreadsheetExport, DebugLogger, FeedbackConstants) {
     "use strict";
 
     var PATHS = AnalyticsContracts.PATHS;
@@ -72,6 +72,16 @@ sap.ui.define([
         };
     }
 
+    function showToast(oController, sTextKey, aArgs, sSeverity) {
+        return FeedbackDefaultHandlers.handlers.showToast({
+            controller: oController,
+            textKey: sTextKey,
+            args: aArgs || [],
+            severity: sSeverity,
+            fallback: sTextKey
+        });
+    }
+
     function exportAnalyticsReport(oController) {
         var oBundle = getBundle(oController);
         var oViewState = ControllerViewStateRuntime.get(oController, "/", {});
@@ -85,17 +95,17 @@ sap.ui.define([
             if (DebugLogger && typeof DebugLogger.error === "function") {
                 DebugLogger.error("AnalyticsExportRuntime", "build_rows_failed", getLoggerPayload(oError, sErrorMessage));
             }
-            FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
+            showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
             return Promise.resolve(false);
         }
         if (!aRows.length) {
-            return FeedbackCoordinator.showToast(oController, "nothingToExport", [], FeedbackConstants.SEVERITY.WARNING);
+            return showToast(oController, "nothingToExport", [], FeedbackConstants.SEVERITY.WARNING);
         }
         try {
             return SpreadsheetExport.download(buildAnalyticsExportFileName(oController), aRows, {
                 workbookColumns: buildSpreadsheetColumns(aRows)
             }).then(function () {
-                FeedbackCoordinator.showToast(oController, "searchExportSuccess", [], FeedbackConstants.SEVERITY.INFO);
+                showToast(oController, "searchExportSuccess", [], FeedbackConstants.SEVERITY.INFO);
                 return true;
             }).catch(function (oError) {
                 sErrorMessage = String((oError && oError.message) || "Analytics export failed");
@@ -105,7 +115,7 @@ sap.ui.define([
                         export: getLoggerPayload(oError, sErrorMessage)
                     }, getSelectionLogContext(oController)));
                 }
-                FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
+                showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
                 return false;
             });
         } catch (oError) {
@@ -116,7 +126,7 @@ sap.ui.define([
                     export: getLoggerPayload(oError, sErrorMessage)
                 }, getSelectionLogContext(oController)));
             }
-            FeedbackCoordinator.showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
+            showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
             return Promise.resolve(false);
         }
     }

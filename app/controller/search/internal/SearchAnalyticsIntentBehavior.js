@@ -1,13 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
-], function (ControllerViewStateRuntime, ModelStateRuntime, SearchCommandPolicy, AnalyticsMonthRuntime, JsRuntime, ModelContracts, StatePaths, UiControlIds) {
+], function (ControllerViewStateRuntime, ModelStateRuntime, AnalyticsMonthRuntime, JsRuntime, ModelContracts, StatePaths, UiControlIds) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -122,9 +121,19 @@ sap.ui.define([
         ModelStateRuntime.write(oController, sStateModel, sIntentPath, null);
     }
 
+    function runSearchCommand(oController, sMethod, mInput, fnExecuteCommand) {
+        if (typeof fnExecuteCommand === TYPE_FUNCTION) {
+            return fnExecuteCommand(sMethod, mInput || {});
+        }
+        if (oController && typeof oController._runSearchCommand === TYPE_FUNCTION) {
+            return oController._runSearchCommand(sMethod, mInput || {});
+        }
+        return false;
+    }
+
     function applyAnalyticsDrilldownIntent(oController, mOptions) {
         var oIntent = readAnalyticsDrilldownIntent(oController, mOptions.stateModel, mOptions.intentPath) || {};
-        var oCommandPolicy = (mOptions && mOptions.commandPolicy) || SearchCommandPolicy;
+        var fnExecuteCommand = mOptions && mOptions.executeCommand;
         var sFilterKey = normalizeText(oIntent.filterKey);
         var sFilterValue = normalizeText(oIntent.filterValue);
         var oSmartFilterBar = oController.byId(UiControlIds.SEARCH.SMART_FILTER_BAR);
@@ -156,11 +165,9 @@ sap.ui.define([
         }
         applySegmentState(oController, oIntent);
         clearAnalyticsDrilldownIntent(oController, mOptions.stateModel, mOptions.intentPath);
-        if (oCommandPolicy && typeof oCommandPolicy.buildFilter === TYPE_FUNCTION) {
-            oCommandPolicy.buildFilter(oController, { source: mOptions.source });
-        }
-        if (ControllerViewStateRuntime.get(oController, mOptions.smartTableReadyPath) && oCommandPolicy && typeof oCommandPolicy.rebind === TYPE_FUNCTION) {
-            oCommandPolicy.rebind(oController, { source: mOptions.source });
+        runSearchCommand(oController, "buildFilter", { source: mOptions.source }, fnExecuteCommand);
+        if (ControllerViewStateRuntime.get(oController, mOptions.smartTableReadyPath)) {
+            runSearchCommand(oController, "rebind", { source: mOptions.source }, fnExecuteCommand);
         }
         return true;
     }

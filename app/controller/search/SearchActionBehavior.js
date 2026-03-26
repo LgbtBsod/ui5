@@ -3,7 +3,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchActionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchAnalyticsRailRuntime",
@@ -24,7 +23,6 @@ sap.ui.define([
     ModelStateRuntime,
     UiDecisionDefaultHandlers,
     NavigationIntentService,
-    SearchCommandPolicy,
     SearchSelectionRuntime,
     SearchActionRuntime,
     SearchAnalyticsRailRuntime,
@@ -47,6 +45,13 @@ sap.ui.define([
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var SEARCH_MODE = SearchContracts.SEARCH_MODE;
 
+    function runSearchCommand(oController, sMethod, mInput) {
+        if (!oController || typeof oController._runSearchCommand !== "function") {
+            return Promise.resolve(false);
+        }
+        return oController._runSearchCommand(sMethod, mInput || {});
+    }
+
     function withActionBusy(oController, sPath, fnAction, fnBusyChange) {
         var fnWork = typeof fnAction === "function" ? fnAction : function () { return null; };
         var fnToggle = typeof fnBusyChange === "function" ? fnBusyChange : function () { return null; };
@@ -58,7 +63,7 @@ sap.ui.define([
     }
 
     function dispatchSelectionChanged(oController, mInput) {
-        return SearchCommandPolicy.selectionChanged(oController, mInput);
+        return runSearchCommand(oController, "selectionChanged", mInput);
     }
 
     function focusSearchResults(oController) {
@@ -83,7 +88,7 @@ sap.ui.define([
 
     function selectRowWithScrollCapture(oController, mInput) {
         SearchViewportRuntime.captureSearchScrollPosition(oController);
-        return SearchCommandPolicy.selectRow(oController, mInput);
+        return runSearchCommand(oController, "selectRow", mInput);
     }
 
     function setSearchActionBusy(oController, bBusy) {
@@ -112,7 +117,7 @@ sap.ui.define([
         }
         SearchLoadRuntime.markLoading(oController);
         return withActionBusy(oController, "/searchActionBusy", function () {
-            return SearchCommandPolicy.executeSearch(oController, { source: SEARCH_SOURCES.SMART_SEARCH, state: bLoose });
+            return runSearchCommand(oController, "executeSearch", { source: SEARCH_SOURCES.SMART_SEARCH, state: bLoose });
         }, function (bBusy) {
             setSearchActionBusy(oController, bBusy);
         });
@@ -121,7 +126,7 @@ sap.ui.define([
     function onRetrySearchLoad(oController) {
         SearchLoadRuntime.markLoading(oController);
         SearchLoadingFeedbackRuntime.beginSearchLoadingFeedback(oController);
-        return SearchCommandPolicy.rebind(oController, { source: SEARCH_SOURCES.SEARCH_RETRY }).finally(function () {
+        return runSearchCommand(oController, "rebind", { source: SEARCH_SOURCES.SEARCH_RETRY }).finally(function () {
             SearchLoadRuntime.setLoadStatus(oController, { isLoading: false, isBusy: false, loadError: false });
         }).catch(function (oError) {
             SearchLoadRuntime.applyLoadError(oController, String((oError && oError.message) || "Unable to load search results."));
@@ -141,7 +146,7 @@ sap.ui.define([
         var aSelectedRowIds = ControllerViewStateRuntime.get(oController, "/selectedRowIds", []) || [];
         ControllerViewStateRuntime.set(oController, "/exportBusy", true);
         ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_EXPORT, true);
-        return Promise.resolve(SearchCommandPolicy.exportFlow(oController, {
+        return Promise.resolve(runSearchCommand(oController, "exportFlow", {
             entity: sEntity || "screen",
             selectedRowIds: Array.isArray(aSelectedRowIds) ? aSelectedRowIds.slice(0) : []
         })).finally(function () {

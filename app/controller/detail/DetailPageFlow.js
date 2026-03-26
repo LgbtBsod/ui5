@@ -1,6 +1,5 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailAccessViewState",
-    "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailCommandPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailEditRestoreRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailMatchedRuntime",
@@ -16,7 +15,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (DetailAccessViewState, DetailCommandPolicy, DetailEditRestoreRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime, ModelContracts, DetailUseCaseConstants) {
+], function (DetailAccessViewState, DetailEditRestoreRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime, ModelContracts, DetailUseCaseConstants) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -27,6 +26,13 @@ sap.ui.define([
         CHECKS: "/checksBusy",
         BARRIERS: "/barriersBusy"
     });
+
+    function runDetailCommand(oController, sMethod, mInput) {
+        if (!oController || typeof oController._runDetailCommand !== TYPE_FUNCTION) {
+            return Promise.resolve(false);
+        }
+        return oController._runDetailCommand(sMethod, mInput || {});
+    }
 
     function markDetailReady(oController, mDetails) {
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.DETAIL_READY, mDetails);
@@ -142,7 +148,7 @@ sap.ui.define([
             applyLayoutState: mOptions.applyLayoutState,
             createAccessState: DetailAccessViewState.createDefaultState,
             openChecklist: function (mInput) {
-                return DetailCommandPolicy.open(oController, mInput);
+                return runDetailCommand(oController, "open", mInput);
             },
             scheduleAttachmentDropZoneBind: mOptions.scheduleAttachmentDropZoneBind,
             validationSummaryPath: mOptions.validationSummaryPath,
@@ -159,7 +165,7 @@ sap.ui.define([
         if (mContext.bCreate) {
             return Promise.resolve(DetailMatchedRuntime.openCreateDraft(oController, mContext, {
                 openChecklist: function (mInput) {
-                    return DetailCommandPolicy.open(oController, mInput);
+                    return runDetailCommand(oController, "open", mInput);
                 }
             })).then(function (oResult) {
                 if (!oResult || oResult.ok !== false) {
@@ -182,7 +188,7 @@ sap.ui.define([
             markDetailReady(oController, { mode: "hydratedReturn", rootId: mContext.sId });
             DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
                 enterEdit: function (mInput) {
-                    return DetailCommandPolicy.enterEdit(oController, mInput);
+                    return runDetailCommand(oController, "enterEdit", mInput);
                 },
                 onToggleEdit: oController.onToggleEdit && oController.onToggleEdit.bind(oController)
             });
@@ -190,7 +196,7 @@ sap.ui.define([
         }
 
         ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, mContext.sId);
-        return DetailCommandPolicy.open(oController, { id: mContext.sId, rootId: mContext.sId }).then(function (oResult) {
+        return runDetailCommand(oController, "open", { id: mContext.sId, rootId: mContext.sId }).then(function (oResult) {
             var oAccessState;
             if (oResult && oResult.ok === false) {
                 if (!oResult.error || oResult.error.code !== DETAIL_CODES.NO_VIEW_PERMISSION) {
@@ -218,7 +224,7 @@ sap.ui.define([
             });
             return DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
                 enterEdit: function (mInput) {
-                    return DetailCommandPolicy.enterEdit(oController, mInput);
+                    return runDetailCommand(oController, "enterEdit", mInput);
                 },
                 onToggleEdit: oController.onToggleEdit && oController.onToggleEdit.bind(oController)
             }).then(function () {

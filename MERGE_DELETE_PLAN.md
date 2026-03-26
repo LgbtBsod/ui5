@@ -1,54 +1,62 @@
-# Merge Delete Plan
+# Merge / Delete Plan
 
-## Completed In This Pass
-- `app/service/framework/Ui5RuntimeFacade.js` -> direct `sap/ui/core/Core` usage in consuming owners
-  Why: file only proxied stable public UI5 Core APIs and duplicated standard framework surface without adding domain value.
-- `app/service/runtime/component/ComponentBootstrapDependencyBuilder.js` -> `app/service/framework/ComponentBootstrap.js`
-  Why: file only grouped and flattened bootstrap dependencies for a single caller and added naming overhead without an independent runtime boundary.
-- `app/service/runtime/component/ComponentMainServiceRuntime.js` -> `app/service/framework/ComponentBootstrap.js`
-  Why: file only created the manifest-owned main service model and had no independent semantic boundary outside bootstrap.
-- `app/service/runtime/component/ComponentModelBootstrap.js` -> `app/service/framework/ComponentBootstrap.js`
-  Why: file only chained model initialization plus main-service creation and existed as a pass-through bootstrap layer.
-- `app/service/runtime/component/ComponentGuardedSaveRuntime.js` -> `app/service/runtime/component/ComponentSaveGuardRuntime.js`
-  Why: file only delegated `createHandler` into `createRunGuardedSave` and duplicated the same save-guard owner boundary.
-- `app/service/framework/CtxModelResolver.js` -> `app/service/framework/CtxRuntimeFactory.js`
-  Why: file only resolved models for a single consumer and had no stable boundary outside context assembly.
-- `app/service/framework/CtxCacheRuntimeFactory.js` -> `app/service/framework/CtxRuntimeFactory.js`
-  Why: file only wrapped three cache usecases for a single consumer and existed as a factory shim.
-- `app/service/runtime/component/ComponentRuntimeOptionsFactory.js` -> `app/service/framework/ComponentBootstrap.js` and `app/service/runtime/component/ComponentLifecycleRuntime.js`
-  Why: file only assembled runtime option objects for exactly two consumers and had no stable semantic boundary outside those owners.
-- `app/service/runtime/component/ComponentNavigationRuntime.js` -> `app/service/runtime/component/ComponentLifecycleRuntime.js`
-  Why: file only forwarded navigation-intent calls into `NavigationIntentService` for one consumer and had no standalone boundary.
-- `app/service/runtime/component/ComponentInternalRuntimeState.js` -> `app/service/runtime/component/ComponentModelInitRuntime.js`
-  Why: file only seeded and reset internal cache/env objects for one consumer and existed as bootstrap-local plumbing.
-- `app/service/framework/ControllerActionBusyRuntime.js` -> `app/controller/search/SearchActionBehavior.js`
-  Why: file only wrapped a single `withFlag` busy helper for one consumer and had no cross-feature semantic boundary.
-- `app/controller/detail/internal/DetailValidationHelperRuntime.js` -> `app/controller/detail/DetailValidationSummaryRuntime.js`
-  Why: file only hosted validation-summary-local path/value helpers for one consumer and had no standalone detail boundary.
-- `app/controller/detail/DetailActionDialogRuntime.js` -> `app/controller/detail/DetailControllerRuntime.js`
-  Why: file only contributed controller-local dialog focus and value-help timer helpers to one controller runtime owner.
-- `app/controller/detail/DetailAdaptiveViewportRuntime.js` -> `app/controller/detail/DetailControllerRuntime.js`
-  Why: file only contributed adaptive viewport sync logic to one controller runtime owner.
-- `app/service/framework/execution/behavior/NavigationBehaviorHelpers.js` -> `app/service/framework/behavior/NavigationDefaultHandlers.js`
-  Why: file only re-exported navigation calls into a single consumer and had no separate execution-layer boundary.
-- `app/service/framework/execution/behavior/UiDecisionBehaviorHelpers.js` -> `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
-  Why: file only hosted helper calls for one default decision-handler owner and had no standalone behavior boundary.
-- `app/service/framework/execution/UiDecisionCoordinator.js` -> direct consumer use of `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
-  Why: coordinator added an extra dispatch layer over a single canonical owner while override hooks were unused across the repo.
+## 2026-03-27 Final Pass Outcome
 
-## Remaining High-Value Candidates
-- thin wrappers in `app/controller/detail/*`
-- pass-through orchestration in `app/controller/search/*`
-- framework helper wrappers that only expose one forwarding function
-- Completed:
-  - `AppShellCoordinator.js` merged into `App.controller.js` because it only delegated init/theme/exit orchestration back to the controller.
-  - `AttachmentValueCodec.js` merged into `AttachmentRepoRuntime.js` because it was a thin shared base64 wrapper without a valid domain boundary.
-# Merge/Delete Delta
+### 2026-03-27 Final Hardening Addendum
+- Additional delete completed in this addendum:
+  - `app/controller/search/SearchCommandPolicy.js`
+  - `app/controller/detail/DetailCommandPolicy.js`
+- Focus shifted to targeted structural cleanup plus production-governance hardening:
+  - removed `SearchCommandPolicy` because it only forwarded controller calls into `_facade`
+  - removed `DetailCommandPolicy` because it only forwarded controller calls into `_detailService`
+  - removed raw fallback UI copy from active analytics/search runtime
+  - converted DOM allowlist from hardcoded JS array to reasoned `scripts/dom-hack-allowlist.json`
+  - froze SAP CSS quarantine size inside `scripts/sap-internal-css-gate.js`
 
-- No extra file deletions were executed in this pass because the remaining wrapper-sprawl candidates are still cross-wired through controller/runtime tests and require a broader semantic merge, not blind removal.
-- No extra file merges were executed in this pass for the same reason; contract drift remediation was prioritized over risky structural churn.
-## 2026-03-27 Production-Readiness Implementation Delta
-- Merge `app/service/framework/execution/behavior/OverrideHandlerFactory.js` into `app/service/framework/execution/behavior/BehaviorScopes.js`
-  reason: override registration was a pass-through helper with no boundary value
-- Keep `app/service/framework/ControllerRouteRuntime.js`, `app/service/framework/FeedbackCoordinator.js`, and `app/controller/search/SearchCommandPolicy.js` as restored semantic owners until all direct consumers are refactored
-  reason: source tree still had live imports; removing them without consumer migration left the repo in a broken state
+### Deleted Files
+- `app/service/framework/ControllerRouteRuntime.js`
+  - removed because it was a route attach/detach wrapper with no stable boundary
+- `app/service/framework/FeedbackCoordinator.js`
+  - removed because it only proxied feedback handlers/helpers without adding ownership value
+- `app/controller/search/SearchCommandPolicy.js`
+  - removed because it was a pass-through search facade dispatcher without its own semantic boundary
+- `app/controller/detail/DetailCommandPolicy.js`
+  - removed because it was a pass-through detail service dispatcher without its own semantic boundary
+
+### Merged Files
+- `app/service/framework/ControllerRouteRuntime.js`
+  - destination owners:
+    - `app/controller/analytics/AnalyticsLifecycleBehavior.js`
+    - `app/controller/detail/DetailControllerBehavior.js`
+    - `app/controller/search/SearchLifecycleBehavior.js`
+  - why merged:
+    - route lifecycle is controller-owned behavior, not framework-shared infrastructure
+- `app/service/framework/FeedbackCoordinator.js`
+  - destination owners:
+    - `app/service/framework/behavior/FeedbackDefaultHandlers.js`
+    - `app/service/framework/execution/behavior/FeedbackBehaviorHelpers.js`
+    - consuming controllers/runtimes
+  - why merged:
+    - the file only re-exposed existing feedback owners and created naming overhead
+- `app/controller/search/SearchCommandPolicy.js`
+  - destination owners:
+    - `app/controller/Search.controller.js`
+    - `app/controller/search/SearchActionBehavior.js`
+    - `app/controller/search/SearchLifecycleBehavior.js`
+    - `app/controller/search/internal/SearchAnalyticsIntentBehavior.js`
+  - why merged:
+    - search command dispatch belongs to the search controller boundary and did not justify a separate policy wrapper
+- `app/controller/detail/DetailCommandPolicy.js`
+  - destination owners:
+    - `app/controller/detail/DetailControllerRuntime.js`
+    - `app/controller/detail/DetailInteractionRuntime.js`
+    - `app/controller/detail/DetailPageFlow.js`
+    - `app/controller/detail/internal/DetailChecklistRowBehavior.js`
+    - `app/controller/detail/internal/DetailChecklistStateBehavior.js`
+    - `app/service/features/detail/runtime/AttachmentUploadRuntime.js`
+  - why merged:
+    - detail command dispatch belongs to the detail controller/runtime boundary and did not justify a separate policy wrapper
+
+### Remaining Follow-Up Candidates
+- `ControllerModelRuntime.js`
+  - still thin, but broad usage footprint makes removal higher-risk than the wrappers closed in this pass

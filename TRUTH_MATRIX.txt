@@ -1,45 +1,24 @@
-Truth Matrix
+2026-03-27 Truth Matrix
 
-- Root entity key: `DB_KEY`
-- Root entity parent field: absent
-- Child entity own key: `DB_KEY`
-- Child entity parent field: `PARENT_KEY`
-- Root filter alias compatibility: boundary-only helper in `backend/mock_gateway/api/gateway_canonical_api.py`
-- Child parent compatibility: `PARENT_KEY` only; child `DB_KEY` is not accepted as parent fallback anymore
-- Frontend i18n owner: `app/constants/MessageKeyConstants.js`
-- Frontend machine-readable code owner: `app/constants/MessageCodeConstants.js`
-- Detail domain/workflow constants owner: `app/constants/DetailContracts.js`
-- Attachment canonical fields: `AttachmentKey`, `DB_KEY`, `PARENT_KEY`, `DownloadUrl`, `DocumentHandle`
-- Attachment upload-only payload field: `ContentBase64`
-- Metadata source of truth: `app/localService/metadata.xml`
-- Mock metadata source: `backend/mock_gateway/services/metadata_builder.py`
-- Productive ABAP root key boundary: `DB_KEY` with `ObjectUuid` fallback
-- Component bootstrap runtime-option owner: `app/service/framework/ComponentBootstrap.js` and `app/service/runtime/component/ComponentLifecycleRuntime.js`
-- Navigation intent runtime owner: `app/service/runtime/component/ComponentLifecycleRuntime.js`
-- Internal component runtime state owner: `app/service/runtime/component/ComponentModelInitRuntime.js`
-- Search action busy owner: `app/controller/search/SearchActionBehavior.js`
-- Detail validation summary owner: `app/controller/detail/DetailValidationSummaryRuntime.js`
-- Detail controller runtime owner: `app/controller/detail/DetailControllerRuntime.js`
-- Navigation default handler owner: `app/service/framework/behavior/NavigationDefaultHandlers.js`
-- UI decision default handler owner: `app/service/framework/behavior/UiDecisionDefaultHandlers.js`
-- UI decision dispatch owner: direct `UiDecisionDefaultHandlers.handlers.*` calls from consumers
-- Deleted legacy bootstrap wrappers: `ComponentMainServiceRuntime.js`, `ComponentModelBootstrap.js`, `ComponentGuardedSaveRuntime.js`
-- Deleted thin runtime-option wrapper: `ComponentRuntimeOptionsFactory.js`
-- Deleted thin navigation wrapper: `ComponentNavigationRuntime.js`
-- Deleted thin runtime-state wrapper: `ComponentInternalRuntimeState.js`
-- Deleted thin search busy wrapper: `ControllerActionBusyRuntime.js`
-- Deleted thin detail validation helper: `DetailValidationHelperRuntime.js`
-- Deleted thin detail dialog helper: `DetailActionDialogRuntime.js`
-- Deleted thin adaptive viewport helper: `DetailAdaptiveViewportRuntime.js`
-- Deleted thin navigation behavior helper: `NavigationBehaviorHelpers.js`
-- Deleted thin UI decision helper: `UiDecisionBehaviorHelpers.js`
-- Deleted thin UI decision coordinator: `UiDecisionCoordinator.js`
-- Deleted legacy context wrappers: `CtxModelResolver.js`, `CtxCacheRuntimeFactory.js`
-Frontend root identity owner: DB_KEY
-Frontend lock request owner: app/infra/adapters/LockAdapter.js
-Backend lock compatibility fallback owner: backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap
-Attachment upload compatibility boundary owner: app/infra/adapters/shared/AttachmentRepoRuntime.js
-Final production-readiness pass:
-- UI5 core access owner: direct sap/ui/core/Core usage in consuming owners; Ui5RuntimeFacade.js removed.
-- Attachment save delta owner: app/service/shared/delta/DeltaFieldMappers.js without inline attachment value.
-- Deleted thin bootstrap dependency wrapper: app/service/runtime/component/ComponentBootstrapDependencyBuilder.js.
+- Root identity: `DB_KEY`
+- Root parent field: forbidden
+- Child identity: own `DB_KEY`
+- Child to root relation: `PARENT_KEY`
+- Frontend canonical detail/lock key: `dbKey`
+- Backend compatibility alias: `ObjectUuid` only as narrow ingress fallback
+- Attachment persisted contract: `AttachmentKey`, `DB_KEY`, `PARENT_KEY`, `DownloadUrl`, `DocumentHandle`
+- Attachment entity stream capability: `HasStream="true"`
+- Attachment upload transport: media POST body to `AttachmentSet`
+- Attachment base64 JSON payload on aggregate save: forbidden
+- Frontend message-key owner: `app/constants/MessageKeyConstants.js`
+- Frontend message-code owner: `app/constants/MessageCodeConstants.js`
+- Backend message-code owner: `backend/sap_backend/src/zif_zodata_message_codes.intf.abap`
+- Backend human-readable text owner: `backend/sap_backend/src/zcl_zodata_message_texts.clas.abap` backed by message class `ZPCCT_API`
+- UI state model: `JSONModel`
+- Transport model: `ODataModel`
+- Checklist mutations: function imports
+- Attachment binary transfer: media upload, not aggregate JSON save
+- Removed wrapper owners: `ControllerRouteRuntime`, `FeedbackCoordinator`, `SearchCommandPolicy`, `DetailCommandPolicy`
+- CSS governance: remaining internal `.sap*` selectors only through documented whitelist
+- DOM governance owner: `scripts/dom-hack-allowlist.json` with bounded quarantine reasons
+- Gate status: attachment, lock, wrapper, DOM, CSS, raw-text, residual-cleanup gates pass
