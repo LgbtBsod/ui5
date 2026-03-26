@@ -1,5 +1,14 @@
 - app/infra/navigation/WorkspaceRouteNavigation.js
+- app/infra/adapters/shared/ChecklistSnapshotMapper.js
+- app/infra/adapters/LockAdapter.js
+- app/infra/adapters/shared/ODataChecklistPayloadMapper.js
+- app/infra/adapters/shared/ODataEntityContracts.js
+- app/localService/metadata.xml
 - app/model/schema/navigationSchema.js
+- app/controller/detail/DetailInteractionRuntime.js
+- app/controller/detail/internal/DetailChecklistStateBehavior.js
+- app/service/framework/ComponentAppRuntime.js
+- app/service/runtime/component/ComponentLockReleaseRuntime.js
 - app/service/features/detail/runtime/DetailAttachmentOpenRuntime.js
 - app/service/runtime/component/ComponentLifecycleRuntime.js
 - app/service/runtime/component/ComponentLockEventsRuntime.js
@@ -12,6 +21,12 @@
 - backend/sap_backend/src/zif_zodata_contract_constants.intf.abap
 - backend/sap_backend/src/zif_zodata_message_codes.intf.abap
 - backend/sap_backend/src/zif_zodata_message_texts.intf.abap
+- backend/mock_gateway/tests/test_closeout_invariants.py
+- backend/mock_gateway/api/gateway_canonical_api.py
+- backend/mock_gateway/services/metadata_builder.py
+- backend/mock_gateway/README_ODATA.md
+- backend/mock_gateway/tests/test_gateway_contract_frontend_aliases.py
+- backend/mock_gateway/tests/test_attachment_upload_policy.py
 - scripts/final-residual-cleanup-gate.js
 - scripts/gates/framework-token-drift-gate.js
 - scripts/private-ui5-selectors-allowlist.json

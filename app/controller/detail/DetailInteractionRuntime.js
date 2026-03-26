@@ -7,7 +7,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInputAssistRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerViewStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RootIdRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (
     AttachmentUploadCore,
@@ -18,18 +17,23 @@ sap.ui.define([
     DetailInputAssistRuntime,
     ControllerViewStateRuntime,
     NavigationIntentService,
-    RootIdRuntime,
     SchedulingRuntime
 ) {
     "use strict";
 
+    function withCurrentRootId(oController, mInput) {
+        var oNormalized = Object.assign({}, mInput || {});
+        oNormalized.rootId = oNormalized.rootId || (oController && typeof oController._currentRootId === "function" ? oController._currentRootId() : "");
+        return oNormalized;
+    }
+
     function attachmentSectionHooks(oController) {
         return {
             attachmentDelete: function (mInput) {
-                return DetailCommandPolicy.attachmentDelete(oController, RootIdRuntime.withCurrentRootId(oController, mInput));
+                return DetailCommandPolicy.attachmentDelete(oController, withCurrentRootId(oController, mInput));
             },
             attachmentLoad: function () {
-                return DetailCommandPolicy.attachmentLoad(oController, RootIdRuntime.withCurrentRootId(oController));
+                return DetailCommandPolicy.attachmentLoad(oController, withCurrentRootId(oController));
             },
             scheduleAttachmentDropZoneBind: function () {
                 if (typeof oController._scheduleAttachmentDropZoneBind === "function") {
@@ -126,12 +130,12 @@ sap.ui.define([
         };
     }
 
-    return {
-        attachmentDelete: function (oController, mInput) {
-            return DetailCommandPolicy.attachmentDelete(oController, RootIdRuntime.withCurrentRootId(oController, mInput));
+        return {
+            attachmentDelete: function (oController, mInput) {
+            return DetailCommandPolicy.attachmentDelete(oController, withCurrentRootId(oController, mInput));
         },
         attachmentLoad: function (oController, mInput) {
-            return DetailCommandPolicy.attachmentLoad(oController, RootIdRuntime.withCurrentRootId(oController, mInput));
+            return DetailCommandPolicy.attachmentLoad(oController, withCurrentRootId(oController, mInput));
         },
         openWorkflowAnalytics: function (oController) {
             NavigationIntentService.navigateToAnalytics(oController);

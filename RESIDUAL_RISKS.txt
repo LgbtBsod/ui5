@@ -2,3 +2,4 @@
 2. Component/runtime and detail controller ownership is cleaner, but some clusters still have more than one true owner.
 3. UI5 private selector usage is still present in a few documented override points.
 4. Full regression test suite was not run in this pass.
+5. Backend/mock transport boundary still accepts a few legacy aliases for ingress compatibility, but productive payloads now use `DB_KEY` / `PARENT_KEY`.

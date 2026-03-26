@@ -13,6 +13,10 @@ sap.ui.define([
         return (mArgs && (mArgs.sessionGuid || mArgs.lockToken)) || "";
     }
 
+    function normalizeLockObjectId(mArgs) {
+        return String((mArgs && (mArgs.dbKey || mArgs.DB_KEY || mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId || mArgs.RootId || mArgs.RootKey)) || "").trim();
+    }
+
     function resolveOwner(oResult) {
         var sOwnerUser = String((oResult && (oResult.owner || oResult.Owner || oResult.lock_owner_user || "")) || "").trim();
         var sOwnerSession = String((oResult && (
@@ -65,7 +69,7 @@ sap.ui.define([
 
     function acquire(mArgs) {
         var sSession = normalizeLockToken(mArgs);
-        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
+        var sObjectUuid = normalizeLockObjectId(mArgs);
         var sTabSessionId = String((mArgs && (mArgs.tabSessionId || mArgs.TabSessionId)) || "").trim();
         var bForceTakeover = !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force));
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE, {
@@ -82,7 +86,7 @@ sap.ui.define([
 
     function heartbeat(mArgs) {
         var sToken = normalizeLockToken(mArgs);
-        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
+        var sObjectUuid = normalizeLockObjectId(mArgs);
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT, {
             ObjectUuid: sObjectUuid,
             SessionGuid: sToken
@@ -94,7 +98,7 @@ sap.ui.define([
     }
 
     function status(mArgs) {
-        var sRootId = String((mArgs && mArgs.rootId) || "").trim();
+        var sRootId = normalizeLockObjectId(mArgs);
         var sToken = normalizeLockToken(mArgs);
         return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(
             GatewayContractConstants.ENTITY_SETS.LOCK_STATUS,
@@ -115,7 +119,7 @@ sap.ui.define([
 
     function release(mArgs) {
         var sToken = normalizeLockToken(mArgs);
-        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
+        var sObjectUuid = normalizeLockObjectId(mArgs);
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
             ObjectUuid: sObjectUuid,
             SessionGuid: sToken
@@ -131,7 +135,7 @@ sap.ui.define([
     }
 
     function releaseOnPageLeave(mArgs) {
-        var sObjectUuid = String((mArgs && (mArgs.objectUuid || mArgs.ObjectUuid || mArgs.rootId)) || "").trim();
+        var sObjectUuid = normalizeLockObjectId(mArgs);
         var sToken = normalizeLockToken(mArgs);
         var oModel;
         var sServiceUrl;

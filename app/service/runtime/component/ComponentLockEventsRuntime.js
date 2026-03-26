@@ -22,7 +22,7 @@ sap.ui.define([
 
     function readCurrentLockScope(oStateModel, oStatePaths) {
         return {
-            rootId: String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim(),
+            dbKey: String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim(),
             sessionGuid: String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SESSION_ID, "") || "").trim(),
             editMode: String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") || "").trim(),
             lockState: String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") || "").trim()
@@ -30,7 +30,7 @@ sap.ui.define([
     }
 
     function isActiveEditLockScope(oScope) {
-        return oScope.editMode === "EDIT" && oScope.lockState === "EDIT_LOCKED" && !!oScope.rootId;
+        return oScope.editMode === "EDIT" && oScope.lockState === "EDIT_LOCKED" && !!oScope.dbKey;
     }
 
     function shouldIgnoreProbePayload(oPayload, oStateModel, oStatePaths) {
@@ -41,7 +41,7 @@ sap.ui.define([
         if (!isActiveEditLockScope(oScope)) {
             return true;
         }
-        if (sPayloadRootId && oScope.rootId && sPayloadRootId !== oScope.rootId) {
+        if (sPayloadRootId && oScope.dbKey && sPayloadRootId !== oScope.dbKey) {
             return true;
         }
         if (sPayloadSessionGuid && oScope.sessionGuid && sPayloadSessionGuid !== oScope.sessionGuid) {
@@ -220,9 +220,9 @@ sap.ui.define([
                 sCurrentLockState = mOptions.layoutStateRuntime.readLockState(oStateModel, "");
                 if (sCurrentRootId && sCurrentMode === WorkflowContracts.EDIT_MODES.EDIT && sCurrentLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                     ModelStateRuntime.writeOnModel(oStateModel, StatePaths.TAB_CONFLICT_STATE, { active: false, source: "", at: "" });
-                    fnPublishTabSignal(VALUES.LOCK_OWNED, { rootId: sCurrentRootId });
+                    fnPublishTabSignal(VALUES.LOCK_OWNED, { dbKey: sCurrentRootId, rootId: sCurrentRootId });
                 } else if (sCurrentRootId && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sCurrentMode !== WorkflowContracts.EDIT_MODES.EDIT) {
-                    fnPublishTabSignal(VALUES.LOCK_RELEASED, { rootId: sCurrentRootId });
+                    fnPublishTabSignal(VALUES.LOCK_RELEASED, { dbKey: sCurrentRootId, rootId: sCurrentRootId });
                 }
             }
         };

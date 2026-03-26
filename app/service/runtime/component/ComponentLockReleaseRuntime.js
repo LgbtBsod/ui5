@@ -21,6 +21,7 @@ sap.ui.define([
             return null;
         }
         return {
+            DB_KEY: sRootId,
             ObjectUuid: sRootId,
             RootKey: sRootId,
             SessionGuid: sSessionGuid

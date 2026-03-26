@@ -60,31 +60,24 @@ sap.ui.define([
         var sKey = String(firstDefined.apply(null, IDENTITY.ATTACHMENT_KEY_FIELDS.map(function (sField) {
             return o[sField];
         }).concat([""]))).trim();
+        var sParentKey = String(firstDefined(o.PARENT_KEY, "")).trim();
+        var sDbKey = String(firstDefined(o.DB_KEY, "")).trim();
         return Object.assign({}, o, {
-            Key: sKey,
+            DB_KEY: sDbKey,
             AttachmentKey: sKey,
-            RootKey: String(firstDefined(o.RootKey, o.rootKey, "")).trim(),
-            ParentKey: String(firstDefined(o.ParentKey, o.parentKey, o.RootKey, o.rootKey, "")).trim(),
-            FolderKey: String(firstDefined(o.FolderKey, o.folderKey, "")).trim(),
-            fileName: String(firstDefined(o.FileName, o.fileName, o.Name, o.name, "")).trim(),
-            FileName: String(firstDefined(o.FileName, o.fileName, o.Name, o.name, "")).trim(),
-            mimeType: String(firstDefined(o.MimeType, o.mimeType, "application/octet-stream")).trim(),
-            MimeType: String(firstDefined(o.MimeType, o.mimeType, "application/octet-stream")).trim(),
-            description: String(firstDefined(o.Description, o.description, "")).trim(),
-            Description: String(firstDefined(o.Description, o.description, "")).trim(),
-            fileSize: Number(firstDefined(o.FileSize, o.fileSize, 0)) || 0,
-            FileSize: Number(firstDefined(o.FileSize, o.fileSize, 0)) || 0,
-            fileSizeContent: Number(firstDefined(o.FileSizeContent, o.fileSizeContent, o.FileSize, o.fileSize, 0)) || 0,
-            FileSizeContent: Number(firstDefined(o.FileSizeContent, o.fileSizeContent, o.FileSize, o.fileSize, 0)) || 0,
-            changedOn: String(firstDefined(o.ChangedOn, o.changedOn, "")).trim(),
-            ChangedOn: String(firstDefined(o.ChangedOn, o.changedOn, "")).trim(),
-            createdOn: String(firstDefined(o.CreatedOn, o.createdOn, "")).trim(),
-            CreatedOn: String(firstDefined(o.CreatedOn, o.createdOn, "")).trim(),
-            categoryKey: String(firstDefined(o.CategoryKey, o.categoryKey, "GEN")).trim(),
-            CategoryKey: String(firstDefined(o.CategoryKey, o.categoryKey, "GEN")).trim(),
-            categoryText: String(firstDefined(o.CategoryText, o.categoryText, "")).trim(),
-            CategoryText: String(firstDefined(o.CategoryText, o.categoryText, "")).trim(),
-            Value: String(firstDefined(o.Value, o.value, "")).trim()
+            PARENT_KEY: sParentKey,
+            FolderKey: String(firstDefined(o.FolderKey, "")).trim(),
+            FileName: String(firstDefined(o.FileName, "")).trim(),
+            MimeType: String(firstDefined(o.MimeType, "application/octet-stream")).trim(),
+            Description: String(firstDefined(o.Description, "")).trim(),
+            FileSize: Number(firstDefined(o.FileSize, 0)) || 0,
+            FileSizeContent: Number(firstDefined(o.FileSizeContent, o.FileSize, 0)) || 0,
+            ChangedOn: String(firstDefined(o.ChangedOn, "")).trim(),
+            CreatedOn: String(firstDefined(o.CreatedOn, "")).trim(),
+            CategoryKey: String(firstDefined(o.CategoryKey, "GEN")).trim(),
+            CategoryText: String(firstDefined(o.CategoryText, "")).trim(),
+            DownloadUrl: String(firstDefined(o.DownloadUrl, "")).trim(),
+            DocumentHandle: String(firstDefined(o.DocumentHandle, "")).trim()
         });
     }
 

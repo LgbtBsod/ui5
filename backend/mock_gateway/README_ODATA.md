@@ -19,14 +19,14 @@ Productive UI5 baseline target: `1.71.28`
 
 - resource: `ChecklistCreatePermissionSet('CURRENT')`
 - request identity semantics: the frontend always asks for `CURRENT`
-- response entity identity also stays `RootKey='CURRENT'`
+- response entity identity also stays `DB_KEY='CURRENT'`
 - no fallback through `CurrentUserSet` or any unrelated resource
 - frontend adaptation point: `app/infra/adapters/ODataChecklistRepoAdapter.js`
 - permission normalization point: `normalizePermissionResponse()`
 
 ### Required permission DTO fields
 
-- `RootKey`
+- `DB_KEY`
 - `UserId`
 - `GrantedOperations`
 - `CanCreate`
@@ -57,21 +57,21 @@ Productive UI5 baseline target: `1.71.28`
 
 ## Binary key policy
 
-- `RootKey`, `ParentKey`, and any DB checklist key are treated as RAW16/`Edm.Binary`
+- `DB_KEY`, `PARENT_KEY`, and any DB checklist key are treated as RAW16/`Edm.Binary`
 - frontend path builders must serialize these keys through the OData typed-literal helper, never by manual string concatenation
 - `AttachmentKey` stays a string key and must not be mixed with checklist binary keys
 - productive SAP Gateway and mock Gateway must expose the same binary-key typing in metadata
 
 ## LastChangeSet
 
-- resource: `LastChangeSet(RootKey=<BINARY_LITERAL>)`
+- resource: `LastChangeSet(DB_KEY=<BINARY_LITERAL>)`
 - purpose: cache freshness and conflict validation
 - expected behavior: return the latest aggregate change marker for the requested root key
 
 ## ReportExport
 
 - resource: `ReportExport`
-- `SelectionMode='selected'` means `RootKeys` only
+- `SelectionMode='selected'` means `DB_KEYs` only
 - `SelectionMode='all'` means `SearchContract` only
 - `Limit` is independent from visible rows, paging, and growing page size
 
@@ -98,11 +98,11 @@ Productive UI5 baseline target: `1.71.28`
 Frontend detail hydration expects these resources:
 
 - `ChecklistRootSet(<BINARY_LITERAL>)`
-- `ChecklistBasicInfoSet?$filter=RootKey eq <BINARY_LITERAL>`
-- `ChecklistCheckSet?$filter=RootKey eq <BINARY_LITERAL>`
-- `ChecklistBarrierSet?$filter=RootKey eq <BINARY_LITERAL>`
-- `AttachmentSet?$filter=RootKey eq <BINARY_LITERAL>`
-- `AttachmentSet(AttachmentKey='<ATTACHMENT_KEY>')` when the UI opens a stored binary through `Value`
+- `ChecklistBasicInfoSet?$filter=DB_KEY eq <BINARY_LITERAL>`
+- `ChecklistCheckSet?$filter=PARENT_KEY eq <BINARY_LITERAL>`
+- `ChecklistBarrierSet?$filter=PARENT_KEY eq <BINARY_LITERAL>`
+- `AttachmentSet?$filter=PARENT_KEY eq <BINARY_LITERAL>`
+- `AttachmentSet(AttachmentKey='<ATTACHMENT_KEY>')` when the UI opens a stored binary through `DownloadUrl` / `DocumentHandle`
 
 ## Detail update and save composition
 
@@ -124,8 +124,8 @@ Mutating detail flows stay on dedicated resources/functions:
 ### Expected attachment request row
 
 - `Key`
-- `RootKey`
-- `ParentKey`
+- `DB_KEY`
+- `PARENT_KEY`
 - `FolderKey`
 - `CategoryKey`
 - `Type`
@@ -135,13 +135,12 @@ Mutating detail flows stay on dedicated resources/functions:
 - `Description`
 - `FileSize`
 - `FileSizeContent`
-- `Value`
 
 ### Attachment field semantics
 
 - `CategoryKey` and `Type` stay aligned to the attachment-type dictionary seam
-- `RootKey` / `ParentKey` identify the owning checklist and stay `Edm.Binary`
-- `Value` is the base64-encoded binary payload carried as OData `Edm.Binary`
+- `DB_KEY` / `PARENT_KEY` identify the owning checklist and stay `Edm.Binary`
+- attachment content is opened through `DownloadUrl` / `DocumentHandle`; raw payload transfer is compatibility-only
 - `FileSize` and `FileSizeContent` stay aligned to the decoded binary length
 
 ### Productive adaptation boundary

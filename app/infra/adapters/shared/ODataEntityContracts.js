@@ -7,52 +7,51 @@ sap.ui.define([
         ATTACHMENT_KEY: "Edm.String",
         CURRENT_ALIAS_KEY: "Edm.String",
         DB_KEY: "Edm.Binary",
-        PARENT_KEY: "Edm.Binary",
-        ROOT_KEY: "Edm.Binary"
+        PARENT_KEY: "Edm.Binary"
     });
 
     var IDENTITY = Object.freeze({
-        ROOT_FILTER_BINARY: "RootKey",
-        ROOT_CANONICAL_FIELDS: Object.freeze(["RootKey", "Key", "id"]),
-        ROOT_ALIAS_FIELDS: Object.freeze(["rootKey", "key", "pcct_uuid", "Id"]),
-        ATTACHMENT_KEY_FIELDS: Object.freeze(["AttachmentKey", "Key", "key", "attach_uuid"]),
-        PARENT_KEY_FIELDS: Object.freeze(["ParentKey", "parentKey", "RootKey", "rootKey"]),
-        ROOT_KEY_FIELDS: Object.freeze(["RootKey", "rootKey"]),
-        FILE_NAME_FIELDS: Object.freeze(["FileName", "fileName", "Name", "name"]),
-        MIME_TYPE_FIELDS: Object.freeze(["MimeType", "mimeType"]),
-        FILE_SIZE_FIELDS: Object.freeze(["FileSize", "fileSize", "FileSizeContent", "fileSizeContent"]),
+        ROOT_FILTER_BINARY: "DB_KEY",
+        ROOT_CANONICAL_FIELDS: Object.freeze(["DB_KEY"]),
+        ROOT_ALIAS_FIELDS: Object.freeze(["DB_KEY"]),
+        ATTACHMENT_KEY_FIELDS: Object.freeze(["AttachmentKey"]),
+        PARENT_KEY_FIELDS: Object.freeze(["PARENT_KEY"]),
+        ROOT_KEY_FIELDS: Object.freeze(["DB_KEY"]),
+        FILE_NAME_FIELDS: Object.freeze(["FileName"]),
+        MIME_TYPE_FIELDS: Object.freeze(["MimeType"]),
+        FILE_SIZE_FIELDS: Object.freeze(["FileSize", "FileSizeContent"]),
     });
 
     var DETAIL_ENTITY_FILTERS = Object.freeze({
         CHECKLIST_BASIC_INFO: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.CHECKLIST_BASIC_INFO,
             property: IDENTITY.ROOT_FILTER_BINARY,
-            type: TYPES.ROOT_KEY
+            type: TYPES.DB_KEY
         }),
         CHECKLIST_CHECK: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK,
-            property: IDENTITY.ROOT_FILTER_BINARY,
-            type: TYPES.ROOT_KEY
+            property: "PARENT_KEY",
+            type: TYPES.PARENT_KEY
         }),
         CHECKLIST_BARRIER: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER,
-            property: IDENTITY.ROOT_FILTER_BINARY,
-            type: TYPES.ROOT_KEY
+            property: "PARENT_KEY",
+            type: TYPES.PARENT_KEY
         }),
         ATTACHMENT: Object.freeze({
             entitySet: GatewayContractConstants.ENTITY_SETS.ATTACHMENT,
-            property: IDENTITY.ROOT_FILTER_BINARY,
-            type: TYPES.ROOT_KEY
+            property: "PARENT_KEY",
+            type: TYPES.PARENT_KEY
         })
     });
 
     var SELECTS = Object.freeze({
-        ATTACHMENT: "AttachmentKey,Key,RootKey,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,DownloadUrl,DocumentHandle,ScanStatus,ScannedOn,CreatedOn,ChangedOn",
+        ATTACHMENT: "AttachmentKey,Key,DB_KEY,PARENT_KEY,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,DownloadUrl,DocumentHandle,ScanStatus,ScannedOn,CreatedOn,ChangedOn",
         ATTACHMENT_CONTENT: "AttachmentKey,FileName,MimeType,DownloadUrl,DocumentHandle",
-        CHECKLIST_BASIC_INFO: "RootKey,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverFullname,ObservedPernr,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName",
-        CHECKLIST_BARRIER: "Key,RootKey,BarriersNum,Text,Comment,Result,ChangedOn",
-        CHECKLIST_CHECK: "Key,RootKey,ChecksNum,Text,Comment,Result,ChangedOn",
-        CHECKLIST_PERMISSION: "RootKey,CanCreate,CanView,CanEdit,CanDelete,ReasonCode,Message"
+        CHECKLIST_BASIC_INFO: "DB_KEY,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverFullname,ObservedPernr,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName",
+        CHECKLIST_BARRIER: "DB_KEY,PARENT_KEY,BarriersNum,Text,Comment,Result,ChangedOn",
+        CHECKLIST_CHECK: "DB_KEY,PARENT_KEY,ChecksNum,Text,Comment,Result,ChangedOn",
+        CHECKLIST_PERMISSION: "DB_KEY,CanCreate,CanView,CanEdit,CanDelete,ReasonCode,Message"
     });
 
     function byEntitySet(sEntitySet) {

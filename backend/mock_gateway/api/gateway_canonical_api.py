@@ -63,8 +63,8 @@ SEARCH_MAP = {
     "ChangedOn": "changed_on",
     "EquipName": "equipment",
 }
-CHECK_MAP = {"RootKey": "root_id", "RootId": "root_id", "ChecksNum": "position", "ChangedOn": "changed_on"}
-BARRIER_MAP = {"RootKey": "root_id", "RootId": "root_id", "BarriersNum": "position", "ChangedOn": "changed_on"}
+CHECK_MAP = {"PARENT_KEY": "root_id", "RootKey": "root_id", "RootId": "root_id", "ChecksNum": "position", "ChangedOn": "changed_on"}
+BARRIER_MAP = {"PARENT_KEY": "root_id", "RootKey": "root_id", "RootId": "root_id", "BarriersNum": "position", "ChangedOn": "changed_on"}
 PERSON_VH_MAP = {
     "Pernr": "perner",
     "FirstName": "first_name",
@@ -123,7 +123,7 @@ def _normalize_hex_key(value: str) -> str:
 
 def _entity_key(key_expr: str) -> str:
     cleaned = str(key_expr or "").strip()
-    for prefix in ("Key=", "RootKey=", "AttachmentKey=", "FolderKey="):
+    for prefix in ("Key=", "DB_KEY=", "PARENT_KEY=", "AttachmentKey=", "FolderKey="):
         if cleaned.startswith(prefix):
             cleaned = cleaned.split("=", 1)[1].strip()
     cleaned = _strip_odata_binary_literal(cleaned)
@@ -132,12 +132,12 @@ def _entity_key(key_expr: str) -> str:
 
 
 def _resolve_root_from_payload(payload: dict) -> str:
-    root_key = str(payload.get("RootKey") or payload.get("root_id") or "")
+    root_key = str(payload.get("DB_KEY") or payload.get("root_id") or payload.get("RootKey") or "")
     if root_key:
         return root_key
     full = payload.get("FullPayload") or payload
     root_block = full.get("root") if isinstance(full, dict) else {}
-    return str((root_block or {}).get("Key") or (root_block or {}).get("RootKey") or (root_block or {}).get("id") or "")
+    return str((root_block or {}).get("DB_KEY") or (root_block or {}).get("Key") or (root_block or {}).get("RootKey") or (root_block or {}).get("id") or "")
 
 
 def _datecheck_datetime(root: ChecklistRoot) -> datetime:
@@ -259,14 +259,14 @@ def _normalize_attachment_payload_rows(items, root_hex: str) -> list[dict]:
         item = row if isinstance(row, dict) else {}
         normalized.append({
             "AttachmentKey": _pick_attachment_text(item, "AttachmentKey", "Key", "key"),
-            "RootKey": _pick_attachment_text(item, "RootKey", "ParentKey", "parent_key") or root_hex,
-            "FolderKey": _pick_attachment_text(item, "FolderKey", "folder_key", "ParentKey", "parent_key") or root_hex,
+            "DB_KEY": _pick_attachment_text(item, "DB_KEY", "Key", "key"),
+            "PARENT_KEY": _pick_attachment_text(item, "PARENT_KEY", "ParentKey", "parent_key") or root_hex,
+            "FolderKey": _pick_attachment_text(item, "FolderKey", "folder_key", "PARENT_KEY", "ParentKey", "parent_key") or root_hex,
             "CategoryKey": _pick_attachment_text(item, "CategoryKey", "category_key", "Type", "type") or "GEN",
             "FileName": _pick_attachment_text(item, "FileName", "file_name", "Name", "name"),
             "MimeType": _pick_attachment_text(item, "MimeType", "mime_type", "Mimetype", "mimtype") or "application/octet-stream",
             "Description": _pick_attachment_text(item, "Description", "description", "Desc", "desc"),
             "FileSize": _coerce_int(_pick_first_present(item, "FileSize", "file_size", "FileSizeContent", "filesize_content"), 0),
-            "Value": _pick_attachment_text(item, "Value", "value")
         })
     return normalized
 
@@ -757,7 +757,7 @@ def _attachment_matches_filter(row: AttachmentEntry, filter_expr: str | None) ->
     expr = str(filter_expr or "").strip()
     if not expr:
         return True
-    root_match = re.search(r"RootKey\s+eq\s+'([^']+)'", expr, flags=re.IGNORECASE)
+    root_match = re.search(r"(?:PARENT_KEY|RootKey)\s+eq\s+'([^']+)'", expr, flags=re.IGNORECASE)
     if root_match:
         return str(row.root_id or "") == _entity_key(root_match.group(1))
     key_match = re.search(r"(?:AttachmentKey|Key)\s+eq\s+'([^']+)'", expr, flags=re.IGNORECASE)
@@ -777,9 +777,8 @@ def _to_attachment(entry: AttachmentEntry, db: Session | None = None, include_va
     payload = {
         "__metadata": _entity_metadata("Attachment", "AttachmentSet", entry_key),
         "AttachmentKey": entry_key,
-        "Key": entry_key,
-        "RootKey": _hex(entry.root_id),
-        "ParentKey": _hex(entry.root_id),
+        "DB_KEY": entry_key,
+        "PARENT_KEY": _hex(entry.root_id),
         "FolderKey": str(entry.folder_key or ""),
         "CategoryKey": category_key,
         "CategoryText": category_text,
@@ -790,13 +789,13 @@ def _to_attachment(entry: AttachmentEntry, db: Session | None = None, include_va
         "Description": "",
         "FileSize": int(entry.file_size or 0),
         "FileSizeContent": int(entry.file_size or 0),
+        "DownloadUrl": f"{SERVICE_ROOT}/AttachmentSet(AttachmentKey='{entry_key}')/$value",
+        "DocumentHandle": entry_key,
         "ScanStatus": "OK",
         "ScannedOn": format_datetime(entry.changed_on),
         "CreatedOn": format_datetime(entry.created_on),
         "ChangedOn": format_datetime(entry.changed_on),
     }
-    if include_value:
-        payload["Value"] = _attachment_content_base64(entry)
     return payload
 def _rate(items, pred) -> float:
     if not items:
@@ -845,7 +844,7 @@ def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
     lpc_text = _dict_text(db, "LPC", lpc) if db else ""
     return {
         "__metadata": _entity_metadata("ChecklistSearch", "ChecklistSearchSet", root_key),
-        "Key": root_key,
+        "DB_KEY": root_key,
         "Id": root.checklist_id or "",
         "DateCheck": date_only_to_odata(_datecheck_datetime(root).date()),
         "TimeCheck": root.time_check or "",
@@ -875,8 +874,8 @@ def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
 def _to_root(root: ChecklistRoot, db: Session | None = None) -> dict:
     s = _to_search(root, db=db)
     return {
-        "__metadata": _entity_metadata("ChecklistRoot", "ChecklistRootSet", s["Key"]),
-        "Key": s["Key"],
+        "__metadata": _entity_metadata("ChecklistRoot", "ChecklistRootSet", s["DB_KEY"]),
+        "DB_KEY": s["DB_KEY"],
         "RequestId": s["RequestId"],
         "Id": s["Id"],
         "ChangedOn": s["ChangedOn"],
@@ -896,7 +895,7 @@ def _to_basic(root: ChecklistRoot) -> dict:
     root_key = _hex(root.id)
     return {
         "__metadata": _entity_metadata("ChecklistBasicInfo", "ChecklistBasicInfoSet", root_key),
-        "RootKey": root_key,
+        "DB_KEY": root_key,
         "LocationKey": root.location_key or "",
         "LocationName": root.location_name or root.location_text or "",
         "LocationText": root.location_text or root.location_name or "",
@@ -923,7 +922,7 @@ def _to_permission(root: ChecklistRoot, user_id: str | None, db: Session | None 
     root_key = _hex(root.id)
     return {
         "__metadata": _entity_metadata("ChecklistPermission", "ChecklistPermissionSet", root_key),
-        "RootKey": root_key,
+        "DB_KEY": root_key,
         "UserId": str(permission.get("user_id") or ""),
         "AuthObject": str(permission.get("auth_object") or ""),
         "CreateOperation": str(permission.get("create_operation") or ""),
@@ -945,7 +944,7 @@ def _to_create_permission(user_id: str | None, db: Session | None = None) -> dic
     root_key = "CURRENT"
     return {
         "__metadata": _entity_metadata("ChecklistPermission", "ChecklistCreatePermissionSet", root_key),
-        "RootKey": root_key,
+        "DB_KEY": root_key,
         "UserId": str(permission.get("user_id") or ""),
         "AuthObject": str(permission.get("auth_object") or ""),
         "CreateOperation": str(permission.get("create_operation") or ""),
@@ -1041,8 +1040,8 @@ def _to_check(item: ChecklistCheck) -> dict:
     key = _hex(item.id)
     return {
         "__metadata": _entity_metadata("ChecklistCheck", "ChecklistCheckSet", key),
-        "Key": key,
-        "RootKey": _hex(item.root_id),
+        "DB_KEY": key,
+        "PARENT_KEY": _hex(item.root_id),
         "ChecksNum": int(item.position or 0),
         "Text": item.text or "",
         "Comment": item.comment or "",
@@ -1055,8 +1054,8 @@ def _to_barrier(item: ChecklistBarrier) -> dict:
     key = _hex(item.id)
     return {
         "__metadata": _entity_metadata("ChecklistBarrier", "ChecklistBarrierSet", key),
-        "Key": key,
-        "RootKey": _hex(item.root_id),
+        "DB_KEY": key,
+        "PARENT_KEY": _hex(item.root_id),
         "BarriersNum": int(item.position or 0),
         "Text": item.description or "",
         "Comment": item.comment or "",
@@ -1088,7 +1087,7 @@ def _build_lock_status_row(db: Session, root_uuid: str, session_guid: str = "") 
         exp = format_datetime(expires_at)
         return {
             "__metadata": meta,
-            "RootKey": root_key_hex,
+            "DB_KEY": root_key_hex,
             "Ok": ok,
             "Success": ok,
             "ReasonCode": reason,
@@ -1164,7 +1163,7 @@ def _apply_order_filter(query, model, fmap, filter_expr, orderby, top, skip):
     return query.offset(skip).limit(top).all(), total
 
 
-def _normalize_filter_hex_keys(filter_expr: str | None, fields: tuple[str, ...] = ("Key", "RootKey")) -> str | None:
+def _normalize_filter_hex_keys(filter_expr: str | None, fields: tuple[str, ...] = ("DB_KEY", "PARENT_KEY")) -> str | None:
     if not filter_expr:
         return filter_expr
 
@@ -1245,9 +1244,11 @@ def _save_request_root_key(payload: dict | None) -> str:
     root = _save_request_root(payload)
     return str(
         root.get("pcct_uuid")
+        or root.get("DB_KEY")
         or root.get("RootKey")
         or root.get("root_id")
         or root.get("RootId")
+        or body.get("DB_KEY")
         or body.get("RootKey")
         or body.get("root_id")
         or ""
@@ -1656,8 +1657,8 @@ def checklist_root_delete(entity_key: str, db: Session = Depends(get_db)):
 
 @router.get(f"{SERVICE_ROOT}/ChecklistBasicInfoSet")
 def checklist_basic_info_set(filter: str | None = Query(None, alias="$filter"), top: int = Query(DEFAULT_PAGE_SIZE, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
-    filter = _normalize_filter_hex_keys(filter, fields=("RootKey",))
-    rows, total = _apply_order_filter(db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)), ChecklistRoot, {"RootKey": "id"}, filter, None, top, skip)
+    filter = _normalize_filter_hex_keys(filter, fields=("DB_KEY",))
+    rows, total = _apply_order_filter(db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)), ChecklistRoot, {"DB_KEY": "id"}, filter, None, top, skip)
     return odata_payload([_to_basic(r) for r in rows], total if inlinecount == "allpages" else None)
 
 
@@ -1673,8 +1674,8 @@ def checklist_basic_info_entity(entity_key: str, db: Session = Depends(get_db)):
 def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
     if (err := _reject_expand(expand)):
         return err
-    filter = re.sub(r"\bRootId\b", "RootKey", str(filter or ""), flags=re.IGNORECASE)
-    filter = _normalize_filter_hex_keys(filter, fields=("RootKey", "RootId", "Key"))
+    filter = re.sub(r"\bRootId\b", "PARENT_KEY", str(filter or ""), flags=re.IGNORECASE)
+    filter = _normalize_filter_hex_keys(filter, fields=("PARENT_KEY", "DB_KEY"))
     rows, total = _apply_order_filter(db.query(ChecklistCheck), ChecklistCheck, CHECK_MAP, filter, None, top, skip)
     return odata_payload([_to_check(c) for c in rows], total if inlinecount == "allpages" else None)
 
@@ -1925,7 +1926,7 @@ def last_change_entity(entity_key: str, response: Response, db: Session = Depend
     response.headers["ETag"] = format_entity_etag(agg)
     return odata_entity({
         "__metadata": _entity_metadata("LastChange", "LastChangeSet", root_key_hex),
-        "RootKey": root_key_hex,
+        "DB_KEY": root_key_hex,
         "AggChangedOn": format_datetime(agg)
     })
 
@@ -1951,7 +1952,7 @@ def last_change_set(
     )
     payload = [{
         "__metadata": _entity_metadata("LastChange", "LastChangeSet", _hex(r.id)),
-        "RootKey": _hex(r.id),
+        "DB_KEY": _hex(r.id),
         "AggChangedOn": format_datetime(_agg_changed_on(r))
     } for r in rows]
     return odata_payload(payload, total if inlinecount == "allpages" else None)
@@ -2135,7 +2136,7 @@ async def lock_acquire_function_import(request: Request, root_id: str | None = Q
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = root_id or merged.get("ObjectUuid") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
+    resolved_root_id = root_id or merged.get("DB_KEY") or merged.get("ObjectUuid") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "ObjectUuid and SessionGuid are required")
@@ -2151,7 +2152,7 @@ async def lock_heartbeat_function_import(request: Request, root_id: str | None =
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = root_id or merged.get("ObjectUuid") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
+    resolved_root_id = root_id or merged.get("DB_KEY") or merged.get("ObjectUuid") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "ObjectUuid and SessionGuid are required")
@@ -2167,7 +2168,7 @@ async def lock_release_function_import(request: Request, root_id: str | None = Q
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = root_id or merged.get("ObjectUuid") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
+    resolved_root_id = root_id or merged.get("DB_KEY") or merged.get("ObjectUuid") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "ObjectUuid and SessionGuid are required")
@@ -2258,7 +2259,7 @@ def create_checklist(payload: dict, response: Response, db: Session = Depends(ge
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
 
     out = _to_root(root, db=db)
-    out["RootKey"] = out["Key"]
+    out["DB_KEY"] = out["DB_KEY"]
     out["AggChangedOn"] = format_datetime(_agg_changed_on(root))
     out["Message"] = "Checklist created"
     out["ReasonCode"] = "CREATED"
@@ -2267,7 +2268,7 @@ def create_checklist(payload: dict, response: Response, db: Session = Depends(ge
 
 
 @router.post(f"{SERVICE_ROOT}/CopyChecklist")
-async def copy_checklist(request: Request, root_id: str | None = Query(None, alias="RootKey"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
+async def copy_checklist(request: Request, root_id: str | None = Query(None, alias="DB_KEY"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
     body = payload or {}
     if not body:
         try:
@@ -2275,7 +2276,7 @@ async def copy_checklist(request: Request, root_id: str | None = Query(None, ali
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = root_id or merged.get("RootKey") or merged.get("RootId") or merged.get("SourceRootKey") or merged.get("source_root_key") or merged.get("SourceUuid")
+    resolved_root_id = root_id or merged.get("DB_KEY") or merged.get("RootKey") or merged.get("RootId") or merged.get("SourceRootKey") or merged.get("source_root_key") or merged.get("SourceUuid")
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:
@@ -2307,7 +2308,7 @@ async def copy_checklist(request: Request, root_id: str | None = Query(None, ali
         "LockExpires": format_datetime(lock_result.get("lock_expires")),
         "IsKilled": False,
         "Status": _status_external(copied_root.status),
-        "RootKey": _hex(copied_root.id),
+        "DB_KEY": _hex(copied_root.id),
     }
     return odata_entity(response_payload)
 
@@ -2370,7 +2371,7 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
 async def set_status(
     request: Request,
     response: Response,
-    root_key_q: str | None = Query(None, alias="RootKey"),
+    root_key_q: str | None = Query(None, alias="DB_KEY"),
     new_status_q: str | None = Query(None, alias="NewStatus"),
     client_agg_q: str | None = Query(None, alias="ClientAggChangedOn"),
     if_match: str | None = Header(None, alias="If-Match"),
@@ -2384,7 +2385,7 @@ async def set_status(
     except Exception:
         body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_key = root_key_q or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id") or ""
+    resolved_root_key = root_key_q or merged.get("DB_KEY") or merged.get("RootKey") or merged.get("RootId") or merged.get("root_id") or ""
     resolved_new_status = new_status_q or merged.get("NewStatus") or merged.get("new_status") or merged.get("Status") or merged.get("status") or ""
     resolved_client_agg = client_agg_q or merged.get("ClientAggChangedOn") or merged.get("client_agg_changed_on")
 
@@ -2414,7 +2415,7 @@ async def set_status(
     AnalyticsService.mark_dirty()
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
     response.headers["sap-message"] = build_sap_message("Status updated", "success", code="STATUS_SET")
-    return odata_entity({"RootKey": _hex(root.id), "Status": root.status, "AggChangedOn": format_datetime(_agg_changed_on(root)), "Message": "Status updated", "ReasonCode": "STATUS_SET"})
+    return odata_entity({"DB_KEY": _hex(root.id), "Status": root.status, "AggChangedOn": format_datetime(_agg_changed_on(root)), "Message": "Status updated", "ReasonCode": "STATUS_SET"})
 
 
 @router.get(f"{SERVICE_ROOT}/GetHierarchy")
@@ -2477,7 +2478,7 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
         checks = [_to_check(c) for c in root.checks]
         barriers = [_to_barrier(b) for b in root.barriers]
         base_row = {
-            "RootKey": base["Key"],
+            "DB_KEY": base["DB_KEY"],
             "Id": base["Id"],
             "Lpc": base.get("Lpc", ""),
             "LpcText": base.get("LpcText", ""),
@@ -2536,7 +2537,7 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
         for b in barriers:
             txt = db.query(DictionaryItem).filter(DictionaryItem.domain == "BARRIER", DictionaryItem.key == str(b["BarriersNum"])).first()
             rows.append({
-                "RootKey": base["Key"], "Id": base["Id"],
+                "DB_KEY": base["DB_KEY"], "Id": base["Id"],
                 "Lpc": base.get("Lpc", ""), "LpcText": base.get("LpcText", ""),
                 "Profession": base.get("Profession", ""), "ProfessionText": base.get("ProfessionText", ""),
                 "DateCheck": base["DateCheck"],

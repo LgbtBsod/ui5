@@ -28,9 +28,10 @@ sap.ui.define([
     function normalizeAttachmentRows(aAttachments, sRootId) {
         return (Array.isArray(aAttachments) ? aAttachments : []).map(function (oAttachment) {
             var oRow = Object.assign({}, oAttachment || {});
-            oRow.RootKey = normalizeRootKey(oRow.RootKey || sRootId);
-            oRow.ParentKey = normalizeRootKey(oRow.ParentKey || oRow.RootKey || sRootId);
-            oRow.FolderKey = String(oRow.FolderKey || oRow.ParentKey || oRow.RootKey || sRootId || "").trim();
+            var sParentKey = normalizeRootKey(oRow.PARENT_KEY || sRootId);
+            oRow.DB_KEY = normalizeRootKey(oRow.DB_KEY || "");
+            oRow.PARENT_KEY = sParentKey;
+            oRow.FolderKey = String(oRow.FolderKey || sParentKey || sRootId || "").trim();
             oRow.CategoryKey = String(oRow.CategoryKey || oRow.Type || "GEN").trim() || "GEN";
             oRow.Type = String(oRow.Type || oRow.CategoryKey || "GEN").trim() || "GEN";
             oRow.FileName = String(oRow.FileName || oRow.Name || "").trim();
@@ -53,7 +54,7 @@ sap.ui.define([
         return {
             Payload: {
                 root: Object.assign({}, oIn.root || {}, {
-                    pcct_uuid: normalizeRootKey((oIn.root && (oIn.root.pcct_uuid || oIn.root.RootKey || oIn.root.rootKey)) || sRootId)
+                    DB_KEY: normalizeRootKey((oIn.root && oIn.root.DB_KEY) || sRootId)
                 }),
                 basic: Object.assign({}, oIn.basic || {}),
                 checks: Array.isArray(oIn.checks) ? oIn.checks.slice() : [],

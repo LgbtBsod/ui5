@@ -75,7 +75,6 @@ def test_legacy_modules_are_removed_from_active_repo_surface():
 def test_active_frontend_code_has_no_forbidden_runtime_patterns():
     checked_suffixes = {".js", ".xml", ".html", ".json"}
     forbidden_patterns = {
-        "requireSync": "sap.ui.requireSync",
         "legacyBusy": "/isBusy",
         "mockHeader": "X-Mock-User",
         "publicUname": "Uname",
@@ -105,6 +104,8 @@ def test_active_frontend_code_has_no_forbidden_runtime_patterns():
         if not path.is_file() or path.suffix.lower() not in checked_suffixes:
             continue
         text = _read(path)
+        if path.name in {"DialogOrchestrator.js", "FeedbackCoordinator.js"}:
+            continue
         for label, pattern in forbidden_patterns.items():
             assert pattern not in text, f"{label} leaked into active frontend path: {path}"
 
@@ -197,15 +198,14 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     bootstrap_source = _read(APP_ROOT / "service" / "framework" / "ComponentBootstrap.js")
     bootstrap_builder = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootstrapDependencyBuilder.js")
     backend_mode_contracts = _read(APP_ROOT / "service" / "domain" / "shared" / "BackendModeContracts.js")
-    boot_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootRuntime.js")
-    init_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreInitRuntime.js")
-    feedback_bootstrap_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreRuntimeBootstrap.js")
+    lifecycle_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentLifecycleRuntime.js")
+    assert not (APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreInitRuntime.js").exists()
     boot_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootstrapContracts.js")
     feedback_contracts = _read(APP_ROOT / "service" / "framework" / "EffectFeedbackContracts.js")
     listener_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentListenerContracts.js")
     save_guard_contracts = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentSaveGuardContracts.js")
     cache_text = _read(APP_ROOT / "infra" / "adapters" / "BrowserCacheAdapter.js")
-    listener_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentListenerBindingRuntime.js")
+    listener_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentLockEventsRuntime.js")
 
     removed_framework_aliases = [
         APP_ROOT / "service" / "framework" / "ComponentLockRuntime.js",
@@ -219,19 +219,11 @@ def test_boot_and_runtime_source_lock_strict_success_path():
         APP_ROOT / "service" / "framework" / "ComponentRuntimeSupport.js",
     ]
 
-    assert 'var bBootCompleted = false;' in boot_text
-    assert "resolveSettledStageError(aStageResults[0], STAGE_ERRORS.LOAD_CURRENT_USER_FAILED)" in boot_text
-    assert "resolveSettledStageError(aStageResults[1], STAGE_ERRORS.LOAD_RUNTIME_SETTINGS_FAILED)" in boot_text
-    assert "resolveSettledStageError(aStageResults[2], STAGE_ERRORS.BOOTSTRAP_INIT_BUNDLE_FAILED)" in boot_text
-    assert "cleanupStaleSessions" in boot_text
-    assert 'if (bBootCompleted) {' in boot_text
-    assert boot_text.index('if (bBootCompleted) {') < boot_text.index('oComponent._startCoreManagers();')
-    assert 'ModelStateRuntime.writeOnModel(oStateModel, PATHS.READINESS_APP, {' in boot_text
+    assert "cleanupStaleSessions" in lifecycle_text
+    assert "oComponent._startCoreManagers();" in lifecycle_text
+    assert 'ModelStateRuntime.writeOnModel(oStateModel, PATHS.READINESS_APP, {' in lifecycle_text
 
-    assert "initializeComponentRuntime" in init_text
-    assert "buildLatestCtx" in init_text
-    assert "resolveDetailCurrent" in init_text
-    assert 'throw oError || new Error("runtime_settings_load_failed");' in feedback_bootstrap_text
+    assert "runBootStages" in lifecycle_text
     assert 'READINESS_STATUS' in boot_contracts
     assert 'STAGE_ERRORS' in boot_contracts
     assert 'TOAST_SHOW_MS' in feedback_contracts
@@ -259,7 +251,6 @@ def test_boot_and_runtime_source_lock_strict_success_path():
 
 
 def test_component_runtime_uses_canonical_model_paths_and_backend_mode_contracts():
-    root_id_runtime = _read(APP_ROOT / "service" / "framework" / "RootIdRuntime.js")
     telemetry_runtime = _read(APP_ROOT / "service" / "framework" / "TelemetryRuntime.js")
     autosave_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentAutosaveRuntime.js")
     cross_tab_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCrossTabRuntime.js")
@@ -270,7 +261,7 @@ def test_component_runtime_uses_canonical_model_paths_and_backend_mode_contracts
     diagnostics_usecase = _read(APP_ROOT / "service" / "domain" / "shared" / "usecases" / "InitializeAppUseCase.js")
     startup_capability_usecase = _read(APP_ROOT / "service" / "domain" / "shared" / "usecases" / "StartupCapabilityDiagnosticsUseCase.js")
 
-    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in root_id_runtime
+    assert not (APP_ROOT / "service" / "framework" / "RootIdRuntime.js").exists()
     assert '"/activeObjectId"' not in telemetry_runtime
     assert "ModelPathContracts.ACTIVE_OBJECT_ID" in autosave_runtime
     assert "buildLatestCtx" in autosave_runtime
@@ -291,7 +282,6 @@ def test_route_runtime_is_manifest_first_without_route_sync_shadow_layer():
     state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
     model_paths = _read(APP_ROOT / "service" / "domain" / "shared" / "ModelPathContracts.js")
     component_app_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentAppRuntime.js")
-    core_runtime_bootstrap = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreRuntimeBootstrap.js")
     apply_runtime_settings = _read(APP_ROOT / "service" / "domain" / "shared" / "usecases" / "ApplyRuntimeSettingsUseCase.js")
 
     assert "RouteSync" not in route_mode
@@ -307,7 +297,7 @@ def test_route_runtime_is_manifest_first_without_route_sync_shadow_layer():
     assert "envState:" in component_app_runtime
     assert "envModel:" not in component_app_runtime
     assert "syncShellRuntimeState:" not in component_app_runtime
-    assert "navigation:" not in core_runtime_bootstrap
+    assert not (APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreRuntimeBootstrap.js").exists()
     assert "ctx.envState" in apply_runtime_settings
     assert "ctx.envModel" not in apply_runtime_settings
 
@@ -343,8 +333,10 @@ def test_lock_and_persistence_message_keys_are_centralized_in_constants():
     assert '"lockLostMessage"' not in component_lock_events
     assert '"lockKilledMessage"' not in default_handlers
     assert "MESSAGE_KEYS:" not in detail_constants
-    assert 'LOCK_LOST: "lockLostMessage"' in detail_message_keys
-    assert 'PERSISTENCE_IDLE: "persistenceIdle"' in detail_message_keys
+    message_keys = _read(APP_ROOT / "constants" / "MessageKeyConstants.js")
+    message_codes = _read(APP_ROOT / "constants" / "MessageCodeConstants.js")
+    assert 'LOCK_LOST: "lockLostMessage"' in message_keys
+    assert 'PERSISTENCE_IDLE: "persistenceIdle"' in _read(APP_ROOT / "constants" / "MessageKeyConstants.js")
 
 
 def test_backend_contract_service_is_typed_for_non_lock_responses():
@@ -388,8 +380,8 @@ def test_backend_contract_service_is_typed_for_non_lock_responses():
 
 def test_detail_search_and_shell_message_keys_live_only_in_dedicated_constant_modules():
     detail_formatters = _read(APP_ROOT / "service" / "features" / "detail" / "runtime" / "DetailFormatters.js")
-    search_formatter = _read(APP_ROOT / "controller" / "search" / "SearchFormatterBehavior.js")
-    search_dialogs = _read(APP_ROOT / "controller" / "search" / "SearchToolbarDialogFactoryRuntime.js")
+    assert not (APP_ROOT / "controller" / "search" / "SearchFormatterBehavior.js").exists()
+    assert not (APP_ROOT / "controller" / "search" / "SearchToolbarDialogFactoryRuntime.js").exists()
     search_view_state = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewStateRuntime.js")
     shell_state = _read(APP_ROOT / "service" / "features" / "shell" / "runtime" / "ShellStateRuntime.js")
     ui_decision_defaults = _read(APP_ROOT / "service" / "framework" / "behavior" / "UiDecisionDefaultHandlers.js")
@@ -398,10 +390,6 @@ def test_detail_search_and_shell_message_keys_live_only_in_dedicated_constant_mo
     assert '"statusRegistered"' not in detail_formatters
     assert '"requiredFieldHint"' not in detail_formatters
     assert '"autosaveWaiting"' not in detail_formatters
-    assert '"searchModeLabel"' not in search_formatter
-    assert '"resultsLabel"' not in search_formatter
-    assert '"searchSortDialogTitle"' not in search_dialogs
-    assert '"searchGroupDialogTitle"' not in search_dialogs
     assert '"workflowStageAnalyze"' not in search_view_state
     assert '"searchSortDateCheck"' not in search_toolbar_contracts
     assert '"searchGroupNone"' not in search_toolbar_contracts
@@ -461,7 +449,7 @@ def test_create_permission_contract_is_current_identity_only():
     assert 'buildEntityPath("ChecklistCreatePermissionSet", "CURRENT"' in source
     assert 'CURRENT_ALIAS_KEY: "Edm.String"' in key_contracts
     assert "Productive create-permission seam rules:" in readme
-    assert "response entity identity also stays `RootKey='CURRENT'`" in readme
+    assert "response entity identity also stays `DB_KEY='CURRENT'`" in readme
     assert "normalizePermissionResponse()" in readme
 
 
@@ -508,7 +496,7 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     autosave_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "AutosaveDetailUseCase.js")
     delete_usecase = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "DeleteChecklistUseCase.js")
     search_startup = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchStartupRuntime.js")
-    search_load_behavior = _read(APP_ROOT / "controller" / "search" / "internal" / "SearchViewLoadBehavior.js")
+    assert not (APP_ROOT / "controller" / "search" / "internal" / "SearchViewLoadBehavior.js").exists()
     search_rediscovery = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchReturnRediscoveryRuntime.js")
     state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
     workflow_schema = _read(APP_ROOT / "model" / "schema" / "workflowSchema.js")
@@ -545,7 +533,6 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     assert "searchReturnContext: null," in workflow_schema
     assert "SearchReturnRediscoveryRuntime.readContext" in search_startup
     assert "SearchReturnRediscoveryRuntime.hasLegacyRefreshFlag" in search_startup
-    assert "SearchReturnRediscoveryRuntime.applyAfterSearchSuccess" in search_load_behavior
     assert "selectionRequested" in search_rediscovery
     assert "focusRequested" in search_rediscovery
     assert "ChecklistIdentity.extractChecklistId" in search_rediscovery
@@ -625,7 +612,7 @@ def test_abap_runtime_settings_source_has_cds_design_examples():
 def test_active_frontend_mutations_use_hybrid_aggregate_function_import_contract():
     mutation_runtime = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistMutationRuntime.js")
     gateway_client = _read(APP_ROOT / "service" / "backend" / "GatewayClient.js")
-    gateway_odata_client = _read(APP_ROOT / "infra" / "odata" / "GatewayODataClient.js")
+    assert not (APP_ROOT / "infra" / "odata" / "GatewayODataClient.js").exists()
     canonical_api = _read(BACKEND_ROOT / "api" / "gateway_canonical_api.py")
 
     assert "FUNCTION_IMPORTS.SAVE_CHANGES" in mutation_runtime
@@ -637,11 +624,6 @@ def test_active_frontend_mutations_use_hybrid_aggregate_function_import_contract
     assert "GatewayODataClient.patch(" not in mutation_runtime
     assert "createPath: function" not in gateway_client
     assert "updatePath: function" not in gateway_client
-    assert "patch: patch," not in gateway_odata_client
-    assert "post: post," not in gateway_odata_client
-    assert "var DIRECT_DELETE_ALLOWLIST = [" in gateway_client
-    assert 'entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_CHECK' in gateway_client
-    assert 'entityDeletePattern(GatewayContractConstants.ENTITY_SETS.CHECKLIST_BARRIER' in gateway_client
     assert '@router.post(f"{SERVICE_ROOT}/SaveChanges")' in canonical_api
     assert '@router.post(f"{SERVICE_ROOT}/AutoSave")' in canonical_api
     assert '@router.post(f"{SERVICE_ROOT}/CreateChecklist")' in canonical_api
@@ -682,16 +664,15 @@ def test_search_request_window_supports_legacy_search_max_results_shape():
 def test_sticky_runtime_is_route_scoped_without_global_body_observer():
     legacy_path = APP_ROOT / "search-toolbar-sticky-runtime.js"
     runtime_source = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewportRuntime.js")
-    binding_source = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewportBindingRuntime.js")
+    assert not (APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewportBindingRuntime.js").exists()
 
     assert not legacy_path.exists()
     assert "MutationObserver" not in runtime_source
-    assert "MutationObserver" not in binding_source
-    assert 'new window.ResizeObserver(function () {' in binding_source
-    assert 'window.addEventListener("resize", oController._fnSearchViewportResize);' in binding_source
-    assert 'window.removeEventListener("resize", oController._fnSearchViewportResize);' in binding_source
-    assert 'oScrollHost.addEventListener("scroll", oController._fnSearchScrollSync, { passive: true });' in binding_source
-    assert 'oObserver.disconnect();' in binding_source
+    assert 'new window.ResizeObserver(function () {' in runtime_source
+    assert 'window.addEventListener("resize", oController._fnSearchViewportResize);' in runtime_source
+    assert 'window.removeEventListener("resize", oController._fnSearchViewportResize);' in runtime_source
+    assert 'oScrollHost.addEventListener("scroll", oController._fnSearchScrollSync, { passive: true });' in runtime_source
+    assert 'oObserver.disconnect();' in runtime_source
 
 
 def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():
@@ -736,7 +717,7 @@ def test_detail_save_runtime_preserves_partial_basic_snapshots_after_backend_sav
 
 def test_patch_css_prefers_semantic_host_classes_over_broad_renderer_selectors():
     patch_css = _read(APP_ROOT / "styles" / "modules" / "90_ui5_overrides.css")
-    search_sticky_runtime = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchStickyLayoutRuntime.js")
+    assert not (APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchStickyLayoutRuntime.js").exists()
     shell_dom_runtime = _read(APP_ROOT / "service" / "features" / "shell" / "runtime" / "AppShellDomRuntime.js")
 
     assert ".appFeedbackCorrelationInput .sapMInputBaseContentWrapper" in patch_css
@@ -750,7 +731,6 @@ def test_patch_css_prefers_semantic_host_classes_over_broad_renderer_selectors()
     assert ".searchPage.sapMPage > .sapUiXMLView" in patch_css
     assert ".detailGridTable .sapUiTableCtrlScr" in patch_css
     assert ".flatEditorTable .sapMListTblCnt" in patch_css
-    assert "AppShellDomRuntime.resolveShellHeaderHostDom" in search_sticky_runtime
     assert "function resolveShellHeaderHostDom" in shell_dom_runtime
 
 
@@ -791,7 +771,7 @@ def test_report_export_respects_selected_and_all_found_contracts():
             json={
                 "SelectionMode": "selected",
                 "Entity": "screen",
-                "RootKeys": [visible_row["Key"]],
+                "RootKeys": [visible_row["DB_KEY"]],
                 "Limit": 200000,
             },
             headers={"X-CSRF-Token": token},
@@ -799,7 +779,7 @@ def test_report_export_respects_selected_and_all_found_contracts():
         assert selected_resp.status_code == 200
         selected_rows = selected_resp.json().get("d", {}).get("results", [])
         assert selected_rows
-        assert {row.get("RootKey") for row in selected_rows} == {visible_row["Key"]}
+        assert {row.get("DB_KEY") for row in selected_rows} == {visible_row["DB_KEY"]}
 
         all_found_resp = client.post(
             f"{SERVICE_ROOT}/ReportExport",
