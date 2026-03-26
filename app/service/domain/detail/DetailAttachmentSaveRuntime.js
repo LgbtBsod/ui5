@@ -13,6 +13,22 @@ sap.ui.define([
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
 
+    function uploadPendingAttachments(oRepo, sRootId, aCurrentAttachments, sSessionGuid) {
+        var aPendingUploads = DetailAttachmentDeltaRuntime.listPendingStagedAttachments(aCurrentAttachments, sRootId);
+        if (!sRootId || !aPendingUploads.length || !oRepo || typeof oRepo.uploadAttachment !== "function") {
+            return Promise.resolve([]);
+        }
+        return Promise.all(aPendingUploads.map(function (oPending) {
+            return Promise.resolve(oRepo.uploadAttachment({
+                rootId: sRootId,
+                sessionGuid: sSessionGuid,
+                attachment: oPending
+            })).catch(function () {
+                return null;
+            });
+        }));
+    }
+
     function syncAfterSave(mOptions) {
         var oRepo = mOptions.repo;
         var sRootId = String(mOptions.rootId || "").trim();
@@ -21,13 +37,16 @@ sap.ui.define([
         var oSavedSnapshot = mOptions.savedSnapshot || {};
         var sServerRootId = String(mOptions.serverRootId || "").trim();
         var bNeedsAttachmentReload = bCreate || !!mOptions.hasStagedPayload;
+        var sEffectiveRootId = sServerRootId || sRootId;
 
-        return DetailAttachmentDeltaRuntime.refreshAttachments(
-            oRepo,
-            sServerRootId || sRootId,
-            aCurrentAttachments,
-            bNeedsAttachmentReload
-        ).then(function (aSyncedAttachmentsRaw) {
+        return uploadPendingAttachments(oRepo, sEffectiveRootId, aCurrentAttachments, mOptions.sessionGuid).then(function () {
+            return DetailAttachmentDeltaRuntime.refreshAttachments(
+                oRepo,
+                sEffectiveRootId,
+                aCurrentAttachments,
+                bNeedsAttachmentReload || DetailAttachmentDeltaRuntime.hasPendingStagedAttachments(aCurrentAttachments)
+            );
+        }).then(function (aSyncedAttachmentsRaw) {
             var aSyncedAttachments = DetailAttachmentDeltaRuntime.stripStagedAttachmentInternals(aSyncedAttachmentsRaw);
             var bHasPendingAttachments = DetailAttachmentDeltaRuntime.hasPendingStagedAttachments(aCurrentAttachments);
             var oSelectedSnapshot = Object.assign({}, oSavedSnapshot, { attachments: aSyncedAttachments });

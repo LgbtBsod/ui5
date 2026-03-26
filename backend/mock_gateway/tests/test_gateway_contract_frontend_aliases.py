@@ -141,18 +141,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
                 },
                 "checks": [{"ChecksNum": 1, "text": "Check via create payload", "result": False}],
                 "barriers": [{"BarriersNum": 1, "comment": "Barrier via create payload", "result": True}],
-                "attachments": [{
-                    "Key": "TMP-ATT-100",
-                    "CategoryKey": "GEN",
-                    "Type": "GEN",
-                    "FileName": "create-note.txt",
-                    "Name": "create-note.txt",
-                "MimeType": "text/plain",
-                "Description": "Created with checklist",
-                "FileSize": 12,
-                "FileSizeContent": 12,
-                "ContentBase64": "aGVsbG8gY3JlYXRl"
-            }],
+                "attachments": [],
         }
         }
         created = client.post(f"{SERVICE_ROOT}/CreateChecklist", json=create_payload, headers={"X-CSRF-Token": token})
@@ -196,18 +185,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
             "root": {"pcct_uuid": created_key, "equipment": "Pump Local A2"},
             "checks": [],
             "barriers": [],
-            "attachments": [{
-                "Key": "TMP-ATT-200",
-                "CategoryKey": "GEN",
-                "Type": "GEN",
-                "FileName": "save-note.txt",
-                "Name": "save-note.txt",
-                "MimeType": "text/plain",
-                "Description": "Saved with checklist",
-                "FileSize": 10,
-                "FileSizeContent": 10,
-                "ContentBase64": "c2F2ZSBub3Rl"
-            }],
+            "attachments": [],
             "client_version": 1,
             "SessionGuid": "S2",
         }

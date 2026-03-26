@@ -1,3 +1,6 @@
+app/service/framework/Ui5RuntimeFacade.js
+app/test/unit/framework/Ui5RuntimeFacade.qunit.js
+app/service/runtime/component/ComponentBootstrapDependencyBuilder.js
 app/service/runtime/component/ComponentMainServiceRuntime.js
 app/service/runtime/component/ComponentModelBootstrap.js
 app/service/runtime/component/ComponentGuardedSaveRuntime.js
@@ -15,3 +18,6 @@ app/service/framework/CtxModelResolver.js
 app/service/framework/CtxCacheRuntimeFactory.js
 app/test/unit/framework/ComponentMainServiceRuntime.qunit.js
 app/test/unit/framework/ComponentModelBootstrap.qunit.js
+app/service/features/detail/runtime/AttachmentValueCodec.js
+app/service/framework/AppShellCoordinator.js
+2026-03-27 final production-readiness delta: no additional safe deletions in this pass.

@@ -5,9 +5,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ValueTokenParser",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeTokenRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade"
-], function (Core, Parameters, ThemeContracts, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime, Ui5RuntimeFacade) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
+], function (Core, Parameters, ThemeContracts, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime) {
     "use strict";
 
     var SWITCH_CLASS = ThemeContracts.CLASSES.SWITCHING;
@@ -183,7 +182,9 @@ sap.ui.define([
         var oNodes = ThemeDomRuntime.getNodes();
         iSwitchTimer = SchedulingRuntime.clearTimer(iSwitchTimer);
         if (fnThemeChangedCleanup) {
-            Ui5RuntimeFacade.detachThemeChanged(fnThemeChangedCleanup);
+            if (Core && typeof Core.detachThemeChanged === "function") {
+                Core.detachThemeChanged(fnThemeChangedCleanup);
+            }
             fnThemeChangedCleanup = null;
         }
         sPendingMode = "";
@@ -209,7 +210,9 @@ sap.ui.define([
                     clearSwitching();
                 });
             };
-            Ui5RuntimeFacade.attachThemeChanged(fnThemeChangedCleanup);
+            if (Core && typeof Core.attachThemeChanged === "function") {
+                Core.attachThemeChanged(fnThemeChangedCleanup);
+            }
         }
         iSwitchTimer = SchedulingRuntime.restartTimer(iSwitchTimer, function () {
             clearSwitching();

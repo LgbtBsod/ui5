@@ -1,11 +1,11 @@
 sap.ui.define([
+    "sap/ui/core/Core",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
-], function (ControllerTextRuntime, CreateSentinel, WorkflowContracts, Ui5RuntimeFacade, MessageKeyConstants, UiSemanticConstants) {
+], function (Core, ControllerTextRuntime, CreateSentinel, WorkflowContracts, MessageKeyConstants, UiSemanticConstants) {
     "use strict";
 
     var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
@@ -108,23 +108,28 @@ sap.ui.define([
         });
     }
 
-    function formatDateTimeCardValue(sDate, sTime, sTimezone) {
+    function formatDateTimeCardValue(oController, sDate, sTime, sTimezone) {
         var sHumanDate = formatHumanDate(sDate) || "-";
         var sTimeValue = String(sTime || "-");
         var sTimezoneValue = String(sTimezone || "-");
         return [
-            "Date: " + sHumanDate,
-            "Time: " + sTimeValue,
-            "Timezone: " + sTimezoneValue
+            text(oController, "dateLabel") + ": " + sHumanDate,
+            text(oController, "timeLabel") + ": " + sTimeValue,
+            text(oController, "timezoneLabel") + ": " + sTimezoneValue
         ].join("\n");
     }
 
     function formatAutosaveTime(vValue) {
         var oDate = parseDateLike(vValue);
+        var oConfiguration;
+        var oLanguageTag;
+        var sLanguageTag = "";
         if (!oDate) {
             return vValue || "-";
         }
-        var sLanguageTag = Ui5RuntimeFacade.getLanguageTag();
+        oConfiguration = Core && typeof Core.getConfiguration === "function" ? Core.getConfiguration() : null;
+        oLanguageTag = oConfiguration && typeof oConfiguration.getLanguageTag === "function" ? oConfiguration.getLanguageTag() : null;
+        sLanguageTag = oLanguageTag && typeof oLanguageTag.toString === "function" ? String(oLanguageTag.toString() || "") : "";
         try {
             return oDate.toLocaleTimeString(sLanguageTag || undefined, {
                 hour: "2-digit",
@@ -354,7 +359,7 @@ sap.ui.define([
 
         formatInfoCardValue: function (sKey, sDate, sTime, sTimezone, sEquipment, _sObserver, _sObserved, sLocationName, sLocationText, sLpcText, sProfText) {
             var mByKey = {
-                datetime: formatDateTimeCardValue(sDate, sTime, sTimezone),
+                datetime: formatDateTimeCardValue(this, sDate, sTime, sTimezone),
                 equipment: [sEquipment],
                 location: [sLocationName || sLocationText],
                 lpc: [sLpcText],

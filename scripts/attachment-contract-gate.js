@@ -73,6 +73,17 @@ appFiles.forEach((file) => {
   });
 });
 
+appFiles.forEach((file) => {
+  const relative = rel(file);
+  if (relative.includes('__pycache__')) {
+    return;
+  }
+  const text = fs.readFileSync(file, 'utf8');
+  if (/ContentBase64/.test(text) && !/app\/infra\/adapters\/shared\/AttachmentRepoRuntime\.js$/.test(relative) && !/backend\/mock_gateway\//.test(relative)) {
+    issues.push(`${relative} uses ContentBase64 outside the gateway attachment upload boundary`);
+  }
+});
+
 if (issues.length) {
   console.log(['FAIL attachment-contract-gate', ...issues.map((issue) => `- ${issue}`)].join('\n'));
   process.exit(1);

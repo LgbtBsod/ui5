@@ -118,8 +118,7 @@ sap.ui.define([
       file_name: String(pickValue(oRow, IDENTITY.FILE_NAME_FIELDS) || "").trim(),
       mime_type: String(pickValue(oRow, IDENTITY.MIME_TYPE_FIELDS) || "application/octet-stream").trim() || "application/octet-stream",
       description: String(pickValue(oRow, ["Description", "description"]) || "").trim(),
-      file_size: Number(pickValue(oRow, IDENTITY.FILE_SIZE_FIELDS) || 0) || 0,
-      value: String(pickValue(oRow, IDENTITY.INLINE_VALUE_FIELDS) || "").trim()
+      file_size: Number(pickValue(oRow, IDENTITY.FILE_SIZE_FIELDS) || 0) || 0
     };
   }
 

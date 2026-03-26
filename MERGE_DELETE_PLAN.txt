@@ -36,3 +36,11 @@ Remaining high-value candidates:
 - `app/controller/detail/*`
 - `app/controller/search/*`
 - pass-through `app/service/framework/*`
+Completed:
+- AppShellCoordinator.js -> App.controller.js
+- AttachmentValueCodec.js -> AttachmentRepoRuntime.js
+Completed in final production-readiness pass:
+- app/service/framework/Ui5RuntimeFacade.js -> direct sap/ui/core/Core usage in consuming owners
+  Why: thin proxy over stable public UI5 Core API with no boundary value.
+- app/service/runtime/component/ComponentBootstrapDependencyBuilder.js -> app/service/framework/ComponentBootstrap.js
+  Why: single-caller dependency grouping wrapper with no stable semantic boundary.

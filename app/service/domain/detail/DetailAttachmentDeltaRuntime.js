@@ -1,8 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/AttachmentValueCodec",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (AttachmentValueCodec, DeltaContracts, JsRuntime) {
+], function (DeltaContracts, JsRuntime) {
     "use strict";
 
     function readAttachmentKey(oAttachment) {
@@ -13,39 +12,15 @@ sap.ui.define([
         var sUploadState = String((oAttachment && oAttachment.uploadState) || "").trim().toUpperCase();
         return !!(
             oAttachment && (
-                (oAttachment.staged && (oAttachment._file || oAttachment._fileBase64)) ||
+                (oAttachment.staged && oAttachment._file) ||
                 sUploadState === "PENDINGUPLOAD" ||
                 sUploadState === "PENDING_UPLOAD"
             )
         );
     }
 
-    function buildStagedAttachmentPayload(oAttachment, sRootId) {
-        return AttachmentValueCodec.fileToBase64(oAttachment && oAttachment._file).then(function (sValue) {
-            return {
-                client_row_id: readAttachmentKey(oAttachment),
-        root_key: String((oAttachment && (oAttachment.DB_KEY || oAttachment.dbKey)) || sRootId || "").trim(),
-        parent_key: String((oAttachment && (oAttachment.PARENT_KEY || oAttachment.parentKey || oAttachment.ParentKey)) || sRootId || "").trim(),
-                folder_key: String((oAttachment && (oAttachment.FolderKey || oAttachment.folderKey || oAttachment.ParentKey || oAttachment.parentKey)) || sRootId || "").trim(),
-                category_key: String((oAttachment && (oAttachment.CategoryKey || oAttachment.categoryKey || oAttachment.Type || oAttachment.type)) || "GEN").trim() || "GEN",
-                file_name: String((oAttachment && (oAttachment.FileName || oAttachment.fileName || oAttachment.Name || oAttachment.name)) || "").trim(),
-                mime_type: String((oAttachment && (oAttachment.MimeType || oAttachment.mimeType)) || "application/octet-stream").trim() || "application/octet-stream",
-                description: String((oAttachment && (oAttachment.Description || oAttachment.description || oAttachment.Desc || oAttachment.desc)) || "").trim(),
-                file_size: Number((oAttachment && (oAttachment.FileSize || oAttachment.fileSize || oAttachment.FileSizeContent || oAttachment.fileSizeContent)) || 0) || 0,
-                value: sValue,
-                edit_mode: DeltaContracts.EDIT_MODE.CREATE
-            };
-        });
-    }
-
     function serializeStagedAttachments(aAttachments, sRootId) {
-        var aPending = (Array.isArray(aAttachments) ? aAttachments : []).filter(hasStagedFile);
-        if (!aPending.length) {
-            return Promise.resolve([]);
-        }
-        return Promise.all(aPending.map(function (oAttachment) {
-            return buildStagedAttachmentPayload(oAttachment, sRootId);
-        }));
+        return Promise.resolve([]);
     }
 
     function mergeDeltaAttachments(oDelta, aAttachmentRows) {
@@ -103,9 +78,27 @@ sap.ui.define([
         return (Array.isArray(aAttachments) ? aAttachments : []).map(function (oAttachment) {
             var oClean = Object.assign({}, oAttachment || {});
             delete oClean._file;
-            delete oClean.localObjectUrl;
             delete oClean.staged;
+            delete oClean.uploadState;
+            delete oClean.localObjectUrl;
             return oClean;
+        });
+    }
+
+    function listPendingStagedAttachments(aAttachments, sRootId) {
+        return (Array.isArray(aAttachments) ? aAttachments : []).filter(hasStagedFile).map(function (oAttachment) {
+            return {
+                attachmentId: readAttachmentKey(oAttachment),
+                dbKey: String((oAttachment && (oAttachment.DB_KEY || oAttachment.dbKey)) || "").trim(),
+                parentKey: String((oAttachment && (oAttachment.PARENT_KEY || oAttachment.parentKey || oAttachment.ParentKey)) || sRootId || "").trim(),
+                folderKey: String((oAttachment && (oAttachment.FolderKey || oAttachment.folderKey)) || sRootId || "").trim(),
+                categoryKey: String((oAttachment && (oAttachment.CategoryKey || oAttachment.categoryKey || oAttachment.Type || oAttachment.type)) || "GEN").trim() || "GEN",
+                fileName: String((oAttachment && (oAttachment.FileName || oAttachment.fileName || oAttachment.Name || oAttachment.name)) || "").trim(),
+                mimeType: String((oAttachment && (oAttachment.MimeType || oAttachment.mimeType)) || "application/octet-stream").trim() || "application/octet-stream",
+                description: String((oAttachment && (oAttachment.Description || oAttachment.description || oAttachment.Desc || oAttachment.desc)) || "").trim(),
+                fileSize: Number((oAttachment && (oAttachment.FileSize || oAttachment.fileSize || oAttachment.FileSizeContent || oAttachment.fileSizeContent)) || 0) || 0,
+                file: oAttachment && oAttachment._file
+            };
         });
     }
 
@@ -116,6 +109,7 @@ sap.ui.define([
     return {
         cleanupStagedAttachmentUrls: cleanupStagedAttachmentUrls,
         hasPendingStagedAttachments: hasPendingStagedAttachments,
+        listPendingStagedAttachments: listPendingStagedAttachments,
         mergeDeltaAttachments: mergeDeltaAttachments,
         refreshAttachments: refreshAttachments,
         serializeStagedAttachments: serializeStagedAttachments,

@@ -1,0 +1,66 @@
+const fs = require("fs");
+const path = require("path");
+
+function read(relPath) {
+  return fs.readFileSync(path.join(__dirname, "..", relPath), "utf8");
+}
+
+const issues = [];
+const metadata = read("app/localService/metadata.xml");
+const lockAdapter = read("app/infra/adapters/LockAdapter.js");
+const dpc = read("backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap");
+
+if (!/FunctionImport Name="LockAcquire"[\s\S]*?<Parameter Name="DB_KEY"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: LockAcquire must expose DB_KEY as the canonical lock key");
+}
+
+if (!/FunctionImport Name="LockHeartbeat"[\s\S]*?<Parameter Name="DB_KEY"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: LockHeartbeat must expose DB_KEY as the canonical lock key");
+}
+
+if (!/FunctionImport Name="LockRelease"[\s\S]*?<Parameter Name="DB_KEY"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: LockRelease must expose DB_KEY as the canonical lock key");
+}
+
+if (!/FunctionImport Name="CopyChecklist"[\s\S]*?<Parameter Name="DB_KEY"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: CopyChecklist must expose DB_KEY as the canonical root key");
+}
+
+if (/ObjectUuid/.test(lockAdapter)) {
+  issues.push("app/infra/adapters/LockAdapter.js: frontend canonical lock surface must not use ObjectUuid");
+}
+
+const mutationRuntime = read("app/infra/adapters/shared/ODataChecklistMutationRuntime.js");
+if (/SourceUuid/.test(mutationRuntime)) {
+  issues.push("app/infra/adapters/shared/ODataChecklistMutationRuntime.js: copy contract must not use SourceUuid on the frontend canonical surface");
+}
+
+["lockacquire_create_entity", "lockheartbeat_create_entity", "lockrelease_create_entity"].forEach((methodName) => {
+  const methodMatch = dpc.match(new RegExp(`METHOD ${methodName}\\.[\\s\\S]*?ENDMETHOD\\.`, "i"));
+  const methodBody = methodMatch ? methodMatch[0] : "";
+  if (!methodBody) {
+    issues.push(`backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap: method ${methodName} not found`);
+    return;
+  }
+  if (!/ls_req-db_key/.test(methodBody)) {
+    issues.push(`backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap: ${methodName} must read canonical DB_KEY`);
+  }
+});
+
+const mpc = read("backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap");
+if (!/CopyChecklist[\s\S]*?iv_name = 'DB_KEY'/.test(mpc)) {
+  issues.push("backend/sap_backend/src/zcl_zodata_mpc_ext.clas.abap: CopyChecklist must define DB_KEY as canonical parameter");
+}
+
+const fallbackCount = (dpc.match(/ObjectUuid/g) || []).length;
+if (fallbackCount > 4) {
+  issues.push("backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap: ObjectUuid compatibility alias leaked beyond narrow backend boundary");
+}
+
+if (issues.length) {
+  console.error("Lock contract naming gate failed:");
+  issues.forEach((issue) => console.error(" - " + issue));
+  process.exit(1);
+}
+
+console.log("Lock contract naming gate: OK");

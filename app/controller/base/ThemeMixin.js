@@ -1,8 +1,8 @@
 sap.ui.define([
+    "sap/ui/core/Core",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade"
-], function (ThemeContracts, ThemeService, Ui5RuntimeFacade) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService"
+], function (Core, ThemeContracts, ThemeService) {
     "use strict";
 
     /* Этот блок задает единственный допустимый визуальный режим приложения.
@@ -31,7 +31,9 @@ sap.ui.define([
         oController._fnThemeChangedHandler = function () {
             ThemeService.syncTokensFromUI5();
         }.bind(oController);
-        Ui5RuntimeFacade.attachThemeChanged(oController._fnThemeChangedHandler);
+        if (Core && typeof Core.attachThemeChanged === "function") {
+            Core.attachThemeChanged(oController._fnThemeChangedHandler);
+        }
     }
 
     /* Этот блок применяет канонический утренний режим и при необходимости сохраняет профиль.

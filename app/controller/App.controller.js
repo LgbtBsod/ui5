@@ -2,10 +2,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller",
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/AppShellCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
@@ -31,17 +31,17 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/Ui5RuntimeFacade",
+    "sap/ui/core/Core",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/AppShellDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime"
 ], function (
     BaseController,
     ControllerResourceCleanup,
     ControllerTextRuntime,
-    AppShellCoordinator,
     ControllerModelRuntime,
     ModelStateRuntime,
     SchedulingRuntime,
+    RouteModeCoordinator,
     NavigationContracts,
     ReadinessTelemetryContracts,
     ReadinessTelemetryRuntime,
@@ -67,7 +67,7 @@ sap.ui.define([
     NavigationIntentService,
     UiDecisionDefaultHandlers,
     ThemeDomRuntime,
-    Ui5RuntimeFacade,
+    Core,
     AppShellDomRuntime,
     SemanticDomRuntime
 ) {
@@ -247,9 +247,43 @@ sap.ui.define([
         }, _RESIZE_END_DELAY_MS);
     }
 
+    function initializeAppShell(oController) {
+        var oApplied = oController.applyStoredTheme();
+        var oState = ControllerModelRuntime.state(oController);
+        var oShell = ControllerModelRuntime.shell(oController);
+        var oModelPatch = {};
+
+        if (oShell) {
+            ModelStateRuntime.setManyOnModel(oShell, {
+                [MODEL_PATHS.SHELL_THEME_MODE]: "morning",
+                [MODEL_PATHS.SHELL_ANIMATION_ENABLED]: !oApplied || oApplied.animationEnabled !== false,
+                [MODEL_PATHS.SHELL_LAYOUT]: ModelStateRuntime.readOnModel(oShell, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN) || NavigationContracts.LAYOUTS.ONE_COLUMN
+            });
+        }
+        if (oState) {
+            oModelPatch[ModelPathContracts.SELECTED_ID] = typeof ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, undefined) === "undefined"
+                ? null
+                : ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, null);
+            ModelStateRuntime.setManyOnModel(oState, oModelPatch);
+            if (!oController._oRouteModeCoordinator) {
+                oController._oRouteModeCoordinator = new RouteModeCoordinator({
+                    router: oController.getRouter(),
+                    stateModel: oState
+                });
+                oController._oRouteModeCoordinator.start();
+            }
+        }
+    }
+
+    function teardownAppShell(oController) {
+        if (oController && oController._oRouteModeCoordinator) {
+            oController._oRouteModeCoordinator.stop();
+            oController._oRouteModeCoordinator = null;
+        }
+    }
+
     return BaseController.extend("PRODUCTION_CONTROL_CHECKLIST.controller.App", {
         onInit: function () {
-            AppShellCoordinator.onInit(this);
             this._mShellOverlays = {};
             this._mShellOverlayTriggers = {};
             this._mShellOverlaySkipRestore = {};
@@ -262,6 +296,7 @@ sap.ui.define([
             this._bindLayoutSync();
             this._bindShellStateSync();
             this._bindShellPaneRouting();
+            initializeAppShell(this);
             this._fnViewportResize = this._syncResponsiveViewport.bind(this);
             Device.resize.attachHandler(this._fnViewportResize);
             this._syncResponsiveViewport();
@@ -337,11 +372,11 @@ sap.ui.define([
             if (typeof this._teardownAppDomRuntime === TYPE_FUNCTION) {
                 this._teardownAppDomRuntime();
             }
-            AppShellCoordinator.onExit(this);
+            teardownAppShell(this);
         },
 
         onToggleTheme: function () {
-            AppShellCoordinator.onToggleTheme(this, null);
+            this.toggleTheme(null);
             this._syncShellState();
         },
 
@@ -350,7 +385,7 @@ sap.ui.define([
             if (!sMode) {
                 return;
             }
-            AppShellCoordinator.onSetThemeMode(this, sMode);
+            this.setThemeMode(sMode);
             this._syncShellState();
         },
 
@@ -392,7 +427,7 @@ sap.ui.define([
 
         onToggleThemeAnimation: function (oEvent) {
             var bState = ModelStateRuntime.writeBoolean(this, SHELL_MODEL, MODEL_PATHS.SHELL_ANIMATION_ENABLED, oEvent && oEvent.getParameter && oEvent.getParameter("state"));
-            AppShellCoordinator.onToggleThemeAnimation(this, bState);
+            this.setThemeAnimationEnabled(bState);
             return bState;
         },
 
@@ -509,7 +544,7 @@ sap.ui.define([
         },
 
         _syncStaticAreaScope: function () {
-            var oStaticArea = Ui5RuntimeFacade.getStaticAreaRef();
+            var oStaticArea = Core && typeof Core.getStaticAreaRef === TYPE_FUNCTION ? Core.getStaticAreaRef() : null;
             if (!oStaticArea) {
                 return;
             }

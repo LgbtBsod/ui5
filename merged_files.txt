@@ -1,3 +1,5 @@
+app/service/framework/Ui5RuntimeFacade.js -> direct sap/ui/core/Core usage in App.controller.js + ThemeMixin.js + ThemeService.js + DetailFormatters.js
+app/service/runtime/component/ComponentBootstrapDependencyBuilder.js -> app/service/framework/ComponentBootstrap.js
 app/service/runtime/component/ComponentMainServiceRuntime.js -> app/service/framework/ComponentBootstrap.js
 app/service/runtime/component/ComponentModelBootstrap.js -> app/service/framework/ComponentBootstrap.js
 app/service/runtime/component/ComponentGuardedSaveRuntime.js -> app/service/runtime/component/ComponentSaveGuardRuntime.js
@@ -13,3 +15,6 @@ app/service/framework/execution/behavior/UiDecisionBehaviorHelpers.js -> app/ser
 app/service/framework/execution/UiDecisionCoordinator.js -> direct consumers + app/service/framework/behavior/UiDecisionDefaultHandlers.js
 app/service/framework/CtxModelResolver.js -> app/service/framework/CtxRuntimeFactory.js
 app/service/framework/CtxCacheRuntimeFactory.js -> app/service/framework/CtxRuntimeFactory.js
+app/service/framework/AppShellCoordinator.js -> app/controller/App.controller.js
+app/service/features/detail/runtime/AttachmentValueCodec.js -> app/infra/adapters/shared/AttachmentRepoRuntime.js
+2026-03-27 final production-readiness delta: no additional safe merges in this pass.

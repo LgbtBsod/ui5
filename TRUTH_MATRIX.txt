@@ -35,3 +35,11 @@ Truth Matrix
 - Deleted thin UI decision helper: `UiDecisionBehaviorHelpers.js`
 - Deleted thin UI decision coordinator: `UiDecisionCoordinator.js`
 - Deleted legacy context wrappers: `CtxModelResolver.js`, `CtxCacheRuntimeFactory.js`
+Frontend root identity owner: DB_KEY
+Frontend lock request owner: app/infra/adapters/LockAdapter.js
+Backend lock compatibility fallback owner: backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap
+Attachment upload compatibility boundary owner: app/infra/adapters/shared/AttachmentRepoRuntime.js
+Final production-readiness pass:
+- UI5 core access owner: direct sap/ui/core/Core usage in consuming owners; Ui5RuntimeFacade.js removed.
+- Attachment save delta owner: app/service/shared/delta/DeltaFieldMappers.js without inline attachment value.
+- Deleted thin bootstrap dependency wrapper: app/service/runtime/component/ComponentBootstrapDependencyBuilder.js.

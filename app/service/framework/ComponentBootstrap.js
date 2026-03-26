@@ -11,7 +11,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/AutoSaveCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/ConnectivityCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/SettingsManager",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapDependencyBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
@@ -61,7 +60,6 @@ sap.ui.define([
     AutoSaveCoordinator,
     ConnectivityCoordinator,
     SettingsManager,
-    ComponentBootstrapDependencyBuilder,
     DeltaPayloadBuilder,
     CreateSentinel,
     GatewayClient,
@@ -100,6 +98,88 @@ sap.ui.define([
     BackendModeContracts
 ) {
     "use strict";
+
+    function buildGroupedDependencies(mStaticDeps) {
+        return {
+            core: {
+                UIComponent: mStaticDeps.UIComponent,
+                JSONModel: mStaticDeps.JSONModel,
+                Device: mStaticDeps.Device,
+                ModelFactory: mStaticDeps.ModelFactory,
+                ModelStateRuntime: mStaticDeps.ModelStateRuntime,
+                GatewayClient: mStaticDeps.GatewayClient,
+                DebugLogger: mStaticDeps.DebugLogger,
+                RuntimeTimerSanitizer: mStaticDeps.RuntimeTimerSanitizer,
+                TimeConfigService: mStaticDeps.TimeConfigService,
+                EffectApplier: mStaticDeps.EffectApplier,
+                FeedbackPolicy: mStaticDeps.FeedbackPolicy,
+                WorkflowCoordinator: mStaticDeps.WorkflowCoordinator,
+                TelemetryRuntime: mStaticDeps.TelemetryRuntime,
+                LayoutStateRuntime: mStaticDeps.LayoutStateRuntime,
+                ActionDispatcher: mStaticDeps.ActionDispatcher,
+                ActionContract: mStaticDeps.ActionContract,
+                WorkflowTelemetry: mStaticDeps.WorkflowTelemetry,
+                CreateSentinel: mStaticDeps.CreateSentinel,
+                DeltaPayloadBuilder: mStaticDeps.DeltaPayloadBuilder,
+                StatePaths: mStaticDeps.StatePaths,
+                SearchUiConfig: mStaticDeps.SearchUiConfig,
+                DetailFacade: mStaticDeps.DetailFacade
+            },
+            managers: {
+                Managers: Object.freeze({
+                    PollingManager: mStaticDeps.PollingManager,
+                    GCDManager: mStaticDeps.GCDManager,
+                    ActivityMonitor: mStaticDeps.ActivityMonitor,
+                    AutoSaveCoordinator: mStaticDeps.AutoSaveCoordinator,
+                    ConnectivityCoordinator: mStaticDeps.ConnectivityCoordinator,
+                    SettingsManager: mStaticDeps.SettingsManager
+                }),
+                managers: {}
+            },
+            runtime: {
+                ComponentAutosaveRuntime: ComponentAutosaveRuntime,
+                ComponentLockReleaseRuntime: ComponentLockReleaseRuntime,
+                ComponentSaveGuardRuntime: ComponentSaveGuardRuntime,
+                ComponentModelInitRuntime: ComponentModelInitRuntime,
+                ComponentRuntimeSettingsRuntime: ComponentRuntimeSettingsRuntime,
+                ComponentPollingRuntime: ComponentPollingRuntime,
+                ComponentCrossTabRuntime: ComponentCrossTabRuntime,
+                ComponentInitListenersRuntime: ComponentInitListenersRuntime,
+                ComponentLockEventsRuntime: ComponentLockEventsRuntime,
+                ComponentLifecycleRuntime: ComponentLifecycleRuntime
+            },
+            theme: {
+                ThemeRuntime: ThemeService
+            },
+            usecases: {
+                ApplyRuntimeSettingsUseCase: ApplyRuntimeSettingsUseCase,
+                EnsureDictLoadedUseCase: EnsureDictLoadedUseCase,
+                InitializeAppUseCase: InitializeAppUseCase,
+                LoadCurrentUserUseCase: LoadCurrentUserUseCase,
+                DiagnosticsUseCase: DiagnosticsUseCase
+            }
+        };
+    }
+
+    function flattenDependencyGroups(mGroups) {
+        return Object.assign({},
+            mGroups.core || {},
+            mGroups.managers || {},
+            mGroups.runtime || {},
+            mGroups.theme || {},
+            mGroups.usecases || {}
+        );
+    }
+
+    function attachManagerRuntime(mDeps) {
+        var mResolved = Object.assign({}, mDeps);
+        var oManagers = mResolved.Managers || {};
+        mResolved.managers = {};
+        mResolved.managers.GCDManager = oManagers.GCDManager;
+        mResolved.managers.ActivityMonitor = oManagers.ActivityMonitor;
+        mResolved.managers.AutoSaveCoordinator = oManagers.AutoSaveCoordinator;
+        return mResolved;
+    }
 
     function buildActionRuntimeOptions(oComponent, mDeps, mModels) {
         return {
@@ -186,10 +266,10 @@ sap.ui.define([
             LoadCurrentUserUseCase: LoadCurrentUserUseCase,
             DiagnosticsUseCase: DiagnosticsUseCase
         };
-        var mGroups = ComponentBootstrapDependencyBuilder.build(mStaticDeps);
-        var mDeps = ComponentBootstrapDependencyBuilder.flatten(mGroups);
+        var mGroups = buildGroupedDependencies(mStaticDeps);
+        var mDeps = flattenDependencyGroups(mGroups);
 
-        mDeps = ComponentBootstrapDependencyBuilder.withManagerRuntime(mDeps);
+        mDeps = attachManagerRuntime(mDeps);
         mDeps.ComponentRuntimeSupport = ComponentAppRuntime.buildComponentRuntimeSupport();
 
         return {

@@ -2189,7 +2189,7 @@ async def lock_acquire_function_import(request: Request, root_id: str | None = Q
     resolved_root_id = _boundary_root_key(merged, root_id, merged.get("ObjectUuid"))
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
-        return _err(400, "VALIDATION_ERROR", "ObjectUuid and SessionGuid are required")
+        return _err(400, "VALIDATION_ERROR", "DB_KEY and SessionGuid are required")
     return lock_control(_lock_import_payload("ACQUIRE", resolved_root_id, resolved_session_guid, merged), db)
 
 
@@ -2205,7 +2205,7 @@ async def lock_heartbeat_function_import(request: Request, root_id: str | None =
     resolved_root_id = _boundary_root_key(merged, root_id, merged.get("ObjectUuid"))
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
-        return _err(400, "VALIDATION_ERROR", "ObjectUuid and SessionGuid are required")
+        return _err(400, "VALIDATION_ERROR", "DB_KEY and SessionGuid are required")
     return lock_control(_lock_import_payload("HEARTBEAT", resolved_root_id, resolved_session_guid, merged), db)
 
 
@@ -2221,7 +2221,7 @@ async def lock_release_function_import(request: Request, root_id: str | None = Q
     resolved_root_id = _boundary_root_key(merged, root_id, merged.get("ObjectUuid"))
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
-        return _err(400, "VALIDATION_ERROR", "ObjectUuid and SessionGuid are required")
+        return _err(400, "VALIDATION_ERROR", "DB_KEY and SessionGuid are required")
     return lock_control(_lock_import_payload("RELEASE", resolved_root_id, resolved_session_guid, merged), db)
 
 

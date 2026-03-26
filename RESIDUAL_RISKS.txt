@@ -1,5 +1,11 @@
 Residual risks after final residual cleanup + key-model completion pass:
 
+Update after final production-readiness pass:
+- `Ui5RuntimeFacade` is removed, but broader controller/model wrapper cleanup is still incomplete; `ControllerModelRuntime` and `ControllerRouteRuntime` remain active across multiple consumers.
+- Lock naming governance is now gated in CI-style local validation, but backend compatibility alias handling still exists in `zcl_zodata_dpc_ext.clas.abap` for legacy requests by design.
+- Persisted attachment contract is now clean on the frontend save path, but upload ingress still relies on compatibility `ContentBase64` in `AttachmentRepoRuntime.js` because this repository does not provide a productive media-stream upload endpoint.
+- SAP internal CSS and DOM debt remain the largest unresolved production-readiness hotspot; this pass did not rewrite the heavy style modules or DOM-dependent shell/search runtime.
+
 1. Local browser click-through validation is still blocked by environment-level SAPUI5 package resolution.
    `npm.cmd run start` fails because `@sapui5/distribution-metadata@1.71.70` is not resolvable here.
 
@@ -21,3 +27,9 @@ Residual risks after final residual cleanup + key-model completion pass:
 
 4. SAP internal CSS debt is reduced at the allowlist level, but active private-selector use still remains in:
    - `app/styles/modules/controls/26_controls.css`
+- `scripts/dom-hack-gate.js` currently fails on broad legacy DOM coupling across controllers, shell runtime, search runtime and tests.
+- `scripts/sap-internal-css-gate.js` currently fails on widespread `.sap*` selector debt, especially in `app/styles/modules/23_dialogs.css`, `app/styles/modules/40_page_search.css` and several controls modules.
+- Attachment upload still uses compatibility `ContentBase64` at the gateway ingress boundary because this repository has no productive SAP media-stream upload endpoint to switch to.
+1. Attachment upload transport is still media-gap constrained by current backend/mock implementation. The persisted contract is canonical (`DownloadUrl` / `DocumentHandle`), but upload creation still crosses the boundary through `ContentBase64` in `app/infra/adapters/shared/AttachmentRepoRuntime.js` and `backend/mock_gateway/api/gateway_canonical_api.py`. This is isolated, gated, and documented, but not yet a true stream/media entity upload.
+2. SAP backend ABAP still keeps compatibility reads for `ObjectUuid` inside `zcl_zodata_dpc_ext.clas.abap` lock handlers. The canonical frontend surface is `DB_KEY`; the alias remains only as a narrow backend fallback until productive Gateway/DDIC structures are fully retired.
+3. CSS/DOM debt remains partially structural in search/dialog styling because several screens still rely on UI5 internal selectors for visual polish. Existing gates limit further spread, but a full public-API-only restyling would require coordinated XML/control refactoring beyond this pass.

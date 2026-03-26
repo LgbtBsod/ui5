@@ -168,6 +168,7 @@ sap.ui.define([
                         rootId: sRootId,
                         createMode: bCreate,
                         currentAttachments: aCurrentAttachments,
+                        sessionGuid: sSessionGuid,
                         savedResult: oSaved,
                         currentChecklist: oCurrent,
                         savedSnapshot: oInitialSavedSnapshot,

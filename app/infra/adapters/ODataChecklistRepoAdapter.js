@@ -70,7 +70,8 @@ sap.ui.define([
                 });
             },
             loadAttachments: AttachmentRepoRuntime.loadAttachments,
-            deleteAttachment: AttachmentRepoRuntime.deleteAttachment
+            deleteAttachment: AttachmentRepoRuntime.deleteAttachment,
+            uploadAttachment: AttachmentRepoRuntime.uploadAttachment
         };
     }
     return { create: create };

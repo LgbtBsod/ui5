@@ -58,7 +58,7 @@ sap.ui.define([
         var sRootId = mDeps.rootId(mArgs);
         var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
         return GatewayClient.callFunctionImport(FUNCTION_IMPORTS.COPY_CHECKLIST, {
-            SourceUuid: mDeps.normalizeRootKey(sRootId),
+            DB_KEY: mDeps.normalizeRootKey(sRootId),
             SessionGuid: sSessionGuid
         }).then(function (oServerPayload) {
             return mDeps.enrichServerSnapshot(oServerPayload, "").then(function (oServerSnapshot) {

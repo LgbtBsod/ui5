@@ -8,6 +8,28 @@ sap.ui.define([
 ], function (GatewayClient, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, ODataKeyNormalizer, GatewayContractConstants) {
     "use strict";
 
+    function stripDataUrlPrefix(sValue) {
+        return String(sValue || "").replace(/^data:.*?;base64,/i, "").trim();
+    }
+
+    function readTransientUploadPayload(oFile) {
+        return new Promise(function (resolve, reject) {
+            var oReader;
+            if (!oFile || typeof FileReader === "undefined" || typeof Blob === "undefined" || !(oFile instanceof Blob)) {
+                resolve("");
+                return;
+            }
+            oReader = new FileReader();
+            oReader.onload = function (oEvent) {
+                resolve(stripDataUrlPrefix(oEvent && oEvent.target && oEvent.target.result));
+            };
+            oReader.onerror = function () {
+                reject(new Error("ATTACHMENT_READ_FAILED"));
+            };
+            oReader.readAsDataURL(oFile);
+        });
+    }
+
     function normalizeRootKey(sRootId) {
         return ODataKeyNormalizer.normalizeBinaryKey(sRootId);
     }
@@ -64,9 +86,39 @@ sap.ui.define([
         });
     }
 
+    function uploadAttachment(mArgs) {
+        var oAttachment = (mArgs && mArgs.attachment) || {};
+        var sRootId = normalizeRootKey((mArgs && mArgs.rootId) || oAttachment.parentKey);
+        var sAttachmentId = String(oAttachment.attachmentId || oAttachment.AttachmentKey || "").trim().toUpperCase();
+        if (!sRootId || !oAttachment.file) {
+            return Promise.resolve(null);
+        }
+        return readTransientUploadPayload(oAttachment.file).then(function (sBase64) {
+            // Canonical persisted attachment state stays on DownloadUrl/DocumentHandle after save.
+            return GatewayClient.create("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
+                AttachmentKey: sAttachmentId || undefined,
+                DB_KEY: sRootId,
+                PARENT_KEY: sRootId,
+                FolderKey: String(oAttachment.folderKey || sRootId).trim(),
+                CategoryKey: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
+                Type: String(oAttachment.categoryKey || "GEN").trim() || "GEN",
+                FileName: String(oAttachment.fileName || "").trim(),
+                Name: String(oAttachment.fileName || "").trim(),
+                MimeType: String(oAttachment.mimeType || "application/octet-stream").trim() || "application/octet-stream",
+                Description: String(oAttachment.description || "").trim(),
+                FileSize: Number(oAttachment.fileSize || 0) || 0,
+                FileSizeContent: Number(oAttachment.fileSize || 0) || 0,
+                ContentBase64: sBase64
+            }).then(function (oResult) {
+                return ChecklistSnapshotMapper.mapAttachmentRow(ODataAdapterUtils.unwrap(oResult) || {});
+            });
+        });
+    }
+
     return {
         normalizeRootKey: normalizeRootKey,
         loadAttachments: loadAttachments,
-        deleteAttachment: deleteAttachment
+        deleteAttachment: deleteAttachment,
+        uploadAttachment: uploadAttachment
     };
 });

@@ -1,6 +1,10 @@
 # Merge Delete Plan
 
 ## Completed In This Pass
+- `app/service/framework/Ui5RuntimeFacade.js` -> direct `sap/ui/core/Core` usage in consuming owners
+  Why: file only proxied stable public UI5 Core APIs and duplicated standard framework surface without adding domain value.
+- `app/service/runtime/component/ComponentBootstrapDependencyBuilder.js` -> `app/service/framework/ComponentBootstrap.js`
+  Why: file only grouped and flattened bootstrap dependencies for a single caller and added naming overhead without an independent runtime boundary.
 - `app/service/runtime/component/ComponentMainServiceRuntime.js` -> `app/service/framework/ComponentBootstrap.js`
   Why: file only created the manifest-owned main service model and had no independent semantic boundary outside bootstrap.
 - `app/service/runtime/component/ComponentModelBootstrap.js` -> `app/service/framework/ComponentBootstrap.js`
@@ -36,3 +40,10 @@
 - thin wrappers in `app/controller/detail/*`
 - pass-through orchestration in `app/controller/search/*`
 - framework helper wrappers that only expose one forwarding function
+- Completed:
+  - `AppShellCoordinator.js` merged into `App.controller.js` because it only delegated init/theme/exit orchestration back to the controller.
+  - `AttachmentValueCodec.js` merged into `AttachmentRepoRuntime.js` because it was a thin shared base64 wrapper without a valid domain boundary.
+# Merge/Delete Delta
+
+- No extra file deletions were executed in this pass because the remaining wrapper-sprawl candidates are still cross-wired through controller/runtime tests and require a broader semantic merge, not blind removal.
+- No extra file merges were executed in this pass for the same reason; contract drift remediation was prioritized over risky structural churn.

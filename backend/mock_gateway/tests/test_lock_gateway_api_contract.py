@@ -93,3 +93,20 @@ def test_lock_release_wrong_session_does_not_report_free():
         assert body.get("ReasonCode") == "LOCKED_BY_OTHER"
         assert body.get("Action") == "FAILED"
         assert body.get("OwnerSession") == "S1"
+
+
+def test_copy_checklist_uses_canonical_db_key_query_parameter():
+    root_id = str(uuid.uuid4())
+    _create_root(root_id)
+
+    with TestClient(app) as client:
+        token = _csrf(client)
+        copied = client.post(
+            f"{SERVICE_ROOT}/CopyChecklist",
+            params={"DB_KEY": root_id, "SessionGuid": "S1"},
+            headers={"X-CSRF-Token": token}
+        )
+        assert copied.status_code == 200
+        body = copied.json().get("d", {})
+        assert body.get("Ok") is True
+        assert body.get("DB_KEY")

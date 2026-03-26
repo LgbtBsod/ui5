@@ -41,35 +41,17 @@ def _attachment_payload(file_name: str, mime_type: str, body: bytes, category_ke
     }
 
 
-def test_create_checklist_accepts_embedded_attachment_under_10mb():
+def test_attachment_create_accepts_embedded_attachment_under_10mb():
     with TestClient(app) as client:
         token = _csrf(client)
+        root_key = _sample_root(client)
         body = b"ID3" + (b"\x00" * 4096)
         created = client.post(
-            f"{SERVICE_ROOT}/CreateChecklist",
-            json={
-                "FullPayload": {
-                    "root": {"id": "__CREATE", "status": "DRAFT"},
-                    "basic": {
-                        "date": "2026-03-02",
-                        "equipment": "Attachment create",
-                        "LOCATION_KEY": "LOC-001-01-01",
-                        "LOCATION_NAME": "Area A",
-                        "LOCATION_TEXT": "Area A",
-                        "OBSERVER_FULLNAME": "Observer One",
-                        "OBSERVED_FULLNAME": "Observed One",
-                        "LPC_KEY": "L2",
-                        "PROF_KEY": "PR1",
-                    },
-                    "checks": [],
-                    "barriers": [],
-                    "attachments": [_attachment_payload("voice-note.mp3", "audio/mpeg", body)],
-                }
-            },
+            f"{SERVICE_ROOT}/AttachmentSet",
+            json=dict(_attachment_payload("voice-note.mp3", "audio/mpeg", body), DB_KEY=root_key, PARENT_KEY=root_key, FolderKey=root_key),
             headers={"X-CSRF-Token": token},
         )
         assert created.status_code == 200
-        root_key = created.json().get("d", {}).get("DB_KEY")
         attachments = client.get(f"{SERVICE_ROOT}/AttachmentSet", params={"$filter": f"PARENT_KEY eq '{root_key}'"})
         assert attachments.status_code == 200
         rows = attachments.json().get("d", {}).get("results", [])
@@ -88,19 +70,10 @@ def test_save_changes_rejects_embedded_attachment_over_10mb():
     with TestClient(app) as client:
         token = _csrf(client)
         root_key = _sample_root(client)
-        acquire = client.post(f"{SERVICE_ROOT}/LockAcquire", params={"DB_KEY": root_key, "SessionGuid": "ATT-S1"}, headers={"X-CSRF-Token": token})
-        assert acquire.status_code == 200
         body = b"RIFF" + (b"\x00" * (10 * 1024 * 1024))
         resp = client.post(
-            f"{SERVICE_ROOT}/SaveChanges",
-            json={
-                "root": {"pcct_uuid": root_key},
-                "checks": [],
-                "barriers": [],
-                "attachments": [_attachment_payload("large-sample.wav", "audio/wav", body)],
-                "client_version": 1,
-                "SessionGuid": "ATT-S1",
-            },
+            f"{SERVICE_ROOT}/AttachmentSet",
+            json=dict(_attachment_payload("large-sample.wav", "audio/wav", body), DB_KEY=root_key, PARENT_KEY=root_key, FolderKey=root_key),
             headers={"X-CSRF-Token": token},
         )
-        assert resp.status_code in (200, 413)
+        assert resp.status_code == 413

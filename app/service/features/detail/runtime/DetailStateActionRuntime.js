@@ -5,7 +5,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailResetRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CanonicalRootKeyRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
@@ -22,7 +21,6 @@ sap.ui.define([
     ModelStateRuntime,
     DetailResetRuntime,
     NavigationIntentService,
-    CanonicalRootKeyRuntime,
     UiDecisionDefaultHandlers,
     WorkflowCoordinator,
     StatePaths,
@@ -43,6 +41,15 @@ sap.ui.define([
     var DETAIL_SOURCES = OperationSourceContracts.DETAIL;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
+
+    function resolveActiveDbKey(oStateModel) {
+        return String(
+            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "")
+            || ""
+        ).trim();
+    }
 
     function resolvePinnedRailHeight(oController) {
         var oStickyHost = oController && oController.byId && oController.byId("detailControlPinnedDock");
@@ -126,7 +133,7 @@ sap.ui.define([
     var navigationActions = {
         copyDetailLink: function (oController, mHooks) {
             var oState = ControllerModelRuntime.state(oController);
-            var sId = CanonicalRootKeyRuntime.resolveActiveFromStateModel(oState);
+            var sId = resolveActiveDbKey(oState);
             var sHash;
             var sUrl;
             if (!sId || mHooks.isCreateId(sId)) {

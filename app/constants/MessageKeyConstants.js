@@ -31,6 +31,7 @@ sap.ui.define([], function () {
         DETAIL: Object.freeze({
             ATTACHMENT_DELETED: "attachmentDeleted",
             ATTACHMENT_DRAFT_STAGE_HINT: "attachmentDraftStageHint",
+            ATTACHMENT_TARGET_MISSING: "attachmentTargetMissing",
             ATTACHMENT_UPLOADED: "attachmentUploaded",
             CHECKLIST_DELETED: "checklistDeleted",
             DELETE_CHECKLIST_CONFIRM: "deleteChecklistConfirmText",

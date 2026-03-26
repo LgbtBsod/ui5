@@ -154,6 +154,7 @@ function execute(mInput, mCtx) {
                 rootId: sRootId,
                 createMode: false,
                 currentAttachments: aCurrentAttachments,
+                sessionGuid: sSessionGuid,
                 savedResult: oSaved,
                 currentChecklist: oCurrentChecklist,
                 savedSnapshot: oSavedSnapshot,

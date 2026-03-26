@@ -233,6 +233,16 @@ sap.ui.define([
                 return (oData && oData.results) || [];
             });
         },
+        create: function (path, oPayload, mOptions) {
+            var sPath = assertCanonicalPath(normalizePath(path));
+            return executeMutatingRequest(REQUEST.POST, function (resolve, reject, mHeaders) {
+                ensureModel().create(sPath, oPayload || {}, {
+                    headers: mHeaders,
+                    success: function (oData) { resolve(oData || {}); },
+                    error: function (oError) { reject(oError); }
+                });
+            }, mOptions || {});
+        },
         serviceUrl: serviceUrl,
         getModel: function () {
             return ensureModel();

@@ -70,11 +70,11 @@ sap.ui.define([
 
     function acquire(mArgs) {
         var sSession = normalizeLockToken(mArgs);
-        var sObjectUuid = normalizeLockObjectId(mArgs);
+        var sDbKey = normalizeLockObjectId(mArgs);
         var sTabSessionId = String((mArgs && (mArgs.tabSessionId || mArgs.TabSessionId)) || "").trim();
         var bForceTakeover = !!(mArgs && (mArgs.forceTakeover !== undefined ? mArgs.forceTakeover : mArgs.force));
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE, {
-            ObjectUuid: sObjectUuid,
+            DB_KEY: sDbKey,
             SessionGuid: sSession,
             TabSessionId: sTabSessionId,
             ForceTakeover: bForceTakeover
@@ -87,9 +87,9 @@ sap.ui.define([
 
     function heartbeat(mArgs) {
         var sToken = normalizeLockToken(mArgs);
-        var sObjectUuid = normalizeLockObjectId(mArgs);
+        var sDbKey = normalizeLockObjectId(mArgs);
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT, {
-            ObjectUuid: sObjectUuid,
+            DB_KEY: sDbKey,
             SessionGuid: sToken
         }).then(function (oResult) {
             return normalizeResult(oResult, sToken);
@@ -120,9 +120,9 @@ sap.ui.define([
 
     function release(mArgs) {
         var sToken = normalizeLockToken(mArgs);
-        var sObjectUuid = normalizeLockObjectId(mArgs);
+        var sDbKey = normalizeLockObjectId(mArgs);
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
-            ObjectUuid: sObjectUuid,
+            DB_KEY: sDbKey,
             SessionGuid: sToken
         }).then(function (oResult) {
             var oNormalized = normalizeResult(oResult, sToken);
@@ -136,13 +136,13 @@ sap.ui.define([
     }
 
     function releaseOnPageLeave(mArgs) {
-        var sObjectUuid = normalizeLockObjectId(mArgs);
+        var sDbKey = normalizeLockObjectId(mArgs);
         var sToken = normalizeLockToken(mArgs);
         var oModel;
         var sServiceUrl;
         var sCsrfToken;
         var oPayload;
-        if (!sObjectUuid || !sToken || typeof window === "undefined" || typeof window.fetch !== "function") {
+        if (!sDbKey || !sToken || typeof window === "undefined" || typeof window.fetch !== "function") {
             return false;
         }
         try {
@@ -156,7 +156,7 @@ sap.ui.define([
             return false;
         }
         oPayload = {
-            ObjectUuid: sObjectUuid,
+            DB_KEY: sDbKey,
             SessionGuid: sToken,
             ForceTakeover: false
         };

@@ -79,7 +79,6 @@ sap.ui.define([
         var sRootId = rootId(mInput, mCtx);
         return {
             rootId: sRootId,
-            objectUuid: sRootId,
             sessionGuid: sessionGuid(mInput, mCtx),
             tabSessionId: tabSessionId(mInput, mCtx)
         };
