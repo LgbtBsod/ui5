@@ -96,7 +96,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
 
         heartbeat = client.post(
             f"{SERVICE_ROOT}/LockHeartbeat",
-            params={"DB_KEY": "__CREATE", "ObjectUuid": "__CREATE", "SessionGuid": "S-CREATE"},
+            params={"DB_KEY": "__CREATE", "SessionGuid": "S-CREATE"},
             headers={"X-CSRF-Token": token}
         )
         assert heartbeat.status_code == 200 and "d" in heartbeat.json()

@@ -36,7 +36,7 @@ sap.ui.define([
 
     function shouldIgnoreProbePayload(oPayload, oStateModel, oStatePaths) {
         var oScope = readCurrentLockScope(oStateModel, oStatePaths);
-        var sPayloadDbKey = String((oPayload && (oPayload.dbKey || oPayload.DB_KEY || oPayload.rootId)) || "").trim();
+        var sPayloadDbKey = String((oPayload && (oPayload.dbKey || oPayload.DB_KEY)) || "").trim();
         var sPayloadSessionGuid = String((oPayload && (oPayload.sessionGuid || oPayload.SessionGuid)) || "").trim();
 
         if (!isActiveEditLockScope(oScope)) {
@@ -221,9 +221,9 @@ sap.ui.define([
                 sCurrentLockState = mOptions.layoutStateRuntime.readLockState(oStateModel, "");
                 if (sCurrentRootId && sCurrentMode === WorkflowContracts.EDIT_MODES.EDIT && sCurrentLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                     ModelStateRuntime.writeOnModel(oStateModel, StatePaths.TAB_CONFLICT_STATE, { active: false, source: "", at: "" });
-                    fnPublishTabSignal(VALUES.LOCK_OWNED, { dbKey: sCurrentRootId, rootId: sCurrentRootId });
+                    fnPublishTabSignal(VALUES.LOCK_OWNED, { dbKey: sCurrentRootId });
                 } else if (sCurrentRootId && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sCurrentMode !== WorkflowContracts.EDIT_MODES.EDIT) {
-                    fnPublishTabSignal(VALUES.LOCK_RELEASED, { dbKey: sCurrentRootId, rootId: sCurrentRootId });
+                    fnPublishTabSignal(VALUES.LOCK_RELEASED, { dbKey: sCurrentRootId });
                 }
             }
         };

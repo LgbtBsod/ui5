@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 BASE="${BASE:-http://localhost:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV}"
-ROOT="${ROOT:-0123456789ABCDEF0123456789ABCDEF}"
+DB_KEY="${DB_KEY:-0123456789ABCDEF0123456789ABCDEF}"
 SESS="${SESS:-sess-1}"
 
 echo "[1] service document"
@@ -27,23 +27,23 @@ curl -sS "$BASE/RuntimeSettingsSet(Key='GLOBAL')"
 echo
 
 echo "[7] last change"
-curl -sS "$BASE/LastChangeSet(DB_KEY=binary'$ROOT')"
+curl -sS "$BASE/LastChangeSet(DB_KEY=binary'$DB_KEY')"
 echo
 
 echo "[8] lock acquire"
-curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockAcquire?DB_KEY=binary'$ROOT'&SessionGuid=$SESS"
+curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockAcquire?DB_KEY=binary'$DB_KEY'&SessionGuid=$SESS"
 echo
 
 echo "[9] lock status"
-curl -sS "$BASE/LockStatusSet(DB_KEY=binary'$ROOT',SessionGuid='$SESS')"
+curl -sS "$BASE/LockStatusSet(DB_KEY=binary'$DB_KEY',SessionGuid='$SESS')"
 echo
 
 echo "[10] lock heartbeat"
-curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockHeartbeat?DB_KEY=binary'$ROOT'&SessionGuid=$SESS"
+curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockHeartbeat?DB_KEY=binary'$DB_KEY'&SessionGuid=$SESS"
 echo
 
 echo "[11] lock release"
-curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockRelease?DB_KEY=binary'$ROOT'&SessionGuid=$SESS"
+curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' "$BASE/LockRelease?DB_KEY=binary'$DB_KEY'&SessionGuid=$SESS"
 echo
 
 echo "[12] hierarchy"
@@ -51,7 +51,7 @@ curl -sS "$BASE/GetHierarchy?DateCheck=datetime'2025-01-01T00:00:00'&Method=loca
 echo
 
 echo "[13] report export"
-curl -sS -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' -d '{"Entity":"screen","SelectionMode":"selected","DBKeys":["'$ROOT'"],"Limit":200000}' "$BASE/ReportExport"
+curl -sS -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' -d '{"Entity":"screen","SelectionMode":"selected","DBKeys":["'$DB_KEY'"],"Limit":200000}' "$BASE/ReportExport"
 echo
 
 echo "[14] batch read"

@@ -88,11 +88,11 @@ sap.ui.define([
     var aAttachments = [];
     var oRootDelta = DeltaCore.diffFields(oCur.root || {}, oBas.root || {});
     var oBasicDelta = DeltaCore.diffFields(oCur.basic || {}, oBas.basic || {});
-    var sRootEditMode = DeltaContracts.normalizeEditMode(
+    var sDbEditMode = DeltaContracts.normalizeEditMode(
       oOptions.rootEditMode || ((oCur.root || {}).edit_mode) || (CreateSentinel.isCreateId(sDbKey) ? DeltaContracts.EDIT_MODE.CREATE : DeltaContracts.EDIT_MODE.UPDATE),
       DeltaContracts.EDIT_MODE.UPDATE
     );
-    var oRootPayload = DeltaFieldMappers.mapRootFields(oRootDelta, oBasicDelta, sDbKey, sRootEditMode);
+    var oRootPayload = DeltaFieldMappers.mapRootFields(oRootDelta, oBasicDelta, sDbKey, sDbEditMode);
 
     appendChildChanges(aChecks, sDbKey, oCur.checks || [], oBas.checks || [], DeltaFieldMappers.toCheckFields);
     appendChildChanges(aBarriers, sDbKey, oCur.barriers || [], oBas.barriers || [], DeltaFieldMappers.toBarrierFields);

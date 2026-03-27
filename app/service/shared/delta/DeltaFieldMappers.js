@@ -108,13 +108,14 @@ sap.ui.define([
     var sMode = DeltaContracts.normalizeEditMode(sEditMode, DeltaContracts.EDIT_MODE.UPDATE);
     var sKey = pickValue(oRow, IDENTITY.ATTACHMENT_KEY_FIELDS);
     var bCreate = sMode === DeltaContracts.EDIT_MODE.CREATE;
+    var sParentDbKey = String(sParentKey || "").trim();
     return {
       attach_uuid: bCreate ? "" : String(sKey || "").trim(),
       client_row_id: String(pickValue(oRow, ["client_row_id"].concat(IDENTITY.ATTACHMENT_KEY_FIELDS)) || "").trim(),
       edit_mode: sMode,
-      root_key: String(pickValue(oRow, IDENTITY.ROOT_KEY_FIELDS) || sParentKey || "").trim(),
-      parent_key: String(pickValue(oRow, IDENTITY.PARENT_KEY_FIELDS) || sParentKey || "").trim(),
-      folder_key: String(pickValue(oRow, ["FolderKey", "folderKey"].concat(IDENTITY.PARENT_KEY_FIELDS)) || sParentKey || "").trim(),
+      root_key: String(pickValue(oRow, IDENTITY.ROOT_KEY_FIELDS) || sParentDbKey || "").trim(),
+      parent_key: String(pickValue(oRow, IDENTITY.PARENT_KEY_FIELDS) || sParentDbKey || "").trim(),
+      folder_key: String(pickValue(oRow, ["FolderKey", "folderKey"].concat(IDENTITY.PARENT_KEY_FIELDS)) || sParentDbKey || "").trim(),
       category_key: String(pickValue(oRow, ["CategoryKey", "categoryKey", "Type", "type"]) || "GEN").trim() || "GEN",
       file_name: String(pickValue(oRow, IDENTITY.FILE_NAME_FIELDS) || "").trim(),
       mime_type: String(pickValue(oRow, IDENTITY.MIME_TYPE_FIELDS) || "application/octet-stream").trim() || "application/octet-stream",

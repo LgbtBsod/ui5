@@ -1,14 +1,15 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/PermissionPresentation",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (LayoutStateRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts"
+], function (LayoutStateRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants, ComponentBootstrapContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -200,7 +201,7 @@ sap.ui.define([
         sFrontendSource = String(
             ModelStateRuntime.read(oController, STATE_MODEL, "/frontendConfigSource", "")
             || ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.BACKEND_MODE, "")
-            || "gateway_runtime"
+            || ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE.GATEWAY_RUNTIME
         );
         bSearchWorkspace = !sSelectedId;
         bEditWorkspace = !bSearchWorkspace && sMode === WorkflowContracts.EDIT_MODES.EDIT;
@@ -246,12 +247,12 @@ sap.ui.define([
         }
     }
 
+    function getModel(oController, sName) {
+        return oController && oController.getModel ? oController.getModel(sName) : null;
+    }
     return {
         ensureShellDefaults: ensureShellDefaults,
         syncRuntimeShellState: syncRuntimeShellState,
         syncShellState: syncShellState
     };
 });
-    function getModel(oController, sName) {
-        return oController && oController.getModel ? oController.getModel(sName) : null;
-    }

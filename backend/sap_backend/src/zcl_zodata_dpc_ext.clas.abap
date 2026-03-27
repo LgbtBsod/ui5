@@ -78,6 +78,10 @@ CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE
       IMPORTING
         iv_context TYPE string
       RAISING /iwbep/cx_mgw_busi_exception.
+    METHODS resolve_lock_db_key
+      IMPORTING
+        is_lock_request TYPE any
+      RETURNING VALUE(rv_db_key) TYPE sysuuid_x16.
     METHODS read_root_key
       IMPORTING
         it_key_tab TYPE /iwbep/t_mgw_name_value_pair
@@ -291,7 +295,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA lv_root_key TYPE sysuuid_x16.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
-    lv_root_key = COND #( WHEN ls_req-db_key IS NOT INITIAL THEN ls_req-db_key ELSE ls_req-object_uuid ).
+    lv_root_key = resolve_lock_db_key( ls_req ).
     IF lv_root_key IS INITIAL OR ls_req-session_guid IS INITIAL.
       raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_acquire_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
@@ -323,7 +327,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA lv_root_key TYPE sysuuid_x16.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
-    lv_root_key = COND #( WHEN ls_req-db_key IS NOT INITIAL THEN ls_req-db_key ELSE ls_req-object_uuid ).
+    lv_root_key = resolve_lock_db_key( ls_req ).
     IF lv_root_key IS INITIAL OR ls_req-session_guid IS INITIAL.
       raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_heartbeat_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
@@ -347,7 +351,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA lv_root_key TYPE sysuuid_x16.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
-    lv_root_key = COND #( WHEN ls_req-db_key IS NOT INITIAL THEN ls_req-db_key ELSE ls_req-object_uuid ).
+    lv_root_key = resolve_lock_db_key( ls_req ).
     IF lv_root_key IS INITIAL OR ls_req-session_guid IS INITIAL.
       raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_release_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
@@ -366,7 +370,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       EXPORTING
         iv_ok                  = abap_true
         iv_code                = zif_zodata_message_codes=>lock_ok
-        iv_object_uuid         = lv_root_key
+        iv_db_key              = lv_root_key
         iv_owner_session       = ls_req-session_guid
         iv_server_now          = lv_now_ts
         iv_lock_refreshed      = abap_false
@@ -544,6 +548,12 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       CATCH zcx_zodata_error INTO DATA(lx_rootkey).
         raise_busi_exception( iv_text = lx_rootkey->get_message_text( ) iv_code = lx_rootkey->get_code( ) ).
     ENDTRY.
+  ENDMETHOD.
+
+  METHOD resolve_lock_db_key.
+    rv_db_key = COND #( WHEN is_lock_request-db_key IS NOT INITIAL
+                        THEN is_lock_request-db_key
+                        ELSE is_lock_request-db_key ).
   ENDMETHOD.
 
   METHOD raise_busi_exception.

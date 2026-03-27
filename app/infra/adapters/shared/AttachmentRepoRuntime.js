@@ -8,7 +8,7 @@ sap.ui.define([
 ], function (GatewayClient, ChecklistSnapshotMapper, ODataAdapterUtils, ODataKeyContracts, ODataKeyNormalizer, GatewayContractConstants) {
     "use strict";
 
-    function normalizeRootKey(sDbKey) {
+    function normalizeDbKey(sDbKey) {
         return ODataKeyNormalizer.normalizeBinaryKey(sDbKey);
     }
 
@@ -17,12 +17,12 @@ sap.ui.define([
     }
 
     function loadAttachments(mArgs) {
-        var sRootId = normalizeRootKey(mArgs && mArgs.dbKey);
-        if (!sRootId) {
+        var sDbKey = normalizeDbKey(mArgs && mArgs.dbKey);
+        if (!sDbKey) {
             return Promise.resolve({ attachments: [] });
         }
         return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, {
-            "$filter": ODataAdapterUtils.buildEqFilter("PARENT_KEY", sRootId, ODataKeyContracts.TYPES.PARENT_KEY),
+            "$filter": ODataAdapterUtils.buildEqFilter("PARENT_KEY", sDbKey, ODataKeyContracts.TYPES.PARENT_KEY),
             "$select": ODataKeyContracts.SELECTS.ATTACHMENT
         }).then(function (oResult) {
             return { attachments: mapAttachmentResult(oResult) };
@@ -31,7 +31,7 @@ sap.ui.define([
 
     function deleteAttachment(mArgs) {
         var sAttachmentId = String((mArgs && (mArgs.attachmentId || mArgs.attachmentKey)) || "").trim().toUpperCase();
-        var sDbKey = normalizeRootKey(mArgs && mArgs.dbKey);
+        var sDbKey = normalizeDbKey(mArgs && mArgs.dbKey);
         if (!sAttachmentId || !sDbKey) {
             return Promise.resolve({
                 attachmentId: sAttachmentId,
@@ -66,13 +66,12 @@ sap.ui.define([
 
     /* Binary transport gate anchor: productive upload payload normalizes canonical PARENT_KEY. */
     var MEDIA_UPLOAD_CONTRACT = {
-        PARENT_KEY: normalizeRootKey
+        PARENT_KEY: normalizeDbKey
     };
 
     return {
         mediaUploadContract: MEDIA_UPLOAD_CONTRACT,
-        normalizeDbKey: normalizeRootKey,
-        normalizeRootKey: normalizeRootKey,
+        normalizeDbKey: normalizeDbKey,
         loadAttachments: loadAttachments,
         deleteAttachment: deleteAttachment
     };

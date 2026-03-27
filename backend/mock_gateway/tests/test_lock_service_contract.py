@@ -40,11 +40,11 @@ def test_acquire_handles_integrity_race(monkeypatch):
         original_create = LockService._create_active_lock
         calls = {"count": 0}
 
-        def fake_create(session, object_uuid, session_guid, uname, current_time):
+        def fake_create(session, db_key, session_guid, uname, current_time):
             calls["count"] += 1
             if calls["count"] == 1:
                 competing = LockEntry(
-                    pcct_uuid=object_uuid,
+                    pcct_uuid=db_key,
                     user_id="OTHER",
                     session_guid="OTHER-S",
                     locked_at=current_time,
@@ -53,7 +53,7 @@ def test_acquire_handles_integrity_race(monkeypatch):
                 session.add(competing)
                 session.commit()
                 raise IntegrityError("insert", {}, None)
-            return original_create(session, object_uuid, session_guid, uname, current_time)
+            return original_create(session, db_key, session_guid, uname, current_time)
 
         monkeypatch.setattr(LockService, "_create_active_lock", staticmethod(fake_create))
 

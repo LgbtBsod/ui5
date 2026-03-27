@@ -245,13 +245,13 @@ sap.ui.define([
     }
 
     function onTableItemPress(oController, oEvent) {
-        var sRootId = resolvePressedSearchRowId(oEvent);
-        if (!sRootId) {
+        var sDbKey = resolvePressedSearchRowId(oEvent);
+        if (!sDbKey) {
             return undefined;
         }
         return selectRowWithScrollCapture(oController, {
             intent: SEARCH_SOURCES.OPEN,
-            rootId: sRootId,
+            rootId: sDbKey,
             source: SEARCH_SOURCES.TABLE_ITEM_PRESS
         });
     }

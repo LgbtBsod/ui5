@@ -25,6 +25,11 @@ const ROOT_ALIAS_ALLOWLIST = [
 const ROOTIDRUNTIME_ALLOWLIST = [
   'backend/mock_gateway/tests/test_closeout_invariants.py'
 ];
+const OBJECTUUID_ALLOWLIST = [
+  'backend/mock_gateway/api/gateway_canonical_api.py',
+  'backend/mock_gateway/tests/test_gateway_contract_frontend_aliases.py',
+  'backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap'
+];
 
 for (const file of scanFiles) {
   const text = read(path.join(ROOT, file));
@@ -44,6 +49,10 @@ for (const file of scanFiles) {
 
   if (/["'](?:RootKey|RootId)["']|\.(?:RootKey|RootId)\b/.test(text) && ROOT_ALIAS_ALLOWLIST.indexOf(file) < 0) {
     issues.push(`${file}: RootKey/RootId must not remain outside explicit compatibility boundary`);
+  }
+
+  if (/\bObjectUuid\b|\bobjectUuid\b/.test(text) && OBJECTUUID_ALLOWLIST.indexOf(file) < 0) {
+    issues.push(`${file}: ObjectUuid/objectUuid must not remain outside explicit compatibility boundary`);
   }
 
   if (/return\s+Object\.freeze\(\s*\{\s*\}\s*\)/.test(text) || /return\s+\w+;\s*$/.test(text)) {

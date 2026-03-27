@@ -137,8 +137,6 @@ def _boundary_root_key(payload: dict | None = None, *candidates) -> str:
     values = list(candidates) + [
         body.get("DB_KEY"),
         body.get("db_key"),
-        body.get("RootKey"),
-        body.get("RootId"),
     ]
     for value in values:
         raw = str(value or "").strip()
@@ -1611,7 +1609,7 @@ def _import_payload(root_id: str | None = None, session_guid: str | None = None,
 
 
 def _normalize_root_filter_aliases(filter_value: str | None) -> str:
-    return re.sub(r"\bRootKey\b|\bRootId\b", "DB_KEY", str(filter_value or ""), flags=re.IGNORECASE)
+    return re.sub(r"\bRootKey\b|\bRootId\b", "PARENT_KEY", str(filter_value or ""), flags=re.IGNORECASE)
 
 
 
@@ -2254,7 +2252,7 @@ async def lock_acquire_function_import(request: Request, root_id: str | None = Q
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = _boundary_root_key(merged, root_id, merged.get("ObjectUuid"))
+    resolved_root_id = _boundary_root_key(merged, root_id)
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "DB_KEY and SessionGuid are required")
@@ -2270,7 +2268,7 @@ async def lock_heartbeat_function_import(request: Request, root_id: str | None =
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = _boundary_root_key(merged, root_id, merged.get("ObjectUuid"))
+    resolved_root_id = _boundary_root_key(merged, root_id)
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "DB_KEY and SessionGuid are required")
@@ -2286,7 +2284,7 @@ async def lock_release_function_import(request: Request, root_id: str | None = Q
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = _boundary_root_key(merged, root_id, merged.get("ObjectUuid"))
+    resolved_root_id = _boundary_root_key(merged, root_id)
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "DB_KEY and SessionGuid are required")
@@ -2394,7 +2392,7 @@ async def copy_checklist(request: Request, root_id: str | None = Query(None, ali
         except Exception:
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = _boundary_root_key(merged, root_id, merged.get("SourceRootKey"), merged.get("source_root_key"), merged.get("SourceUuid"))
+    resolved_root_id = _boundary_root_key(merged, root_id, merged.get("source_parent_key"), merged.get("SourceParentKey"), merged.get("SourceUuid"))
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:

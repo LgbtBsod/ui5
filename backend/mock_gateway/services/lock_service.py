@@ -63,15 +63,15 @@ class LockService:
         }
 
     @staticmethod
-    def _with_server_state(payload: dict, db: Session, object_uuid: str) -> dict:
-        payload["server_changed_on"] = LockService._server_changed_on(db, object_uuid)
-        payload["version_number"] = LockService._version_number(db, object_uuid)
+    def _with_server_state(payload: dict, db: Session, db_key: str) -> dict:
+        payload["server_changed_on"] = LockService._server_changed_on(db, db_key)
+        payload["version_number"] = LockService._version_number(db, db_key)
         return payload
 
     @staticmethod
-    def _create_active_lock(db: Session, object_uuid: str, session_guid: str, uname: str, current_time) -> LockEntry:
+    def _create_active_lock(db: Session, db_key: str, session_guid: str, uname: str, current_time) -> LockEntry:
         lock = LockEntry(
-            pcct_uuid=object_uuid,
+            pcct_uuid=db_key,
             user_id=uname,
             session_guid=session_guid,
             locked_at=current_time,
@@ -80,18 +80,18 @@ class LockService:
         )
         db.add(lock)
         db.flush()
-        db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="ACQUIRED"))
+        db.add(LockLog(pcct_uuid=db_key, user_id=uname, session_guid=session_guid, action="ACQUIRED"))
         db.commit()
         db.refresh(lock)
         return lock
 
     @staticmethod
-    def _active_lock(db: Session, object_uuid: str) -> LockEntry | None:
+    def _active_lock(db: Session, db_key: str) -> LockEntry | None:
         current_time = now_utc()
         lock = (
             db.query(LockEntry)
             .filter(
-                LockEntry.pcct_uuid == object_uuid,
+                LockEntry.pcct_uuid == db_key,
                 LockEntry.is_killed.is_(False),
             )
             .first()
@@ -101,39 +101,39 @@ class LockService:
 
         if LockService._is_expired(lock, current_time):
             lock.is_killed = True
-            db.add(LockLog(pcct_uuid=object_uuid, user_id=lock.user_id, action="EXPIRED"))
+            db.add(LockLog(pcct_uuid=db_key, user_id=lock.user_id, action="EXPIRED"))
             db.commit()
             return None
         return lock
 
     @staticmethod
-    def acquire(db: Session, object_uuid: str, session_guid: str, uname: str, steal_from: str | None = None, force_takeover: bool = False) -> dict:
+    def acquire(db: Session, db_key: str, session_guid: str, uname: str, steal_from: str | None = None, force_takeover: bool = False) -> dict:
         current_time = now_utc()
-        existing = LockService._active_lock(db, object_uuid)
+        existing = LockService._active_lock(db, db_key)
 
         if not existing:
             try:
-                lock = LockService._create_active_lock(db, object_uuid, session_guid, uname, current_time)
+                lock = LockService._create_active_lock(db, db_key, session_guid, uname, current_time)
                 return LockService._with_server_state(
                     LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(lock), False, True, True, "ACQUIRED"),
                     db,
-                    object_uuid
+                    db_key
                 )
             except IntegrityError:
                 db.rollback()
-                existing = LockService._active_lock(db, object_uuid)
+                existing = LockService._active_lock(db, db_key)
                 if not existing:
                     raise
 
         if existing.session_guid == session_guid:
             existing.last_refresh_at = current_time
             existing.expires_at = current_time + LOCK_TTL
-            db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="REFRESHED"))
+            db.add(LockLog(pcct_uuid=db_key, user_id=uname, session_guid=session_guid, action="REFRESHED"))
             db.commit()
             return LockService._with_server_state(
                 LockService._lock_payload(True, "LOCK_OK", existing.user_id, existing.session_guid, LockService._lock_expires_at(existing), False, True, True, "HEARTBEAT"),
                 db,
-                object_uuid
+                db_key
             )
 
         if force_takeover and (not steal_from or steal_from == existing.session_guid):
@@ -141,7 +141,7 @@ class LockService:
             existing.killed_by = session_guid
 
             new_lock = LockEntry(
-                pcct_uuid=object_uuid,
+                pcct_uuid=db_key,
                 user_id=uname,
                 session_guid=session_guid,
                 locked_at=current_time,
@@ -149,40 +149,40 @@ class LockService:
                 expires_at=current_time + LOCK_TTL,
             )
             db.add(new_lock)
-            db.add(LockLog(pcct_uuid=object_uuid, user_id=uname, session_guid=session_guid, action="FORCE_TAKEOVER"))
+            db.add(LockLog(pcct_uuid=db_key, user_id=uname, session_guid=session_guid, action="FORCE_TAKEOVER"))
             db.commit()
             return LockService._with_server_state(
                 LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(new_lock), True, True, True, "ACQUIRED"),
                 db,
-                object_uuid
+                db_key
             )
 
         return LockService._with_server_state(
             LockService._lock_payload(False, "LOCK_NOT_OWNED_BY_SESSION", existing.user_id, existing.session_guid, LockService._lock_expires_at(existing), False, False, False, "FAILED"),
             db,
-            object_uuid
+            db_key
         )
 
     @staticmethod
-    def status(db: Session, object_uuid: str, session_guid: str) -> dict:
-        active_lock = LockService._active_lock(db, object_uuid)
+    def status(db: Session, db_key: str, session_guid: str) -> dict:
+        active_lock = LockService._active_lock(db, db_key)
         if not active_lock:
             raise ValueError("LOCK_MISSING")
         if str(active_lock.session_guid or "").strip() != str(session_guid or "").strip():
             return LockService._with_server_state(
                 LockService._lock_payload(False, "LOCK_NOT_OWNED_BY_SESSION", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, False, False, "FAILED"),
                 db,
-                object_uuid
+                db_key
             )
         return LockService._with_server_state(
             LockService._lock_payload(True, "LOCK_OK", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, False, True, "OWNED"),
             db,
-            object_uuid
+            db_key
         )
 
     @staticmethod
-    def heartbeat(db: Session, object_uuid: str, session_guid: str) -> dict:
-        active_lock = LockService._active_lock(db, object_uuid)
+    def heartbeat(db: Session, db_key: str, session_guid: str) -> dict:
+        active_lock = LockService._active_lock(db, db_key)
         if not active_lock:
             raise ValueError("LOCK_MISSING")
         if str(active_lock.session_guid or "").strip() != str(session_guid or "").strip():
@@ -195,15 +195,15 @@ class LockService:
         return LockService._with_server_state(
             LockService._lock_payload(True, "LOCK_OK", active_lock.user_id, active_lock.session_guid, LockService._lock_expires_at(active_lock), False, True, True, "HEARTBEAT"),
             db,
-            object_uuid
+            db_key
         )
 
     @staticmethod
-    def release(db: Session, object_uuid: str, session_guid: str, try_save: bool = False, payload: dict | None = None) -> dict:
+    def release(db: Session, db_key: str, session_guid: str, try_save: bool = False, payload: dict | None = None) -> dict:
         lock = (
             db.query(LockEntry)
             .filter(
-                LockEntry.pcct_uuid == object_uuid,
+                LockEntry.pcct_uuid == db_key,
                 LockEntry.session_guid == session_guid,
                 LockEntry.is_killed.is_(False),
             )
@@ -211,7 +211,7 @@ class LockService:
         )
 
         if not lock:
-            active_lock = LockService._active_lock(db, object_uuid)
+            active_lock = LockService._active_lock(db, db_key)
             if active_lock:
                 return {
                     "released": False,
@@ -229,14 +229,14 @@ class LockService:
         if try_save and isinstance(payload, dict):
             try:
                 from services.checklist_service import ChecklistService
-                ChecklistService.save_via_import(db, object_uuid, lock.user_id, payload, is_autosave=False, force=True, session_guid=session_guid)
+                ChecklistService.save_via_import(db, db_key, lock.user_id, payload, is_autosave=False, force=True, session_guid=session_guid)
                 s_save_status = "S"
             except Exception:
                 db.rollback()
                 s_save_status = "E"
 
         lock.is_killed = True
-        db.add(LockLog(pcct_uuid=object_uuid, user_id=lock.user_id, session_guid=session_guid, action="RELEASE"))
+        db.add(LockLog(pcct_uuid=db_key, user_id=lock.user_id, session_guid=session_guid, action="RELEASE"))
         db.commit()
         return {
             "released": True,
@@ -311,11 +311,11 @@ class LockService:
         return True
 
     @staticmethod
-    def _server_changed_on(db: Session, object_uuid: str):
-        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == object_uuid).first()
+    def _server_changed_on(db: Session, db_key: str):
+        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == db_key).first()
         return root.changed_on if root else None
 
     @staticmethod
-    def _version_number(db: Session, object_uuid: str):
-        ts = LockService._server_changed_on(db, object_uuid)
+    def _version_number(db: Session, db_key: str):
+        ts = LockService._server_changed_on(db, db_key)
         return int(ts.timestamp()) if ts else 0

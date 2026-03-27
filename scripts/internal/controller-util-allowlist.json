@@ -47,7 +47,6 @@
   "service/framework/ThemeRuntime",
   "service/framework/TimeConfigService",
   "service/framework/UiDecisionCoordinator",
-  "service/framework/WorkflowCoordinator",
   "util/DraftChecklistFactory",
   "model/StatePaths",
   "util/UiAssetPaths",

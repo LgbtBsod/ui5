@@ -44,7 +44,7 @@ CLASS zcl_zodata_read_service DEFINITION
     tt_root_row TYPE STANDARD TABLE OF ty_root_row WITH DEFAULT KEY,
     BEGIN OF ty_check_row,
       key_uuid TYPE sysuuid_x16,
-      root_key TYPE sysuuid_x16,
+      parent_key TYPE sysuuid_x16,
       checks_num TYPE int4,
       text TYPE string,
       comment_text TYPE string,
@@ -54,7 +54,7 @@ CLASS zcl_zodata_read_service DEFINITION
     tt_check_row TYPE STANDARD TABLE OF ty_check_row WITH DEFAULT KEY,
     BEGIN OF ty_barrier_row,
       key_uuid TYPE sysuuid_x16,
-      root_key TYPE sysuuid_x16,
+      parent_key TYPE sysuuid_x16,
       barriers_num TYPE int4,
       text TYPE string,
       comment_text TYPE string,
@@ -217,12 +217,12 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
 
   METHOD read_check_rows.
     IF iv_parent_key IS INITIAL.
-      SELECT check_uuid AS key_uuid pcct_uuid AS root_key checks_num check_text AS text comment_text result changed_on
+      SELECT check_uuid AS key_uuid pcct_uuid AS parent_key checks_num check_text AS text comment_text result changed_on
         FROM zpcct_check
         INTO CORRESPONDING FIELDS OF TABLE @rt_checks.
       RETURN.
     ENDIF.
-    SELECT check_uuid AS key_uuid pcct_uuid AS root_key checks_num check_text AS text comment_text result changed_on
+    SELECT check_uuid AS key_uuid pcct_uuid AS parent_key checks_num check_text AS text comment_text result changed_on
       FROM zpcct_check
       INTO CORRESPONDING FIELDS OF TABLE @rt_checks
       WHERE pcct_uuid = @iv_parent_key.
@@ -230,12 +230,12 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
 
   METHOD read_barrier_rows.
     IF iv_parent_key IS INITIAL.
-      SELECT barrier_uuid AS key_uuid pcct_uuid AS root_key barriers_num barrier_text AS text comment_text result changed_on
+      SELECT barrier_uuid AS key_uuid pcct_uuid AS parent_key barriers_num barrier_text AS text comment_text result changed_on
         FROM zpcct_barrier
         INTO CORRESPONDING FIELDS OF TABLE @rt_barriers.
       RETURN.
     ENDIF.
-    SELECT barrier_uuid AS key_uuid pcct_uuid AS root_key barriers_num barrier_text AS text comment_text result changed_on
+    SELECT barrier_uuid AS key_uuid pcct_uuid AS parent_key barriers_num barrier_text AS text comment_text result changed_on
       FROM zpcct_barrier
       INTO CORRESPONDING FIELDS OF TABLE @rt_barriers
       WHERE pcct_uuid = @iv_parent_key.

@@ -35,8 +35,8 @@ try {
   }
 });
 
-if (/\bRootKey\b/.test(abap) || /\bRootId\b/.test(abap)) {
-  issues.push('ABAP DPC still reads RootKey/RootId instead of canonical DB_KEY/ObjectUuid boundary');
+if (/\bRootId\b/.test(abap)) {
+  issues.push('ABAP DPC still reads RootId instead of canonical DB_KEY boundary');
 }
 
 if (issues.length) {

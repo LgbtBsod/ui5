@@ -119,7 +119,7 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
         iv_owner               = is_snapshot-lock_owner
         iv_owner_session       = is_snapshot-lock_session
         iv_tab_session_id      = is_snapshot-tab_session_id
-        iv_object_uuid         = is_key-object_id
+        iv_db_key              = is_key-object_id
         iv_lock_expires        = is_snapshot-lock_expires_at
         iv_server_now          = iv_now
         iv_lock_refreshed      = abap_false
@@ -188,7 +188,7 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
         iv_owner               = is_owner-uname
         iv_owner_session       = is_owner-session_guid
         iv_tab_session_id      = is_owner-tab_session_id
-        iv_object_uuid         = is_key-object_id
+        iv_db_key              = is_key-object_id
         iv_lock_expires        = lv_expires
         iv_server_now          = lv_now
         iv_lock_refreshed      = abap_true
@@ -214,7 +214,7 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
         iv_ok                  = abap_true
         iv_code                = zif_zodata_message_codes=>lock_ok
         iv_owner_session       = iv_session_guid
-        iv_object_uuid         = is_key-object_id
+        iv_db_key              = is_key-object_id
         iv_lock_expires        = lv_expires
         iv_server_now          = lv_now
         iv_lock_refreshed      = abap_true

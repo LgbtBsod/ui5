@@ -8,9 +8,9 @@ router = APIRouter(tags=["LockEntity"])
 
 
 @router.get("/LockStatusSet")
-def lock_status_set(object_uuid: str, session_guid: str, db: Session = Depends(get_db)):
+def lock_status_set(db_key: str, session_guid: str, db: Session = Depends(get_db)):
     try:
-        status = LockService.status(db, object_uuid, session_guid)
+        status = LockService.status(db, db_key, session_guid)
         return {"d": {"results": [status]}}
     except ValueError as exc:
         message = str(exc)

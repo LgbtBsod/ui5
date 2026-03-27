@@ -451,7 +451,7 @@ def get_tail_search_row(page) -> dict[str, Any]:
           }
           return {
             domId: dom && dom.id ? String(dom.id) : '',
-            rootKey: String(data.Key || data.RootKey || '').trim(),
+            dbKey: String(data.DB_KEY || data.Key || '').trim(),
             checklistId: String(data.Id || data.ChecklistId || '').trim(),
             tableId: table && table.getId ? String(table.getId()) : ''
           };

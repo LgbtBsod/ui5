@@ -25,10 +25,6 @@ sap.ui.define([
         BUSY: "/busy",
         ERROR: AnalyticsUiContracts.PATHS.ERROR
     });
-    var ERROR_CODES = Object.freeze({
-        INTERNAL_ERROR: "analytics_unavailable"
-    });
-
     function buildNormalizedRequest(mInput) {
         return {
             selectedYear: YearValue.parseYearOrNull(mInput && mInput.selectedYear),
@@ -38,7 +34,7 @@ sap.ui.define([
     }
 
     function resolveErrorMessage(oError) {
-        return String((oError && oError.message) || ERROR_CODES.INTERNAL_ERROR);
+        return String((oError && oError.message) || AnalyticsUiContracts.MESSAGES.ANALYTICS_UNAVAILABLE);
     }
 
     function buildReadyEffects(oDashboard, sReadyAt) {
@@ -66,7 +62,7 @@ sap.ui.define([
                 error: sErrorMessage
             }),
             Effects.modelPatch(MODEL_NAMES.VIEW, VIEW_PATHS.BUSY, false),
-            Effects.modelPatch(MODEL_NAMES.VIEW, VIEW_PATHS.ERROR, sErrorMessage || ERROR_CODES.INTERNAL_ERROR)
+            Effects.modelPatch(MODEL_NAMES.VIEW, VIEW_PATHS.ERROR, sErrorMessage || AnalyticsUiContracts.MESSAGES.ANALYTICS_UNAVAILABLE)
         ];
     }
 

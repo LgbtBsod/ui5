@@ -29,7 +29,7 @@ RESULT_BLOCKED = "BLOCKED_SAP_ENV"
 RESULT_FAIL = "FAIL_PRODUCT_CONTRACT"
 
 
-def fetch_existing_root_id() -> str:
+def fetch_existing_db_key() -> str:
     with urllib.request.urlopen(
         f"{SERVICE_ROOT}/ChecklistSearchSet?$top=1&$orderby=ChangedOn%20desc", timeout=20
     ) as resp:
@@ -38,10 +38,10 @@ def fetch_existing_root_id() -> str:
     if not rows:
         raise RuntimeError("ChecklistSearchSet returned no rows")
     row = rows[0]
-    root_id = str(row.get("DB_KEY") or row.get("Key") or row.get("RootKey") or row.get("Id") or "").strip().upper()
-    if not root_id:
-        raise RuntimeError("Could not resolve existing root id")
-    return root_id
+    db_key = str(row.get("DB_KEY") or row.get("Key") or row.get("Id") or "").strip().upper()
+    if not db_key:
+        raise RuntimeError("Could not resolve existing DB key")
+    return db_key
 
 
 def geom_snapshot(page) -> dict[str, Any]:
@@ -120,7 +120,7 @@ def invoke_detail(page, method_name: str) -> None:
 
 
 def main() -> int:
-    root_id = fetch_existing_root_id()
+    root_id = fetch_existing_db_key()
     network: list[dict[str, Any]] = []
     checks: list[dict[str, Any]] = []
     bugs: list[str] = []

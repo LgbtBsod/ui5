@@ -25,14 +25,14 @@ sap.ui.define([
      */
     /* Этот блок собирает строковый eq-filter для lookup по человекочитаемому идентификатору.
      * Результат: запрос к search/read-модели формируется в одном стандартизованном виде. */
-    function buildStringEqFilter(sProperty, sRootId) {
-        return ODataAdapterUtils.buildEqFilter(sProperty, sRootId);
+    function buildStringEqFilter(sProperty, sValue) {
+        return ODataAdapterUtils.buildEqFilter(sProperty, sValue);
     }
 
     /* Этот блок собирает канонический фильтр для detail entity set.
      * Результат: все children/read запросы используют один и тот же boundary-контракт. */
-    function buildDetailFilter(oFilterContract, sRootId) {
-        return ODataAdapterUtils.buildEqFilter(oFilterContract.property, ODataKeyNormalizer.normalizeBinaryKey(sRootId), oFilterContract.type);
+    function buildDetailFilter(oFilterContract, sDbKey) {
+        return ODataAdapterUtils.buildEqFilter(oFilterContract.property, ODataKeyNormalizer.normalizeBinaryKey(sDbKey), oFilterContract.type);
     }
 
     /* Этот блок разрешает входной route/id в реальный backend root key.
@@ -57,10 +57,10 @@ sap.ui.define([
     /* Этот блок загружает phase-1 snapshot карточки.
      * Результат: на initial open приходят root + basic, а heavy rows остаются отложенными. */
     function fetchDetailSnapshot(mArgs, mDeps) {
-        var sRootId = ODataKeyNormalizer.normalizeBinaryKey(mDeps.rootId(mArgs));
+        var sDbKey = ODataKeyNormalizer.normalizeBinaryKey(mDeps.rootId(mArgs));
         var bIncludeChildren = !mArgs || mArgs.includeChildren !== false;
         var oBasicFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BASIC_INFO;
-        var pRoot = GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
+        var pRoot = GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sDbKey, {
             name: "DB_KEY",
             type: ODataEntityContracts.TYPES.DB_KEY
         }), {
@@ -69,11 +69,11 @@ sap.ui.define([
         // ChecklistBasicInfoSet is a separate CDS-backed read model.
         // Keep it independent from ChecklistRootSet and read it via its own entity set.
         var pBasic = GatewayClient.rawRead("/" + oBasicFilter.entitySet, {
-            "$filter": buildDetailFilter(oBasicFilter, sRootId),
+            "$filter": buildDetailFilter(oBasicFilter, sDbKey),
             "$select": ODataEntityContracts.SELECTS.CHECKLIST_BASIC_INFO
         });
         var pRows = bIncludeChildren ? loadDetailRows({
-            rootId: sRootId,
+            rootId: sDbKey,
             includeChecks: true,
             includeBarriers: true
         }, mDeps) : Promise.resolve({ checks: [], barriers: [] });
@@ -87,12 +87,12 @@ sap.ui.define([
 
     /* Этот блок постранично читает коллекцию дочерних строк из OData.
      * Результат: большие наборы данных не грузятся одним тяжелым запросом. */
-    function loadChunkedCollection(oFilterContract, sRootId, sSelect, fnMapRow) {
+    function loadChunkedCollection(oFilterContract, sDbKey, sSelect, fnMapRow) {
         var aRows = [];
 
         function loadPage(iSkip) {
             return GatewayClient.rawRead("/" + oFilterContract.entitySet, {
-                "$filter": buildDetailFilter(oFilterContract, sRootId),
+                "$filter": buildDetailFilter(oFilterContract, sDbKey),
                 "$select": sSelect,
                 "$top": DETAIL_ROW_CHUNK_SIZE,
                 "$skip": iSkip
@@ -112,13 +112,13 @@ sap.ui.define([
     /* Этот блок объединяет чтение checks и barriers в один отложенный owner.
      * Результат: контроллер и use case получают уже нормализованный набор строк. */
     function loadDetailRows(mArgs, mDeps) {
-        var sRootId = ODataKeyNormalizer.normalizeBinaryKey(mDeps.rootId(mArgs));
+        var sDbKey = ODataKeyNormalizer.normalizeBinaryKey(mDeps.rootId(mArgs));
         var bChecks = !mArgs || mArgs.includeChecks !== false;
         var bBarriers = !mArgs || mArgs.includeBarriers !== false;
         var pChecks = bChecks
             ? loadChunkedCollection(
                 ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_CHECK,
-                sRootId,
+                sDbKey,
                 ODataEntityContracts.SELECTS.CHECKLIST_CHECK,
                 ChecklistSnapshotMapper.mapCheckRow
             )
@@ -126,7 +126,7 @@ sap.ui.define([
         var pBarriers = bBarriers
             ? loadChunkedCollection(
                 ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BARRIER,
-                sRootId,
+                sDbKey,
                 ODataEntityContracts.SELECTS.CHECKLIST_BARRIER,
                 ChecklistSnapshotMapper.mapBarrierRow
             )
@@ -178,6 +178,7 @@ sap.ui.define([
         buildDetailFilter: buildDetailFilter,
         loadDetailRows: loadDetailRows,
         loadDetailSnapshot: fetchDetailSnapshot,
+        resolveDbKey: resolveDbKey,
         resolveRootId: resolveDbKey
     };
 });

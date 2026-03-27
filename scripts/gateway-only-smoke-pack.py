@@ -63,14 +63,14 @@ def fetch_csrf(opener) -> str:
     return str(headers.get("X-CSRF-Token") or headers.get("x-csrf-token") or "").strip()
 
 
-def existing_root(opener) -> str:
+def existing_db_key(opener) -> str:
     status, payload, _headers = request(opener, "GET", f"{SERVICE_ROOT}/ChecklistSearchSet?$top=1&$orderby=ChangedOn%20desc")
     if status != 200:
         raise RuntimeError("ChecklistSearchSet request failed")
     rows = (((payload or {}).get("d") or {}).get("results")) or []
     if not rows:
         raise RuntimeError("ChecklistSearchSet returned no rows")
-    return str(rows[0].get("DB_KEY") or rows[0].get("Key") or rows[0].get("Id") or "").strip().upper()
+    return str(rows[0].get("DB_KEY") or rows[0].get("Id") or "").strip().upper()
 
 
 def create_checklist(opener, token: str) -> dict[str, Any]:
@@ -178,8 +178,8 @@ def main() -> int:
     try:
         token = fetch_csrf(opener)
         ensure(api_checks, "csrf.fetch", bool(token), {"tokenPresent": bool(token)})
-        existing = existing_root(opener)
-        ensure(api_checks, "search.root.available", bool(existing), {"rootId": existing})
+        existing = existing_db_key(opener)
+        ensure(api_checks, "search.root.available", bool(existing), {"dbKey": existing})
 
         status, runtime_payload, _headers = request(opener, "GET", f"{SERVICE_ROOT}/RuntimeSettingsSet('GLOBAL')")
         runtime_data = (runtime_payload or {}).get("d") or {}

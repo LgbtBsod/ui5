@@ -12,7 +12,7 @@ CLASS zcl_zodata_contract_service DEFINITION
         iv_owner               TYPE string OPTIONAL
         iv_owner_session       TYPE string OPTIONAL
         iv_tab_session_id      TYPE string OPTIONAL
-        iv_object_uuid         TYPE sysuuid_x16 OPTIONAL
+        iv_db_key             TYPE sysuuid_x16 OPTIONAL
         iv_lock_expires        TYPE timestampl OPTIONAL
         iv_server_now          TYPE timestampl OPTIONAL
         iv_lock_refreshed      TYPE abap_bool DEFAULT abap_false
@@ -28,7 +28,7 @@ CLASS zcl_zodata_contract_service DEFINITION
         iv_owner               TYPE string OPTIONAL
         iv_owner_session       TYPE string OPTIONAL
         iv_tab_session_id      TYPE string OPTIONAL
-        iv_object_uuid         TYPE sysuuid_x16 OPTIONAL
+        iv_db_key             TYPE sysuuid_x16 OPTIONAL
         iv_lock_expires        TYPE timestampl OPTIONAL
         iv_server_now          TYPE timestampl OPTIONAL
         iv_lock_refreshed      TYPE abap_bool DEFAULT abap_false
@@ -44,7 +44,7 @@ CLASS zcl_zodata_contract_service DEFINITION
         iv_owner               TYPE string OPTIONAL
         iv_owner_session       TYPE string OPTIONAL
         iv_tab_session_id      TYPE string OPTIONAL
-        iv_object_uuid         TYPE sysuuid_x16 OPTIONAL
+        iv_db_key             TYPE sysuuid_x16 OPTIONAL
         iv_lock_expires        TYPE timestampl OPTIONAL
         iv_server_now          TYPE timestampl OPTIONAL
         iv_lock_refreshed      TYPE abap_bool DEFAULT abap_false
@@ -122,8 +122,8 @@ CLASS zcl_zodata_contract_service IMPLEMENTATION.
     cs_result-owner = iv_owner.
     cs_result-owner_session = iv_owner_session.
     cs_result-tab_session_id = iv_tab_session_id.
-    IF iv_object_uuid IS NOT INITIAL.
-      cs_result-object_uuid = iv_object_uuid.
+    IF iv_db_key IS NOT INITIAL.
+      cs_result-db_key = iv_db_key.
     ENDIF.
     IF iv_lock_expires IS NOT INITIAL.
       cs_result-lock_expires = iv_lock_expires.
@@ -148,8 +148,8 @@ CLASS zcl_zodata_contract_service IMPLEMENTATION.
     cs_result-owner = iv_owner.
     cs_result-owner_session = iv_owner_session.
     cs_result-tab_session_id = iv_tab_session_id.
-    IF iv_object_uuid IS NOT INITIAL.
-      cs_result-object_uuid = iv_object_uuid.
+    IF iv_db_key IS NOT INITIAL.
+      cs_result-db_key = iv_db_key.
     ENDIF.
     IF iv_lock_expires IS NOT INITIAL.
       cs_result-lock_expires = iv_lock_expires.
@@ -174,8 +174,8 @@ CLASS zcl_zodata_contract_service IMPLEMENTATION.
     cs_result-owner = iv_owner.
     cs_result-owner_session = iv_owner_session.
     cs_result-tab_session_id = iv_tab_session_id.
-    IF iv_object_uuid IS NOT INITIAL.
-      cs_result-object_uuid = iv_object_uuid.
+    IF iv_db_key IS NOT INITIAL.
+      cs_result-db_key = iv_db_key.
     ENDIF.
     IF iv_lock_expires IS NOT INITIAL.
       cs_result-lock_expires = iv_lock_expires.

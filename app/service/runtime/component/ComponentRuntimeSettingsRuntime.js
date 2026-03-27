@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants"
-], function (ModelStateRuntime, FrontendConfigConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FrontendConfigConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts"
+], function (ModelStateRuntime, FrontendConfigConstants, ComponentBootstrapContracts) {
     "use strict";
 
     function normalizeRuntimeSettingsError(oError) {
@@ -30,7 +31,7 @@ sap.ui.define([
                     source: FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                     runtimeSettingsPayload: oRuntime || {}
                 }, oStateModel, oEnvState, oMasterDataModel).then(function () {
-                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime");
+                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE.GATEWAY_RUNTIME);
                     fnEmitTelemetry("runtime.config.loaded", TelemetryRuntime.runtimeConfig(FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL));
                     return oRuntime || {};
                 });
@@ -43,7 +44,7 @@ sap.ui.define([
                 return;
             }
             applyRuntimeSettings(oRuntime).catch(function () {
-                ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
+                ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE.GATEWAY_RUNTIME_ERROR);
             });
         });
 
@@ -56,7 +57,7 @@ sap.ui.define([
                     return applyRuntimeSettings(oRuntime);
                 }).catch(function (oError) {
                     var oOriginalError = normalizeRuntimeSettingsError(oError);
-                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", "gateway_runtime_error");
+                    ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE.GATEWAY_RUNTIME_ERROR);
                     fnEmitTelemetry("runtime.config.fallback_applied", TelemetryRuntime.runtimeConfig(
                         FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
                         "runtime_settings_fallback_applied",
