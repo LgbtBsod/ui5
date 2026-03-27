@@ -48,9 +48,14 @@
 2. metadata publishes `DB_KEY`
 3. adapters call lock/copy using `DB_KEY`
 4. backend may still accept `ObjectUuid` only as ingress compatibility fallback
+5. shell state stores current root identity only as `currentChecklistDbKey`
 
 ## Removed Thin Wrappers
 - `app/service/framework/ControllerRouteRuntime.js`
 - `app/service/framework/FeedbackCoordinator.js`
 - `app/controller/search/SearchCommandPolicy.js`
 - `app/controller/detail/DetailCommandPolicy.js`
+
+## Governance Cleanup In This Pass
+- removed stale deleted-wrapper references from `scripts/internal/controller-util-allowlist.json`
+- removed detail info-card raw i18n fallback copy; labels and tooltips now resolve from bundle keys only

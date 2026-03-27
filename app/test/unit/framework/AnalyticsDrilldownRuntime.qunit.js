@@ -1,8 +1,8 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsDrilldownRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService"
-], function (JSONModel, AnalyticsDrilldownRuntime, NavigationIntentService) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation"
+], function (JSONModel, AnalyticsDrilldownRuntime, WorkspaceRouteNavigation) {
     "use strict";
 
     function createController() {
@@ -24,14 +24,14 @@ sap.ui.define([
 
     QUnit.module("AnalyticsDrilldownRuntime", {
         beforeEach: function () {
-            this._fnNavigateToSearch = NavigationIntentService.navigateToSearch;
+            this._fnNavigateToSearch = WorkspaceRouteNavigation.navigateToSearch;
             this._navigated = 0;
-            NavigationIntentService.navigateToSearch = function () {
+            WorkspaceRouteNavigation.navigateToSearch = function () {
                 this._navigated += 1;
             }.bind(this);
         },
         afterEach: function () {
-            NavigationIntentService.navigateToSearch = this._fnNavigateToSearch;
+            WorkspaceRouteNavigation.navigateToSearch = this._fnNavigateToSearch;
         }
     });
 

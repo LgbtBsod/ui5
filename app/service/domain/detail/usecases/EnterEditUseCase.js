@@ -54,10 +54,10 @@ sap.ui.define([
     function execute(mInput, mCtx) {
         var bEdit = !!(mInput && mInput.state);
         var oLockPort = mCtx && mCtx.lock;
-        var sRootId = UseCaseValue.rootId(mInput);
+        var sDbKey = UseCaseValue.dbKey(mInput);
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
-        var bCreateDraft = CreateSentinel.isCreateId(sRootId);
-        var bShouldRelease = !!(sRootId && !CreateSentinel.isCreateId(sRootId) && oLockPort && typeof oLockPort.release === "function" && sSessionGuid);
+        var bCreateDraft = CreateSentinel.isCreateId(sDbKey);
+        var bShouldRelease = !!(sDbKey && !CreateSentinel.isCreateId(sDbKey) && oLockPort && typeof oLockPort.release === "function" && sSessionGuid);
         var oStateModel = mCtx && mCtx.stateModel;
 
         if (!bEdit) {
@@ -69,12 +69,12 @@ sap.ui.define([
                 if (bShouldRelease) {
                     WorkflowTelemetry.emit(
                         oReleaseResult && oReleaseResult.ok !== false && oReleaseResult.released !== false
-                            ? "lock.release.completed"
+                                ? "lock.release.completed"
                             : "lock.release.failed",
                         {
                             stateModel: mCtx && mCtx.stateModel,
                             payload: {
-                                rootId: sRootId,
+                                rootId: sDbKey,
                                 source: WorkflowContracts.SOURCES.ENTER_EDIT
                             }
                         }
@@ -93,7 +93,7 @@ sap.ui.define([
         if (!sSessionGuid) {
             return Promise.resolve(Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.LOCK_LOST, code: "SESSION_UNAVAILABLE" }, [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_LOST)]));
         }
-        if (!sRootId || !oLockPort || typeof oLockPort.acquire !== "function") {
+        if (!sDbKey || !oLockPort || typeof oLockPort.acquire !== "function") {
             return Promise.resolve(Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED, code: "PORT_UNAVAILABLE" }));
         }
         if (requiresIntegrationConfirm(mInput, mCtx)) {
@@ -109,7 +109,7 @@ sap.ui.define([
             ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK);
         }
 
-        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sRootId, {
+        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sDbKey, {
             activity: DetailAuthorizationRuntime.OPERATIONS.CHANGE
         }).then(function (oPermission) {
             if (!oPermission.allowed) {
@@ -128,7 +128,7 @@ sap.ui.define([
                         permission: oPermission
                     };
                 }
-                return Promise.resolve(oCacheValidation.execute({ rootId: sRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; }).then(function (oValidation) {
+                return Promise.resolve(oCacheValidation.execute({ rootId: sDbKey, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; }).then(function (oValidation) {
                     var oValidationData = (oValidation && oValidation.ok && oValidation.data) ? oValidation.data : null;
                     if (oValidationData && oValidationData.invalidated) {
                         return Result.fail({ messageKey: DETAIL_VIEW_KEYS.PERSISTENCE_CONFLICT, code: "CACHE_INVALIDATED" }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
@@ -150,8 +150,8 @@ sap.ui.define([
                 WorkflowTelemetry.emit("lock.acquire.success", {
                     stateModel: mCtx && mCtx.stateModel,
                     payload: {
-                        rootId: sRootId,
-                            source: WorkflowContracts.SOURCES.ENTER_EDIT
+                        rootId: sDbKey,
+                        source: WorkflowContracts.SOURCES.ENTER_EDIT
                     }
                 });
                 return Result.ok({ code: DETAIL_FLOW_CODES.OK, lock: oLock }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat([
@@ -171,33 +171,33 @@ sap.ui.define([
             if (sCode === DETAIL_FLOW_CODES.LOCKED_OWN_SESSION) {
                 WorkflowTelemetry.emit("lock.acquire.failed", {
                     stateModel: mCtx && mCtx.stateModel,
-                    payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
+                    payload: { rootId: sDbKey, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
                 });
             return Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.LOCK_STEAL_OWN_SESSION_PROMPT, code: DETAIL_FLOW_CODES.LOCKED_OWN_SESSION, legacyCode: DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
             }
             if (sCode === DETAIL_CODES.EXPIRED) {
                 WorkflowTelemetry.emit("lock.acquire.failed", {
                     stateModel: mCtx && mCtx.stateModel,
-                    payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
+                    payload: { rootId: sDbKey, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
                 });
             return Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.LOCK_EXPIRED_TAKEOVER_PROMPT, code: DETAIL_CODES.EXPIRED, legacyCode: DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));
             }
             if (sCode === DETAIL_FLOW_CODES.KILLED) {
                 WorkflowTelemetry.emit("lock.acquire.failed", {
                     stateModel: mCtx && mCtx.stateModel,
-                    payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
+                    payload: { rootId: sDbKey, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode }
                 });
             return Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.LOCK_KILLED, code: DETAIL_FLOW_CODES.KILLED, legacyCode: DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_KILLED)]));
             }
             WorkflowTelemetry.emit("lock.acquire.failed", {
                 stateModel: mCtx && mCtx.stateModel,
-                payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode || DETAIL_FLOW_CODES.LOCKED }
+                payload: { rootId: sDbKey, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: sCode || DETAIL_FLOW_CODES.LOCKED }
             });
             return Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED, code: DETAIL_FLOW_CODES.LOCKED, legacyCode: DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED, lock: oLock || {} }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects(), [Effects.warn(DETAIL_MESSAGE_KEYS.LOCK_ACQUIRE_FAILED)]));
         }).catch(function (oError) {
             WorkflowTelemetry.emit("lock.acquire.failed", {
                 stateModel: mCtx && mCtx.stateModel,
-                payload: { rootId: sRootId, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: String((oError && oError.code) || DETAIL_CODES.TECHNICAL_ERROR) }
+                payload: { rootId: sDbKey, source: WorkflowContracts.SOURCES.ENTER_EDIT, code: String((oError && oError.code) || DETAIL_CODES.TECHNICAL_ERROR) }
             });
             return Result.fail(oError, readOnlyEffects());
         });

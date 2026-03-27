@@ -4,8 +4,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchSmartTableBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimePayloadNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchToolbarContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
@@ -28,8 +26,6 @@ sap.ui.define([
     SearchLifecycleBehavior,
     SearchSmartTableBehavior,
     ControllerViewStateRuntime,
-    ControllerRuntime,
-    RuntimePayloadNormalizer,
     ModelStateRuntime,
     SearchToolbarContracts,
     SearchViewportRuntime,
@@ -57,25 +53,6 @@ sap.ui.define([
     var TOKENS = ModelContracts.TOKENS;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var SEARCH_MESSAGE_KEYS = MessageKeyConstants.SEARCH;
-
-    function normalizeSearchCommandPayload(sMethod, mInput) {
-        if (sMethod === SearchContracts.COMMANDS.APPLY_REBIND_POLICY) {
-            return RuntimePayloadNormalizer.normalize(mInput, {
-                booleanKeys: ["silent", "userInitiated"]
-            });
-        }
-        return RuntimePayloadNormalizer.normalize(mInput);
-    }
-
-    function executeSearchCommand(oController, sMethod, mInput) {
-        return ControllerRuntime.executeCommand(
-            oController,
-            oController && oController._facade,
-            sMethod,
-            normalizeSearchCommandPayload(sMethod, mInput || {}),
-            ControllerRuntime.buildCtx(oController)
-        );
-    }
 
     function resolveBundleText(oController, sKey) {
         var oBundle = oController && oController.getResourceBundle && oController.getResourceBundle();
@@ -283,7 +260,7 @@ sap.ui.define([
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_SORT_KEY, sSortKey);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_SORT_DESCENDING, bSortDescending);
         if (shouldRebindSearch(oController)) {
-            return executeSearchCommand(oController, SearchContracts.COMMANDS.REBIND, {
+            return SearchActionBehavior.runSearchCommand(oController, SearchContracts.COMMANDS.REBIND, {
                 source: OperationSourceContracts.SEARCH.SEARCH_SORT_SETTINGS
             });
         }
@@ -299,7 +276,7 @@ sap.ui.define([
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_GROUP_KEY, sGroupKey);
         ModelStateRuntime.write(oController, STATE_MODEL, PATHS.SEARCH_GROUP_DESCENDING, bGroupDescending);
         if (shouldRebindSearch(oController)) {
-            return executeSearchCommand(oController, SearchContracts.COMMANDS.REBIND, {
+            return SearchActionBehavior.runSearchCommand(oController, SearchContracts.COMMANDS.REBIND, {
                 source: OperationSourceContracts.SEARCH.SEARCH_GROUP_SETTINGS
             });
         }
@@ -349,9 +326,6 @@ sap.ui.define([
     }
 
     return BaseController.extend("PRODUCTION_CONTROL_CHECKLIST.controller.Search", {
-        _runSearchCommand: function (sMethod, mInput) {
-            return executeSearchCommand(this, sMethod, mInput);
-        },
         _withActionBusy: function (sPath, fnAction) {
             return SearchActionBehavior.withActionBusy(this, sPath, fnAction);
         },
@@ -435,13 +409,13 @@ sap.ui.define([
             return SearchActionBehavior.onTableItemPress(this, oEvent);
         },
         onChecksFailSegmentChange: function (oEvent) {
-            executeSearchCommand(this, SearchContracts.COMMANDS.BUILD_FILTER, {
+            SearchActionBehavior.runSearchCommand(this, SearchContracts.COMMANDS.BUILD_FILTER, {
                 intent: SEARCH_SOURCES.CHECKS_SEGMENT,
                 key: oEvent.getParameter("key")
             });
         },
         onBarriersFailSegmentChange: function (oEvent) {
-            executeSearchCommand(this, SearchContracts.COMMANDS.BUILD_FILTER, {
+            SearchActionBehavior.runSearchCommand(this, SearchContracts.COMMANDS.BUILD_FILTER, {
                 intent: SEARCH_SOURCES.BARRIERS_SEGMENT,
                 key: oEvent.getParameter("key")
             });

@@ -27,10 +27,10 @@ sap.ui.define([
     }
 
     function execute(mInput, mCtx) {
-        var sRootId = UseCaseValue.rootId(mInput);
+        var sDbKey = UseCaseValue.dbKey(mInput);
         var oAttachment = (mInput && mInput.attachment) || null;
         var sAttachmentId = String((mInput && mInput.attachmentId) || "").trim();
-        if (!sRootId || CreateSentinel.isCreateId(sRootId) || (oAttachment && oAttachment.staged)) {
+        if (!sDbKey || CreateSentinel.isCreateId(sDbKey) || (oAttachment && oAttachment.staged)) {
             cleanupObjectUrl(oAttachment);
             return Promise.resolve(Result.ok(
                 { deleted: true },

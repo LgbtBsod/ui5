@@ -5,7 +5,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailMatchedRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
@@ -15,7 +14,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (DetailAccessViewState, DetailEditRestoreRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime, ModelContracts, DetailUseCaseConstants) {
+], function (DetailAccessViewState, DetailEditRestoreRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime, ModelContracts, DetailUseCaseConstants) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -28,10 +27,14 @@ sap.ui.define([
     });
 
     function runDetailCommand(oController, sMethod, mInput) {
-        if (!oController || typeof oController._runDetailCommand !== TYPE_FUNCTION) {
+        if (!oController || typeof oController._dispatchDetailCommand !== TYPE_FUNCTION) {
             return Promise.resolve(false);
         }
-        return oController._runDetailCommand(sMethod, mInput || {});
+        return oController._dispatchDetailCommand(sMethod, mInput || {});
+    }
+
+    function getModel(oController, sName) {
+        return oController && oController.getModel ? oController.getModel(sName) : null;
     }
 
     function markDetailReady(oController, mDetails) {
@@ -83,7 +86,7 @@ sap.ui.define([
         if (!sameActiveRoot(oController, sRootId)) {
             return false;
         }
-        oDetailModel = ControllerModelRuntime.detail(oController);
+        oDetailModel = getModel(oController, ModelContracts.MODELS.DETAIL);
         if (!oDetailModel) {
             return false;
         }
@@ -132,7 +135,7 @@ sap.ui.define([
 
     function onRouteLeave(oController) {
         var oOwner = oController && oController.getOwnerComponent && oController.getOwnerComponent();
-        var oStateModel = ControllerModelRuntime.state(oController);
+        var oStateModel = getModel(oController, STATE_MODEL);
         if (oOwner && typeof oOwner._stopLockScopedManagers === TYPE_FUNCTION) {
             oOwner._stopLockScopedManagers();
         }

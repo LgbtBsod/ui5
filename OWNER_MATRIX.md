@@ -20,5 +20,6 @@
 | Analytics owner | [`Analytics.controller.js`](/Users/lgbtb/Desktop/ui5/app/controller/Analytics.controller.js) |
 | Framework owner | real runtime/handler owners only; removed thin wrappers must not return |
 | Component lifecycle owner | [`ComponentLifecycleRuntime.js`](/Users/lgbtb/Desktop/ui5/app/service/runtime/component/ComponentLifecycleRuntime.js) |
+| Deleted-wrapper governance owner | [`controller-util-allowlist.json`](/Users/lgbtb/Desktop/ui5/scripts/internal/controller-util-allowlist.json) |
 | CSS legacy quarantine owner | [`sap-internal-css-allowlist.json`](/Users/lgbtb/Desktop/ui5/scripts/sap-internal-css-allowlist.json) |
 | DOM legacy quarantine owner | [`dom-hack-allowlist.json`](/Users/lgbtb/Desktop/ui5/scripts/dom-hack-allowlist.json) |

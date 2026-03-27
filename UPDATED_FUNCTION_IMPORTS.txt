@@ -8,7 +8,7 @@ CreateChecklist
 SaveChanges
 - Purpose: canonical aggregate mutation command for update/delete child changes and root delete.
 - Method: POST body.
-- Truth note: aggregate delta still includes attachment value payload for staged uploads and root pcct_uuid compatibility identity.
+- Truth note: aggregate delta carries metadata/delete only; attachment binaries go through media upload and root transport still uses pcct_uuid compatibility field on backend boundary.
 
 AutoSave
 - Purpose: deferred aggregate patch/autosave path.
@@ -17,24 +17,24 @@ AutoSave
 CopyChecklist
 - Purpose: copy existing checklist.
 - Method: POST query/function import.
-- Required parameters: SourceUuid, SessionGuid.
+- Required parameters: DB_KEY, SessionGuid.
 
 LockAcquire
 - Purpose: acquire edit lock.
 - Method: POST body.
-- Required parameters: ObjectUuid, SessionGuid.
+- Required parameters: DB_KEY, SessionGuid.
 - Optional parameters: TabSessionId, ForceTakeover.
-- Truth note: ObjectUuid is currently the active Gateway boundary field, not proof that frontend command-flow canon is fully ObjectUuid-based.
+- Truth note: ObjectUuid survives only as narrow backend compatibility ingress fallback in DPC request parsing.
 
 LockHeartbeat
 - Purpose: refresh active lock.
 - Method: POST body.
-- Required parameters: ObjectUuid, SessionGuid.
+- Required parameters: DB_KEY, SessionGuid.
 
 LockRelease
 - Purpose: release active lock.
 - Method: POST body.
-- Required parameters: ObjectUuid, SessionGuid.
+- Required parameters: DB_KEY, SessionGuid.
 - Explicitly not part of contract: TrySave.
 
 GetHierarchy

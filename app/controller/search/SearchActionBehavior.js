@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimePayloadNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchActionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchAnalyticsRailRuntime",
@@ -21,8 +22,9 @@ sap.ui.define([
 ], function (
     ControllerViewStateRuntime,
     ModelStateRuntime,
+    RuntimePayloadNormalizer,
     UiDecisionDefaultHandlers,
-    NavigationIntentService,
+    WorkspaceRouteNavigation,
     SearchSelectionRuntime,
     SearchActionRuntime,
     SearchAnalyticsRailRuntime,
@@ -44,12 +46,29 @@ sap.ui.define([
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var SEARCH_MODE = SearchContracts.SEARCH_MODE;
+    var COMMANDS = SearchContracts.COMMANDS;
+
+    function normalizeSearchCommandPayload(sMethod, mInput) {
+        if (sMethod === COMMANDS.APPLY_REBIND_POLICY) {
+            return RuntimePayloadNormalizer.normalize(mInput, {
+                booleanKeys: ["silent", "userInitiated"]
+            });
+        }
+        return RuntimePayloadNormalizer.normalize(mInput);
+    }
 
     function runSearchCommand(oController, sMethod, mInput) {
-        if (!oController || typeof oController._runSearchCommand !== "function") {
+        var oFacade = oController && oController._facade;
+        var oCtx = oController && oController._ctx ? oController._ctx() : {};
+
+        if (!oFacade || typeof oFacade[sMethod] !== "function") {
             return Promise.resolve(false);
         }
-        return oController._runSearchCommand(sMethod, mInput || {});
+        return Promise.resolve(
+            oFacade[sMethod].call(oFacade, normalizeSearchCommandPayload(sMethod, mInput || {}), oCtx)
+        ).then(function () {
+            return true;
+        });
     }
 
     function withActionBusy(oController, sPath, fnAction, fnBusyChange) {
@@ -137,7 +156,7 @@ sap.ui.define([
     function onOpenWorkflowAnalytics(oController) {
         return SearchActionRuntime.openWorkflowAnalytics(oController, {
             navigateToAnalytics: function () {
-                NavigationIntentService.navigateToAnalytics(oController);
+                WorkspaceRouteNavigation.navigateToAnalytics(oController);
             }
         });
     }
@@ -173,7 +192,7 @@ sap.ui.define([
     function onCreate(oController) {
         SearchViewportRuntime.captureSearchScrollPosition(oController);
         return withActionBusy(oController, "/createActionBusy", function () {
-            NavigationIntentService.navigateToDetail(oController, CreateSentinel.toRouteId());
+            WorkspaceRouteNavigation.navigateToDetail(oController, CreateSentinel.toRouteId());
             return Promise.resolve(true);
         });
     }
@@ -247,6 +266,7 @@ sap.ui.define([
     }
 
     return {
+        runSearchCommand: runSearchCommand,
         withActionBusy: withActionBusy,
         onSmartSearch: onSmartSearch,
         onRetrySearchLoad: onRetrySearchLoad,

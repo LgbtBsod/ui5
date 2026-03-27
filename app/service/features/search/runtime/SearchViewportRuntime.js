@@ -1,5 +1,4 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EventDelegateRuntime",
@@ -11,7 +10,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/AppShellDomRuntime"
 ], function (
-    ControllerModelRuntime,
     ModelStateRuntime,
     SchedulingRuntime,
     EventDelegateRuntime,
@@ -36,6 +34,10 @@ sap.ui.define([
     var STATE_MODEL = SearchViewportContracts.MODELS.STATE;
     var STATE_PATHS = SearchViewportContracts.STATE_PATHS;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+
+    function getStateModel(oController) {
+        return oController && oController.getModel ? oController.getModel(STATE_MODEL) : null;
+    }
 
     function resolveViewDom(oController) {
         return oController && oController.getView && oController.getView().getDomRef && oController.getView().getDomRef();
@@ -359,7 +361,7 @@ sap.ui.define([
 
     function captureSearchScrollPosition(oController) {
         var oScrollHost = resolveSearchScrollHost(oController);
-        if (!ControllerModelRuntime.state(oController)) {
+        if (!getStateModel(oController)) {
             return;
         }
         ModelStateRuntime.write(oController, STATE_MODEL, STATE_PATHS.SEARCH_SCROLL_STATE, {

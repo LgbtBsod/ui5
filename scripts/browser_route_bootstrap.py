@@ -247,10 +247,10 @@ def navigate_to_search(page) -> dict[str, Any]:
           const controller = searchView && searchView.getController ? searchView.getController() : null;
           const component = app && sap.ui.core.Component.getOwnerComponentFor(app);
           const router = component && component.getRouter && component.getRouter();
-          sap.ui.require(['PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService'], function (NavigationIntentService) {
+          sap.ui.require(['PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation'], function (WorkspaceRouteNavigation) {
             try {
-              if (controller && NavigationIntentService && typeof NavigationIntentService.navigateToSearch === 'function') {
-                Promise.resolve(NavigationIntentService.navigateToSearch(controller)).then(resolve).catch(reject);
+              if (controller && WorkspaceRouteNavigation && typeof WorkspaceRouteNavigation.navigateToSearch === 'function') {
+                Promise.resolve(WorkspaceRouteNavigation.navigateToSearch(controller)).then(resolve).catch(reject);
                 return;
               }
               if (router && typeof router.navTo === 'function') {
@@ -300,10 +300,10 @@ def navigate_to_detail(page, root_id: str, layout: str | None = None) -> dict[st
             || null;
           const component = app && sap.ui.core.Component.getOwnerComponentFor(app);
           const router = component && component.getRouter && component.getRouter();
-          sap.ui.require(['PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService'], function (NavigationIntentService) {
+          sap.ui.require(['PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation'], function (WorkspaceRouteNavigation) {
             try {
-              if (controller && NavigationIntentService && typeof NavigationIntentService.navigateToDetail === 'function') {
-                Promise.resolve(NavigationIntentService.navigateToDetail(controller, String(rootId || ''), layout || undefined)).then(resolve).catch(reject);
+              if (controller && WorkspaceRouteNavigation && typeof WorkspaceRouteNavigation.navigateToDetail === 'function') {
+                Promise.resolve(WorkspaceRouteNavigation.navigateToDetail(controller, String(rootId || ''), layout || undefined)).then(resolve).catch(reject);
                 return;
               }
               if (router && typeof router.navTo === 'function') {

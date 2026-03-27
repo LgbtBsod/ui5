@@ -12,13 +12,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimePolicy",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DialogConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts"
-], function (DialogOrchestrator, DetailLayoutRuntime, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardFactory, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, ModelPathContracts, StatePaths, FeedbackDefaultHandlers, ModelStateRuntime, DetailRuntimePolicy, NavigationIntentService, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
+], function (DialogOrchestrator, DetailLayoutRuntime, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardFactory, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, ModelPathContracts, StatePaths, FeedbackDefaultHandlers, ModelStateRuntime, DetailRuntimePolicy, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -103,6 +102,20 @@ sap.ui.define([
 
         _currentRootId: function () {
             return this._currentChecklistDbKey();
+        },
+
+        _dispatchDetailCommand: function (sMethod, mInput) {
+            var oDetailService = this._detailService;
+            var oCtx = typeof this._ctx === "function" ? this._ctx() : {};
+
+            if (!oDetailService || typeof oDetailService[sMethod] !== "function") {
+                return Promise.resolve(false);
+            }
+            return Promise.resolve(
+                oDetailService[sMethod].call(oDetailService, Object.assign({}, mInput || {}), oCtx)
+            ).then(function () {
+                return true;
+            });
         },
 
         _applyDetailFieldChange: function (oEvent, mOptions) {

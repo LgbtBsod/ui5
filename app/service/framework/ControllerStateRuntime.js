@@ -1,16 +1,19 @@
 sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (JSONModel, ModelStateRuntime, ControllerModelRuntime, ModelContracts) {
+], function (JSONModel, ModelStateRuntime, ModelContracts) {
     "use strict";
 
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
 
+    function resolveViewStateModel(oController) {
+        return oController && typeof oController.getModel === "function" ? oController.getModel(VIEW_MODEL) : null;
+    }
+
     function initModel(oController, vState) {
         var vData = typeof vState === "function" ? vState() : vState;
-        var oModel = ControllerModelRuntime.viewState(oController);
+        var oModel = resolveViewStateModel(oController);
         if (oModel && typeof oModel.setData === "function") {
             oModel.setData(vData || {});
             return oModel;
@@ -18,7 +21,7 @@ sap.ui.define([
         if (oController && typeof oController.setModel === "function") {
             oController.setModel(new JSONModel(vData || {}), VIEW_MODEL);
         }
-        return ControllerModelRuntime.viewState(oController);
+        return resolveViewStateModel(oController);
     }
 
     function get(oController, sPath, vFallback) {
@@ -55,7 +58,7 @@ sap.ui.define([
         setFlag: setFlag,
         withFlag: withFlag,
         viewState: function (oController) {
-            return ControllerModelRuntime.viewState(oController);
+            return resolveViewStateModel(oController);
         }
     });
 });

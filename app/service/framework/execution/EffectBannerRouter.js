@@ -1,12 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
-], function (FeedbackBannerRuntime, RuntimeInput, ControllerModelRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput"
+], function (FeedbackBannerRuntime, RuntimeInput) {
     "use strict";
 
     function readStateModel(oController) {
-        return ControllerModelRuntime.state(oController);
+        return oController && oController.getModel ? oController.getModel("state") : null;
     }
 
     function resolveTextKey(oEffect, sFallbackTextKey) {

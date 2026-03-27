@@ -2,13 +2,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "sap/ui/core/routing/HashChanger",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, ControllerModelRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger, JsRuntime) {
+], function (CloneUtil, LayoutStateRuntime, ModelStateRuntime, StatePaths, NavigationContracts, WorkflowContracts, HashChanger, JsRuntime) {
     "use strict";
 
     var TYPEOF = JsRuntime.TYPEOF;
@@ -20,7 +19,11 @@ sap.ui.define([
     }
 
     function readStateModel(oController) {
-        return ControllerModelRuntime.state(oController);
+        return oController && typeof oController.getModel === TYPEOF.FUNCTION ? oController.getModel("state") : null;
+    }
+
+    function readShellModel(oController) {
+        return oController && typeof oController.getModel === TYPEOF.FUNCTION ? oController.getModel("shell") : null;
     }
 
     function buildFallbackIntent() {
@@ -97,7 +100,7 @@ sap.ui.define([
 
     function setAnalyticsReturnIntent(oController) {
         var oStateModel = readStateModel(oController);
-        var oShellModel = ControllerModelRuntime.shell(oController);
+        var oShellModel = readShellModel(oController);
         var oRouter = oController && oController.getRouter && oController.getRouter();
         var oSnapshot = buildAnalyticsReturnSnapshot(oStateModel, oShellModel, oRouter);
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));

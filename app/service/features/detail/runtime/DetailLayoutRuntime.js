@@ -1,20 +1,23 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts"
-], function (LayoutStateRuntime, NavigationIntentService, ControllerModelRuntime, ModelStateRuntime, ModelPathContracts, ModelContracts, NavigationContracts) {
+], function (LayoutStateRuntime, WorkspaceRouteNavigation, ModelStateRuntime, ModelPathContracts, ModelContracts, NavigationContracts) {
     "use strict";
 
     var SHELL_MODEL = ModelContracts.MODELS.SHELL;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
 
+    function getModel(oController, sName) {
+        return oController && oController.getModel ? oController.getModel(sName) : null;
+    }
+
     function resolveActiveDbKey(oController) {
-        var oDetailModel = ControllerModelRuntime.detail(oController);
-        var oStateModel = ControllerModelRuntime.state(oController);
+        var oDetailModel = getModel(oController, ModelContracts.MODELS.DETAIL);
+        var oStateModel = getModel(oController, ModelContracts.MODELS.STATE);
         return String(
             ModelStateRuntime.readOnModel(oDetailModel, "/root/id", "")
             || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
@@ -31,7 +34,7 @@ sap.ui.define([
             var sRootId;
             var sLayout;
 
-            if (!ControllerModelRuntime.state(oController)) {
+            if (!getModel(oController, ModelContracts.MODELS.STATE)) {
                 return;
             }
 
@@ -42,13 +45,13 @@ sap.ui.define([
                 return;
             }
             if (sLayout === NavigationContracts.LAYOUTS.ONE_COLUMN) {
-                NavigationIntentService.navigateToSearch(oController);
+                WorkspaceRouteNavigation.navigateToSearch(oController);
                 return;
             }
             if (!sRootId) {
                 return;
             }
-            NavigationIntentService.navigateToDetail(oController, sRootId, sLayout);
+            WorkspaceRouteNavigation.navigateToDetail(oController, sRootId, sLayout);
         }
     };
 });

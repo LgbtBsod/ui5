@@ -3,10 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectBannerRouter",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
-], function (EffectApplier, EffectBannerRouter, FeedbackBehaviorHelpers, FeedbackBannerRuntime, ControllerModelRuntime, BehaviorRegistry, FeedbackConstants) {
+], function (EffectApplier, EffectBannerRouter, FeedbackBehaviorHelpers, FeedbackBannerRuntime, BehaviorRegistry, FeedbackConstants) {
     "use strict";
 
     var FEEDBACK_SCOPE = "feedback";
@@ -45,7 +44,7 @@ sap.ui.define([
     }
 
     function showGlobalMessage(mContext) {
-        var oState = ControllerModelRuntime.state(mContext.controller);
+        var oState = mContext.controller && mContext.controller.getModel ? mContext.controller.getModel("state") : null;
         var sText = resolveText({
             controller: mContext.controller,
             textKey: mContext.textKey,
@@ -57,7 +56,7 @@ sap.ui.define([
     }
 
     function showRouteMessage(mContext) {
-        var oState = ControllerModelRuntime.state(mContext.controller);
+        var oState = mContext.controller && mContext.controller.getModel ? mContext.controller.getModel("state") : null;
         var sText = resolveText({
             controller: mContext.controller,
             textKey: mContext.textKey,

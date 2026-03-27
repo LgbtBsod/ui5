@@ -1,6 +1,5 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/PermissionPresentation",
 "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
@@ -9,7 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (LayoutStateRuntime, ControllerModelRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants) {
+], function (LayoutStateRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -70,7 +69,7 @@ sap.ui.define([
     function ensureShellDefaults(oController) {
         var mPatch = {};
 
-        if (!ControllerModelRuntime.shell(oController)) {
+        if (!getModel(oController, SHELL_MODEL)) {
             return;
         }
         mPatch[MODEL_PATHS.SHELL_COMPACT_DENSITY] = !!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_COMPACT_DENSITY, false);
@@ -159,7 +158,7 @@ sap.ui.define([
     }
 
     function syncShellState(oController, mHooks) {
-        var oState = ControllerModelRuntime.state(oController);
+        var oState = getModel(oController, STATE_MODEL);
         var mShellPatch = {};
         var sSelectedId;
         var sMode;
@@ -176,7 +175,7 @@ sap.ui.define([
         var bEditWorkspace;
         var oShellLockState;
 
-        if (!ControllerModelRuntime.shell(oController) || !oState) {
+        if (!getModel(oController, SHELL_MODEL) || !oState) {
             return;
         }
 
@@ -253,4 +252,7 @@ sap.ui.define([
         syncShellState: syncShellState
     };
 });
+    function getModel(oController, sName) {
+        return oController && oController.getModel ? oController.getModel(sName) : null;
+    }
 

@@ -14,6 +14,7 @@ Current truth
 - Edit mode literals are centralized in zif_zodata_contract_constants.
 - BOPF mapper remains the modify bridge.
 - DB_KEY / PARENT_KEY compatible contract remains intact.
-- Gateway MPC lock function-import metadata is aligned to ObjectUuid / SessionGuid, with TabSessionId and optional ForceTakeover on LockAcquire.
+- Gateway MPC lock function-import metadata is aligned to DB_KEY / SessionGuid, with TabSessionId and optional ForceTakeover on LockAcquire.
+- Productive DPC still accepts ObjectUuid only as narrow compatibility ingress fallback while resolving canonical DB_KEY first.
 - LockRelease target semantics do not include TrySave.
 - Analytics remains split between lightweight summary, heavy breakdown and separate refresh-state contract.

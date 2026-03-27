@@ -5,7 +5,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentOpenRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInputAssistRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
 ], function (
     AttachmentUploadCore,
@@ -14,22 +14,21 @@ sap.ui.define([
     DetailAttachmentOpenRuntime,
     DetailInputAssistRuntime,
     ControllerViewStateRuntime,
-    NavigationIntentService,
+    WorkspaceRouteNavigation,
     SchedulingRuntime
 ) {
     "use strict";
 
     function runDetailCommand(oController, sMethod, mInput) {
-        if (!oController || typeof oController._runDetailCommand !== "function") {
+        if (!oController || typeof oController._dispatchDetailCommand !== "function") {
             return Promise.resolve(false);
         }
-        return oController._runDetailCommand(sMethod, mInput || {});
+        return oController._dispatchDetailCommand(sMethod, mInput || {});
     }
 
     function withCurrentDbKey(oController, mInput) {
         var oNormalized = Object.assign({}, mInput || {});
-        oNormalized.dbKey = oNormalized.dbKey || oNormalized.rootId || (oController && typeof oController._currentChecklistDbKey === "function" ? oController._currentChecklistDbKey() : "");
-        delete oNormalized.rootId;
+        oNormalized.dbKey = oNormalized.dbKey || (oController && typeof oController._currentChecklistDbKey === "function" ? oController._currentChecklistDbKey() : "");
         return oNormalized;
     }
 
@@ -144,7 +143,7 @@ sap.ui.define([
             return runDetailCommand(oController, "attachmentLoad", withCurrentDbKey(oController, mInput));
         },
         openWorkflowAnalytics: function (oController) {
-            NavigationIntentService.navigateToAnalytics(oController);
+            WorkspaceRouteNavigation.navigateToAnalytics(oController);
             return Promise.resolve();
         },
         toggleAttachmentsSection: function (oController, mInput) {
@@ -163,7 +162,7 @@ sap.ui.define([
             return AttachmentUploadCore.openNativeFilePicker(this);
         },
         onOpenWorkflowAnalytics: function () {
-            NavigationIntentService.navigateToAnalytics(this);
+            WorkspaceRouteNavigation.navigateToAnalytics(this);
             return Promise.resolve();
         },
         onToggleAttachmentsSection: function () {

@@ -144,12 +144,12 @@ sap.ui.define([
     }
 
     function execute(mInput, mCtx) {
-        var sRootId = UseCaseValue.rootId(mInput);
+        var sDbKey = UseCaseValue.dbKey(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oUiState = mCtx && mCtx.uiState;
         var sReadyAt = new Date().toISOString();
 
-        if (CreateSentinel.isCreateId(sRootId)) {
+        if (CreateSentinel.isCreateId(sDbKey)) {
             var oDraft = (oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT)) || {};
             var oDraftSnapshot = cloneSnapshot(oDraft);
             var oDraftSelected = cloneSnapshot(oDraft);
@@ -215,13 +215,13 @@ sap.ui.define([
             });
         }
 
-        if (!sRootId || !oRepo || typeof oRepo.loadDetailSnapshot !== "function") {
+        if (!sDbKey || !oRepo || typeof oRepo.loadDetailSnapshot !== "function") {
             return Promise.resolve(Result.fail({ messageKey: DETAIL_VIEW_KEYS.GENERIC_OPERATION_FAILED, code: DETAIL_CODES.INVALID_INPUT }));
         }
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;
 
-        return resolveCanonicalRootId(oRepo, sRootId).then(function (sCanonicalRootId) {
+        return resolveCanonicalRootId(oRepo, sDbKey).then(function (sCanonicalRootId) {
             return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sCanonicalRootId, {
                 activity: DetailAuthorizationRuntime.OPERATIONS.DISPLAY
             }).then(function (oPermission) {
@@ -279,7 +279,7 @@ sap.ui.define([
             }
             var oSnapshot = oResolved && oResolved.snapshot;
             var oPermission = oResolved && oResolved.permission;
-            var sCanonicalRootId = String((oResolved && oResolved.rootId) || sRootId).trim() || sRootId;
+            var sCanonicalRootId = String((oResolved && oResolved.rootId) || sDbKey).trim() || sDbKey;
             var oCurrentSelected = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.ROOT);
             var oCurrentSnapshot = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.BASE);
             var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
@@ -331,7 +331,7 @@ sap.ui.define([
                     ready: false,
                     readyAt: "",
                     error: String((oError && oError.message) || "detail_open_failed"),
-                    rootId: sRootId,
+                    rootId: sDbKey,
                     mode: WorkflowContracts.EDIT_MODES.READ,
                     permissionKnown: false,
                     lockKnown: false

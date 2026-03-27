@@ -3,7 +3,6 @@ sap.ui.define([
     "sap/ui/core/Fragment",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/analytics/AnalyticsFacade",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsYearRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
@@ -13,7 +12,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsFormatRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsExportRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLifecycleBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsLoadRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
@@ -22,7 +21,6 @@ sap.ui.define([
     Fragment,
     ControllerTextRuntime,
     AnalyticsFacade,
-    ControllerRuntime,
     AnalyticsBuilderRuntime,
     AnalyticsYearRuntime,
     AnalyticsContracts,
@@ -32,7 +30,7 @@ sap.ui.define([
     AnalyticsFormatRuntime,
     AnalyticsExportRuntime,
     AnalyticsRefreshRuntime,
-    NavigationIntentService,
+    WorkspaceRouteNavigation,
     AnalyticsLifecycleBehavior,
     AnalyticsLoadRuntime,
     UiSemanticConstants
@@ -47,7 +45,7 @@ sap.ui.define([
     var YEAR_PICKER_FIELDS = AnalyticsContracts.YEAR_PICKER_FIELDS;
 
     function buildCtx(oController) {
-        return ControllerRuntime.buildCtx(oController);
+        return oController && typeof oController._ctx === "function" ? oController._ctx() : {};
     }
 
     function getBundleText(oController, sKey, aArgs, sFallback) {
@@ -441,7 +439,7 @@ sap.ui.define([
             }
         },
         onExportAnalyticsReport: function () { return AnalyticsExportRuntime.exportAnalyticsReport(this); },
-        onCloseAnalytics: function () { NavigationIntentService.navigateBackFromAnalytics(this); },
+        onCloseAnalytics: function () { WorkspaceRouteNavigation.navigateBackFromAnalytics(this); },
         formatAnalyticsMatrixMetricLabel: function (sMetricKey) {
             return AnalyticsFormatRuntime.formatMatrixMetricLabel(sMetricKey, getBundleText.bind(null, this));
         },

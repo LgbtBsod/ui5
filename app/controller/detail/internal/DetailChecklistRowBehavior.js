@@ -31,10 +31,10 @@ sap.ui.define([
     }
 
     function runDetailCommand(oController, sMethod, mInput) {
-        if (!oController || typeof oController._runDetailCommand !== "function") {
+        if (!oController || typeof oController._dispatchDetailCommand !== "function") {
             return Promise.resolve(false);
         }
-        return oController._runDetailCommand(sMethod, mInput || {});
+        return oController._dispatchDetailCommand(sMethod, mInput || {});
     }
 
     function buildHooks(oController) {

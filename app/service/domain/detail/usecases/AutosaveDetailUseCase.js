@@ -99,20 +99,20 @@ function mapFieldDelta(mInput, oCurrent) {
     }
 
 function execute(mInput, mCtx) {
-        var sRootId = UseCaseValue.rootId(mInput);
+        var sDbKey = UseCaseValue.dbKey(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oCacheWrite = mCtx && mCtx.cacheWrite;
         var oDelta;
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
         var aSerializedAttachments = [];
 
-        if (CreateSentinel.isCreateId(sRootId)) {
+        if (CreateSentinel.isCreateId(sDbKey)) {
             return Promise.resolve(Result.ok({ skipped: true, reason: DETAIL_REASONS.CREATE_DRAFT_PENDING }, []));
         }
-        if (!isAutosaveAllowed(sRootId, mCtx)) {
+        if (!isAutosaveAllowed(sDbKey, mCtx)) {
             return Promise.resolve(Result.ok({ skipped: true, reason: DETAIL_REASONS.AUTOSAVE_GUARD }, []));
         }
-        if (!sRootId || !oRepo || typeof oRepo.autosaveChecklist !== "function") {
+        if (!sDbKey || !oRepo || typeof oRepo.autosaveChecklist !== "function") {
             return Promise.resolve(Result.fail({ code: DETAIL_CODES.AUTOSAVE_UNAVAILABLE, messageKey: DETAIL_MESSAGE_KEYS.PERSISTENCE_TECHNICAL_ERROR }));
         }
 
@@ -133,10 +133,10 @@ function execute(mInput, mCtx) {
         var oCurrentChecklist = readCurrentChecklist(mCtx);
         var aCurrentAttachments = DetailStateAccess.readWorkingAttachments(mCtx);
 
-        return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, sRootId).then(function (aStagedPayload) {
+        return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, sDbKey).then(function (aStagedPayload) {
             aSerializedAttachments = Array.isArray(aStagedPayload) ? aStagedPayload : [];
             return Promise.resolve(oRepo.autosaveChecklist(DetailRuntimePayload.saveRequest({
-                rootId: sRootId,
+                dbKey: sDbKey,
                 delta: DetailAttachmentDeltaRuntime.mergeDeltaAttachments(oDelta, aSerializedAttachments),
                 sessionGuid: sSessionGuid,
                 attachments: []
@@ -151,7 +151,7 @@ function execute(mInput, mCtx) {
             );
             return DetailAttachmentSaveRuntime.syncAfterSave({
                 repo: oRepo,
-                rootId: sRootId,
+                rootId: sDbKey,
                 createMode: false,
                 currentAttachments: aCurrentAttachments,
                 sessionGuid: sSessionGuid,
@@ -162,7 +162,7 @@ function execute(mInput, mCtx) {
                 ctx: mCtx,
                 hasStagedPayload: aSerializedAttachments.length > 0
             }).then(function (oAttachmentSync) {
-                return writeDetailCache(oCacheWrite, sRootId, oAttachmentSync.snapshot, mCtx).then(function () {
+                return writeDetailCache(oCacheWrite, sDbKey, oAttachmentSync.snapshot, mCtx).then(function () {
                     return Result.ok({ autosavedAt: sAt }, [
                         Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, oAttachmentSync.hasPendingAttachments),
                         Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, CloneUtil.clone(oAttachmentSync.snapshot, {}))

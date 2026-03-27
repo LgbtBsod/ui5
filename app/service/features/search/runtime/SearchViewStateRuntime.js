@@ -2,18 +2,21 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFormattingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, ControllerModelRuntime, SearchMaxResults, OperationSourceContracts, SearchContracts, UiSemanticConstants, JsRuntime) {
+], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, SearchMaxResults, OperationSourceContracts, SearchContracts, UiSemanticConstants, JsRuntime) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
     var PERSISTENCY_PREFIXES = SearchContracts.PERSISTENCY_PREFIXES;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+
+    function getStateModel(oController) {
+        return oController && typeof oController.getModel === TYPE_FUNCTION ? oController.getModel("state") : null;
+    }
 
     function createViewModel(sScope) {
         return new JSONModel({
@@ -123,7 +126,7 @@ sap.ui.define([
     function syncSearchTableRequestWindow(oController) {
         var oSmartTable = oController.byId("searchSmartTable");
         var oInnerTable = oSmartTable && oSmartTable.getTable && oSmartTable.getTable();
-        var oStateModel = ControllerModelRuntime.state(oController);
+        var oStateModel = getStateModel(oController);
         var oStateData = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
         var iVisibleCap = resolveVisibleCap(oStateData) || 100;
         var iBackendTop = SearchMaxResults.resolveSearchFetchLimit(oStateData);
@@ -157,7 +160,7 @@ sap.ui.define([
     }
 
     function readStateData(oController) {
-        var oStateModel = ControllerModelRuntime.state(oController);
+        var oStateModel = getStateModel(oController);
         return (oStateModel && typeof oStateModel.getData === TYPE_FUNCTION && oStateModel.getData()) || {};
     }
 

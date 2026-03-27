@@ -28,3 +28,6 @@
   - `app/controller/detail/DetailCommandPolicy.js` -> `app/service/features/detail/runtime/AttachmentUploadRuntime.js`
 - Remaining candidates:
   - `app/service/framework/ControllerModelRuntime.js`
+- Governance cleanup in this pass:
+  - `scripts/internal/controller-util-allowlist.json` no longer contains deleted wrapper owners
+  - `app/controller/detail/DetailInfoCardFactory.js` no longer carries embedded English fallback label/tooltip copy

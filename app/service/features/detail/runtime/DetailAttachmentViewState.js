@@ -1,22 +1,25 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (ModelContracts, StatePaths, ControllerModelRuntime, ControllerViewStateRuntime, ModelStateRuntime, ModelPathContracts, WorkflowContracts, DetailUseCaseConstants) {
+], function (ModelContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, ModelPathContracts, WorkflowContracts, DetailUseCaseConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var STATE_MODEL = MODELS.STATE;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
 
+    function getModel(oController, sName) {
+        return oController && oController.getModel ? oController.getModel(sName) : null;
+    }
+
     function resolveActiveDbKey(oController) {
-        var oStateModel = ControllerModelRuntime.state(oController);
-        var oDetailModel = ControllerModelRuntime.detail(oController);
+        var oStateModel = getModel(oController, MODELS.STATE);
+        var oDetailModel = getModel(oController, MODELS.DETAIL);
         return String(
             ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ROOT_ID, "")
             || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
@@ -27,7 +30,7 @@ sap.ui.define([
     }
 
     function hasActiveRoot(oController) {
-        var oDetailModel = ControllerModelRuntime.detail(oController);
+        var oDetailModel = getModel(oController, MODELS.DETAIL);
         var sDetailRootId = String(ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ROOT_ID, "") || "").trim();
         var sCanonicalRootId = resolveActiveDbKey(oController);
         var aSessionAttachments = ControllerViewStateRuntime.get(oController, "/sessionAttachments", []);

@@ -17,13 +17,13 @@ sap.ui.define([
     }
 
     function execute(mInput, mCtx) {
-        var sRootId = UseCaseValue.rootId(mInput);
+        var sDbKey = UseCaseValue.dbKey(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oUiState = mCtx && mCtx.uiState;
         var aSessionAttachments;
         var aWorkingAttachments;
 
-        if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
+        if (!sDbKey || CreateSentinel.isCreateId(sDbKey)) {
             aSessionAttachments = (oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.SESSION_ATTACHMENTS)) || [];
             aWorkingAttachments = Array.isArray(aSessionAttachments) ? aSessionAttachments : [];
             return Promise.resolve(Result.ok({
@@ -40,7 +40,7 @@ sap.ui.define([
             }, DetailAttachmentStateRuntime.buildAttachmentBusyResetEffects()));
         }
 
-        return Promise.resolve(oRepo.loadAttachments({ dbKey: sRootId })).then(function (oResult) {
+        return Promise.resolve(oRepo.loadAttachments({ dbKey: sDbKey })).then(function (oResult) {
             return Result.ok(oResult || {}, DetailAttachmentStateRuntime.buildAttachmentLoadEffects((oResult && oResult.attachments) || [], "", "info"));
         }).catch(function (oError) {
             return Result.fail(oError, DetailAttachmentStateRuntime.buildAttachmentBusyResetEffects());

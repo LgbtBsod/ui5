@@ -84,7 +84,7 @@ sap.ui.define([
     }
 
     function execute(mInput, mCtx) {
-        var sRootId = UseCaseValue.rootId(mInput);
+        var sDbKey = UseCaseValue.dbKey(mInput);
         var oUiState = mCtx && mCtx.uiState;
         var oCurrent = readCurrentChecklist(mCtx);
         var oSelectedChecklist = readSelectedChecklist(mCtx);
@@ -93,7 +93,7 @@ sap.ui.define([
         var oCacheWrite = mCtx && mCtx.cacheWrite;
         var oLock = mCtx && mCtx.lock;
         var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
-        var bCreate = CreateSentinel.isCreateId(sRootId) || sMode === WorkflowContracts.EDIT_MODES.CREATE;
+        var bCreate = CreateSentinel.isCreateId(sDbKey) || sMode === WorkflowContracts.EDIT_MODES.CREATE;
         var oDelta = (mInput && mInput.delta) || (bCreate ? DeltaPayloadBuilder.buildCreatePayload(oCurrent) : DeltaPayloadBuilder.buildDeltaPayload(oCurrent, oSnapshot));
         var iClientVersion = DetailSaveRuntime.resolveVersionNumber(oCurrent, oSnapshot);
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
@@ -135,12 +135,12 @@ sap.ui.define([
             ]));
         }
 
-        return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, bCreate ? "" : sRootId).then(function (aStagedPayload) {
+        return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, bCreate ? "" : sDbKey).then(function (aStagedPayload) {
             var oUnifiedDelta = DetailAttachmentDeltaRuntime.mergeDeltaAttachments(oDelta, aStagedPayload);
             var pSave = bCreate
                 ? Promise.resolve(oRepo.createChecklist({ delta: oUnifiedDelta, sessionGuid: sSessionGuid }))
                 : Promise.resolve(oRepo.saveChecklist(DetailRuntimePayload.saveRequest({
-                    rootId: sRootId,
+                    dbKey: sDbKey,
                     delta: oUnifiedDelta,
                     sessionGuid: sSessionGuid,
                     attachments: []
@@ -165,7 +165,7 @@ sap.ui.define([
                 return Promise.all([
                     DetailAttachmentSaveRuntime.syncAfterSave({
                         repo: oRepo,
-                        rootId: sRootId,
+                        rootId: sDbKey,
                         createMode: bCreate,
                         currentAttachments: aCurrentAttachments,
                         sessionGuid: sSessionGuid,

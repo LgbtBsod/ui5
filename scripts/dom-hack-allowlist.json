@@ -4,7 +4,7 @@
   "app/service/framework/ThemeDomRuntime.js": "Theme runtime is the single quarantined owner for document class and CSS variable writes.",
   "app/service/framework/SemanticDomRuntime.js": "Semantic runtime still applies ARIA attributes where XML cannot express late-bound shell semantics.",
   "app/controller/detail/AttachmentDropZoneRuntime.js": "Attachment drop zone still needs native drag-enter and drag-leave DOM boundaries around the upload surface.",
-  "app/controller/detail/DetailControllerRuntime.js": "Detail controller runtime still bridges focus and DOM measurement gaps not covered by public UI5 card APIs.",
+  "app/controller/Detail.controller.js": "Detail controller still bridges focus and DOM measurement gaps not covered by public UI5 card APIs after collapsing the legacy runtime wrapper.",
   "app/controller/detail/DetailInfoCardFactory.js": "Detail info cards still require DOM-level semantic enrichment until custom card wrappers replace generated internals.",
   "app/service/features/detail/runtime/DetailRowBehaviorRuntime.js": "Detail row behavior still needs targeted DOM state sync while grid row wrappers remain legacy.",
   "app/service/features/search/runtime/SearchReturnRediscoveryRuntime.js": "Search return flow still uses DOM anchors to restore focus after route transitions.",

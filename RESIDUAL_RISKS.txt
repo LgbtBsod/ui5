@@ -19,7 +19,7 @@
 - Larger bootstrap/component/runtime clusters still need a deeper merge pass if the repo wants a stricter SRP end-state.
 
 5. Raw UI fallback text is now governed, but legacy `ControllerTextRuntime`/`ControllerModelRuntime` helper usage remains broad.
-- The current pass removed live fallback copy from active analytics/search runtime and strengthened the gate.
+- The current pass removed live fallback copy from active analytics/search runtime and detail info-card labels/tooltips.
 - Helper consolidation is still possible later, but it is not required to keep the current production baseline compliant.
 
 6. DOM and CSS debt is frozen behind quarantine, not erased.

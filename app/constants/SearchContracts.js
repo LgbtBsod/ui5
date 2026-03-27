@@ -19,6 +19,17 @@ sap.ui.define([], function () {
             EXACT: "EXACT",
             LOOSE: "LOOSE"
         }),
+        COMMANDS: Object.freeze({
+            BOOTSTRAP: "bootstrap",
+            BUILD_FILTER: "buildFilter",
+            EXECUTE_SEARCH: "executeSearch",
+            REBIND: "rebind",
+            SELECT_ROW: "selectRow",
+            SELECTION_CHANGED: "selectionChanged",
+            EXPORT_FLOW: "exportFlow",
+            ANALYTICS: "analytics",
+            APPLY_REBIND_POLICY: "applyRebindPolicy"
+        }),
         COLUMN_RULES: Object.freeze({
             Id: Object.freeze({ width: "8.5rem", minScreenWidth: "Phone", demandPopin: false, importance: "High" }),
             LpcText: Object.freeze({ width: "6.75rem", minScreenWidth: "Tablet", demandPopin: true, importance: "High" }),

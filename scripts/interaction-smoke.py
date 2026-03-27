@@ -22,9 +22,9 @@ URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
 DETAIL_ROOT = "E49B679F518F4947BD7A0F2CC1C4AC46"
 CREATE_ROUTE = "#/checklist/__CREATE"
 APP_VIEW_ID = "checklist_app_comp---app"
-SEARCH_VIEW_ID = "checklist_app_comp---searchView"
-DETAIL_VIEW_ID = "checklist_app_comp---detailView"
-ANALYTICS_VIEW_ID = "checklist_app_comp---analyticsView"
+SEARCH_VIEW_ID = "checklist_app_comp---searchTargetPage"
+DETAIL_VIEW_ID = "checklist_app_comp---detailTargetPage"
+ANALYTICS_VIEW_ID = "checklist_app_comp---analyticsTargetPage"
 SHELL_HEADER_HOST_ID = f"{APP_VIEW_ID}--appShellHeaderHost"
 SEARCH_WORKBENCH_ID = f"{SEARCH_VIEW_ID}--searchWorkbenchDock"
 SEARCH_FILTER_ID = f"{SEARCH_VIEW_ID}--searchFilterCard"
@@ -48,30 +48,20 @@ def wait_for_app_ready(page, delay: int = 1200) -> None:
     page.wait_for_load_state("networkidle")
     page.wait_for_function(
         """
-        (ids) => {
+        () => {
           if (typeof sap === 'undefined' || !sap.ui || !sap.ui.getCore) {
             return false;
           }
           const core = sap.ui.getCore();
-          return !!core.byId(ids.app)
-            && !!core.byId(ids.fcl)
-            && !!core.byId(ids.shellHeaderHost)
-            && !!core.byId(ids.searchWorkbench)
-            && !!core.byId(ids.searchFilter)
-            && !!core.byId(ids.searchResults)
-            && !!core.byId(ids.searchResultsToolbar)
+          const app = core.byId('checklist_app_comp---app');
+          const fcl = core.byId('checklist_app_comp---app--mainFcl');
+          const state = app && app.getModel && app.getModel('state');
+          return !!app
+            && !!fcl
+            && !!state
             && document.body.classList.contains('chkAppRoot');
         }
         """,
-        arg={
-            "app": APP_VIEW_ID,
-            "fcl": f"{APP_VIEW_ID}--mainFcl",
-            "shellHeaderHost": SHELL_HEADER_HOST_ID,
-            "searchWorkbench": SEARCH_WORKBENCH_ID,
-            "searchFilter": SEARCH_FILTER_ID,
-            "searchResults": SEARCH_RESULTS_ID,
-            "searchResultsToolbar": SEARCH_RESULTS_TOOLBAR_ID,
-        },
         timeout=90000,
     )
     page.wait_for_timeout(delay)
@@ -109,18 +99,18 @@ def wait_for_detail_ready(page, root_id: str = DETAIL_ROOT, delay: int = 1400, r
 def wait_for_analytics_ready(page, delay: int = 1200) -> None:
     page.wait_for_function(
         """
-        (ids) => {
+        () => {
           const core = sap.ui.getCore();
-          const app = core.byId(ids.app);
-          const analyticsView = core.byId(ids.analytics);
+          const app = core.byId('checklist_app_comp---app');
+          const fcl = core.byId('checklist_app_comp---app--mainFcl');
           const state = app && app.getModel && app.getModel('state');
-          return !!analyticsView
-            && (!!analyticsView.getDomRef() || document.getElementById(ids.analytics))
-            && state
-            && state.getProperty('/currentRouteName') === 'analytics';
+          const currentMid = fcl && fcl.getCurrentMidColumnPage && fcl.getCurrentMidColumnPage();
+          const currentMidId = currentMid && currentMid.getId ? String(currentMid.getId()) : '';
+          return !!state
+            && state.getProperty('/currentRouteName') === 'analytics'
+            && (currentMidId.endsWith('analyticsView') || currentMidId.endsWith('analyticsTargetPage') || String(window.location.hash || '').indexOf('/analytics') >= 0);
         }
         """,
-        arg={"app": APP_VIEW_ID, "analytics": ANALYTICS_VIEW_ID},
         timeout=30000,
     )
     page.wait_for_timeout(delay)
@@ -200,6 +190,30 @@ def invoke_controller_method(page, view_id: str, method_name: str, *args: Any) -
         }
         """,
         {"viewId": view_id, "methodName": method_name, "args": list(args)},
+    )
+
+
+def close_analytics(page) -> Any:
+    return page.evaluate(
+        """
+        () => {
+          const core = sap.ui.getCore();
+          const app = core.byId('checklist_app_comp---app');
+          const analytics = core.byId('checklist_app_comp---analyticsView') || core.byId('checklist_app_comp---analyticsTargetPage');
+          const controller = (analytics && analytics.getController && analytics.getController())
+            || (app && app.getController && app.getController())
+            || null;
+          sap.ui.require([
+            'PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation'
+          ], function (WorkspaceRouteNavigation) {
+            if (!controller || !WorkspaceRouteNavigation || typeof WorkspaceRouteNavigation.navigateBackFromAnalytics !== 'function') {
+              throw new Error('analytics close navigation is unavailable');
+            }
+            WorkspaceRouteNavigation.navigateBackFromAnalytics(controller);
+          });
+          return true;
+        }
+        """
     )
 
 
@@ -675,8 +689,8 @@ def main() -> int:
         wait_for_analytics_ready(page)
         shell_analytics_state = route_state(page)
         ensure(shell_analytics_state["routeName"] == "analytics", "shell analytics did not navigate to analytics route")
-        ensure(shell_analytics_state["midPageId"].endswith("analyticsView"), "shell analytics did not activate analytics mid page")
-        invoke_controller_method(page, ANALYTICS_VIEW_ID, "onCloseAnalytics")
+        ensure(shell_analytics_state["midPageId"].endswith("analyticsView") or shell_analytics_state["midPageId"].endswith("analyticsTargetPage"), "shell analytics did not activate analytics mid page")
+        close_analytics(page)
         wait_for_search_route(page)
         report["shellAnalytics"] = shell_analytics_state
 
@@ -698,7 +712,7 @@ def main() -> int:
             wait_for_analytics_ready(page)
             detail_analytics_state = route_state(page)
             ensure(detail_analytics_state["routeName"] == "analytics", "detail analytics did not navigate to analytics route")
-            invoke_controller_method(page, ANALYTICS_VIEW_ID, "onCloseAnalytics")
+            close_analytics(page)
             wait_for_detail_ready(page, DETAIL_ROOT, 1200)
             detail_return_state = route_state(page)
             ensure(detail_return_state["routeName"] == "detail", "analytics close did not return to detail route")

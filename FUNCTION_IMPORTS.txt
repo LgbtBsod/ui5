@@ -15,23 +15,23 @@ AutoSave
 CopyChecklist
 - Purpose: copy existing checklist.
 - Method: POST query/function import.
-- Required parameters: SourceUuid, SessionGuid.
+- Required parameters: DB_KEY, SessionGuid.
 
 LockAcquire
 - Purpose: acquire edit lock.
 - Method: POST body.
-- Required parameters: ObjectUuid, SessionGuid.
+- Required parameters: DB_KEY, SessionGuid.
 - Optional parameters: TabSessionId, ForceTakeover.
 
 LockHeartbeat
 - Purpose: refresh active lock.
 - Method: POST body.
-- Required parameters: ObjectUuid, SessionGuid.
+- Required parameters: DB_KEY, SessionGuid.
 
 LockRelease
 - Purpose: release active lock.
 - Method: POST body.
-- Required parameters: ObjectUuid, SessionGuid.
+- Required parameters: DB_KEY, SessionGuid.
 - Explicitly not part of contract: TrySave.
 
 GetHierarchy

@@ -15,7 +15,7 @@ sap.ui.define([
     }
 
     function normalizeLockDbKey(mArgs) {
-        return String((mArgs && (mArgs.dbKey || mArgs.DB_KEY || mArgs.rootId)) || "").trim();
+        return String((mArgs && (mArgs.dbKey || mArgs.DB_KEY)) || "").trim();
     }
 
     function resolveOwner(oResult) {

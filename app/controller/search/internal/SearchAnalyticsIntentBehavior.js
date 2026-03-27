@@ -1,4 +1,5 @@
 sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchActionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime",
@@ -6,7 +7,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
-], function (ControllerViewStateRuntime, ModelStateRuntime, AnalyticsMonthRuntime, JsRuntime, ModelContracts, StatePaths, UiControlIds) {
+], function (SearchActionBehavior, ControllerViewStateRuntime, ModelStateRuntime, AnalyticsMonthRuntime, JsRuntime, ModelContracts, StatePaths, UiControlIds) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -125,10 +126,7 @@ sap.ui.define([
         if (typeof fnExecuteCommand === TYPE_FUNCTION) {
             return fnExecuteCommand(sMethod, mInput || {});
         }
-        if (oController && typeof oController._runSearchCommand === TYPE_FUNCTION) {
-            return oController._runSearchCommand(sMethod, mInput || {});
-        }
-        return false;
+        return SearchActionBehavior.runSearchCommand(oController, sMethod, mInput || {});
     }
 
     function applyAnalyticsDrilldownIntent(oController, mOptions) {

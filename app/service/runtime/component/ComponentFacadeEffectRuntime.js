@@ -1,9 +1,7 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
 ], function (
-    ModelContracts,
-    ControllerModelRuntime
+    ModelContracts
 ) {
     "use strict";
 
@@ -21,7 +19,7 @@ sap.ui.define([
 
     function createBundleText(oComponent) {
         return function (sKey, aArgs) {
-            var oI18nModel = ControllerModelRuntime.model(oComponent, I18N_MODEL, true);
+            var oI18nModel = oComponent && oComponent.getModel ? oComponent.getModel(I18N_MODEL) : null;
             var oBundle = oI18nModel && typeof oI18nModel.getResourceBundle === "function" ? oI18nModel.getResourceBundle() : null;
             if (!oBundle || typeof oBundle.getText !== "function") {
                 return String(sKey || "");

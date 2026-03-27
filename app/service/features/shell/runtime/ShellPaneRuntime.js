@@ -1,13 +1,12 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ShellPaneConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (ShellPaneContracts, ControllerModelRuntime, ModelStateRuntime) {
+], function (ShellPaneContracts, ModelStateRuntime) {
     "use strict";
 
     function writePaneLoaded(oController, sPaneKey, bLoaded) {
         var sPath = ShellPaneContracts.READINESS_PATHS[sPaneKey];
-        var oStateModel = ControllerModelRuntime.state(oController);
+        var oStateModel = oController && oController.getModel ? oController.getModel("state") : null;
         if (!sPath || !oStateModel) {
             return false;
         }

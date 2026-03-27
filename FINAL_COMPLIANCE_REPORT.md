@@ -2,6 +2,28 @@
 
 ## 2026-03-27 Final Production-Readiness Pass
 
+### 2026-03-27 Canonical Contract Sync Addendum
+- Local runtime smoke flake was reduced to deterministic orchestration:
+  - `scripts/local-launch-smoke.ps1` is now the canonical automation entrypoint
+  - it can bootstrap the environment itself, verifies repeated `200` reachability for UI and metadata, and validates repeated search JSON availability
+  - `BindToParentShell` is now explicitly documented as interactive-only because it intentionally stops the environment when the parent shell exits
+- Browser facade smoke contract was aligned with the real post-cleanup domain surface:
+  - `scripts/browser-smoke-domain-facade-contract.py` no longer imports removed `ExportFacade` / `LockFacade`
+  - the smoke contract now verifies the actual `DetailFacade` and `SearchFacade` method surface only
+  - stale facade smoke drift is no longer masking real runtime readiness
+- Documentation drift on lock contract naming was closed:
+  - `ABAP.txt`
+  - `FUNCTION_IMPORTS.txt`
+  - `LOCK_STATE_MACHINE.txt`
+  - `UPDATED_FUNCTION_IMPORTS.txt`
+  - `UPDATED_LOCK_STATE_MACHINE.txt`
+  - all now describe `DB_KEY` as the canonical lock/copy parameter and `ObjectUuid` only as narrow backend ingress compatibility
+- Governance drift was closed:
+  - `scripts/internal/controller-util-allowlist.json` no longer references deleted wrapper owners
+  - architecture allowlist now reflects the active repo tree instead of historical wrapper names
+- Detail info-card raw fallback copy was removed:
+  - `app/controller/detail/DetailInfoCardFactory.js` now resolves labels/tooltips strictly through i18n keys instead of embedded English fallback text
+
 ### 2026-03-27 Final Hardening Addendum
 - One more detail-layer pass-through wrapper was removed:
   - deleted `app/controller/detail/DetailCommandPolicy.js`

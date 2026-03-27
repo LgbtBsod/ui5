@@ -1,10 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ClipboardRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailResetRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
@@ -17,10 +16,9 @@ sap.ui.define([
 ], function (
     ClipboardRuntime,
     LayoutStateRuntime,
-    ControllerModelRuntime,
+    WorkspaceRouteNavigation,
     ModelStateRuntime,
     DetailResetRuntime,
-    NavigationIntentService,
     UiDecisionDefaultHandlers,
     WorkflowCoordinator,
     StatePaths,
@@ -41,6 +39,10 @@ sap.ui.define([
     var DETAIL_SOURCES = OperationSourceContracts.DETAIL;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
+
+    function getModel(oController, sName) {
+        return oController && oController.getModel ? oController.getModel(sName) : null;
+    }
 
     function resolveActiveDbKey(oStateModel) {
         return String(
@@ -86,7 +88,7 @@ sap.ui.define([
                     });
                     ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN);
                     DetailResetRuntime.resetDetailRuntimeData(oController);
-                    NavigationIntentService.navigateToSearch(oController);
+                    WorkspaceRouteNavigation.navigateToSearch(oController);
                     return true;
                 }
                 return mHooks.closeDetail({ intent: DETAIL_SOURCES.CLOSE });
@@ -132,14 +134,14 @@ sap.ui.define([
 
     var navigationActions = {
         copyDetailLink: function (oController, mHooks) {
-            var oState = ControllerModelRuntime.state(oController);
+            var oState = getModel(oController, STATE_MODEL);
             var sId = resolveActiveDbKey(oState);
             var sHash;
             var sUrl;
             if (!sId || mHooks.isCreateId(sId)) {
                 return;
             }
-            sHash = NavigationIntentService.buildDetailHash(oController, sId);
+            sHash = WorkspaceRouteNavigation.buildDetailHash(oController, sId);
             sUrl = window.location.origin + window.location.pathname + "#" + sHash;
             ClipboardRuntime.writeText(sUrl).then(function (bCopied) {
                 mHooks.showToast(bCopied ? "detailLinkCopied" : "detailLinkCopyFailed");
@@ -164,8 +166,8 @@ sap.ui.define([
             }
         },
         toggleFullscreen: function (oController, mHooks) {
-            var oState = ControllerModelRuntime.state(oController);
-            var oShell = ControllerModelRuntime.shell(oController);
+            var oState = getModel(oController, STATE_MODEL);
+            var oShell = getModel(oController, SHELL_MODEL);
             var sLayout;
             var sNextLayout;
             if (!oState || !oShell || typeof oState[METHODS.GET_PROPERTY] !== TYPE_FUNCTION || typeof oState[METHODS.SET_PROPERTY] !== TYPE_FUNCTION) {

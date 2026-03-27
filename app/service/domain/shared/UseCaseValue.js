@@ -7,6 +7,10 @@ sap.ui.define([
         return String((mInput && (mInput.rootId || mInput.id)) || "").trim();
     }
 
+    function dbKey(mInput) {
+        return String((mInput && (mInput.dbKey || mInput.DB_KEY)) || "").trim() || rootId(mInput);
+    }
+
     function text(vValue) {
         return String(vValue || "").trim();
     }
@@ -33,6 +37,7 @@ sap.ui.define([
     return {
         bool: bool,
         callOrDefault: callOrDefault,
+        dbKey: dbKey,
         fail: fail,
         ok: ok,
         rootId: rootId,

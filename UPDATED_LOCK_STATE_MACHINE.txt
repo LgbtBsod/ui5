@@ -16,12 +16,12 @@ Observed operations
 - takeover via ForceTakeover on acquire
 
 Canonical Gateway payloads
-- LockAcquire(ObjectUuid, SessionGuid, TabSessionId, ForceTakeover)
-- LockHeartbeat(ObjectUuid, SessionGuid)
-- LockRelease(ObjectUuid, SessionGuid)
+- LockAcquire(DB_KEY, SessionGuid, TabSessionId, ForceTakeover)
+- LockHeartbeat(DB_KEY, SessionGuid)
+- LockRelease(DB_KEY, SessionGuid)
 
 Truth notes
-- Current lock contract is aligned at the Gateway boundary.
-- This does not prove that overall frontend command-flow canon is fully reduced to DB_KEY / RootKey only, because lock entry still receives rootId aliases upstream.
+- Current lock contract is aligned at the frontend and metadata boundary on DB_KEY.
+- Backend DPC still tolerates ObjectUuid as a narrow compatibility ingress fallback while resolving DB_KEY first.
 - Page-leave release remains best-effort only and session-aware.
 - lock acquire before integration-origin confirm is not the intended flow, but full all-entry-path proof remains outside current frontend-only evidence.

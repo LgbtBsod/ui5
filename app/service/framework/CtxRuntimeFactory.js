@@ -1,11 +1,9 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxAdapterFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/usecases/CacheValidationUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/usecases/CacheReadUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/cache/usecases/CacheWriteUseCase"
 ], function (
-    ControllerModelRuntime,
     CtxAdapterFactory,
     CacheValidationUseCase,
     CacheReadUseCase,
@@ -21,21 +19,17 @@ sap.ui.define([
     }
 
     function collectModels(oController) {
-        var oView;
-
         if (!oController) {
             return {};
         }
 
-        oView = ControllerModelRuntime.view(oController);
-
         return {
-            default: ControllerModelRuntime.defaultModel(oController) || resolveDirectModel(oController),
-            view: ControllerModelRuntime.viewState(oController) || (oView && oView.getModel ? oView.getModel("view") : null),
-            state: ControllerModelRuntime.state(oController) || resolveDirectModel(oController, "state"),
-            detail: ControllerModelRuntime.detail(oController) || resolveDirectModel(oController, "detail"),
-            shell: ControllerModelRuntime.shell(oController) || resolveDirectModel(oController, "shell"),
-            masterData: ControllerModelRuntime.masterData(oController) || resolveDirectModel(oController, "masterData")
+            default: resolveDirectModel(oController),
+            view: resolveDirectModel(oController, "view"),
+            state: resolveDirectModel(oController, "state"),
+            detail: resolveDirectModel(oController, "detail"),
+            shell: resolveDirectModel(oController, "shell"),
+            masterData: resolveDirectModel(oController, "masterData")
         };
     }
 

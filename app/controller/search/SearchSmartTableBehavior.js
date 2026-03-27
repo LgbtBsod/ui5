@@ -1,9 +1,8 @@
 sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchActionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimePayloadNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewportRuntime",
@@ -21,11 +20,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts"
 ], function (
+    SearchActionBehavior,
     ControllerViewStateRuntime,
     ModelStateRuntime,
     SchedulingRuntime,
-    ControllerRuntime,
-    RuntimePayloadNormalizer,
     StatePaths,
     SearchSelectionRuntime,
     SearchViewportRuntime,
@@ -58,23 +56,8 @@ sap.ui.define([
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
 
-    function normalizeSearchCommandPayload(sMethod, mInput) {
-        if (sMethod === SearchRuntimeContracts.COMMANDS.APPLY_REBIND_POLICY) {
-            return RuntimePayloadNormalizer.normalize(mInput, {
-                booleanKeys: ["silent", "userInitiated"]
-            });
-        }
-        return RuntimePayloadNormalizer.normalize(mInput);
-    }
-
     function executeSearchCommand(oController, sMethod, mInput) {
-        return ControllerRuntime.executeCommand(
-            oController,
-            oController && oController._facade,
-            sMethod,
-            normalizeSearchCommandPayload(sMethod, mInput || {}),
-            ControllerRuntime.buildCtx(oController)
-        );
+        return SearchActionBehavior.runSearchCommand(oController, sMethod, mInput || {});
     }
 
     function normalizeRequestValue(sNormalizedValue, sFallbackValue) {

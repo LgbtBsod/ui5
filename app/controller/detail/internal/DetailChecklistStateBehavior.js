@@ -16,16 +16,15 @@ sap.ui.define([
 
     function withCurrentDbKey(oController, mInput) {
         var oNormalized = Object.assign({}, mInput || {});
-        oNormalized.dbKey = oNormalized.dbKey || oNormalized.rootId || (oController && typeof oController._currentChecklistDbKey === "function" ? oController._currentChecklistDbKey() : "");
-        delete oNormalized.rootId;
+        oNormalized.dbKey = oNormalized.dbKey || (oController && typeof oController._currentChecklistDbKey === "function" ? oController._currentChecklistDbKey() : "");
         return oNormalized;
     }
 
     function runDetailCommand(oController, sMethod, mInput) {
-        if (!oController || typeof oController._runDetailCommand !== "function") {
+        if (!oController || typeof oController._dispatchDetailCommand !== "function") {
             return Promise.resolve(false);
         }
-        return oController._runDetailCommand(sMethod, mInput || {});
+        return oController._dispatchDetailCommand(sMethod, mInput || {});
     }
 
     return {

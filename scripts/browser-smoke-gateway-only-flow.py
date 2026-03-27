@@ -12,6 +12,8 @@ from __future__ import annotations
 import json
 import sys
 import time
+import urllib.parse
+import urllib.request
 from pathlib import Path
 from typing import Any
 
@@ -79,6 +81,32 @@ def ensure(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any) -> No
     checks.append({"name": name, "ok": bool(ok), "detail": detail})
 
 
+def fetch_seed_root_candidates(ui_url: str, limit: int = 5) -> list[str]:
+    base = str(ui_url or "").split("#", 1)[0].rsplit("/", 1)[0]
+    service_url = (
+        f"{base}/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/ChecklistSearchSet?"
+        + urllib.parse.urlencode({"$top": max(1, int(limit or 5)), "$format": "json"})
+    )
+    try:
+        with urllib.request.urlopen(service_url, timeout=15) as response:
+            payload = json.load(response)
+    except Exception:  # noqa: BLE001
+        return []
+    results = (((payload or {}).get("d") or {}).get("results") or [])
+    unique: list[str] = []
+    for item in results:
+        value = str(
+            (item or {}).get("Key")
+            or (item or {}).get("DB_KEY")
+            or (item or {}).get("RootKey")
+            or (item or {}).get("Id")
+            or ""
+        ).strip()
+        if value and value != "__CREATE" and value not in unique:
+            unique.append(value)
+    return unique
+
+
 def is_navigation_race(exc: Exception) -> bool:
     message = str(exc or "")
     return "Execution context was destroyed" in message or "Cannot find context with specified id" in message
@@ -105,30 +133,6 @@ def wait_for_ui5_bootstrap(page) -> None:
 
 def wait_for_search_ready(page) -> None:
     shared_wait_for_search_ready(page, timeout=30000)
-    page.wait_for_function(
-        """
-        () => {
-          const core = sap.ui.getCore();
-          const app = core.byId('checklist_app_comp---app');
-          const search = core.byId('checklist_app_comp---searchTargetPage');
-          const state = app && app.getModel && app.getModel('state');
-          const dom = search && search.getDomRef ? search.getDomRef() : null;
-          const createButtons = dom && dom.querySelectorAll
-            ? Array.from(dom.querySelectorAll('button,[role="button"]')).filter((node) => {
-                const text = String((node.innerText || node.textContent || '')).trim();
-                return text === 'Create';
-              })
-            : [];
-          return !!search
-            && !!dom
-            && !!state
-            && String(state.getProperty('/currentRouteName') || '') === 'search'
-            && createButtons.length >= 1;
-        }
-        """,
-        timeout=30000,
-    )
-    page.wait_for_timeout(1200)
 
 
 def wait_for_detail_ready(page, root_id: str) -> None:
@@ -272,6 +276,17 @@ def collect_search_root_candidates(page, limit: int = 5) -> list[str]:
         """
         (maxCount) => {
           const core = sap.ui.getCore();
+          const searchView = core.byId('checklist_app_comp---searchTargetPage');
+          const controller = searchView && searchView.getController && searchView.getController();
+          const ctx = controller && controller._ctx && controller._ctx();
+          const smartControls = ctx && ctx.smartControls;
+          if (smartControls && typeof smartControls.getBoundRows === 'function') {
+            return Promise.resolve(smartControls.getBoundRows(Number(maxCount || 5))).then((rows) => {
+              return (rows || []).map((item) => {
+                return String((item && (item.Key || item.RootKey || item.Id)) || '').trim();
+              }).filter((value) => !!value && value !== '__CREATE').slice(0, Number(maxCount || 5));
+            });
+          }
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
           const smartTable = all.find((item) => item && item.isA && item.isA('sap.ui.comp.smarttable.SmartTable') && item.getId && String(item.getId()).indexOf('searchSmartTable') >= 0) || null;
@@ -280,8 +295,8 @@ def collect_search_root_candidates(page, limit: int = 5) -> list[str]:
             || null;
           const rows = table && table.getItems ? (table.getItems() || []).filter((item) => !!(item && item.getVisible && item.getVisible() && item.getBindingContext && item.getBindingContext())) : [];
           return rows.map((item) => {
-            const ctx = item && item.getBindingContext ? item.getBindingContext() : null;
-            const data = ctx && ctx.getObject ? ctx.getObject() : null;
+            const ctx2 = item && item.getBindingContext ? item.getBindingContext() : null;
+            const data = ctx2 && ctx2.getObject ? ctx2.getObject() : null;
             return String((data && (data.Key || data.RootKey || data.Id)) || '').trim();
           }).filter((value) => !!value && value !== '__CREATE').slice(0, Number(maxCount || 5));
         }
@@ -294,6 +309,36 @@ def collect_search_root_candidates(page, limit: int = 5) -> list[str]:
         if value and value not in unique:
             unique.append(value)
     return unique
+
+
+def ensure_search_results_loaded(page, timeout: int = 30000) -> None:
+    if fetch_seed_root_candidates(UI_URL, limit=1):
+        return
+    candidates = collect_search_root_candidates(page, limit=1)
+    if candidates:
+        return
+    invoke_view_controller_method(page, SEARCH_VIEW_ID, "onSmartSearch")
+    page.wait_for_function(
+        """
+        () => {
+          const core = sap.ui.getCore();
+          const searchView = core.byId('checklist_app_comp---searchTargetPage');
+          const controller = searchView && searchView.getController && searchView.getController();
+          const viewModel = searchView && searchView.getModel && searchView.getModel('view');
+          const ctx = controller && controller._ctx && controller._ctx();
+          const smartControls = ctx && ctx.smartControls;
+          if (viewModel && viewModel.getProperty && Number(viewModel.getProperty('/resultCount') || 0) > 0) {
+            return true;
+          }
+          if (smartControls && typeof smartControls.getBoundRows === 'function') {
+            return Promise.resolve(smartControls.getBoundRows(1)).then((rows) => Array.isArray(rows) && rows.length > 0);
+          }
+          return false;
+        }
+        """,
+        timeout=timeout,
+    )
+    page.wait_for_timeout(1200)
 
 
 def detail_view_candidates(page) -> list[dict[str, Any]]:
@@ -436,6 +481,9 @@ def resolve_smoke_root(page, network: list[dict[str, Any]], preferred_root_id: s
     preferred = str(preferred_root_id or "").strip()
     if preferred and preferred != "__CREATE":
         candidates.append(preferred)
+    for candidate in fetch_seed_root_candidates(UI_URL):
+        if candidate not in candidates:
+            candidates.append(candidate)
     for candidate in collect_search_root_candidates(page):
         if candidate not in candidates:
             candidates.append(candidate)
@@ -757,7 +805,9 @@ def wait_for_analytics_close_ready(page, root_id: str, network: list[dict[str, A
 
 def invoke_view_controller_method(page, view_id: str, method_name: str, *args: Any):
     controller_name = "PRODUCTION_CONTROL_CHECKLIST.controller.Detail"
-    if "analyticsTargetPage" in view_id:
+    if "searchTargetPage" in view_id:
+        controller_name = "PRODUCTION_CONTROL_CHECKLIST.controller.Search"
+    elif "analyticsTargetPage" in view_id:
         controller_name = "PRODUCTION_CONTROL_CHECKLIST.controller.Analytics"
     return shared_invoke_controller_method(page, controller_name, method_name, *args)
 
@@ -959,6 +1009,8 @@ def main() -> int:
                 failures.append("search.smart.gateway.controls")
 
             current_step = "root.selection"
+            if not fetch_seed_root_candidates(UI_URL, limit=1):
+                ensure_search_results_loaded(page)
             root_resolution = resolve_smoke_root(page, network, ROOT_ID)
             root_selection_diagnostics = root_resolution.get("rootSelectionDiagnostics") or []
             route_open_diagnostics = root_resolution.get("routeOpenDiagnostics") or {}
@@ -1412,8 +1464,9 @@ def main() -> int:
                   const core = sap.ui.getCore();
                   const all = Object.values(core.mElements || {});
                   const smartTable = all.find((item) => item && item.getId && String(item.getId()).endsWith('searchSmartTable'));
+                  const text = document.body && document.body.innerText ? String(document.body.innerText) : '';
                   return {
-                    hasCreateButton: document.body && document.body.innerText.includes('Create'),
+                    hasCreateButton: text.indexOf('Create') >= 0 || text.indexOf('Создать') >= 0 || text.indexOf('Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ') >= 0,
                     smartTable: !!smartTable
                   };
                 }

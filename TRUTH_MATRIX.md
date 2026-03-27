@@ -22,6 +22,7 @@
 | Checklist mutations | function imports |
 | Attachment binary transfer | media upload, not aggregate JSON save |
 | Removed wrapper owners | `ControllerRouteRuntime`, `FeedbackCoordinator`, `SearchCommandPolicy`, `DetailCommandPolicy` |
+| Deleted-wrapper governance | controller util allowlist no longer references deleted wrapper owners |
 | CSS governance | remaining internal `.sap*` selectors only through documented whitelist |
 | DOM governance owner | `scripts/dom-hack-allowlist.json` with bounded quarantine reasons |
 | Gate status | attachment, lock, wrapper, DOM, CSS, raw-text, residual-cleanup gates pass |

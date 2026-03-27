@@ -1,10 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailPersonContracts"
-], function (ModelStateRuntime, ControllerViewStateRuntime, ControllerModelRuntime, ModelContracts, DetailPersonContracts) {
+], function (ModelStateRuntime, ControllerViewStateRuntime, ModelContracts, DetailPersonContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -21,7 +20,7 @@ sap.ui.define([
     function syncDrafts(oController, oDetailModel, sModelPath) {
         var oBasic;
         var sNormalizedPath = normalizeDetailModelPath(sModelPath);
-        if (!oController || !ControllerModelRuntime.viewState(oController) || !oDetailModel || !oDetailModel.getProperty) {
+        if (!oController || !(oController.getModel && oController.getModel(MODELS.VIEW)) || !oDetailModel || !oDetailModel.getProperty) {
             return;
         }
         if (sNormalizedPath === "/current" || sNormalizedPath === "/") {

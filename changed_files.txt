@@ -39,3 +39,10 @@ app/controller/detail/DetailPageFlow.js
 app/controller/detail/internal/DetailChecklistRowBehavior.js
 app/controller/detail/internal/DetailChecklistStateBehavior.js
 app/service/features/detail/runtime/AttachmentUploadRuntime.js
+app/controller/detail/DetailInfoCardFactory.js
+scripts/internal/controller-util-allowlist.json
+ABAP.txt
+FUNCTION_IMPORTS.txt
+LOCK_STATE_MACHINE.txt
+UPDATED_FUNCTION_IMPORTS.txt
+UPDATED_LOCK_STATE_MACHINE.txt

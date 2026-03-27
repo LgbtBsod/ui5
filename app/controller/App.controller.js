@@ -2,7 +2,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/Base.controller",
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeCoordinator",
@@ -28,7 +27,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerReturnFocusRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerState",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "sap/ui/core/Core",
@@ -38,7 +37,6 @@ sap.ui.define([
     BaseController,
     ControllerResourceCleanup,
     ControllerTextRuntime,
-    ControllerModelRuntime,
     ModelStateRuntime,
     SchedulingRuntime,
     RouteModeCoordinator,
@@ -64,7 +62,7 @@ sap.ui.define([
     ControllerReturnFocusRuntime,
     FeedbackBannerState,
     FeedbackBannerRuntime,
-    NavigationIntentService,
+    WorkspaceRouteNavigation,
     UiDecisionDefaultHandlers,
     ThemeDomRuntime,
     Core,
@@ -90,6 +88,22 @@ sap.ui.define([
         ShellGlobalsRuntime.markAppReady();
     }
 
+    function resolveControllerView(oController) {
+        return oController && typeof oController.getView === TYPE_FUNCTION ? oController.getView() : null;
+    }
+
+    function resolveControllerOwner(oController) {
+        return oController && typeof oController.getOwnerComponent === TYPE_FUNCTION ? oController.getOwnerComponent() : null;
+    }
+
+    function resolveControllerModel(oController, sName, bOwnerFallback) {
+        var oView = resolveControllerView(oController);
+        var oOwner = bOwnerFallback === false ? null : resolveControllerOwner(oController);
+        return (oView && typeof oView.getModel === TYPE_FUNCTION && oView.getModel(sName))
+            || (oOwner && typeof oOwner.getModel === TYPE_FUNCTION && oOwner.getModel(sName))
+            || null;
+    }
+
     function openShellOverlayByKey(oController, oEvent, sKey) {
         var sFragment = SHELL_OVERLAY_FRAGMENTS[sKey];
         if (!sFragment) {
@@ -99,8 +113,8 @@ sap.ui.define([
     }
 
     function refreshCurrentUser(oController) {
-        var oState = ControllerModelRuntime.state(oController);
-        var oShellModel = ControllerModelRuntime.shell(oController);
+        var oState = resolveControllerModel(oController, MODELS.STATE, true);
+        var oShellModel = resolveControllerModel(oController, MODELS.SHELL, true);
         var bAlreadyBusy = !!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_USER_REFRESH_BUSY, false);
         if (!oState || bAlreadyBusy) {
             return Promise.resolve(false);
@@ -137,7 +151,7 @@ sap.ui.define([
     }
 
     function refreshShellUserContext(oController) {
-        var oModel = ControllerModelRuntime.defaultModel(oController);
+        var oModel = resolveControllerModel(oController, undefined, true);
         function syncShellUi() {
             oController._syncShellState();
             oController._syncShellMetrics();
@@ -177,8 +191,8 @@ sap.ui.define([
 
     function initializeAppShell(oController) {
         var oApplied = oController.applyStoredTheme();
-        var oState = ControllerModelRuntime.state(oController);
-        var oShell = ControllerModelRuntime.shell(oController);
+        var oState = resolveControllerModel(oController, MODELS.STATE, true);
+        var oShell = resolveControllerModel(oController, MODELS.SHELL, true);
         var oModelPatch = {};
 
         if (oShell) {
@@ -319,11 +333,11 @@ sap.ui.define([
 
         onOpenShellHelp: function (oEvent) { return openShellOverlayByKey(this, oEvent, "help"); },
         onOpenShellSettings: function (oEvent) { return openShellOverlayByKey(this, oEvent, "settings"); },
-        onOpenShellAnalytics: function () { NavigationIntentService.navigateToAnalytics(this); },
+        onOpenShellAnalytics: function () { WorkspaceRouteNavigation.navigateToAnalytics(this); },
         onOpenShellUserMenu: function (oEvent) { return openShellOverlayByKey(this, oEvent, "user"); },
 
         onGlobalBannerRetry: function () {
-            var oState = ControllerModelRuntime.state(this);
+            var oState = this._getStateModel();
             var sAction = String(FeedbackBannerRuntime.getBannerProperty(oState, "global", "retryAction") || "").trim();
             return RetryCoordinator.runRetry(this, sAction);
         },
@@ -622,8 +636,9 @@ sap.ui.define([
             ShellStateRuntime.ensureShellDefaults(this);
         },
 
-        _getStateModel: function () { return ControllerModelRuntime.state(this) || this.getModel(MODELS.STATE); },
-        _getShellModel: function () { return ControllerModelRuntime.shell(this); },
+        _getStateModel: function () { return resolveControllerModel(this, MODELS.STATE, true); },
+        _getShellModel: function () { return resolveControllerModel(this, MODELS.SHELL, true); },
+        _getDefaultModel: function () { return resolveControllerModel(this, undefined, true); },
 
         _syncShellState: function () {
             ShellStateRuntime.syncShellState(this, {

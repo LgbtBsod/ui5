@@ -17,7 +17,7 @@ sap.ui.define([
     }
 
     function loadAttachments(mArgs) {
-        var sRootId = normalizeRootKey(mArgs && (mArgs.dbKey || mArgs.rootId));
+        var sRootId = normalizeRootKey(mArgs && mArgs.dbKey);
         if (!sRootId) {
             return Promise.resolve({ attachments: [] });
         }
@@ -31,7 +31,7 @@ sap.ui.define([
 
     function deleteAttachment(mArgs) {
         var sAttachmentId = String((mArgs && (mArgs.attachmentId || mArgs.attachmentKey)) || "").trim().toUpperCase();
-        var sDbKey = normalizeRootKey(mArgs && (mArgs.dbKey || mArgs.rootId));
+        var sDbKey = normalizeRootKey(mArgs && mArgs.dbKey);
         if (!sAttachmentId || !sDbKey) {
             return Promise.resolve({
                 attachmentId: sAttachmentId,
@@ -66,7 +66,7 @@ sap.ui.define([
 
     function uploadAttachment(mArgs) {
         var oAttachment = (mArgs && mArgs.attachment) || {};
-        var sDbKey = normalizeRootKey((mArgs && (mArgs.dbKey || mArgs.rootId)) || oAttachment.parentKey);
+        var sDbKey = normalizeRootKey((mArgs && mArgs.dbKey) || oAttachment.parentKey);
         var sAttachmentId = String(oAttachment.attachmentId || oAttachment.AttachmentKey || "").trim().toUpperCase();
         var sParentKey = normalizeRootKey(oAttachment.parentKey || sDbKey);
         var oFile = oAttachment.file;

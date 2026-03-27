@@ -60,3 +60,10 @@
 ### Remaining Follow-Up Candidates
 - `ControllerModelRuntime.js`
   - still thin, but broad usage footprint makes removal higher-risk than the wrappers closed in this pass
+
+### Governance Cleanup In This Pass
+- `scripts/internal/controller-util-allowlist.json`
+  - deleted stale allowlist entries for already-removed wrapper owners
+  - keeps architecture governance aligned with the real active file tree
+- `app/controller/detail/DetailInfoCardFactory.js`
+  - removed raw fallback label/tooltip copy so detail cards consume i18n keys directly

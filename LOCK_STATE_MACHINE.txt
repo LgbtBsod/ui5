@@ -16,9 +16,9 @@ Observed operations
 - takeover via canonical ForceTakeover flag
 
 Canonical payloads
-- LockAcquire(ObjectUuid, SessionGuid, TabSessionId, ForceTakeover)
-- LockHeartbeat(ObjectUuid, SessionGuid)
-- LockRelease(ObjectUuid, SessionGuid)
+- LockAcquire(DB_KEY, SessionGuid, TabSessionId, ForceTakeover)
+- LockHeartbeat(DB_KEY, SessionGuid)
+- LockRelease(DB_KEY, SessionGuid)
 
 Expected flow
 1. integration-origin confirm when required

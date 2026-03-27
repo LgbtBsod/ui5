@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
@@ -9,7 +9,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime"
 ], function (
     ComponentBootstrapContracts,
-    NavigationIntentService,
+    BehaviorScopes,
     ModelStateRuntime,
     CloneUtil,
     WorkflowTelemetry,
@@ -215,6 +215,14 @@ sap.ui.define([
         return new Error(String(vError || sFallbackMessage || "boot_stage_failed"));
     }
 
+    function navigationScope() {
+        return BehaviorScopes.navigation;
+    }
+
+    function runNavigationOperation(sOperation, mContext) {
+        return navigationScope().executeSync(sOperation, mContext || {});
+    }
+
     function resolveSettledStageError(oSettledResult, sFallbackMessage) {
         if (!oSettledResult) {
             return toStageError(null, sFallbackMessage);
@@ -249,13 +257,15 @@ sap.ui.define([
 
     function runBootStages(mOptions) {
         return allSettledPolyfill([
+            Promise.resolve(typeof mOptions.initializeApp === "function" ? mOptions.initializeApp() : null),
             Promise.resolve(typeof mOptions.loadCurrentUser === "function" ? mOptions.loadCurrentUser() : null),
             Promise.resolve(typeof mOptions.loadRuntimeSettings === "function" ? mOptions.loadRuntimeSettings() : null),
             Promise.resolve(mOptions.ensureDictLoadedUseCase.execute({}, mOptions.component._ctx))
         ]).then(function (aStageResults) {
-            var oBootError = resolveSettledStageError(aStageResults[0], STAGE_ERRORS.LOAD_CURRENT_USER_FAILED) ||
-                resolveSettledStageError(aStageResults[1], STAGE_ERRORS.LOAD_RUNTIME_SETTINGS_FAILED) ||
-                resolveSettledStageError(aStageResults[2], STAGE_ERRORS.BOOTSTRAP_INIT_BUNDLE_FAILED);
+            var oBootError = resolveSettledStageError(aStageResults[0], STAGE_ERRORS.BOOTSTRAP_APP_FAILED) ||
+                resolveSettledStageError(aStageResults[1], STAGE_ERRORS.LOAD_CURRENT_USER_FAILED) ||
+                resolveSettledStageError(aStageResults[2], STAGE_ERRORS.LOAD_RUNTIME_SETTINGS_FAILED) ||
+                resolveSettledStageError(aStageResults[3], STAGE_ERRORS.BOOTSTRAP_INIT_BUNDLE_FAILED);
             if (oBootError) {
                 throw oBootError;
             }
@@ -268,31 +278,37 @@ sap.ui.define([
         var oStateModel = mOptions.stateModel;
         var oEnvState = mOptions.envState;
         var oCacheState = mOptions.cacheState;
-        var InitializeAppUseCase = mOptions.initializeAppUseCase;
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
         var bBootCompleted = false;
         var sTabSessionId = "";
 
         initializeBootState(oStateModel);
 
-        return Promise.resolve(InitializeAppUseCase.execute({}, { stateModel: oStateModel }))
-            .then(function (oBootstrapResult) {
-                if (oBootstrapResult && oBootstrapResult.ok === false) {
-                    throw toStageError(oBootstrapResult.error && oBootstrapResult.error.message, STAGE_ERRORS.BOOTSTRAP_APP_FAILED);
-                }
-                ComponentRuntimeSupport.ensureSessionId(oStateModel);
-                sTabSessionId = ComponentRuntimeSupport.ensureTabSessionId(oStateModel);
-                seedFrontendState(oStateModel, oEnvState);
-                return cleanupCacheSessions(mOptions.cacheAdapter, oStateModel, sTabSessionId);
-            })
-            .then(function () {
-                return runBootStages({
-                    component: oComponent,
-                    ensureDictLoadedUseCase: mOptions.ensureDictLoadedUseCase,
-                    loadCurrentUser: mOptions.loadCurrentUser,
-                    loadRuntimeSettings: mOptions.loadRuntimeSettings
-                });
-            })
+        return Promise.resolve().then(function () {
+            seedFrontendState(oStateModel, oEnvState);
+            ComponentRuntimeSupport.ensureSessionId(oStateModel);
+            sTabSessionId = ComponentRuntimeSupport.ensureTabSessionId(oStateModel);
+            return cleanupCacheSessions(mOptions.cacheAdapter, oStateModel, sTabSessionId);
+        }).then(function () {
+            return runBootStages({
+                component: oComponent,
+                initializeApp: function () {
+                    return Promise.resolve(
+                        typeof mOptions.initializeApp === "function"
+                            ? mOptions.initializeApp()
+                            : mOptions.initializeAppUseCase.execute({}, { stateModel: oStateModel })
+                    ).then(function (oBootstrapResult) {
+                        if (oBootstrapResult && oBootstrapResult.ok === false) {
+                            throw toStageError(oBootstrapResult.error && oBootstrapResult.error.message, STAGE_ERRORS.BOOTSTRAP_APP_FAILED);
+                        }
+                        return oBootstrapResult;
+                    });
+                },
+                ensureDictLoadedUseCase: mOptions.ensureDictLoadedUseCase,
+                loadCurrentUser: mOptions.loadCurrentUser,
+                loadRuntimeSettings: mOptions.loadRuntimeSettings
+            });
+        })
             .then(function () {
                 var sCacheAt = ComponentRuntimeSupport.formatHumanDateTime(new Date());
                 var sReadyAt = new Date().toISOString();
@@ -380,19 +396,41 @@ sap.ui.define([
         initializeRouter(oComponent);
         return {
             queuePendingNavigationIntent: function (oRouteEvent, mIntentOptions) {
-                NavigationIntentService.queuePendingIntent(oComponent, mModels.stateModel, mDeps.StatePaths, oRouteEvent, mIntentOptions);
+                runNavigationOperation("queuePendingIntent", {
+                    component: oComponent,
+                    stateModel: mModels.stateModel,
+                    statePaths: mDeps.StatePaths,
+                    routeEvent: oRouteEvent,
+                    owner: mIntentOptions && mIntentOptions.owner,
+                    resumeMode: mIntentOptions && mIntentOptions.resumeMode
+                });
             },
             clearPendingNavigationIntent: function () {
-                NavigationIntentService.clearPendingIntent(mModels.stateModel, mDeps.StatePaths);
+                runNavigationOperation("clearPendingIntent", {
+                    stateModel: mModels.stateModel,
+                    statePaths: mDeps.StatePaths
+                });
             },
             revertPendingNavigationIntent: function () {
-                return NavigationIntentService.revertPendingIntent(oComponent, mModels.stateModel, mDeps.StatePaths);
+                return runNavigationOperation("revertPendingIntent", {
+                    component: oComponent,
+                    stateModel: mModels.stateModel,
+                    statePaths: mDeps.StatePaths
+                });
             },
             resumePendingNavigationIntent: function () {
-                return NavigationIntentService.resumePendingIntent(oComponent, mModels.stateModel, mDeps.StatePaths);
+                return runNavigationOperation("resumePendingIntent", {
+                    component: oComponent,
+                    stateModel: mModels.stateModel,
+                    statePaths: mDeps.StatePaths
+                });
             },
             restorePendingNavigationIntent: function () {
-                return NavigationIntentService.restorePendingIntent(oComponent, mModels.stateModel, mDeps.StatePaths);
+                return runNavigationOperation("restorePendingIntent", {
+                    component: oComponent,
+                    stateModel: mModels.stateModel,
+                    statePaths: mDeps.StatePaths
+                });
             }
         };
     }

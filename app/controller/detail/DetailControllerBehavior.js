@@ -4,10 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailPageFlow",
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/DetailViewStateFactory",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerModelRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailAttachmentViewState",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
@@ -23,10 +21,8 @@ sap.ui.define([
     DetailPageFlow,
     DetailViewStateFactory,
     StatePaths,
-    ControllerModelRuntime,
     ControllerViewStateRuntime,
     SchedulingRuntime,
-    ControllerCommandContextRuntime,
     DetailAttachmentViewState,
     StatusChipClassRuntime,
     SemanticDomRuntime,
@@ -41,6 +37,10 @@ sap.ui.define([
 
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL = MODELS.DETAIL;
+
+    function getModel(oController, sName) {
+        return oController && oController.getModel ? oController.getModel(sName) : null;
+    }
 
     function getRouter(oController) {
         return oController && oController.getRouter ? oController.getRouter() : null;
@@ -101,7 +101,7 @@ sap.ui.define([
 
     function syncComputedEditFlags(oController) {
         var oStateModel = oController && oController._oStateValidationModel;
-        var oViewModel = ControllerModelRuntime.viewState(oController);
+        var oViewModel = getModel(oController, MODELS.VIEW);
         var sActiveObjectId;
         var sMode;
         if (!oStateModel || !oViewModel) {
@@ -115,7 +115,7 @@ sap.ui.define([
     }
 
     function bindStateValidationModel(oController) {
-        oController._oStateValidationModel = ControllerModelRuntime.state(oController);
+        oController._oStateValidationModel = getModel(oController, MODELS.STATE);
         if (!oController._oStateValidationModel || !oController._oStateValidationModel.attachPropertyChange) {
             return;
         }
@@ -135,7 +135,7 @@ sap.ui.define([
                 return;
             }
             DetailAttachmentViewState.sync(oController);
-            oViewModel = ControllerModelRuntime.viewState(oController);
+            oViewModel = getModel(oController, MODELS.VIEW);
             if (oViewModel) {
                 ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
             }
@@ -168,7 +168,7 @@ sap.ui.define([
             ControllerViewStateRuntime.initModel(this, DetailViewStateFactory.create.bind(null, this));
             DetailAttachmentViewState.sync(this);
 
-            this._oDetailModel = ControllerModelRuntime.detail(this);
+            this._oDetailModel = getModel(this, DETAIL_MODEL);
             if (this._oDetailModel && this._oDetailModel.attachPropertyChange) {
                 this._oDetailModel.attachPropertyChange(this._onDetailModelChanged, this);
             }
@@ -236,7 +236,9 @@ sap.ui.define([
         _onDetailMatched: function (oEvent) {
             return Promise.resolve(DetailPageFlow.onMatched(this, oEvent, {
                 applyLayoutState: this._applyLayoutState.bind(this),
-                buildCommandContext: ControllerCommandContextRuntime.buildCtx.bind(null, this),
+                buildCommandContext: function () {
+                    return typeof this._ctx === "function" ? this._ctx() : {};
+                }.bind(this),
                 scheduleAttachmentDropZoneBind: this._scheduleAttachmentDropZoneBind.bind(this),
                 validationSummaryPath: StatePaths.VALIDATION_SUMMARY
             })).then(function (vResult) {

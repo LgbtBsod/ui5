@@ -6,6 +6,8 @@ Architectural baseline for the current production-grade baseline.
 
 Use `scripts/start-local-env.ps1` to launch the local UI and mock Gateway stack.
 Use `scripts/stop-local-env.ps1` to stop the local environment cleanly.
+Use `scripts/local-launch-smoke.ps1 -EnsureEnvironment` as the canonical deterministic local smoke entrypoint for automation and release checks.
+Do not use `-BindToParentShell` for automated smoke runs. That mode is only for interactive shells and intentionally tears down the environment when the parent shell exits.
 For live Gateway verification use `node scripts/gateway-live-smoke-runner.js`.
 Run `npm run build` before smoke. In this local environment the build uses a repo-owned dist/preload fallback because public npm does not resolve SAPUI5 `1.71.70` framework metadata.
 
@@ -21,6 +23,13 @@ Internet Explorer is not supported.
 3. Open detail, enter edit, and confirm lock state becomes `EDIT_LOCKED`.
 4. Create a new checklist and complete the first save.
 5. Reload search, reopen detail, and verify attachments, lock recovery, and analytics export.
+
+## Deterministic local smoke
+
+1. Run `npm run validate:local`.
+2. Run `powershell -ExecutionPolicy Bypass -File scripts/local-launch-smoke.ps1 -EnsureEnvironment`.
+3. Run `py -3 scripts/browser-smoke-domain-facade-contract.py http://127.0.0.1:8080/index.html`.
+4. Execute the manual smoke playbook in Microsoft Edge against the same local environment.
 
 ## Notes
 

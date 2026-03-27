@@ -18,5 +18,6 @@
 - Analytics owner: `app/controller/Analytics.controller.js`
 - Framework owner: real runtime/handler owners only; removed thin wrappers must not return
 - Component lifecycle owner: `app/service/runtime/component/ComponentLifecycleRuntime.js`
+- Deleted-wrapper governance owner: `scripts/internal/controller-util-allowlist.json`
 - CSS legacy quarantine owner: `scripts/sap-internal-css-allowlist.json`
 - DOM legacy quarantine owner: `scripts/dom-hack-allowlist.json`

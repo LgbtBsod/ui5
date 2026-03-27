@@ -314,6 +314,7 @@ sap.ui.define([
         var mRuntimeModels;
         var mActionRuntimeOptions;
         var oNavigationRuntime;
+        var oRuntimeSettingsRuntime;
 
         initializeStartupState(oComponent, aInitArgs);
 
@@ -330,6 +331,15 @@ sap.ui.define([
         mActionRuntimeOptions = buildActionRuntimeOptions(oComponent, {
             WorkflowTelemetry: WorkflowTelemetry
         }, oModelBootstrap.models);
+        oRuntimeSettingsRuntime = mBootstrapDeps.ComponentRuntimeSettingsRuntime.initializeRuntimeSettings(oComponent, {
+            stateModel: oModelBootstrap.models.stateModel,
+            envState: oModelBootstrap.models.envState,
+            masterDataModel: oModelBootstrap.models.masterDataModel,
+            settingsManager: mBootstrapDeps.Managers && mBootstrapDeps.Managers.SettingsManager || mBootstrapDeps.SettingsManager,
+            gatewayBackendService: GatewayClient,
+            telemetryRuntime: TelemetryRuntime,
+            emitTelemetry: mActionRuntimeOptions.emitTelemetry
+        });
         oNavigationRuntime = ComponentLifecycleRuntime.attachRuntime(
             oComponent,
             Object.assign({}, mBootstrapDeps, mActionRuntimeOptions),
@@ -343,19 +353,16 @@ sap.ui.define([
             envState: oModelBootstrap.models.envState,
             cacheState: oModelBootstrap.models.cacheState,
             cacheAdapter: oComponent._ctx && oComponent._ctx.cache,
+            initializeApp: function () {
+                return InitializeAppUseCase.execute({}, { stateModel: oModelBootstrap.models.stateModel });
+            },
             initializeAppUseCase: InitializeAppUseCase,
             ensureDictLoadedUseCase: EnsureDictLoadedUseCase,
             componentRuntimeSupport: mBootstrapDeps.ComponentRuntimeSupport,
             loadRuntimeSettings: function () {
-                return mBootstrapDeps.ComponentRuntimeSettingsRuntime.loadRuntimeSettings({
-                    stateModel: oModelBootstrap.models.stateModel,
-                    envState: oModelBootstrap.models.envState,
-                    masterDataModel: oModelBootstrap.models.masterDataModel,
-                    settingsManager: mBootstrapDeps.Managers && mBootstrapDeps.Managers.SettingsManager || mBootstrapDeps.SettingsManager,
-                    gatewayBackendService: GatewayClient,
-                    telemetryRuntime: TelemetryRuntime,
-                    emitTelemetry: mActionRuntimeOptions.emitTelemetry
-                });
+                return oRuntimeSettingsRuntime && typeof oRuntimeSettingsRuntime.loadRuntimeSettings === "function"
+                    ? oRuntimeSettingsRuntime.loadRuntimeSettings()
+                    : Promise.resolve(null);
             },
             loadCurrentUser: function () {
                 return LoadCurrentUserUseCase && LoadCurrentUserUseCase.refresh

@@ -19,12 +19,6 @@ sap.ui.define([
 
     var VIEW_MODEL = ModelContracts.MODELS.VIEW;
     var CARD_REQUIRED_KEYS = DetailRuntimeContracts.CARD_REQUIRED_KEYS;
-    var LABEL_FALLBACKS = {
-        locationCodeLabel: "Location code",
-        checksNumberLabel: "Checks number",
-        barriersNumberLabel: "Barriers number"
-    };
-
     function withStyleClasses(oControl, sClassNames) {
         return ControlStyleRuntime.enable(oControl, sClassNames);
     }
@@ -123,7 +117,7 @@ sap.ui.define([
     }
 
     function createPrefixedStatus(oController, sLabelKey, sValuePath) {
-        var sLabel = ControllerTextRuntime.getText(oController, sLabelKey, [], LABEL_FALLBACKS[sLabelKey] || sLabelKey);
+        var sLabel = ControllerTextRuntime.getText(oController, sLabelKey, []);
         var oStatus = new ObjectStatus({ state: "Information" });
         oStatus.bindProperty("text", {
             path: sValuePath,
@@ -176,7 +170,7 @@ sap.ui.define([
 
     return {
         buildInfoCard: function (oController, sId, oContext) {
-        var sKey = String(BindingContextReader.read(oContext, "key", "") || "");
+            var sKey = String(BindingContextReader.read(oContext, "key", "") || "");
             var oItem = createInfoCardWrapper(sId, oContext);
             var oShell = withStyleClasses(new VBox({ renderType: "Bare" }), "appMetricSurface mushroomCard");
             var oTitle = withStyleClasses(new Text(), "infoCardTitle");
@@ -218,8 +212,7 @@ sap.ui.define([
                     return ControllerTextRuntime.getText(
                         oController,
                         bPinned ? "infoCardUnpinTooltip" : "infoCardPinTooltip",
-                        [],
-                        bPinned ? "Unpin card" : "Pin card"
+                        []
                     );
                 }
             });

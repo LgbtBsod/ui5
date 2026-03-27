@@ -1,11 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/NavigationIntentService",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsMonthRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader"
-], function (ModelStateRuntime, NavigationIntentService, AnalyticsContracts, ModelContracts, AnalyticsMonthRuntime, AnalyticsViewStateReader) {
+], function (ModelStateRuntime, WorkspaceRouteNavigation, AnalyticsContracts, ModelContracts, AnalyticsMonthRuntime, AnalyticsViewStateReader) {
     "use strict";
 
     var PATHS = AnalyticsContracts.PATHS;
@@ -92,7 +92,7 @@ sap.ui.define([
             PATHS.ANALYTICS_DRILLDOWN_INTENT,
             buildSearchDrilldownIntent(sFilter, sValue, oController, mResolvedExtras)
         );
-        NavigationIntentService.navigateToSearch(oController);
+        WorkspaceRouteNavigation.navigateToSearch(oController);
         return Promise.resolve(true);
     }
 

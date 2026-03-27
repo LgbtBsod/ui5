@@ -1,5 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/shared/ControllerResourceCleanup",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/search/SearchActionBehavior",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/search/SearchFacade",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
@@ -20,6 +21,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds"
 ], function (
     ControllerResourceCleanup,
+    SearchActionBehavior,
     SearchFacade,
     ControllerViewStateRuntime,
     ModelStateRuntime,
@@ -47,10 +49,7 @@ sap.ui.define([
     var PATHS = SearchToolbarContracts.PATHS;
 
     function runSearchCommand(oController, sMethod, mInput) {
-        if (!oController || typeof oController._runSearchCommand !== "function") {
-            return Promise.resolve(false);
-        }
-        return oController._runSearchCommand(sMethod, mInput || {});
+        return SearchActionBehavior.runSearchCommand(oController, sMethod, mInput || {});
     }
 
     function getRouter(oController) {
