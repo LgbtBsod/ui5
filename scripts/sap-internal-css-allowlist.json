@@ -1,6 +1,8 @@
 {
   "app/styles/modules/22_skeleton.css": "Legacy skeleton loaders still rely on SAP renderer internals for placeholder parity; keep isolated until skeleton controls are rebuilt with app-owned wrappers.",
   "app/styles/modules/23_dialogs.css": "Dialog and popover polish still depends on SAP dialog structure; migration target is app-owned wrapper classes on shell/dialog hosts.",
+  "app/styles/modules/40_page_search.css": "Search page bundle still carries scoped UI5 1.71 search/table compatibility selectors while toolbar and result-shell wrappers are being narrowed.",
+  "app/styles/modules/41_page_detail.css": "Detail page bundle still carries scoped UI5 1.71 attachment/object-page compatibility selectors while renderer-coupled section shells are being reduced.",
   "app/styles/modules/42_page_analytics.css": "Analytics viz and responsive layout styling still bridges SAP control internals until chart host wrappers replace them.",
   "app/styles/modules/90_ui5_overrides.css": "Central override layer is the explicit quarantine zone for unavoidable SAP theme overrides, including search/detail renderer compatibility extracted from page bundles.",
   "app/styles/modules/controls/22_feedback_and_status.css": "Feedback strip/status styling still needs SAP internals for message strip parity; keep quarantined to feedback controls.",

@@ -60,6 +60,29 @@ sap.ui.define([
         });
     }
 
+    function normalizeMutationAttachmentRows(aAttachments, sRootId) {
+        return (Array.isArray(aAttachments) ? aAttachments : []).map(function (oAttachment) {
+            var oRow = Object.assign({}, oAttachment || {});
+            var sParentKey = normalizeRootKey(oRow.PARENT_KEY || oRow.parent_key || sRootId);
+            var sAttachmentKey = String(oRow.AttachmentKey || oRow.attach_uuid || oRow.client_row_id || oRow.Key || "").trim();
+            return {
+                attach_uuid: String(oRow.attach_uuid || (String(oRow.edit_mode || oRow.EditMode || "").toUpperCase() === "C" ? "" : sAttachmentKey)).trim(),
+                client_row_id: String(oRow.client_row_id || sAttachmentKey || "").trim(),
+                edit_mode: String(oRow.edit_mode || oRow.EditMode || "U").trim().toUpperCase() || "U",
+                root_key: normalizeRootKey(oRow.root_key || oRow.DB_KEY || sRootId),
+                parent_key: sParentKey,
+                folder_key: String(oRow.folder_key || oRow.FolderKey || sParentKey || sRootId || "").trim(),
+                category_key: String(oRow.category_key || oRow.CategoryKey || oRow.Type || "GEN").trim() || "GEN",
+                file_name: String(oRow.file_name || oRow.FileName || oRow.Name || "").trim(),
+                mime_type: String(oRow.mime_type || oRow.MimeType || "application/octet-stream").trim() || "application/octet-stream",
+                description: String(oRow.description || oRow.Description || "").trim(),
+                file_size: Number(oRow.file_size || oRow.FileSize || oRow.FileSizeContent || 0) || 0
+            };
+        }).filter(function (oRow) {
+            return !!(oRow.edit_mode && (oRow.file_name || oRow.attach_uuid || oRow.client_row_id));
+        });
+    }
+
     function mapBasicFieldName(sFieldName) {
         var sField = String(sFieldName || "").trim();
         return BASIC_FIELD_ALIASES[sField] || sField;
@@ -91,7 +114,10 @@ sap.ui.define([
 
     function normalizeSavePayload(sRootId, oPayload, aAttachments) {
         var oIn = oPayload || {};
-        var aNormalizedAttachments = normalizeAttachmentRows(aAttachments, sRootId);
+        var aCanonicalAttachments = Array.isArray(oIn.attachments) && oIn.attachments.length
+            ? oIn.attachments
+            : aAttachments;
+        var aNormalizedAttachments = normalizeMutationAttachmentRows(aCanonicalAttachments, sRootId);
         return {
             Payload: {
                 root: Object.assign({}, oIn.root || {}, {
@@ -101,7 +127,7 @@ sap.ui.define([
                 checks: Array.isArray(oIn.checks) ? oIn.checks.slice() : [],
                 barriers: Array.isArray(oIn.barriers) ? oIn.barriers.slice() : [],
                 participants: Array.isArray(oIn.participants) ? oIn.participants.slice() : [],
-                attachments: aNormalizedAttachments.concat(Array.isArray(oIn.attachments) ? oIn.attachments.slice() : [])
+                attachments: aNormalizedAttachments
             },
             ClientVersion: Number(oIn.client_version || (oIn.root && oIn.root.version_number) || oIn.ClientVersion || 0) || 0,
             SessionGuid: String(oIn.SessionGuid || oIn.session_guid || "").trim() || null
@@ -112,6 +138,7 @@ sap.ui.define([
         applyBasicFieldAlias: applyBasicFieldAlias,
         mapBasicFieldName: mapBasicFieldName,
         normalizeAttachmentRows: normalizeAttachmentRows,
+        normalizeMutationAttachmentRows: normalizeMutationAttachmentRows,
         normalizeRootKey: normalizeRootKey,
         normalizeSavePayload: normalizeSavePayload,
         pickBasicFieldValue: pickBasicFieldValue,

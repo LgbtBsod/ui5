@@ -24,7 +24,8 @@ Tablet and phone rendering remain non-blocking best-effort and are not part of t
 2. Filter by `filterLocationKey` and execute search.
 3. Open detail, enter edit, and confirm lock state becomes `EDIT_LOCKED`.
 4. Create a new checklist and complete the first save.
-5. Reload search, reopen detail, and verify attachments, lock recovery, and analytics export.
+5. Add or remove an attachment, save again, and confirm the change survives reload without duplicate or ghost attachment state.
+6. Reload search, reopen detail, and verify attachments, lock recovery, and analytics export.
 
 ## Deterministic local smoke
 
@@ -37,3 +38,4 @@ Tablet and phone rendering remain non-blocking best-effort and are not part of t
 ## Notes
 
 Manual smoke playbook must be executed after lint, tests, and preload/build validation.
+Phase 1 release readiness additionally requires `validate:contracts` to pass with the canonical attachment delta flow and reduced UI5 compatibility override surface.

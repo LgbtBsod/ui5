@@ -1,6 +1,6 @@
 /*
- * Consolidated UI5 compatibility and renderer-level overrides.
- * This replaces 90_ui5_patches.css, 91_ui5_layout_patches.css and 92_ui5_surface_tuning.css.
+ * Consolidated UI5 compatibility allowlist for UI5 1.71 on evergreen Edge.
+ * Keep renderer-coupled rules here only when host-owned classes cannot replace them yet.
  */
 
 /* UI5 OverflowToolbar renders the custom header as sapMIBar/sapMTB and strips host skin. */
@@ -94,8 +94,6 @@
 }
 
 .chkApp .pageTransparent .sapMScrollCont,
-.chkApp .sapMDialogScrollCont,
-.chkApp .sapMDialogScroll,
 .chkApp .detailGridTable .sapUiTableCtrlScr,
 .chkApp .detailGridTable .sapUiTableVSb,
 .chkApp .detailGridTable .sapUiTableHSb,
@@ -221,9 +219,9 @@
   min-width: 2.5rem;
 }
 
-/* ObjectPage host still paints a renderer-owned background in UI5 1.71. */
-.chkApp .sapUxAPObjectPageContainer,
-.chkApp .sapUxAPObjectPageContainer + div,
-.chkApp .sapUxAPObjectPageHeaderDetailsHidden {
+/* Required ObjectPage host background reset for UI5 1.71. */
+.chkApp .detailPage .sapUxAPObjectPageContainer,
+.chkApp .detailPage .sapUxAPObjectPageContainer + div,
+.chkApp .detailPage .sapUxAPObjectPageHeaderDetailsHidden {
   background-color: transparent;
 }

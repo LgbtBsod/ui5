@@ -85,4 +85,78 @@ sap.ui.define([
             done();
         });
     });
+
+    QUnit.test("save merges staged attachment delta rows into canonical payload", function (assert) {
+        var done = assert.async();
+        var oUseCase = SaveDetailUseCase();
+        var oCapturedArgs = null;
+
+        oUseCase.execute({ rootId: "CHK-ATT-1" }, {
+            repo: {
+                saveChecklist: function (mArgs) {
+                    oCapturedArgs = mArgs;
+                    return Promise.resolve({
+                        serverSnapshot: {
+                            root: { id: "CHK-ATT-1", version_number: 8 },
+                            basic: {},
+                            attachments: []
+                        }
+                    });
+                },
+                loadAttachments: function () {
+                    return Promise.resolve({ attachments: [] });
+                }
+            },
+            uiState: {
+                get: function (sModelName, sPath) {
+                    if (sModelName === "detail" && sPath === "/current") {
+                        return {
+                            root: { id: "CHK-ATT-1", version_number: 7 },
+                            basic: {},
+                            checks: [],
+                            barriers: [],
+                            attachments: []
+                        };
+                    }
+                    if (sModelName === "detail" && sPath === "/base") {
+                        return {
+                            root: { id: "CHK-ATT-1", version_number: 7 },
+                            basic: {},
+                            checks: [],
+                            barriers: [],
+                            attachments: []
+                        };
+                    }
+                    if (sModelName === "view" && sPath === "/sessionAttachments") {
+                        return [{
+                            client_row_id: "ATT-STAGED-1",
+                            fileName: "evidence.txt",
+                            mimeType: "text/plain",
+                            fileSize: 42,
+                            categoryKey: "GEN",
+                            folderKey: "CHK-ATT-1",
+                            uploadState: "pendingUpload",
+                            _file: {}
+                        }];
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
+                        return "EDIT";
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
+                        return "EDIT_LOCKED";
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.SESSION_ID) {
+                        return "SESSION-ATT-1";
+                    }
+                    return null;
+                }
+            }
+        }).then(function () {
+            assert.ok(oCapturedArgs, "save request is captured");
+            assert.ok(Array.isArray(oCapturedArgs.delta.attachments), "attachment delta array is present");
+            assert.strictEqual(oCapturedArgs.delta.attachments.length, 1, "staged attachment is merged into canonical delta");
+            assert.strictEqual(oCapturedArgs.delta.attachments[0].file_name, "evidence.txt", "merged attachment keeps canonical file name field");
+            done();
+        });
+    });
 });

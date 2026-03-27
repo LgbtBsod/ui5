@@ -8,6 +8,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
@@ -21,7 +22,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, NavigationContracts) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentSaveRuntime, DetailAttachmentDeltaRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, NavigationContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -82,6 +83,14 @@ sap.ui.define([
         });
     }
 
+    function mergeDeltaAttachments(oDelta, aCurrentAttachments, sRootId) {
+        var aPendingAttachmentRows = DetailAttachmentDeltaRuntime.listPendingStagedAttachments(aCurrentAttachments, sRootId);
+        if (!aPendingAttachmentRows.length) {
+            return oDelta;
+        }
+        return DetailAttachmentDeltaRuntime.mergeDeltaAttachments(oDelta, aPendingAttachmentRows);
+    }
+
     function execute(mInput, mCtx) {
         var sDbKey = UseCaseValue.dbKey(mInput);
         var oUiState = mCtx && mCtx.uiState;
@@ -133,6 +142,8 @@ sap.ui.define([
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.FAILED)
             ]));
         }
+
+        oDelta = mergeDeltaAttachments(oDelta, aCurrentAttachments, sDbKey);
 
         return Promise.resolve().then(function () {
             var pSave = bCreate

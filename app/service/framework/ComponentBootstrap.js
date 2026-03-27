@@ -199,6 +199,39 @@ sap.ui.define([
         });
     }
 
+    function initializeModelsStage(oComponent, mBootstrapDeps, oBootstrap) {
+        var oModelBootstrap = bootstrapModels(oComponent, mBootstrapDeps);
+        ModelStateRuntime.writeOnModel(
+            oModelBootstrap.models.stateModel,
+            BackendModeContracts.PATHS.BACKEND_MODE,
+            oBootstrap.getBackendMode()
+        );
+        ComponentModelInitRuntime.registerModels(oComponent, oModelBootstrap.models);
+        oComponent.setModel(oModelBootstrap.mainServiceModel);
+        oComponent._detailFacade = oComponent._detailFacade || new DetailFacade();
+        return oModelBootstrap;
+    }
+
+    function initializeRuntimeServicesStage(oComponent, mBootstrapDeps, oModelBootstrap, mActionRuntimeOptions) {
+        return mBootstrapDeps.ComponentRuntimeSettingsRuntime.initializeRuntimeSettings(oComponent, {
+            stateModel: oModelBootstrap.models.stateModel,
+            envState: oModelBootstrap.models.envState,
+            masterDataModel: oModelBootstrap.models.masterDataModel,
+            settingsManager: mBootstrapDeps.Managers && mBootstrapDeps.Managers.SettingsManager || mBootstrapDeps.SettingsManager,
+            gatewayBackendService: GatewayClient,
+            telemetryRuntime: TelemetryRuntime,
+            emitTelemetry: mActionRuntimeOptions.emitTelemetry
+        });
+    }
+
+    function attachLifecycleStage(oComponent, mBootstrapDeps, mActionRuntimeOptions, mRuntimeModels) {
+        return ComponentLifecycleRuntime.attachRuntime(
+            oComponent,
+            Object.assign({}, mBootstrapDeps, mActionRuntimeOptions),
+            mRuntimeModels
+        );
+    }
+
     function createMainServiceModel(oComponent, mDeps) {
         var oMainServiceModel = oComponent && oComponent.getModel ? oComponent.getModel("mainService") : null;
         var sManifestUri = oComponent && oComponent.getManifestEntry
@@ -321,30 +354,14 @@ sap.ui.define([
         oBootstrap = createBootstrapDeps();
         mBootstrapDeps = oBootstrap.deps;
 
-        oModelBootstrap = bootstrapModels(oComponent, mBootstrapDeps);
-        ModelStateRuntime.writeOnModel(oModelBootstrap.models.stateModel, BackendModeContracts.PATHS.BACKEND_MODE, oBootstrap.getBackendMode());
+        oModelBootstrap = initializeModelsStage(oComponent, mBootstrapDeps, oBootstrap);
         runDiagnostics(DiagnosticsUseCase, mBootstrapDeps, oModelBootstrap);
-        ComponentModelInitRuntime.registerModels(oComponent, oModelBootstrap.models);
-        oComponent.setModel(oModelBootstrap.mainServiceModel);
-        oComponent._detailFacade = oComponent._detailFacade || new DetailFacade();
         mRuntimeModels = buildRuntimeModels(oModelBootstrap);
         mActionRuntimeOptions = buildActionRuntimeOptions(oComponent, {
             WorkflowTelemetry: WorkflowTelemetry
         }, oModelBootstrap.models);
-        oRuntimeSettingsRuntime = mBootstrapDeps.ComponentRuntimeSettingsRuntime.initializeRuntimeSettings(oComponent, {
-            stateModel: oModelBootstrap.models.stateModel,
-            envState: oModelBootstrap.models.envState,
-            masterDataModel: oModelBootstrap.models.masterDataModel,
-            settingsManager: mBootstrapDeps.Managers && mBootstrapDeps.Managers.SettingsManager || mBootstrapDeps.SettingsManager,
-            gatewayBackendService: GatewayClient,
-            telemetryRuntime: TelemetryRuntime,
-            emitTelemetry: mActionRuntimeOptions.emitTelemetry
-        });
-        oNavigationRuntime = ComponentLifecycleRuntime.attachRuntime(
-            oComponent,
-            Object.assign({}, mBootstrapDeps, mActionRuntimeOptions),
-            mRuntimeModels
-        );
+        oRuntimeSettingsRuntime = initializeRuntimeServicesStage(oComponent, mBootstrapDeps, oModelBootstrap, mActionRuntimeOptions);
+        oNavigationRuntime = attachLifecycleStage(oComponent, mBootstrapDeps, mActionRuntimeOptions, mRuntimeModels);
 
         return ComponentLifecycleRuntime.runBootSequence({
             component: oComponent,

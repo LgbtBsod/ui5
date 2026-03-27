@@ -228,4 +228,91 @@ sap.ui.define([
         assert.strictEqual(ODataChecklistPayloadMapper.pickBasicFieldValue(oBasic, "Lpc"), "L1", "shared picker resolves LPC alias value");
         assert.strictEqual(ODataChecklistPayloadMapper.pickBasicFieldValue(oBasic, "Profession"), "P1", "shared picker resolves profession alias value");
     });
+
+    QUnit.test("autosave merges staged attachment delta rows into canonical payload", function (assert) {
+        var done = assert.async();
+        var oUseCase = AutosaveDetailUseCase();
+        var oCapturedArgs = null;
+
+        oUseCase.execute({ rootId: "CHK-AUTO-ATT-1" }, {
+            repo: {
+                autosaveChecklist: function (mArgs) {
+                    oCapturedArgs = mArgs;
+                    return Promise.resolve({
+                        autosavedAt: "2026-03-27T12:00:00.000Z",
+                        serverSnapshot: {
+                            root: { id: "CHK-AUTO-ATT-1", version_number: 2 },
+                            basic: {},
+                            attachments: []
+                        }
+                    });
+                },
+                loadAttachments: function () {
+                    return Promise.resolve({ attachments: [] });
+                }
+            },
+            uiState: {
+                get: function (sModelName, sPath) {
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
+                        return WorkflowContracts.EDIT_MODES.EDIT;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DETAIL_LOCK_STATE) {
+                        return WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.WORKFLOW_DIRTY) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.PERSISTENCE_HAS_VALID_LOCK) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES) {
+                        return true;
+                    }
+                    if (sModelName === "state" && sPath === "/hasConflict") {
+                        return false;
+                    }
+                    if (sModelName === "state" && sPath === StatePaths.SESSION_ID) {
+                        return "SESSION-AUTO-ATT-1";
+                    }
+                    if (sModelName === "detail" && sPath === "/current") {
+                        return {
+                            root: { id: "CHK-AUTO-ATT-1", version_number: 1 },
+                            basic: {},
+                            checks: [],
+                            barriers: [],
+                            attachments: []
+                        };
+                    }
+                    if (sModelName === "detail" && sPath === "/base") {
+                        return {
+                            root: { id: "CHK-AUTO-ATT-1", version_number: 1 },
+                            basic: {},
+                            checks: [],
+                            barriers: [],
+                            attachments: []
+                        };
+                    }
+                    if (sModelName === "view" && sPath === "/sessionAttachments") {
+                        return [{
+                            client_row_id: "AUTO-ATT-1",
+                            fileName: "autosave.txt",
+                            mimeType: "text/plain",
+                            fileSize: 24,
+                            categoryKey: "GEN",
+                            folderKey: "CHK-AUTO-ATT-1",
+                            uploadState: "pendingUpload",
+                            _file: {}
+                        }];
+                    }
+                    return null;
+                }
+            }
+        }).then(function (oResult) {
+            assert.ok(oResult && oResult.ok, "autosave succeeds");
+            assert.ok(oCapturedArgs, "autosave request is captured");
+            assert.strictEqual(oCapturedArgs.delta.attachments.length, 1, "staged attachment is merged into canonical autosave delta");
+            assert.strictEqual(oCapturedArgs.delta.attachments[0].file_name, "autosave.txt", "canonical delta keeps attachment mutation fields");
+            done();
+        });
+    });
 });

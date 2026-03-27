@@ -558,20 +558,9 @@ body.chkAppRoot.appDark .chkApp .searchWorkbenchSurface .resultSegmentControl .s
   opacity: 0.92;
 }
 
-.chkApp .searchResultsActionRail .searchToolbarToggleSwitch {
-  height: var(--theme-workbench-control-height);
-}
-
+.chkApp .searchResultsActionRail .searchToolbarToggleSwitch,
 .chkApp .searchSettingsRail .searchToolbarToggleSwitch {
   height: var(--theme-workbench-control-height);
-}
-
-.chkApp .searchResultsActionRail .searchToolbarToggleSwitch {
-  display: inline-flex;
-  align-items: center;
-}
-
-.chkApp .searchSettingsRail .searchToolbarToggleSwitch {
   display: inline-flex;
   align-items: center;
 }
