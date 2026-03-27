@@ -48,6 +48,34 @@ sap.ui.define([
         });
     });
 
+    QUnit.test("CopyChecklist uses body transport via create path", function (assert) {
+        var done = assert.async();
+        var bCreateCalled = false;
+
+        GatewayClient.setModel({
+            callFunction: function () {
+                assert.ok(false, "CopyChecklist must not go through query-based callFunction");
+            },
+            create: function (sPath, oPayload, mOptions) {
+                bCreateCalled = true;
+                assert.strictEqual(sPath, "/" + GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST, "create uses canonical function import path");
+                assert.deepEqual(oPayload, {
+                    DB_KEY: "4711",
+                    SessionGuid: "SESSION-1"
+                }, "payload stays in request body");
+                mOptions.success({ ok: true });
+            }
+        });
+
+        GatewayClient.callFunctionImport(
+            GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST,
+            { DB_KEY: "4711", SessionGuid: "SESSION-1" }
+        ).then(function () {
+            assert.ok(bCreateCalled, "body transport path is executed");
+            done();
+        });
+    });
+
     QUnit.test("all function imports remain covered by one supported execution path", function (assert) {
         var aAllImports = [
             GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE,
@@ -65,13 +93,13 @@ sap.ui.define([
             GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES,
             GatewayContractConstants.FUNCTION_IMPORTS.AUTO_SAVE,
             GatewayContractConstants.FUNCTION_IMPORTS.CREATE_CHECKLIST,
+            GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST,
             GatewayContractConstants.FUNCTION_IMPORTS.REPORT_EXPORT,
             GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE,
             GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT,
             GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE
         ];
         var aQuery = [
-            GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST,
             GatewayContractConstants.FUNCTION_IMPORTS.ANALYTICS_REFRESH_TRIGGER
         ];
         var aGet = [

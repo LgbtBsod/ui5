@@ -1,6 +1,0 @@
-2026-03-27 Final Production-Readiness Pass
-
-app/service/framework/ControllerRouteRuntime.js
-app/service/framework/FeedbackCoordinator.js
-app/controller/search/SearchCommandPolicy.js
-app/controller/detail/DetailCommandPolicy.js

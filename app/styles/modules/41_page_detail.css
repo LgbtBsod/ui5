@@ -54,11 +54,6 @@
   min-width: 0;
 }
 
-.chkApp .detailSectionTableHost .sapUiTable,
-.chkApp .detailSectionTableHost .sapMTable {
-  width: 100%;
-}
-
 .chkApp .tableRowActionBtn,
 .chkApp .tableRowActionBtn .sapMBtnInner {
   width: 100%;
@@ -151,17 +146,6 @@ body.chkAppRoot.appDark .chkApp .tableRowActionBtnDanger .sapMBtnInner {
 .chkApp .detailGridTable .sapMInputBase {
   width: 100%;
   min-width: 0;
-}
-
-.chkApp .flatEditorTable .sapMSwt,
-.chkApp .detailGridTable .sapMSwt {
-  min-width: 2.5rem;
-}
-
-.chkApp .detailSectionTableHost .sapUiTableCnt,
-.chkApp .detailSectionTableHost .sapUiTableCtrlScr,
-.chkApp .detailSectionTableHost .sapUiTableCCnt {
-  max-width: 100%;
 }
 
 .chkApp .flatEditorTable .sapMText,
@@ -1765,7 +1749,7 @@ body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipDraft {
   margin-bottom: 0.5rem;
 }
 
-.chkApp .lockStatusEditSwitch .sapMSwtCont {
+.chkApp .lockStatusEditSwitch {
   min-height: var(--theme-workbench-control-height);
 }
 
@@ -1848,14 +1832,6 @@ body.chkAppRoot.appDark .chkApp .detailRailStatusChip.chipDraft {
   margin-bottom: 0.18rem;
   border-radius: calc(var(--radius-xl) - 0.1rem);
 }
-
-/* Sanctioned compatibility hook: ObjectPage host keeps painting its own background in UI5 1.71. */
-.chkApp .sapUxAPObjectPageContainer,
-.chkApp .sapUxAPObjectPageContainer + div,
-.chkApp .sapUxAPObjectPageHeaderDetailsHidden {
-    background-color: transparent;
-}
-
 
 .chkApp .detailInfoBridgeCard::after {
   content: "";

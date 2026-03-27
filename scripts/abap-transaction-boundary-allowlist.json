@@ -1,0 +1,11 @@
+{
+  "allowedCommitOwners": [
+    "zcl_zodata_save_service.clas.abap",
+    "zfg_zodata_lock.fugr.abap",
+    "z_lock_regs_async.fugr.abap"
+  ],
+  "forbiddenFacadeOwners": [
+    "zcl_zodata_dpc_ext.clas.abap",
+    "zcl_zodata_mpc_ext.clas.abap"
+  ]
+}

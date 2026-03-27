@@ -2,13 +2,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (Effects, StatePaths, WorkflowContracts, DetailContracts, ModelContracts, MessageKeyConstants) {
+], function (Effects, StatePaths, WorkflowContracts, ModelContracts, MessageKeyConstants) {
     "use strict";
 
-    var STATES = DetailContracts.STATES;
+    var STATES = WorkflowContracts.PERSISTENCE_STATES;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var DETAIL_MESSAGE_KEYS = MessageKeyConstants.VIEW;
     var TAXONOMY = Object.freeze({

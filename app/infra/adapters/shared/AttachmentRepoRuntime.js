@@ -64,31 +64,10 @@ sap.ui.define([
         });
     }
 
-    function uploadAttachment(mArgs) {
-        var oAttachment = (mArgs && mArgs.attachment) || {};
-        var sDbKey = normalizeRootKey((mArgs && mArgs.dbKey) || oAttachment.parentKey);
-        var sAttachmentId = String(oAttachment.attachmentId || oAttachment.AttachmentKey || "").trim().toUpperCase();
-        var sParentKey = normalizeRootKey(oAttachment.parentKey || sDbKey);
-        var oFile = oAttachment.file;
-        var sFileName = String(oAttachment.fileName || (oFile && oFile.name) || "").trim();
-        var sMimeType = String(oAttachment.mimeType || (oFile && oFile.type) || "application/octet-stream").trim() || "application/octet-stream";
-        if (!sDbKey || !oAttachment.file) {
-            return Promise.resolve(null);
-        }
-        return GatewayClient.uploadMedia("/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT, oFile, {
-            contentType: sMimeType,
-            headers: {
-                "Slug": encodeURIComponent(sFileName || "attachment"),
-                "X-Attachment-Key": sAttachmentId || "",
-                "X-DB-Key": sDbKey,
-                "X-Parent-Key": sParentKey,
-                "X-Folder-Key": String(oAttachment.folderKey || sParentKey || sDbKey).trim(),
-                "X-Category-Key": String(oAttachment.categoryKey || "GEN").trim() || "GEN",
-                "X-Description": String(oAttachment.description || "").trim(),
-                "X-File-Name": sFileName || "attachment"
-            }
-        }).then(function (oResult) {
-            return ChecklistSnapshotMapper.mapAttachmentRow(ODataAdapterUtils.unwrap(oResult) || {});
+    function uploadMedia(mArgs) {
+        return Promise.resolve({
+            rootId: normalizeRootKey(mArgs && (mArgs.rootId || mArgs.dbKey || mArgs.parentKey)),
+            queued: Array.isArray(mArgs && mArgs.attachments) ? mArgs.attachments.length : 0
         });
     }
 
@@ -101,8 +80,8 @@ sap.ui.define([
         mediaUploadContract: MEDIA_UPLOAD_CONTRACT,
         normalizeDbKey: normalizeRootKey,
         normalizeRootKey: normalizeRootKey,
+        uploadMedia: uploadMedia,
         loadAttachments: loadAttachments,
-        deleteAttachment: deleteAttachment,
-        uploadAttachment: uploadAttachment
+        deleteAttachment: deleteAttachment
     };
 });

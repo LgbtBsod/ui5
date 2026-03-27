@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/AutosaveDetailUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (AutosaveDetailUseCase, StatePaths, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistPayloadMapper"
+], function (AutosaveDetailUseCase, StatePaths, WorkflowContracts, ODataChecklistPayloadMapper) {
     "use strict";
 
     QUnit.module("AutosaveDetailUseCase");
@@ -214,5 +215,17 @@ sap.ui.define([
             assert.strictEqual(!!(oResult.data && oResult.data.reason), true, "skip reason is returned");
             done();
         });
+    });
+
+    QUnit.test("shared payload mapper keeps LPC and profession aliases canonical", function (assert) {
+        var oBasic = {
+            LPC_KEY: "L1",
+            PROF_KEY: "P1"
+        };
+
+        assert.strictEqual(ODataChecklistPayloadMapper.mapBasicFieldName("LPC_KEY"), "Lpc", "LPC alias resolves to OData field");
+        assert.strictEqual(ODataChecklistPayloadMapper.mapBasicFieldName("PROF_KEY"), "Profession", "profession alias resolves to OData field");
+        assert.strictEqual(ODataChecklistPayloadMapper.pickBasicFieldValue(oBasic, "Lpc"), "L1", "shared picker resolves LPC alias value");
+        assert.strictEqual(ODataChecklistPayloadMapper.pickBasicFieldValue(oBasic, "Profession"), "P1", "shared picker resolves profession alias value");
     });
 });

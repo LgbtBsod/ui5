@@ -33,4 +33,19 @@ sap.ui.define([
             "check rows use canonical binary parent key"
         );
     });
+
+    QUnit.test("select contracts include productive root and integration fallback fields", function (assert) {
+        assert.ok(
+            ODataDetailEntityContracts.SELECTS.CHECKLIST_ROOT.indexOf("IntegrationFlag") >= 0,
+            "root select requests IntegrationFlag"
+        );
+        assert.ok(
+            ODataDetailEntityContracts.SELECTS.CHECKLIST_BASIC_INFO.indexOf("ObserverName") >= 0,
+            "basic info select requests ObserverName"
+        );
+        assert.ok(
+            ODataDetailEntityContracts.SELECTS.CHECKLIST_BASIC_INFO.indexOf("ObservedName") >= 0,
+            "basic info select requests ObservedName"
+        );
+    });
 });

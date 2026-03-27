@@ -361,7 +361,6 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       CATCH zcx_zodata_error INTO DATA(lx_release_error).
         raise_busi_exception( iv_text = lx_release_error->get_message_text( ) iv_code = lx_release_error->get_code( ) ).
     ENDTRY.
-    COMMIT WORK AND WAIT.
     GET TIME STAMP FIELD lv_now_ts.
     mo_contract->fill_lock_release_result(
       EXPORTING

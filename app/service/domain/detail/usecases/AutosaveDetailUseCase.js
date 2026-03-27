@@ -5,20 +5,20 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
-"PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistPayloadMapper",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, WorkflowContracts, DetailAttachmentSaveRuntime, DetailStateAccess, DetailPersistenceRuntime, ModelPathContracts, CloneUtil, ODataChecklistPayloadMapper, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -31,22 +31,16 @@ sap.ui.define([
 
     function AutosaveDetailUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 
-function mapFieldDelta(mInput, oCurrent) {
-        var mFieldMap = {
-            LPC_KEY: "Lpc",
-            PROF_KEY: "Profession",
-            CHECKS_NUMBER: "ChecksNumber",
-            BARRIERS_NUMBER: "BarriersNumber"
-        };
+    function applyAliasedBasicField(mInput, oCurrent) {
         var sField = String((mInput && mInput.field) || "");
-        if (!mFieldMap[sField]) { return null; }
+        if (!sField) { return null; }
         var oDraft = Object.assign({}, oCurrent || {});
         oDraft.basic = Object.assign({}, oDraft.basic || {});
-        oDraft.basic[mFieldMap[sField]] = mInput.value;
+        oDraft.basic = ODataChecklistPayloadMapper.applyBasicFieldAlias(oDraft.basic, sField, mInput.value);
         return oDraft;
     }
 
@@ -65,7 +59,7 @@ function mapFieldDelta(mInput, oCurrent) {
         }
         var oCurrent = readCurrentChecklist(mCtx);
         var oSnapshot = DetailSaveRuntime.readBaseSnapshot(mCtx);
-        var oMappedCurrent = mapFieldDelta(mInput, oCurrent) || oCurrent;
+        var oMappedCurrent = applyAliasedBasicField(mInput, oCurrent) || oCurrent;
         return DeltaPayloadBuilder.buildDeltaPayload(oMappedCurrent, oSnapshot) || null;
     }
 
@@ -98,14 +92,12 @@ function mapFieldDelta(mInput, oCurrent) {
         });
     }
 
-function execute(mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var sDbKey = UseCaseValue.dbKey(mInput);
         var oRepo = mCtx && mCtx.repo;
         var oCacheWrite = mCtx && mCtx.cacheWrite;
         var oDelta;
         var sSessionGuid = DetailSaveRuntime.readSessionGuid(mCtx, StatePaths);
-        var aSerializedAttachments = [];
-
         if (CreateSentinel.isCreateId(sDbKey)) {
             return Promise.resolve(Result.ok({ skipped: true, reason: DETAIL_REASONS.CREATE_DRAFT_PENDING }, []));
         }
@@ -133,15 +125,12 @@ function execute(mInput, mCtx) {
         var oCurrentChecklist = readCurrentChecklist(mCtx);
         var aCurrentAttachments = DetailStateAccess.readWorkingAttachments(mCtx);
 
-        return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, sDbKey).then(function (aStagedPayload) {
-            aSerializedAttachments = Array.isArray(aStagedPayload) ? aStagedPayload : [];
-            return Promise.resolve(oRepo.autosaveChecklist(DetailRuntimePayload.saveRequest({
-                dbKey: sDbKey,
-                delta: DetailAttachmentDeltaRuntime.mergeDeltaAttachments(oDelta, aSerializedAttachments),
-                sessionGuid: sSessionGuid,
-                attachments: []
-            })));
-        }).then(function (oSaved) {
+        return Promise.resolve(oRepo.autosaveChecklist(DetailRuntimePayload.saveRequest({
+            dbKey: sDbKey,
+            delta: oDelta,
+            sessionGuid: sSessionGuid,
+            attachments: []
+        }))).then(function (oSaved) {
             var sAt = (oSaved && oSaved.autosavedAt) || new Date().toISOString();
             oCurrentChecklist = readCurrentChecklist(mCtx);
             aCurrentAttachments = DetailStateAccess.readWorkingAttachments(mCtx);
@@ -150,6 +139,7 @@ function execute(mInput, mCtx) {
                 DetailSaveRuntime.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrentChecklist, oCurrentChecklist, oBaseSnapshot)
             );
             return DetailAttachmentSaveRuntime.syncAfterSave({
+                attachmentGateway: mCtx && mCtx.attachmentGateway,
                 repo: oRepo,
                 rootId: sDbKey,
                 createMode: false,
@@ -160,7 +150,7 @@ function execute(mInput, mCtx) {
                 savedSnapshot: oSavedSnapshot,
                 baseSnapshot: oBaseSnapshot,
                 ctx: mCtx,
-                hasStagedPayload: aSerializedAttachments.length > 0
+                hasStagedPayload: false
             }).then(function (oAttachmentSync) {
                 return writeDetailCache(oCacheWrite, sDbKey, oAttachmentSync.snapshot, mCtx).then(function () {
                     return Result.ok({ autosavedAt: sAt }, [

@@ -55,8 +55,11 @@ sap.ui.define([
         return oStatus;
     }
 
-    function createReadInfoText(sTextBinding) {
-        return withStyleClasses(new Text({ text: sTextBinding, renderWhitespace: true }), "infoCardValue");
+    function createReadInfoText(mBindingInfo) {
+        return withStyleClasses(new Text({
+            text: mBindingInfo,
+            renderWhitespace: true
+        }), "infoCardValue");
     }
 
     function bindReadVisibility(oControl) {
@@ -87,7 +90,16 @@ sap.ui.define([
             var sInputPath = sTarget === "observer" ? "view>/observerInputValue" : "view>/observedInputValue";
             var sSuggestionsPath = sTarget === "observer" ? "view>/observerSuggestions" : "view>/observedSuggestions";
             var oBox = withStyleClasses(new VBox({ renderType: "Bare" }), "detailSemanticMetaBlock");
-        var oReadText = createReadInfoText("{detail>/current/basic/" + sUpper + "_FULLNAME}");
+            var oReadText = createReadInfoText({
+                parts: [
+                    { path: "detail>/current/basic/" + sUpper + "_PERNER" },
+                    { path: "detail>/current/basic/" + sUpper + "_NAME" },
+                    { path: "detail>/current/basic/" + sUpper + "_FULLNAME" }
+                ],
+                formatter: function (sPernr, sIntegrationName, sFullname) {
+                    return (sPernr ? sFullname : (sIntegrationName || sFullname)) || "-";
+                }
+            });
             var oInput = new Input({
                 value: "{" + sInputPath + "}",
                 showSuggestion: "{= ${state>/workflow/detail/editMode} === 'EDIT' }",

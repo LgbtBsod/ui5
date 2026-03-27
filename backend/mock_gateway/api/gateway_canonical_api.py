@@ -2566,7 +2566,13 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
     selection_mode = str(payload.get("SelectionMode") or "").strip().lower()
     entity = str(payload.get("Entity") or "screen").strip().lower() or "screen"
     export_limit = _normalize_export_limit(payload.get("Limit") or payload.get("limit"))
-    root_keys = payload.get("DBKeys") or payload.get("keys") or payload.get("ids") or []
+    root_keys = (
+        payload.get("RootKeys")
+        or payload.get("DBKeys")
+        or payload.get("keys")
+        or payload.get("ids")
+        or []
+    )
 
     if not root_keys:
         single_key = _boundary_root_key(payload)

@@ -3,21 +3,20 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/SearchUiConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, DetailContracts, MessageKeyConstants, SearchUiConfig, ShellStateRuntime, ModelContracts) {
+], function (ModelStateRuntime, WorkflowContracts, ComponentListenerContracts, ComponentDetailMetaSyncRuntime, MessageKeyConstants, SearchUiConfig, ShellStateRuntime, ModelContracts) {
     "use strict";
 
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var PATHS = ComponentListenerContracts.PATHS;
     var VALUES = ComponentListenerContracts.VALUES;
     var PERSISTENCE_DIRTY_SOURCE_STATES = Object.freeze({
-        [DetailContracts.STATES.IDLE]: true,
-        [DetailContracts.STATES.SAVED]: true,
-        [DetailContracts.STATES.DIRTY]: true
+        [WorkflowContracts.PERSISTENCE_STATES.IDLE]: true,
+        [WorkflowContracts.PERSISTENCE_STATES.SAVED]: true,
+        [WorkflowContracts.PERSISTENCE_STATES.DIRTY]: true
     });
 
     function syncDirtyPersistence(oStateModel, bDirty) {
@@ -25,7 +24,7 @@ sap.ui.define([
         if (!PERSISTENCE_DIRTY_SOURCE_STATES[sPersistenceState]) {
             return;
         }
-        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/state", bDirty ? DetailContracts.STATES.DIRTY : DetailContracts.STATES.IDLE);
+        ModelStateRuntime.writeOnModel(oStateModel, "/persistence/state", bDirty ? WorkflowContracts.PERSISTENCE_STATES.DIRTY : WorkflowContracts.PERSISTENCE_STATES.IDLE);
         ModelStateRuntime.writeOnModel(oStateModel, "/persistence/messageKey", bDirty ? MessageKeyConstants.VIEW.PERSISTENCE_DIRTY : MessageKeyConstants.VIEW.PERSISTENCE_IDLE);
     }
 

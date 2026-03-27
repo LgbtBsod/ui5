@@ -44,10 +44,21 @@ sap.ui.define([
     function build(oController, mViewRefs) {
         var mModels = collectModels(oController);
         var mStateAdapters = CtxAdapterFactory.buildStateAdapters(mModels, mViewRefs);
+        var oMasterDataModel = mModels.masterData;
+        var oRuntimeSettings = oMasterDataModel && typeof oMasterDataModel.getProperty === "function"
+            ? (
+                oMasterDataModel.getProperty("/runtime/timers")
+                || oMasterDataModel.getProperty("/runtime")
+                || {}
+            )
+            : {};
 
         return Object.assign({},
             CtxAdapterFactory.buildInfraAdapters(mModels, mStateAdapters),
             mStateAdapters,
+            {
+                runtimeSettings: oRuntimeSettings
+            },
             buildCacheRuntime()
         );
     }

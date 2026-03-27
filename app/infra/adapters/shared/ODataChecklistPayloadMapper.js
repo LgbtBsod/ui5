@@ -5,6 +5,18 @@ sap.ui.define([
     "use strict";
 
     var IDENTITY = ODataEntityContracts.IDENTITY;
+    var BASIC_FIELD_ALIASES = Object.freeze({
+        BARRIERS_NUMBER: "BarriersNumber",
+        CHECKS_NUMBER: "ChecksNumber",
+        LPC_KEY: "Lpc",
+        PROF_KEY: "Profession"
+    });
+    var BASIC_FIELD_SYNONYMS = Object.freeze({
+        BarriersNumber: Object.freeze(["BarriersNumber", "BARRIERS_NUMBER"]),
+        ChecksNumber: Object.freeze(["ChecksNumber", "CHECKS_NUMBER"]),
+        Lpc: Object.freeze(["Lpc", "LPC_KEY"]),
+        Profession: Object.freeze(["Profession", "PROF_KEY"])
+    });
 
     function normalizeRootKey(sRootId) {
         return ODataKeyNormalizer.normalizeBinaryKey(sRootId);
@@ -48,6 +60,35 @@ sap.ui.define([
         });
     }
 
+    function mapBasicFieldName(sFieldName) {
+        var sField = String(sFieldName || "").trim();
+        return BASIC_FIELD_ALIASES[sField] || sField;
+    }
+
+    function applyBasicFieldAlias(oBasic, sFieldName, vValue) {
+        var oOut = Object.assign({}, oBasic || {});
+        var sMappedField = mapBasicFieldName(sFieldName);
+        if (!sMappedField) {
+            return oOut;
+        }
+        oOut[sMappedField] = vValue;
+        return oOut;
+    }
+
+    function pickBasicFieldValue(oBasic, sFieldName) {
+        var sMappedField = mapBasicFieldName(sFieldName);
+        var aCandidates = BASIC_FIELD_SYNONYMS[sMappedField] || [sMappedField];
+        var i;
+        var sCandidate;
+        for (i = 0; i < aCandidates.length; i += 1) {
+            sCandidate = aCandidates[i];
+            if (oBasic && Object.prototype.hasOwnProperty.call(oBasic, sCandidate)) {
+                return oBasic[sCandidate];
+            }
+        }
+        return undefined;
+    }
+
     function normalizeSavePayload(sRootId, oPayload, aAttachments) {
         var oIn = oPayload || {};
         var aNormalizedAttachments = normalizeAttachmentRows(aAttachments, sRootId);
@@ -68,9 +109,12 @@ sap.ui.define([
     }
 
     return {
+        applyBasicFieldAlias: applyBasicFieldAlias,
+        mapBasicFieldName: mapBasicFieldName,
         normalizeAttachmentRows: normalizeAttachmentRows,
         normalizeRootKey: normalizeRootKey,
         normalizeSavePayload: normalizeSavePayload,
+        pickBasicFieldValue: pickBasicFieldValue,
         resolveServerRootId: resolveServerRootId
     };
 });

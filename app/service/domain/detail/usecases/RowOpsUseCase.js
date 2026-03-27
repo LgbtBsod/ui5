@@ -6,9 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowEntityConfig",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, ModelContracts, DetailContracts, MessageKeyConstants) {
+], function (StatePaths, Result, Effects, ClientKeyGenerator, DetailRowEntityConfig, DetailRowBindingRuntime, ModelContracts, WorkflowContracts, MessageKeyConstants) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -18,7 +18,7 @@ sap.ui.define([
 
     function RowOpsUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 
@@ -81,7 +81,7 @@ function nextNum(aRows, sField) {
     function markDirtyResult(sEntity, sOp) {
         return Result.ok({ entity: sEntity, op: sOp }, [
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, true),
-            Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_STATE, DetailContracts.STATES.DIRTY),
+            Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_STATE, WorkflowContracts.PERSISTENCE_STATES.DIRTY),
             Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_MESSAGE_KEY, DETAIL_MESSAGE_KEYS.PERSISTENCE_DIRTY)
         ]);
     }

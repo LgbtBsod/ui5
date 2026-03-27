@@ -196,7 +196,6 @@ def test_manifest_and_model_constants_expose_only_current_global_model_surface()
 
 def test_boot_and_runtime_source_lock_strict_success_path():
     bootstrap_source = _read(APP_ROOT / "service" / "framework" / "ComponentBootstrap.js")
-    bootstrap_builder = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentBootstrapDependencyBuilder.js")
     backend_mode_contracts = _read(APP_ROOT / "service" / "domain" / "shared" / "BackendModeContracts.js")
     lifecycle_text = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentLifecycleRuntime.js")
     assert not (APP_ROOT / "service" / "runtime" / "component" / "ComponentCoreInitRuntime.js").exists()
@@ -234,16 +233,15 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     assert 'clearByTabSessionId: clearByTabSessionId,' in cache_text
     assert 'cleanupStaleSessions: cleanupStaleSessions,' in cache_text
     assert 'StatePaths.UI_BUSY_GLOBAL' not in listener_runtime
-    assert "ComponentBootstrapDependencyBuilder.build" in bootstrap_source
-    assert "ComponentBootstrapDependencyBuilder.withManagerRuntime" in bootstrap_source
+    assert "buildGroupedDependencies" in bootstrap_source
+    assert "flattenDependencyGroups" in bootstrap_source
+    assert "attachManagerRuntime" in bootstrap_source
     assert 'getBackendMode: function () { return BackendModeContracts.MODES.REAL; }' in bootstrap_source
     assert 'BackendModeContracts.PATHS.BACKEND_MODE' in bootstrap_source
-    assert "withManagerRuntime" in bootstrap_builder
-    assert "MANAGER_KEYS" in bootstrap_builder
     assert "PollingManager" in bootstrap_source
     assert "HeartbeatManager" not in bootstrap_source
     assert "AutoSaveCoordinator" in bootstrap_source
-    assert "Object.freeze({" in bootstrap_builder
+    assert "Object.freeze({" in bootstrap_source
     assert 'REAL: "real"' in backend_mode_contracts
     assert 'BACKEND_MODE: ModelPathContracts.BACKEND_MODE' in backend_mode_contracts
     for path in removed_framework_aliases:
@@ -303,20 +301,16 @@ def test_route_runtime_is_manifest_first_without_route_sync_shadow_layer():
 
 
 def test_controller_model_access_is_explicit_without_generic_named_fallback_surface():
-    model_access_mixin = _read(APP_ROOT / "controller" / "base" / "ModelAccessMixin.js")
-    controller_model_runtime = _read(APP_ROOT / "service" / "framework" / "ControllerModelRuntime.js")
+    app_controller = _read(APP_ROOT / "controller" / "App.controller.js")
 
-    assert "resolveNamedModel" in model_access_mixin
-    assert "case MODELS.STATE:" in model_access_mixin
-    assert "case MODELS.SHELL:" in model_access_mixin
-    assert "case MODELS.DETAIL:" in model_access_mixin
-    assert "case MODELS.MASTER_DATA:" in model_access_mixin
-    assert "case MODELS.VIEW:" in model_access_mixin
-    assert "return null;" in model_access_mixin
-    assert "named:" not in controller_model_runtime
-    assert "read:" not in controller_model_runtime
-    assert "write:" not in controller_model_runtime
-    assert "setMany:" not in controller_model_runtime
+    assert not (APP_ROOT / "controller" / "base" / "ModelAccessMixin.js").exists()
+    assert not (APP_ROOT / "service" / "framework" / "ControllerModelRuntime.js").exists()
+    assert "function resolveControllerModel(oController, sName, bOwnerFallback)" in app_controller
+    assert "resolveControllerView(oController)" in app_controller
+    assert "resolveControllerOwner(oController)" in app_controller
+    assert "_getStateModel: function () { return resolveControllerModel(this, MODELS.STATE, true); }" in app_controller
+    assert "_getShellModel: function () { return resolveControllerModel(this, MODELS.SHELL, true); }" in app_controller
+    assert "_getDefaultModel: function () { return resolveControllerModel(this, undefined, true); }" in app_controller
 
 
 def test_lock_and_persistence_message_keys_are_centralized_in_constants():

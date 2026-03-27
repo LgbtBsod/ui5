@@ -309,7 +309,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         assert 'EntitySet Name="ChecklistCreatePermissionSet"' in metadata
         assert 'EntityType Name="ChecklistPermission"' in metadata
         assert 'EntityType Name="Attachment"' in metadata
-        assert 'm:HasStream="true"' not in metadata
+        assert 'm:HasStream="true"' in metadata
         assert 'Property Name="Value" Type="Edm.Binary"' not in metadata
         assert 'Property Name="CreateOperation" Type="Edm.String"' in metadata
         assert 'Property Name="CanCreate" Type="Edm.Boolean"' in metadata

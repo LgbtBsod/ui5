@@ -14,7 +14,7 @@ sap.ui.define([
 
     function TakeoverLockUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 

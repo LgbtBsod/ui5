@@ -31,7 +31,10 @@
             <unified:FileUploader
                 id="attachmentUploader"
                 buttonOnly="true"
+                multiple="false"
+                sendXHR="true"
                 sameFilenameAllowed="true"
+                uploadOnChange="false"
                 useMultipart="false"
                 buttonText="{i18n>uploadAttachment}"
                 tooltip="{i18n>uploadAttachment}"

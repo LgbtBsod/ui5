@@ -57,7 +57,7 @@ sap.ui.define([
             code: sCode,
             lockOk: bOk,
             lockToken: sToken,
-            expiresAt: (oResult.LockExpires || oResult.lock_expires || oResult.lock_expires_on || oResult.ExpiresOn || oResult.expiresAt) || "",
+            expiresAt: oResult.LockExpires || "",
             killed: bKilled,
             owner: oOwner,
             canTakeover: bCanTakeover,
@@ -138,42 +138,31 @@ sap.ui.define([
     function releaseOnPageLeave(mArgs) {
         var sDbKey = normalizeLockDbKey(mArgs);
         var sToken = normalizeLockToken(mArgs);
-        var oModel;
-        var sServiceUrl;
-        var sCsrfToken;
         var oPayload;
-        if (!sDbKey || !sToken || typeof window === "undefined" || typeof window.fetch !== "function") {
+        var sServiceUrl;
+        var oBlob;
+        if (!sDbKey || !sToken || typeof navigator === "undefined" || typeof navigator.sendBeacon !== "function") {
             return false;
         }
         try {
-            oModel = GatewayClient.getModel();
             sServiceUrl = GatewayClient.serviceUrl();
-            sCsrfToken = String((oModel && oModel.getSecurityToken && oModel.getSecurityToken()) || "").trim();
         } catch (_error) {
             return false;
         }
-        if (!sServiceUrl || !sCsrfToken) {
+        if (!sServiceUrl) {
             return false;
         }
         oPayload = {
             DB_KEY: sDbKey,
-            SessionGuid: sToken,
-            ForceTakeover: false
+            SessionGuid: sToken
         };
         try {
-            window.fetch(String(sServiceUrl).replace(/\/+$/, "") + "/" + GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE, {
-                method: "POST",
-                keepalive: true,
-                credentials: "same-origin",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                    "X-CSRF-Token": sCsrfToken
-                },
-                body: JSON.stringify(oPayload)
-            });
-            return true;
-        } catch (_fetchError) {
+            oBlob = new Blob([JSON.stringify(oPayload)], { type: "application/json" });
+            return navigator.sendBeacon(
+                String(sServiceUrl).replace(/\/+$/, "") + "/" + GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE,
+                oBlob
+            );
+        } catch (_beaconError) {
             return false;
         }
     }

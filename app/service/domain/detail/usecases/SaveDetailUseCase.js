@@ -7,7 +7,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeltaPayloadBuilder",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
@@ -22,7 +21,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentDeltaRuntime, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, NavigationContracts) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentSaveRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, NavigationContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -39,7 +38,7 @@ sap.ui.define([
 
     function SaveDetailUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 
@@ -135,13 +134,12 @@ sap.ui.define([
             ]));
         }
 
-        return DetailAttachmentDeltaRuntime.serializeStagedAttachments(aCurrentAttachments, bCreate ? "" : sDbKey).then(function (aStagedPayload) {
-            var oUnifiedDelta = DetailAttachmentDeltaRuntime.mergeDeltaAttachments(oDelta, aStagedPayload);
+        return Promise.resolve().then(function () {
             var pSave = bCreate
-                ? Promise.resolve(oRepo.createChecklist({ delta: oUnifiedDelta, sessionGuid: sSessionGuid }))
+                ? Promise.resolve(oRepo.createChecklist({ delta: oDelta, sessionGuid: sSessionGuid }))
                 : Promise.resolve(oRepo.saveChecklist(DetailRuntimePayload.saveRequest({
                     dbKey: sDbKey,
-                    delta: oUnifiedDelta,
+                    delta: oDelta,
                     sessionGuid: sSessionGuid,
                     attachments: []
                 })));
@@ -164,6 +162,7 @@ sap.ui.define([
 
                 return Promise.all([
                     DetailAttachmentSaveRuntime.syncAfterSave({
+                        attachmentGateway: mCtx && mCtx.attachmentGateway,
                         repo: oRepo,
                         rootId: sDbKey,
                         createMode: bCreate,
@@ -175,7 +174,7 @@ sap.ui.define([
                         baseSnapshot: oSnapshot,
                         ctx: mCtx,
                         serverRootId: sServerRootId,
-                        hasStagedPayload: aStagedPayload.length > 0
+                        hasStagedPayload: false
                     }),
                     pLockAcquire
                 ]).then(function (aPostSave) {

@@ -12,7 +12,7 @@ sap.ui.define([
 
     function LoadAttachmentsUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 

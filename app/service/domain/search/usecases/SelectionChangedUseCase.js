@@ -8,7 +8,7 @@ sap.ui.define([
 
     function SelectionChangedUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 

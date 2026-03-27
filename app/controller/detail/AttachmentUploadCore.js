@@ -68,6 +68,7 @@ sap.ui.define([
 
     function uploadFiles(oController, aFiles, oUploader) {
         return AttachmentUploadRuntime.uploadFiles(oController, aFiles, {
+            attachmentGateway: oController && typeof oController._attachmentGateway === "function" ? oController._attachmentGateway() : null,
             clearUploader: function () {
                 clearAttachmentUploader(oUploader);
             },

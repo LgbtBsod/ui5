@@ -42,8 +42,8 @@
     "icons": {},
     "deviceTypes": {
       "desktop": true,
-      "tablet": true,
-      "phone": true
+      "tablet": false,
+      "phone": false
     }
   },
   "sap.ui5": {
@@ -89,7 +89,7 @@
         "settings": {
           "useBatch": true,
           "defaultBindingMode": "OneWay",
-          "defaultCountMode": "Inline",
+          "defaultCountMode": "None",
           "refreshAfterChange": false,
           "defaultOperationMode": "Server",
           "deferredGroups": [

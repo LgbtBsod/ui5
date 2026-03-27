@@ -20,14 +20,19 @@ sap.ui.define([
     function normalize(vError) {
         var aRules;
         var oMatch;
+        var sMessage;
+        var sCode;
+        var iStatusCode;
+        var oHeaders;
+        var sCorrelationId;
         if (!vError) {
             return buildNormalizedError({ kind: NormalizedError.KINDS.UNKNOWN });
         }
-        var sMessage = String(vError.message || vError.responseText || "");
-        var sCode = String(vError.code || vError.statusCode || "UNKNOWN");
-        var iStatusCode = Number(vError.statusCode || vError.status || 0) || 0;
-        var oHeaders = vError.responseHeaders || {};
-        var sCorrelationId = String(oHeaders["x-correlation-id"] || oHeaders["x-request-id"] || oHeaders["x-vcap-request-id"] || "").trim();
+        sMessage = String(vError.message || vError.responseText || "");
+        sCode = String(vError.code || vError.statusCode || "UNKNOWN");
+        iStatusCode = Number(vError.statusCode || vError.status || 0) || 0;
+        oHeaders = vError.responseHeaders || {};
+        sCorrelationId = String(oHeaders["x-correlation-id"] || oHeaders["x-request-id"] || oHeaders["x-vcap-request-id"] || "").trim();
 
         aRules = [
             {

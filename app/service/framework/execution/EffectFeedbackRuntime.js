@@ -1,11 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectFeedbackContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectToastRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectToastRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectBannerRouter",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectDialogFeedbackRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/EffectDialogFeedbackRuntime",
     "sap/ui/core/routing/HashChanger",
     "sap/ui/core/Component",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"

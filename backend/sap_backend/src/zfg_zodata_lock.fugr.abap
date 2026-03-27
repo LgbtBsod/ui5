@@ -31,7 +31,7 @@ FUNCTION zodata_lock_control.
   ENDIF.
 
   CASE iv_mode.
-    WHEN 'A'. " acquire
+    WHEN 'A'. " acquire: persist owner/session/expiry and make lock visible across requests
       IF iv_force_takeover = abap_true.
         UPDATE ztodata_hdr
            SET lock_owner      = ''
@@ -78,7 +78,7 @@ FUNCTION zodata_lock_control.
       ENDIF.
       COMMIT WORK AND WAIT.
 
-    WHEN 'R'. " release
+    WHEN 'R'. " release: clear persisted owner/session/expiry once for the owning session
       IF iv_session_guid IS INITIAL.
         RAISE update_error.
       ENDIF.
@@ -113,7 +113,7 @@ FUNCTION zodata_lock_control.
       ENDIF.
       COMMIT WORK AND WAIT.
 
-    WHEN 'H' OR 'T'. " heartbeat / technical touch
+    WHEN 'H' OR 'T'. " heartbeat / technical touch: refresh persisted timestamps for active ownership
       IF iv_mode = 'H' AND iv_session_guid IS INITIAL.
         RAISE update_error.
       ENDIF.
@@ -132,7 +132,7 @@ FUNCTION zodata_lock_control.
       ENDIF.
       COMMIT WORK AND WAIT.
 
-    WHEN 'S' OR 'V'. " status / validate
+    WHEN 'S' OR 'V'. " status / validate: read-only lock truth without mutating persistence
       " Canonical runtime truth must be checked against:
       " 1. lock row exists
       " 2. physical last_touch_at/lock_expires_at represent the last_refresh_at truth

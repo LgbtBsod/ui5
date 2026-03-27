@@ -23,7 +23,7 @@ sap.ui.define([
 
     function ForceReadOnlyUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 

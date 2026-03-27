@@ -1,4 +1,4 @@
-sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackPolicy"], function (FeedbackPolicy) {
+sap.ui.define(["PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackPolicy"], function (FeedbackPolicy) {
     "use strict";
 
     function normalizeEffects(aEffects) {

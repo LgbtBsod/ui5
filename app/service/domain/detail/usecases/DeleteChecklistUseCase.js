@@ -32,7 +32,7 @@ sap.ui.define([
 
     function DeleteChecklistUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 

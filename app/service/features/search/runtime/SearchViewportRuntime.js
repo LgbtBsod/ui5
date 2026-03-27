@@ -217,12 +217,9 @@ sap.ui.define([
     function syncSearchViewportLayout(oController, bForce) {
         var oScrollHost = resolveSearchScrollHost(oController);
         var sLayoutKey = buildSearchViewportLayoutKey(oController, oScrollHost);
-        var oInnerTable;
         if (!bForce && sLayoutKey && oController._sSearchTableLayoutKey === sLayoutKey) {
             return false;
         }
-        oInnerTable = SearchSelectionRuntime.resolveSearchInnerTable(oController);
-        SearchSelectionRuntime.configureSearchResultTable(oController, oInnerTable, false);
         syncSearchStickyOffsets(oController, oScrollHost);
         oController._sSearchTableLayoutKey = sLayoutKey;
         return true;

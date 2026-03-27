@@ -22,7 +22,7 @@ sap.ui.define([
 
     function CloseDetailUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 
@@ -91,7 +91,7 @@ function execute(mInput, mCtx) {
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.SAVE_IN_FLIGHT, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, false),
-                Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_STATE, DetailContracts.STATES.IDLE),
+                Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_STATE, WorkflowContracts.PERSISTENCE_STATES.IDLE),
                 Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_NEXT_HEARTBEAT_AT, null),
                 Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_HAS_VALID_LOCK, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE_LOCK_OWNER_SESSION_MATCHES, false),

@@ -6,7 +6,7 @@ const runtimeGate = require('./lib/runtimeGateRuntime');
 
 const ROOT = process.cwd();
 const RUNTIME_DIRS = ['Component.js', 'controller', 'manager', 'service', 'infra', 'util', 'model'];
-const GATEWAY_BOOTSTRAP_ALLOWLIST = ['Component.js', 'service/framework/ComponentMainServiceRuntime.js'];
+const GATEWAY_BOOTSTRAP_ALLOWLIST = ['Component.js', 'service/framework/ComponentBootstrap.js'];
 
 function detectGatewayTransportImports(files, violations) {
   files.forEach((file) => {
@@ -93,22 +93,20 @@ function detectManifestContract(violations) {
 function detectComponentGatewayBootstrap(violations) {
   const source = [
     qa.readText(ROOT, 'Component.js'),
-    qa.readText(ROOT, 'service/framework/ComponentMainServiceRuntime.js'),
-    qa.readText(ROOT, 'service/framework/ComponentInitRuntime.js'),
-    qa.readText(ROOT, 'service/framework/ComponentRuntimeSettingsRuntime.js'),
-    qa.readText(ROOT, 'service/framework/ComponentBootStateRuntime.js')
+    qa.readText(ROOT, 'service/framework/ComponentBootstrap.js'),
+    qa.readText(ROOT, 'service/runtime/component/ComponentRuntimeSettingsRuntime.js')
   ].join('\n');
-  if (!/new\s+ODataModel\s*\(\s*sMainServiceUri\s*,\s*\{[\s\S]*useBatch:\s*true[\s\S]*tokenHandling:\s*true/.test(source)) {
-    runtimeGate.pushPipeViolation(violations, 'service/framework/ComponentMainServiceRuntime.js', null, 'Component bootstrap must construct ODataModel with useBatch=true and tokenHandling=true');
+  if (!/getModel\("mainService"\)/.test(source) || !/GatewayClient\.setModel\s*\(\s*oMainServiceModel\s*,\s*\{[\s\S]*serviceUrl:/.test(source)) {
+    runtimeGate.pushPipeViolation(violations, 'service/framework/ComponentBootstrap.js', null, 'Component bootstrap must bind the manifest-owned mainService ODataModel to GatewayClient');
   }
-  if (!/SettingsManager\.(?:load|reload)\s*\(\s*GatewayBackendService\s*\)/.test(source)) {
-    runtimeGate.pushPipeViolation(violations, 'service/framework/ComponentRuntimeSettingsRuntime.js', null, 'Component bootstrap must load RuntimeSettingsSet via GatewayBackendService');
+  if (!/SettingsManager\.(?:load|reload)\s*\(\s*(?:GatewayBackendService|GatewayClient)\s*\)/.test(source)) {
+    runtimeGate.pushPipeViolation(violations, 'service/runtime/component/ComponentRuntimeSettingsRuntime.js', null, 'Component bootstrap must load RuntimeSettingsSet via GatewayBackendService');
   }
   if (!/frontendConfigSource["']?\s*,\s*["']gateway_runtime["']/.test(source)) {
-    runtimeGate.pushPipeViolation(violations, 'service/framework/ComponentRuntimeSettingsRuntime.js', null, 'Component must mark runtime config source as gateway_runtime on success');
+    runtimeGate.pushPipeViolation(violations, 'service/runtime/component/ComponentRuntimeSettingsRuntime.js', null, 'Component must mark runtime config source as gateway_runtime on success');
   }
   if (!/frontendConfigSource["']?\s*,\s*["']gateway_runtime_error["']/.test(source)) {
-    runtimeGate.pushPipeViolation(violations, 'service/framework/ComponentRuntimeSettingsRuntime.js', null, 'Component must mark runtime config failures as gateway_runtime_error');
+    runtimeGate.pushPipeViolation(violations, 'service/runtime/component/ComponentRuntimeSettingsRuntime.js', null, 'Component must mark runtime config failures as gateway_runtime_error');
   }
 }
 

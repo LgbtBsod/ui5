@@ -179,3 +179,51 @@
 .chkApp .detailAttachmentToolbarAction {
   margin-inline-end: 0;
 }
+
+/* Search split layout still needs SmartFilterBar renderer compatibility on UI5 1.71. */
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
+.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchSurface .sapUiCompFilterBarToolbar,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchSurface .sapUiCompFilterBarToolbar {
+  gap: 0.32rem;
+}
+
+.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn,
+.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchSurface .sapUiCompFilterBarToolbar .sapMBtn,
+.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchSurface .sapUiCompFilterBarToolbar .sapMBtn {
+  margin: 0;
+}
+
+/* Search and detail switch wrappers keep layout parity while supported switch APIs remain limited on UI5 1.71. */
+.chkApp .searchResultsActionRail .searchToolbarToggleSwitch.sapMSwtCont,
+.chkApp .searchSettingsRail .searchToolbarToggleSwitch.sapMSwtCont,
+.chkApp .lockStatusEditSwitch.sapMSwtCont {
+  min-height: var(--theme-workbench-control-height);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Detail table host still needs renderer containers for full-width table layout in UI5 1.71. */
+.chkApp .detailSectionTableHost .sapUiTable,
+.chkApp .detailSectionTableHost .sapMTable {
+  width: 100%;
+}
+
+.chkApp .detailSectionTableHost .sapUiTableCnt,
+.chkApp .detailSectionTableHost .sapUiTableCtrlScr,
+.chkApp .detailSectionTableHost .sapUiTableCCnt {
+  max-width: 100%;
+}
+
+.chkApp .flatEditorTable .sapMSwt,
+.chkApp .detailGridTable .sapMSwt {
+  min-width: 2.5rem;
+}
+
+/* ObjectPage host still paints a renderer-owned background in UI5 1.71. */
+.chkApp .sapUxAPObjectPageContainer,
+.chkApp .sapUxAPObjectPageContainer + div,
+.chkApp .sapUxAPObjectPageHeaderDetailsHidden {
+  background-color: transparent;
+}

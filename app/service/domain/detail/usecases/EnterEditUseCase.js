@@ -8,12 +8,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry, WorkflowContracts, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, ModelStateRuntime, CreateSentinel, WorkflowTelemetry, TimerDefaults, WorkflowContracts, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -28,7 +29,7 @@ sap.ui.define([
 
     function EnterEditUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 
@@ -49,6 +50,11 @@ sap.ui.define([
         var bConfirmed = !!(mInput && mInput.confirmedIntegration);
         var bIntegration = !!(oUiState && typeof oUiState.get === "function" && oUiState.get(ModelContracts.MODELS.DETAIL, DETAIL_MODEL_PATHS.ROOT_INTEGRATION_FLAG));
         return bIntegration && !bConfirmed;
+    }
+
+    function resolveCacheTolerance(mCtx) {
+        return (mCtx && mCtx.runtimeSettings && mCtx.runtimeSettings.cacheToleranceMs)
+            || TimerDefaults.cacheToleranceMs.defaultValue;
     }
 
     function execute(mInput, mCtx) {
@@ -128,7 +134,7 @@ sap.ui.define([
                         permission: oPermission
                     };
                 }
-                return Promise.resolve(oCacheValidation.execute({ rootId: sDbKey, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; }).then(function (oValidation) {
+                return Promise.resolve(oCacheValidation.execute({ rootId: sDbKey, toleranceMs: resolveCacheTolerance(mCtx) }, mCtx || {})).catch(function () { return null; }).then(function (oValidation) {
                     var oValidationData = (oValidation && oValidation.ok && oValidation.data) ? oValidation.data : null;
                     if (oValidationData && oValidationData.invalidated) {
                         return Result.fail({ messageKey: DETAIL_VIEW_KEYS.PERSISTENCE_CONFLICT, code: "CACHE_INVALIDATED" }, DetailAuthorizationRuntime.contentAccessEffects(oPermission).concat(readOnlyEffects()));

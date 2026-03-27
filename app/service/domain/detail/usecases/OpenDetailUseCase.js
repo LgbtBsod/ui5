@@ -15,8 +15,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults"
+], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts, TimerDefaults) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -40,6 +41,11 @@ sap.ui.define([
         return CloneUtil.clone(oSnapshot || {}, {});
     }
 
+    function resolveCacheTolerance(mCtx) {
+        return (mCtx && mCtx.runtimeSettings && mCtx.runtimeSettings.cacheToleranceMs)
+            || TimerDefaults.cacheToleranceMs.defaultValue;
+    }
+
     function resolveCanonicalRootId(oRepo, sRootId) {
         if (!oRepo || typeof oRepo.resolveRootId !== "function" || !sRootId || CreateSentinel.isCreateId(sRootId)) {
             return Promise.resolve(sRootId);
@@ -60,7 +66,7 @@ sap.ui.define([
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
             Effects.modelPatch(STATE_MODEL, StatePaths.PERSISTENCE, {
-                state: DetailContracts.STATES.IDLE,
+                state: WorkflowContracts.PERSISTENCE_STATES.IDLE,
                 messageKey: DETAIL_VIEW_KEYS.PERSISTENCE_IDLE,
                 lastSavedAt: null,
                 lastSaveError: null,
@@ -139,7 +145,7 @@ sap.ui.define([
 
     function OpenDetailUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 
@@ -241,7 +247,7 @@ sap.ui.define([
                 ]).concat(DetailAuthorizationRuntime.openDeniedEffects(oPermission)));
             }
             pValidation = (oCacheValidation && typeof oCacheValidation.execute === "function")
-                ? Promise.resolve(oCacheValidation.execute({ rootId: sCanonicalRootId, toleranceMs: 5500 }, mCtx || {})).catch(function () { return null; })
+                ? Promise.resolve(oCacheValidation.execute({ rootId: sCanonicalRootId, toleranceMs: resolveCacheTolerance(mCtx) }, mCtx || {})).catch(function () { return null; })
                 : Promise.resolve(null);
             return pValidation.then(function (oValidation) {
                 var oValidationData = (oValidation && oValidation.ok && oValidation.data) ? oValidation.data : null;

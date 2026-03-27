@@ -6,7 +6,7 @@ sap.ui.define([
     return Object.freeze({
         CLASSES: Object.freeze({
             DIALOG: "appDialogSurface",
-            FEEDBACK_MESSAGE_BOX: "appFeedbackMessageBox",
+            FEEDBACK_DIALOG_BOX: "appFeedbackDialogBox",
             TOAST: "glassToast",
             TOAST_LEVEL_PREFIX: "glassToast--"
         }),

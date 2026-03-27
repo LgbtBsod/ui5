@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts"
-], function (DeltaContracts, ODataEntityContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistPayloadMapper"
+], function (DeltaContracts, ODataEntityContracts, ODataChecklistPayloadMapper) {
   "use strict";
 
   var IDENTITY = ODataEntityContracts.IDENTITY;
@@ -35,7 +36,7 @@ sap.ui.define([
     assignIfPresent(oRoot, "checklist_id", pickValue(oRootChanges, ["Id", "RequestId", "id", "request_id", "checklist_id"]));
     assignIfPresent(oRoot, "lpc", pickValue(oRootChanges, ["Lpc", "lpc"]));
     if (!Object.prototype.hasOwnProperty.call(oRoot, "lpc")) {
-      assignIfPresent(oRoot, "lpc", pickValue(oBasicChanges, ["LPC_KEY"]));
+      assignIfPresent(oRoot, "lpc", ODataChecklistPayloadMapper.pickBasicFieldValue(oBasicChanges, "Lpc"));
     }
     assignIfPresent(oRoot, "date", pickValue(oBasicChanges, ["date", "DateCheck"]));
     assignIfPresent(oRoot, "time_check", pickValue(oBasicChanges, ["time", "TimeCheck"]));
@@ -52,7 +53,7 @@ sap.ui.define([
     assignIfPresent(oRoot, "observer_orgunit", pickValue(oBasicChanges, ["OBSERVER_ORGUNIT", "ObserverOrgUnit"]));
     assignIfPresent(oRoot, "observed_fullname", pickValue(oBasicChanges, ["OBSERVED_FULLNAME", "ObservedFullname"]));
     assignIfPresent(oRoot, "observed_perner", pickValue(oBasicChanges, ["OBSERVED_PERNER", "ObservedPernr"]));
-    assignIfPresent(oRoot, "observed_position", pickValue(oBasicChanges, ["PROF_KEY", "OBSERVED_POSITION", "ObservedPosition"]));
+    assignIfPresent(oRoot, "observed_position", pickValue(oBasicChanges, ["OBSERVED_POSITION", "ObservedPosition"]));
     assignIfPresent(oRoot, "observed_orgunit", pickValue(oBasicChanges, ["OBSERVED_ORGUNIT", "ObservedOrgUnit"]));
 
     return oRoot;

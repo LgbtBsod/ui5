@@ -368,20 +368,6 @@ body.chkAppRoot.appDark .chkApp .searchWorkbenchSurface .resultSegmentControl .s
   font-size: 0.7rem;
 }
 
-.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompFilterBarToolbar,
-.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchSurface .sapUiCompFilterBarToolbar,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchSurface .sapUiCompFilterBarToolbar {
-  gap: 0.32rem;
-}
-
-.chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .sapUiCompFilterBarToolbar .sapMBtn,
-.chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchSurface .sapUiCompFilterBarToolbar .sapMBtn,
-.chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchWorkbenchSurface .sapUiCompFilterBarToolbar .sapMBtn {
-  margin: 0;
-}
-
 .chkApp .appLayoutSplit #searchPaneHost .searchFilterExperienceShell .searchCustomFilterWrapper,
 .chkApp .appLayoutSplit [id$="-searchPaneHost"] .searchFilterExperienceShell .searchCustomFilterWrapper,
 .chkApp .appLayoutSplit #searchPaneHost .searchWorkbenchSurface .searchCustomFilterWrapper,
@@ -504,7 +490,7 @@ body.chkAppRoot.appDark .chkApp .searchWorkbenchSurface .resultSegmentControl .s
 .chkApp .searchResultsActionRail .searchGroupButton .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchExportMenuBtn .sapMBtnInner,
 .chkApp .searchResultsActionRail .searchToolbarNumberInput .sapMInputBaseContentWrapper,
-.chkApp .searchResultsActionRail .searchToolbarToggleSwitch .sapMSwtCont,
+.chkApp .searchResultsActionRail .searchToolbarToggleSwitch,
 .chkApp .searchResultsActionRail .searchToolbarStatusChip {
   min-height: var(--theme-workbench-control-height);
 }
@@ -580,12 +566,12 @@ body.chkAppRoot.appDark .chkApp .searchWorkbenchSurface .resultSegmentControl .s
   height: var(--theme-workbench-control-height);
 }
 
-.chkApp .searchResultsActionRail .searchToolbarToggleSwitch .sapMSwtCont {
+.chkApp .searchResultsActionRail .searchToolbarToggleSwitch {
   display: inline-flex;
   align-items: center;
 }
 
-.chkApp .searchSettingsRail .searchToolbarToggleSwitch .sapMSwtCont {
+.chkApp .searchSettingsRail .searchToolbarToggleSwitch {
   display: inline-flex;
   align-items: center;
 }

@@ -61,10 +61,12 @@ sap.ui.define([
             time: String(o.TimeCheck || o.time || "").slice(0, 5),
             timezone: o.TimeZone || o.timezone || BrowserLocaleUtils.resolveTimezone(),
             equipment: o.EquipName || o.equipment || "",
+            OBSERVER_NAME: o.ObserverName || o.OBSERVER_NAME || "",
             OBSERVER_FULLNAME: o.ObserverFullname || o.OBSERVER_FULLNAME || "",
             OBSERVER_PERNER: o.ObserverPernr || o.OBSERVER_PERNER || "",
             OBSERVER_POSITION: o.ObserverPosition || o.OBSERVER_POSITION || "",
             OBSERVER_ORGUNIT: o.ObserverOrgUnit || o.OBSERVER_ORGUNIT || "",
+            OBSERVED_NAME: o.ObservedName || o.OBSERVED_NAME || "",
             OBSERVED_FULLNAME: o.ObservedFullname || o.OBSERVED_FULLNAME || "",
             OBSERVED_PERNER: o.ObservedPernr || o.OBSERVED_PERNER || "",
             OBSERVED_POSITION: o.ObservedPosition || o.OBSERVED_POSITION || "",
@@ -101,6 +103,9 @@ sap.ui.define([
         }
         if (!oRootRow.status) {
             oRootRow.status = String(oRootRow.Status || "").trim();
+        }
+        if (!Object.prototype.hasOwnProperty.call(oRootRow, "integrationFlag")) {
+            oRootRow.integrationFlag = !!(oRootRow.IntegrationFlag || oRootRow.integrationFlag);
         }
         if (!oRootRow.checklist_id) {
             oRootRow.checklist_id = String(oRootRow.RequestId || oRootRow.Id || "").trim();

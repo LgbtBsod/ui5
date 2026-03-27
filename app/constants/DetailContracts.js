@@ -23,8 +23,8 @@ sap.ui.define([], function () {
         CARD_REQUIRED_KEYS: Object.freeze({
             datetime: Object.freeze(["basic.date", "basic.time", "basic.timezone"]),
             equipment: Object.freeze(["basic.equipment"]),
-            observer: Object.freeze(["basic.OBSERVER_FULLNAME"]),
-            observed: Object.freeze(["basic.OBSERVED_FULLNAME"]),
+            observer: Object.freeze(["basic.OBSERVER_FULLNAME", "basic.OBSERVER_NAME"]),
+            observed: Object.freeze(["basic.OBSERVED_FULLNAME", "basic.OBSERVED_NAME"]),
             location: Object.freeze(["basic.LOCATION_KEY"]),
             lpc: Object.freeze(["basic.LPC_KEY"]),
             profession: Object.freeze(["basic.PROF_KEY"])
@@ -46,18 +46,6 @@ sap.ui.define([], function () {
             SIZE_REJECTED_TOAST_KEY: "attachmentSizeRejected",
             UPLOAD_BUSY_PATH: "/attachmentBusy",
             UPLOAD_DISABLED_TOAST_KEY: "attachmentUploadDisabled"
-        }),
-        STATES: Object.freeze({
-            AUTOSAVING: "autosaving",
-            CONFLICT: "conflict",
-            DIRTY: "dirty",
-            ERROR: "error",
-            IDLE: "idle",
-            IDLE_TIMEOUT_GRACE: "idleTimeoutGrace",
-            LOCK_LOST: "lockLost",
-            READ_ONLY: "readOnly",
-            SAVED: "saved",
-            SAVING: "saving"
         }),
         ACCESS_OPERATIONS: Object.freeze({
             CREATE: "01",

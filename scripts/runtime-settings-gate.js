@@ -96,14 +96,14 @@ function detectLiteralIntervals(files, violations) {
 
 function detectRuntimeSettingsLoad(violations) {
   const settingsSource = readText(ROOT, 'service/runtime/SettingsManager.js');
-  if (!/readEntity\(\s*["']RuntimeSettingsSet["']\s*,\s*["']Key='GLOBAL'["']/.test(settingsSource)) {
+  if (!/readEntity\(\s*(?:["']RuntimeSettingsSet["']|GatewayContractConstants\.ENTITY_SETS\.RUNTIME_SETTINGS)\s*,\s*(?:["']Key='GLOBAL'["']|RUNTIME_SETTINGS_KEY)/.test(settingsSource)) {
     pushPipeViolation(violations, 'service/runtime/SettingsManager.js', null, "RuntimeSettingsSet('GLOBAL') load not detected");
   }
 
   const componentSource = [
     readText(ROOT, 'Component.js'),
-    readText(ROOT, 'service/framework/ComponentInitRuntime.js'),
-    readText(ROOT, 'service/framework/ComponentRuntimeSettingsRuntime.js')
+    readText(ROOT, 'service/framework/ComponentBootstrap.js'),
+    readText(ROOT, 'service/runtime/component/ComponentRuntimeSettingsRuntime.js')
   ].join('\n');
   if (!/SettingsManager\.load\(/.test(componentSource)) {
     pushPipeViolation(violations, 'Component.js', null, 'Component startup does not call SettingsManager.load(...)');

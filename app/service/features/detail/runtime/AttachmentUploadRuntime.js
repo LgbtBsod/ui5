@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (AttachmentUploadPolicy, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
+], function (AttachmentUploadPolicy, StatePaths, LayoutStateRuntime, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, ModelContracts, DetailRuntimeContracts, CreateSentinel) {
     "use strict";
 
     var ATTACHMENT_CONSTANTS = DetailRuntimeContracts.ATTACHMENTS;
@@ -56,7 +57,7 @@ sap.ui.define([
             sDbKey = oController._currentRootId();
         }
         var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ), WorkflowContracts.EDIT_MODES.READ);
-        return !!sDbKey && sMode !== WorkflowContracts.EDIT_MODES.READ;
+        return !!sDbKey && !CreateSentinel.isCreateId(sDbKey) && sMode !== WorkflowContracts.EDIT_MODES.READ;
     }
 
     function validateAttachmentFile(oController, oFile) {
@@ -99,6 +100,30 @@ sap.ui.define([
         return oController._dispatchDetailCommand(sMethod, mInput || {});
     }
 
+    function uploadPersistedFiles(oController, sDbKey, aFiles, mHooks) {
+        var oAttachmentGateway = mHooks.attachmentGateway;
+        var oFile = aFiles[0];
+        var oValidation;
+        var oSpec;
+
+        if (!oFile || !oAttachmentGateway || typeof oAttachmentGateway.uploadPendingAttachments !== "function") {
+            return Promise.resolve();
+        }
+        oValidation = validateAttachmentFile(oController, oFile);
+        if (!oValidation.ok) {
+            mHooks.showToast(oValidation.toastKey);
+            return Promise.resolve();
+        }
+        oSpec = Object.assign({ file: oFile, parentKey: sDbKey }, buildAttachmentMeta(oController, oFile, oValidation.mimeType));
+        return oAttachmentGateway.uploadPendingAttachments({
+            rootId: sDbKey,
+            attachments: [oSpec]
+        }).then(function () {
+            mHooks.showToast("attachmentUploaded");
+            return runDetailCommand(oController, "attachmentLoad", { dbKey: sDbKey });
+        });
+    }
+
     function uploadFiles(oController, aFiles, mHooks) {
         var sDbKey = oController._currentChecklistDbKey && oController._currentChecklistDbKey();
         if (!sDbKey && oController._currentRootId) {
@@ -118,20 +143,22 @@ sap.ui.define([
         }
 
         ControllerViewStateRuntime.setFlag(oController, ATTACHMENT_CONSTANTS.UPLOAD_BUSY_PATH, true);
-        oSequence = aUploadFiles.reduce(function (oPromise, oFile) {
-            return oPromise.then(function () {
-                var oValidation = validateAttachmentFile(oController, oFile);
-                if (!oValidation.ok) {
-                    mHooks.showToast(oValidation.toastKey);
-                    return Promise.resolve();
-                }
-                return runDetailCommand(oController, "attachmentUpload", {
-                    dbKey: sDbKey,
-                    file: oFile,
-                    fileMeta: buildAttachmentMeta(oController, oFile, oValidation.mimeType)
+        oSequence = CreateSentinel.isCreateId(sDbKey)
+            ? aUploadFiles.reduce(function (oPromise, oFile) {
+                return oPromise.then(function () {
+                    var oValidation = validateAttachmentFile(oController, oFile);
+                    if (!oValidation.ok) {
+                        mHooks.showToast(oValidation.toastKey);
+                        return Promise.resolve();
+                    }
+                    return runDetailCommand(oController, "attachmentUpload", {
+                        dbKey: sDbKey,
+                        file: oFile,
+                        fileMeta: buildAttachmentMeta(oController, oFile, oValidation.mimeType)
+                    });
                 });
-            });
-        }, Promise.resolve());
+            }, Promise.resolve())
+            : uploadPersistedFiles(oController, sDbKey, aUploadFiles, mHooks);
 
         return Promise.resolve(oSequence).finally(function () {
             mHooks.clearUploader();

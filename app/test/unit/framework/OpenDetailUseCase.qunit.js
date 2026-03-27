@@ -233,6 +233,53 @@ sap.ui.define([
         });
     });
 
+    QUnit.test("opening detail uses runtime cache tolerance when provided", function (assert) {
+        var done = assert.async();
+        var oUseCase = OpenDetailUseCase();
+        var aValidationCalls = [];
+
+        oUseCase.execute({
+            rootId: "ROOT-CACHE-2"
+        }, {
+            repo: {
+                checkChecklistPermission: function () {
+                    return Promise.resolve({
+                        rootId: "ROOT-CACHE-2",
+                        canView: true,
+                        canEdit: true,
+                        canDelete: true,
+                        reasonCode: "AUTHORIZED"
+                    });
+                },
+                loadDetailSnapshot: function () {
+                    return Promise.resolve({
+                        root: { id: "ROOT-CACHE-2", checklistId: "CHK-CACHE-2" },
+                        basic: {}
+                    });
+                }
+            },
+            runtimeSettings: {
+                cacheToleranceMs: 9100
+            },
+            cacheValidation: {
+                execute: function (mInput) {
+                    aValidationCalls.push(mInput);
+                    return Promise.resolve({ ok: true, data: { valid: false } });
+                }
+            },
+            uiState: {
+                get: function () {
+                    return null;
+                }
+            }
+        }).then(function (oResult) {
+            assert.ok(oResult && oResult.ok, "open detail succeeds");
+            assert.strictEqual(aValidationCalls.length, 1, "cache validation runs once");
+            assert.strictEqual(aValidationCalls[0].toleranceMs, 9100, "runtime cache tolerance is forwarded");
+            done();
+        });
+    });
+
     QUnit.test("opening detail defers checks and barriers on initial read open", function (assert) {
         var done = assert.async();
         var oUseCase = OpenDetailUseCase();

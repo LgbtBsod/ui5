@@ -63,7 +63,9 @@ sap.ui.define([
         var pRoot = GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sRootId, {
             name: "DB_KEY",
             type: ODataEntityContracts.TYPES.DB_KEY
-        }));
+        }), {
+            "$select": ODataEntityContracts.SELECTS.CHECKLIST_ROOT
+        });
         // ChecklistBasicInfoSet is a separate CDS-backed read model.
         // Keep it independent from ChecklistRootSet and read it via its own entity set.
         var pBasic = GatewayClient.rawRead("/" + oBasicFilter.entitySet, {

@@ -114,6 +114,17 @@ sap.ui.define([
         oViewModel.setProperty("/hasPersistedObject", !!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId));
     }
 
+    function syncComputedSectionFlags(oController) {
+        var oViewModel = getModel(oController, MODELS.VIEW);
+        var oDetailModel = getModel(oController, MODELS.DETAIL);
+        var sLpcKey;
+        if (!oViewModel || !oDetailModel || !oDetailModel.getProperty) {
+            return;
+        }
+        sLpcKey = String(oDetailModel.getProperty("/current/basic/LPC_KEY") || "").trim();
+        oViewModel.setProperty("/barriersVisible", !!sLpcKey);
+    }
+
     function bindStateValidationModel(oController) {
         oController._oStateValidationModel = getModel(oController, MODELS.STATE);
         if (!oController._oStateValidationModel || !oController._oStateValidationModel.attachPropertyChange) {
@@ -126,6 +137,7 @@ sap.ui.define([
                 oController._recomputeValidationSummary("requiredFieldsChanged", false);
                 DetailAttachmentViewState.sync(oController);
                 syncComputedEditFlags(oController);
+                syncComputedSectionFlags(oController);
                 return;
             }
             if (sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
@@ -140,9 +152,11 @@ sap.ui.define([
                 ControllerViewStateRuntime.set(oController, "/deleteChecklistConfirmArmed", false);
             }
             syncComputedEditFlags(oController);
+            syncComputedSectionFlags(oController);
         };
         oController._oStateValidationModel.attachPropertyChange(oController._fnStateValidationChange, oController);
         syncComputedEditFlags(oController);
+        syncComputedSectionFlags(oController);
     }
 
     return {
@@ -173,6 +187,7 @@ sap.ui.define([
                 this._oDetailModel.attachPropertyChange(this._onDetailModelChanged, this);
             }
             bindStateValidationModel(this);
+            syncComputedSectionFlags(this);
         },
 
         onAfterRendering: function () {

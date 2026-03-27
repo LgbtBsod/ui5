@@ -287,6 +287,13 @@ sap.ui.define([
             },
             _onDetailModelChanged: function (oEvent) {
                 DetailAttachmentViewState.sync(this);
+                if (this.getModel && this.getModel("view")) {
+                    ControllerViewStateRuntime.set(this, "/barriersVisible", this.isBarriersVisibleByLpc(
+                        this.getModel("detail") && this.getModel("detail").getProperty
+                            ? this.getModel("detail").getProperty("/current/basic/LPC_KEY")
+                            : ""
+                    ));
+                }
                 DetailValidationSummaryRuntime.onDetailModelChanged(this, oEvent, STATE_PATHS);
             }
         },

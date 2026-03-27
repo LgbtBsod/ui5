@@ -16,7 +16,7 @@ sap.ui.define([
 
     function buildMessageBoxOptions(mOptions) {
         return Object.assign({
-            styleClass: [CLASSES.DIALOG, CLASSES.FEEDBACK_MESSAGE_BOX].join(" "),
+            styleClass: [CLASSES.DIALOG, CLASSES.FEEDBACK_DIALOG_BOX].join(" "),
             contentWidth: "36rem"
         }, mOptions || {});
     }

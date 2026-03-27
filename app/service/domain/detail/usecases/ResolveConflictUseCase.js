@@ -10,7 +10,7 @@ sap.ui.define([
 
     function ResolveConflictUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 

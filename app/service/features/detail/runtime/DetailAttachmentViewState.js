@@ -5,8 +5,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (ModelContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, ModelPathContracts, WorkflowContracts, DetailUseCaseConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
+], function (ModelContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, ModelPathContracts, WorkflowContracts, DetailUseCaseConstants, CreateSentinel) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -29,19 +30,9 @@ sap.ui.define([
         ).trim();
     }
 
-    function hasActiveRoot(oController) {
-        var oDetailModel = getModel(oController, MODELS.DETAIL);
-        var sDetailRootId = String(ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ROOT_ID, "") || "").trim();
+    function hasPersistedUploadRoot(oController) {
         var sCanonicalRootId = resolveActiveDbKey(oController);
-        var aSessionAttachments = ControllerViewStateRuntime.get(oController, "/sessionAttachments", []);
-        var aPersistedAttachments = ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ATTACHMENTS, []);
-
-        return !!(
-            sDetailRootId
-            || sCanonicalRootId
-            || (Array.isArray(aSessionAttachments) && aSessionAttachments.length)
-            || (Array.isArray(aPersistedAttachments) && aPersistedAttachments.length)
-        );
+        return !!sCanonicalRootId && !CreateSentinel.isCreateId(sCanonicalRootId);
     }
 
     function sync(oController) {
@@ -49,13 +40,13 @@ sap.ui.define([
             ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, "")
         );
         var bEditable = sEditMode !== WorkflowContracts.EDIT_MODES.READ;
-        var bHasRoot = hasActiveRoot(oController);
+        var bHasPersistedUploadRoot = hasPersistedUploadRoot(oController);
         var bExpanded = !!ControllerViewStateRuntime.get(oController, "/attachmentsExpanded", false);
         var bNarrow = !!ControllerViewStateRuntime.get(oController, "/narrowDetailViewport", false);
 
         ControllerViewStateRuntime.setMany(oController, {
-            "/attachmentActionsEnabled": bEditable && bHasRoot,
-            "/attachmentMetaEditable": bEditable && bHasRoot,
+            "/attachmentActionsEnabled": bEditable && bHasPersistedUploadRoot,
+            "/attachmentMetaEditable": bEditable && bHasPersistedUploadRoot,
             "/showSessionAttachments": !bExpanded,
             "/attachmentTableClass": !bExpanded
                 ? "flatEditorTable detailAttachmentTable detailAttachmentTableSession"

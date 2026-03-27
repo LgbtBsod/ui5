@@ -106,6 +106,7 @@ sap.ui.define([
             personSuggestHint: "",
             locationVhHint: "",
             narrowDetailViewport: false,
+            barriersVisible: false,
             deleteChecklistConfirmArmed: false,
             detailSections: {
                 checks: createSectionState(oCheckConfig),

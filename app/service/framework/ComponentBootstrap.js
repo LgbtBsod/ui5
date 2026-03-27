@@ -18,7 +18,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeTimerSanitizer",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimeConfigService",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/EffectApplier",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackPolicy",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/FeedbackPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentAutosaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentLockReleaseRuntime",

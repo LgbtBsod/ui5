@@ -59,6 +59,30 @@ CLASS zcl_zodata_save_service DEFINITION
         iv_invalid_text TYPE string
       RAISING
         zcx_zodata_error.
+    METHODS refresh_session_lock
+      IMPORTING
+        is_request TYPE zstr_pcct_savechanges_rq
+      RETURNING
+        VALUE(rs_lock_hb) TYPE zstr_pcct_lock_heartbeat_rs
+      RAISING
+        zcx_zodata_error.
+    METHODS finalize_save_transaction
+      IMPORTING
+        iv_is_autosave TYPE abap_bool
+      RAISING
+        zcx_zodata_error.
+    METHODS resolve_lock_expires
+      IMPORTING
+        is_lock_hb      TYPE zstr_pcct_lock_heartbeat_rs
+        iv_lock_expires TYPE timestampl
+      RETURNING
+        VALUE(rv_lock_expires) TYPE timestampl.
+    METHODS resolve_server_now
+      IMPORTING
+        is_lock_hb   TYPE zstr_pcct_lock_heartbeat_rs
+        iv_server_now TYPE timestampl
+      RETURNING
+        VALUE(rv_server_now) TYPE timestampl.
 ENDCLASS.
 
 CLASS zcl_zodata_save_service IMPLEMENTATION.
@@ -131,6 +155,60 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
     ENDLOOP.
   ENDMETHOD.
 
+  METHOD refresh_session_lock.
+    TRY.
+        mo_lock_manager->heartbeat(
+          EXPORTING
+            is_key          = VALUE zif_zodata_lock_manager=>ty_key(
+                                bo_key    = zif_i_bo_c=>sc_bo_key
+                                object_id = is_request-root-pcct_uuid )
+            iv_session_guid = is_request-session_guid
+          CHANGING
+            cs_result       = rs_lock_hb ).
+      CATCH zcx_zodata_error INTO DATA(lx_lock_hb_error).
+        RAISE EXCEPTION lx_lock_hb_error.
+    ENDTRY.
+
+    IF rs_lock_hb-success <> abap_true AND rs_lock_hb-ok <> abap_true.
+      raise_busi_exception(
+        iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_session_required )
+        iv_code = zif_zodata_message_codes=>lock_not_owned_by_session ).
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD finalize_save_transaction.
+    IF iv_is_autosave = abap_true.
+      COMMIT WORK.
+      RETURN.
+    ENDIF.
+
+    COMMIT WORK AND WAIT.
+  ENDMETHOD.
+
+  METHOD resolve_lock_expires.
+    rv_lock_expires = iv_lock_expires.
+
+    ASSIGN COMPONENT 'LOCK_EXPIRES_AT' OF STRUCTURE is_lock_hb TO FIELD-SYMBOL(<lv_lock_expires_at>).
+    IF sy-subrc = 0 AND <lv_lock_expires_at> IS ASSIGNED AND <lv_lock_expires_at> IS NOT INITIAL.
+      rv_lock_expires = <lv_lock_expires_at>.
+      RETURN.
+    ENDIF.
+
+    ASSIGN COMPONENT 'LOCK_EXPIRES' OF STRUCTURE is_lock_hb TO FIELD-SYMBOL(<lv_lock_expires>).
+    IF sy-subrc = 0 AND <lv_lock_expires> IS ASSIGNED AND <lv_lock_expires> IS NOT INITIAL.
+      rv_lock_expires = <lv_lock_expires>.
+    ENDIF.
+  ENDMETHOD.
+
+  METHOD resolve_server_now.
+    rv_server_now = iv_server_now.
+
+    ASSIGN COMPONENT 'SERVER_NOW' OF STRUCTURE is_lock_hb TO FIELD-SYMBOL(<lv_server_now>).
+    IF sy-subrc = 0 AND <lv_server_now> IS ASSIGNED AND <lv_server_now> IS NOT INITIAL.
+      rv_server_now = <lv_server_now>.
+    ENDIF.
+  ENDMETHOD.
+
   METHOD execute_save.
     DATA lt_change TYPE zif_zodata_bopf_mapper=>tt_change.
     DATA lt_mod TYPE /bobf/t_frw_modification.
@@ -139,6 +217,8 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
     DATA ls_lock_hb TYPE zstr_pcct_lock_heartbeat_rs.
     DATA lv_now_ts TYPE timestampl.
     DATA lv_request_id TYPE string.
+    DATA lv_effective_lock_expires TYPE timestampl.
+    DATA lv_effective_server_now TYPE timestampl.
 
     validate_save_request( is_request ).
 
@@ -149,38 +229,31 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
       raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_no_edit_auth_save ) iv_code = zif_zodata_message_codes=>no_edit_auth ).
     ENDIF.
 
-    TRY.
-        mo_lock_manager->heartbeat(
-          EXPORTING
-            is_key          = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = is_request-root-pcct_uuid )
-            iv_session_guid = is_request-session_guid
-          CHANGING
-            cs_result       = ls_lock_hb ).
-      CATCH zcx_zodata_error INTO DATA(lx_lock_hb_error).
-        RAISE EXCEPTION lx_lock_hb_error.
-    ENDTRY.
-
-    IF ls_lock_hb-success <> abap_true AND ls_lock_hb-ok <> abap_true.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_session_required ) iv_code = zif_zodata_message_codes=>lock_not_owned_by_session ).
-    ENDIF.
+    ls_lock_hb = refresh_session_lock( is_request ).
 
     lt_change = mo_mapper->build_change_list( is_request ).
     GET TIME STAMP FIELD lv_now_ts.
+    lv_effective_lock_expires = resolve_lock_expires(
+      is_lock_hb      = ls_lock_hb
+      iv_lock_expires = iv_lock_expires ).
+    lv_effective_server_now = resolve_server_now(
+      is_lock_hb    = ls_lock_hb
+      iv_server_now = lv_now_ts ).
     lv_request_id = |{ zif_zodata_contract_constants=>c_request_id_prefix_save }-{ sy-datum }{ sy-uzeit }|.
 
     IF lt_change IS INITIAL.
       mo_contract->fill_save_response(
         EXPORTING
           iv_pcct_uuid      = is_request-root-pcct_uuid
-          iv_changed_on     = COND #( WHEN iv_changed_on IS INITIAL THEN lv_now_ts ELSE iv_changed_on )
+          iv_changed_on     = COND #( WHEN iv_changed_on IS INITIAL THEN lv_effective_server_now ELSE iv_changed_on )
           iv_version_number = iv_version_number
           iv_is_autosave    = iv_is_autosave
           iv_no_changes     = abap_true
           iv_code           = zif_zodata_message_codes=>lock_ok
           iv_reason_code    = zif_zodata_contract_constants=>c_reason_no_changes
           iv_lock_refreshed = abap_true
-          iv_lock_expires   = iv_lock_expires
-          iv_server_now     = lv_now_ts
+          iv_lock_expires   = lv_effective_lock_expires
+          iv_server_now     = lv_effective_server_now
           iv_request_id     = lv_request_id
         CHANGING
           cs_result         = rs_response ).
@@ -191,24 +264,20 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
     mo_srv_mgr->modify( EXPORTING it_modification = lt_mod IMPORTING et_failed_key = lt_failed et_message = lt_msg ).
     zcl_zodata_bopf_msg_helper=>raise_on_failed_keys( it_failed_key = lt_failed it_message = lt_msg ).
 
-    IF iv_is_autosave = abap_true.
-      COMMIT WORK.
-    ELSE.
-      COMMIT WORK AND WAIT.
-    ENDIF.
+    finalize_save_transaction( iv_is_autosave ).
 
     mo_contract->fill_save_response(
       EXPORTING
         iv_pcct_uuid      = is_request-root-pcct_uuid
-        iv_changed_on     = COND #( WHEN iv_changed_on IS INITIAL THEN lv_now_ts ELSE iv_changed_on )
+        iv_changed_on     = COND #( WHEN iv_changed_on IS INITIAL THEN lv_effective_server_now ELSE iv_changed_on )
         iv_version_number = iv_version_number
         iv_is_autosave    = iv_is_autosave
         iv_no_changes     = abap_false
         iv_code           = zif_zodata_message_codes=>lock_ok
         iv_reason_code    = zif_zodata_contract_constants=>c_reason_saved
         iv_lock_refreshed = abap_true
-        iv_lock_expires   = iv_lock_expires
-        iv_server_now     = lv_now_ts
+        iv_lock_expires   = lv_effective_lock_expires
+        iv_server_now     = lv_effective_server_now
         iv_request_id     = lv_request_id
       CHANGING
         cs_result         = rs_response ).

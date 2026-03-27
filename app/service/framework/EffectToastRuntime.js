@@ -22,6 +22,8 @@ sap.ui.define([
         var sToastKey = String((oEffect && (oEffect.correlationKey || oEffect.textKey || sText)) || "").trim();
         var iNow = Date.now();
         var iLastShownAt = Number(mToastTimeline[sToastKey] || 0);
+        var sLevel;
+        var sClassName;
         if (sToastKey && Number.isFinite(iLastShownAt) && (iNow - iLastShownAt) < DURATIONS.TOAST_DEDUPE_MS) {
             return;
         }
@@ -29,8 +31,8 @@ sap.ui.define([
             mToastTimeline[sToastKey] = iNow;
         }
         if (sText) {
-            var sLevel = String((oEffect && oEffect.level) || LEVELS.INFO).toLowerCase();
-            var sClassName = [CLASSES.TOAST, CLASSES.TOAST_LEVEL_PREFIX + sLevel].join(" ");
+            sLevel = String((oEffect && oEffect.level) || LEVELS.INFO).toLowerCase();
+            sClassName = [CLASSES.TOAST, CLASSES.TOAST_LEVEL_PREFIX + sLevel].join(" ");
             MessageToast.show(String(sText), {
                 className: sClassName,
                 duration: DURATIONS.TOAST_SHOW_MS

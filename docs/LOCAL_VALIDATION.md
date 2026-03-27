@@ -15,6 +15,8 @@ Run `npm run build` before smoke. In this local environment the build uses a rep
 
 Validate only in evergreen Microsoft Edge.
 Internet Explorer is not supported.
+Desktop is the only production target.
+Tablet and phone rendering remain non-blocking best-effort and are not part of the formal release baseline.
 
 ## Manual smoke playbook
 
@@ -26,10 +28,11 @@ Internet Explorer is not supported.
 
 ## Deterministic local smoke
 
-1. Run `npm run validate:local`.
-2. Run `powershell -ExecutionPolicy Bypass -File scripts/local-launch-smoke.ps1 -EnsureEnvironment`.
-3. Run `py -3 scripts/browser-smoke-domain-facade-contract.py http://127.0.0.1:8080/index.html`.
-4. Execute the manual smoke playbook in Microsoft Edge against the same local environment.
+1. Run `cmd /c npm.cmd run validate:local`.
+2. Run `cmd /c npm.cmd run validate:contracts`.
+3. Run `powershell -ExecutionPolicy Bypass -File scripts/local-launch-smoke.ps1 -EnsureEnvironment`.
+4. Run `py -3 scripts/browser-smoke-domain-facade-contract.py http://127.0.0.1:8080/index.html`.
+5. Execute the manual smoke playbook in Microsoft Edge against the same local environment.
 
 ## Notes
 

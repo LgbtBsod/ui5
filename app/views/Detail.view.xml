@@ -76,7 +76,7 @@
                             </uxap:ObjectPageSubSection>
 
                             <!-- Barriers -->
-                    <uxap:ObjectPageSubSection id="ssBarriers" title="{i18n>barriersTitle}" visible="{path:'detail>/current/basic/LPC_KEY', formatter:'.isBarriersVisibleByLpc'}" class="detailSubSectionShell">
+                    <uxap:ObjectPageSubSection id="ssBarriers" title="{i18n>barriersTitle}" visible="{view>/barriersVisible}" class="detailSubSectionShell">
                                 <uxap:blocks>
                                     <core:Fragment fragmentName="PRODUCTION_CONTROL_CHECKLIST.views.fragment.DetailBarriersSectionShell" type="XML"/>
                                 </uxap:blocks>

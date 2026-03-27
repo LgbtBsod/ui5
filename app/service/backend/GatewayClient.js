@@ -46,6 +46,7 @@ sap.ui.define([
         exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES),
         exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.AUTO_SAVE),
         exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.CREATE_CHECKLIST),
+        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST),
         exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.REPORT_EXPORT),
         exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE),
         exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT),
@@ -53,7 +54,6 @@ sap.ui.define([
     ];
 
     var DIRECT_FUNCTION_QUERY_ALLOWLIST = [
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST),
         exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.ANALYTICS_REFRESH_TRIGGER)
     ];
 
@@ -242,66 +242,6 @@ sap.ui.define([
                     error: function (oError) { reject(oError); }
                 });
             }, mOptions || {});
-        },
-        uploadMedia: function (path, vBody, mOptions) {
-            var sPath = assertCanonicalPath(normalizePath(path));
-            var oOptions = mOptions || {};
-            return executeMutatingRequest(REQUEST.POST, function (resolve, reject, mHeaders) {
-                var oModel = ensureModel();
-                var sResolvedUrl = serviceUrl() + sPath;
-                var sCsrfToken = String((oModel && oModel.getSecurityToken && oModel.getSecurityToken()) || "").trim();
-                var mFetchHeaders = Object.assign({}, mHeaders || {}, oOptions.headers || {});
-
-                if (!sResolvedUrl || typeof window === "undefined" || typeof window.fetch !== "function") {
-                    reject({
-                        code: "MEDIA_UPLOAD_UNSUPPORTED",
-                        message: "Media upload requires fetch-capable browser runtime",
-                        path: sPath
-                    });
-                    return;
-                }
-
-                if (sCsrfToken) {
-                    mFetchHeaders["X-CSRF-Token"] = sCsrfToken;
-                }
-                if (oOptions.contentType) {
-                    mFetchHeaders["Content-Type"] = String(oOptions.contentType);
-                }
-
-                window.fetch(sResolvedUrl, {
-                    method: REQUEST.POST,
-                    credentials: "same-origin",
-                    headers: mFetchHeaders,
-                    body: vBody || null
-                }).then(function (oResponse) {
-                    return oResponse.text().then(function (sText) {
-                        var oPayload;
-                        if (!oResponse.ok) {
-                            reject({
-                                statusCode: oResponse.status,
-                                statusText: oResponse.statusText,
-                                responseText: sText,
-                                message: sText || oResponse.statusText || "Media upload failed",
-                                path: sPath
-                            });
-                            return;
-                        }
-                        if (!sText) {
-                            resolve({});
-                            return;
-                        }
-                        try {
-                            oPayload = JSON.parse(sText);
-                        } catch (_parseError) {
-                            resolve({ rawText: sText });
-                            return;
-                        }
-                        resolve(oPayload || {});
-                    });
-                }).catch(function (oError) {
-                    reject(oError);
-                });
-            }, oOptions);
         },
         serviceUrl: serviceUrl,
         getModel: function () {

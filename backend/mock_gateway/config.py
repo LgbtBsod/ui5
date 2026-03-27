@@ -9,7 +9,7 @@ def _env_flag(name: str, default: bool) -> bool:
         return default
     return raw_value in {"1", "true", "yes", "on"}
 
-DATABASE_URL = "sqlite:///" + str((Path(__file__).resolve().parent / "gateway.db").as_posix())
+DATABASE_URL = str(os.getenv("PCCT_DATABASE_URL") or ("sqlite:///" + str((Path(__file__).resolve().parent / "gateway.db").as_posix())))
 APP_PROFILE = str(os.getenv("PCCT_PROFILE", "production") or "production").strip().lower()
 IS_LOCAL_PROFILE = APP_PROFILE == "local"
 FRONTEND_TIMER_PROFILES = {

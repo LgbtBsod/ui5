@@ -17,7 +17,7 @@ sap.ui.define([
 
     function CacheWriteUseCase() {
         return {
-            execute: execute
+            execute: function (input, ctx) { return execute(input, ctx); }
         };
     }
 
