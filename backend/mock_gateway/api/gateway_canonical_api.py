@@ -161,7 +161,7 @@ def _resolve_root_from_payload(payload: dict) -> str:
         return root_key
     full = payload.get("FullPayload") or payload
     root_block = full.get("root") if isinstance(full, dict) else {}
-    return _boundary_root_key(root_block, (root_block or {}).get("DB_KEY"), (root_block or {}).get("pcct_uuid"))
+    return _boundary_root_key(root_block, (root_block or {}).get("DB_KEY"), (root_block or {}).get("db_key"), (root_block or {}).get("pcct_uuid"))
 
 
 def _boundary_parent_key(payload: dict | None = None, *candidates) -> str:
@@ -2327,7 +2327,7 @@ def auto_save(payload: dict, response: Response, if_match: str | None = Header(N
     request_id = str(uuid.uuid4())
     response.headers["sap-message"] = build_sap_message("Autosave completed", "success", code="SAVED")
     return odata_entity({
-        "pcct_uuid": _hex(root.id),
+        "db_key": _hex(root.id),
         "changed_on": format_datetime(root.changed_on),
         "version_number": int(root.version_number or 0),
         "code": "LOCK_OK",
@@ -2475,7 +2475,7 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
     request_id = str(uuid.uuid4())
     response.headers["sap-message"] = build_sap_message("Checklist updated", "success", code="SAVED")
     return odata_entity({
-        "pcct_uuid": _hex(root.id),
+        "db_key": _hex(root.id),
         "changed_on": format_datetime(root.changed_on),
         "version_number": int(root.version_number or 0),
         "code": "LOCK_OK",

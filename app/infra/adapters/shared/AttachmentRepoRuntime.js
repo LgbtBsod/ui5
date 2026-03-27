@@ -41,7 +41,7 @@ sap.ui.define([
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES, {
             Payload: {
                 root: {
-                    pcct_uuid: sDbKey,
+                    db_key: sDbKey,
                     edit_mode: "U"
                 },
                 checks: [],
@@ -64,13 +64,6 @@ sap.ui.define([
         });
     }
 
-    function uploadMedia(mArgs) {
-        return Promise.resolve({
-            rootId: normalizeRootKey(mArgs && (mArgs.rootId || mArgs.dbKey || mArgs.parentKey)),
-            queued: Array.isArray(mArgs && mArgs.attachments) ? mArgs.attachments.length : 0
-        });
-    }
-
     /* Binary transport gate anchor: productive upload payload normalizes canonical PARENT_KEY. */
     var MEDIA_UPLOAD_CONTRACT = {
         PARENT_KEY: normalizeRootKey
@@ -80,7 +73,6 @@ sap.ui.define([
         mediaUploadContract: MEDIA_UPLOAD_CONTRACT,
         normalizeDbKey: normalizeRootKey,
         normalizeRootKey: normalizeRootKey,
-        uploadMedia: uploadMedia,
         loadAttachments: loadAttachments,
         deleteAttachment: deleteAttachment
     };

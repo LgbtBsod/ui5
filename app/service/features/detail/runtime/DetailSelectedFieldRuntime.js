@@ -1,13 +1,14 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailDirtyStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/runtime/DetailEditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRowBindingRuntime"
-], function (DetailDirtyStateRuntime, ModelStateRuntime, ModelContracts, DetailRowBindingRuntime) {
+], function (DetailEditSessionRuntime, ModelStateRuntime, ModelContracts, DetailRowBindingRuntime) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var DETAIL_MODEL = MODELS.DETAIL;
+    var oDetailEditSessionRuntime = new DetailEditSessionRuntime();
 
     function normalizeEventValue(oEvent, sParameterName, sPropertyName, oSource) {
         var vValue = oEvent && oEvent.getParameter && oEvent.getParameter(sParameterName);
@@ -34,7 +35,7 @@ sap.ui.define([
             return false;
         }
         ModelStateRuntime.write(oController, DETAIL_MODEL, sPath, vValue);
-        DetailDirtyStateRuntime.markDirty(oController);
+        oDetailEditSessionRuntime.markDirty(oController);
         return true;
     }
 

@@ -49,7 +49,7 @@ sap.ui.define([
     }
 
     function getBundleText(oController, sKey, aArgs, sFallback) {
-        return ControllerTextRuntime.getText(oController, sKey, aArgs || [], sFallback || sKey);
+        return ControllerTextRuntime.getText(oController, sKey, aArgs || [], sFallback || "");
     }
 
     function extractYearValueFromEvent(oEvent) {
@@ -165,13 +165,13 @@ sap.ui.define([
         var oCategoryFeed = oController.byId && oController.byId("analyticsBreakdownsFragment--analyticsComparisonCategoryFeed");
         if (oValueFeed && typeof oValueFeed.setValues === "function") {
             oValueFeed.setValues([
-                getBundleText(oController, "analyticsSelectedYear", [], "Selected year"),
-                getBundleText(oController, "analyticsCompareYearLabel", [], "Compare year")
+                getBundleText(oController, "analyticsSelectedYear"),
+                getBundleText(oController, "analyticsCompareYearLabel")
             ]);
         }
         if (oCategoryFeed && typeof oCategoryFeed.setValues === "function") {
             oCategoryFeed.setValues([
-                getBundleText(oController, "analyticsMonth", [], "Month")
+                getBundleText(oController, "analyticsMonth")
             ]);
         }
     }

@@ -148,7 +148,7 @@ sap.ui.define([
         return runSearchCommand(oController, "rebind", { source: SEARCH_SOURCES.SEARCH_RETRY }).finally(function () {
             SearchLoadRuntime.setLoadStatus(oController, { isLoading: false, isBusy: false, loadError: false });
         }).catch(function (oError) {
-            SearchLoadRuntime.applyLoadError(oController, String((oError && oError.message) || "Unable to load search results."));
+            SearchLoadRuntime.applyLoadError(oController, String((oError && oError.message) || "searchOfflineMessage"));
             return Promise.reject(oError);
         });
     }

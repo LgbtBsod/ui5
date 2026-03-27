@@ -75,8 +75,8 @@ if (!/CopyChecklist[\s\S]*?iv_name = 'SessionGuid'\s+iv_edm_type = 'String'/.tes
 }
 
 const fallbackCount = (dpc.match(/ObjectUuid/g) || []).length;
-if (fallbackCount > 4) {
-  issues.push("backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap: ObjectUuid compatibility alias leaked beyond narrow backend boundary");
+if (fallbackCount > 3) {
+  issues.push("backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap: ObjectUuid compatibility alias leaked beyond narrow lock boundary");
 }
 
 if (issues.length) {

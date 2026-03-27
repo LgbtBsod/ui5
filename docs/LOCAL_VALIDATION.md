@@ -39,3 +39,7 @@ Tablet and phone rendering remain non-blocking best-effort and are not part of t
 
 Manual smoke playbook must be executed after lint, tests, and preload/build validation.
 Phase 1 release readiness additionally requires `validate:contracts` to pass with the canonical attachment delta flow and reduced UI5 compatibility override surface.
+Phase 2 and Phase 3 release readiness additionally require grouped orchestration ownership to stay intact:
+
+- `SearchFacade -> SearchBootstrapRuntime/SearchExecutionRuntime/SearchSelectionRuntime/SearchPresentationRuntime`
+- `DetailFacade -> DetailOpenMatchRuntime/DetailEditSessionRuntime/DetailSaveFlowRuntime/DetailAttachmentFlowRuntime/DetailFieldAssistRuntime`

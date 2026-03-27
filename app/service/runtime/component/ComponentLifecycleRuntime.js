@@ -79,7 +79,6 @@ sap.ui.define([
             searchConfig: mServices.searchConfig,
             componentRuntimeSupport: oRuntimeSupport,
             timeConfigService: mDeps.TimeConfigService,
-            workflowCoordinator: mDeps.WorkflowCoordinator,
             bundleText: mTelemetry.bundleText,
             setGlobalBanner: mHandlers.setGlobalBanner,
             clearGlobalBanner: mHandlers.clearGlobalBanner,

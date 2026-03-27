@@ -37,20 +37,20 @@ sap.ui.define([
 
     /* Этот блок разрешает входной route/id в реальный backend root key.
      * Результат: downstream detail flow работает с техническим ключом, а не с display-id. */
-    function resolveRootId(mArgs, mDeps) {
-        var sRequestedId = String(mDeps.rootId(mArgs) || "").trim();
-        if (!sRequestedId) {
+    function resolveDbKey(mArgs, mDeps) {
+        var sRequestedDbKey = String(mDeps.rootId(mArgs) || "").trim();
+        if (!sRequestedDbKey) {
             return Promise.resolve("");
         }
         return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.CHECKLIST_SEARCH, {
-            "$filter": buildStringEqFilter("Id", sRequestedId),
+            "$filter": buildStringEqFilter("Id", sRequestedDbKey),
             "$top": 1
         }).then(function (oResponse) {
             var aRows = ODataAdapterUtils.asArray(oResponse);
             var oFirst = aRows[0] || {};
-            return ODataKeyNormalizer.normalizeBinaryKey(oFirst.DB_KEY || oFirst.Id || sRequestedId);
+            return ODataKeyNormalizer.normalizeBinaryKey(oFirst.DB_KEY || oFirst.Id || sRequestedDbKey);
         }).catch(function () {
-            return ODataKeyNormalizer.normalizeBinaryKey(sRequestedId);
+            return ODataKeyNormalizer.normalizeBinaryKey(sRequestedDbKey);
         });
     }
 
@@ -178,6 +178,6 @@ sap.ui.define([
         buildDetailFilter: buildDetailFilter,
         loadDetailRows: loadDetailRows,
         loadDetailSnapshot: fetchDetailSnapshot,
-        resolveRootId: resolveRootId
+        resolveRootId: resolveDbKey
     };
 });

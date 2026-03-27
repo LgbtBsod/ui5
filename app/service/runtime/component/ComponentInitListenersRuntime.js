@@ -37,7 +37,6 @@ sap.ui.define([
             component: mOptions.component,
             stateModel: mOptions.stateModel,
             statePaths: mOptions.statePaths || {},
-            workflowCoordinator: mOptions.workflowCoordinator,
             runGuardedSave: mOptions.runGuardedSave,
             queuePendingNavigationIntent: mOptions.queuePendingNavigationIntent,
             clearPendingNavigationIntent: mOptions.clearPendingNavigationIntent,

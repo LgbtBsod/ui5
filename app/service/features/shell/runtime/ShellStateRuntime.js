@@ -127,12 +127,12 @@ sap.ui.define([
     }
 
     function resolveShellLockState(oStateModel) {
-        var sActiveRootKey;
+        var sActiveDbKey;
         var sEditMode;
         var sLockState;
         var bOwnsActiveLock;
 
-        sActiveRootKey = String(
+        sActiveDbKey = String(
             ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "")
             || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
             || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
@@ -144,11 +144,11 @@ sap.ui.define([
         sLockState = WorkflowContracts.normalizeLockState(
             ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/lock/state", WorkflowContracts.LOCK_STATES.IDLE)
         );
-        bOwnsActiveLock = !!sActiveRootKey
+        bOwnsActiveLock = !!sActiveDbKey
             && sEditMode === WorkflowContracts.EDIT_MODES.EDIT
             && sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
         return {
-            currentDbKey: sActiveRootKey,
+            currentDbKey: sActiveDbKey,
             lock: {
                 ok: bOwnsActiveLock,
                 reason: bOwnsActiveLock ? WorkflowContracts.REASONS.OWNED_BY_YOU : WorkflowContracts.REASONS.FREE,
@@ -255,4 +255,3 @@ sap.ui.define([
     function getModel(oController, sName) {
         return oController && oController.getModel ? oController.getModel(sName) : null;
     }
-

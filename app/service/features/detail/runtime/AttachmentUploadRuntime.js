@@ -114,9 +114,10 @@ sap.ui.define([
             mHooks.showToast(oValidation.toastKey);
             return Promise.resolve();
         }
-        oSpec = Object.assign({ file: oFile, parentKey: sDbKey }, buildAttachmentMeta(oController, oFile, oValidation.mimeType));
+        oSpec = Object.assign({ file: oFile, dbKey: sDbKey, parentKey: sDbKey }, buildAttachmentMeta(oController, oFile, oValidation.mimeType));
         return oAttachmentGateway.uploadPendingAttachments({
-            rootId: sDbKey,
+            dbKey: sDbKey,
+            parentKey: sDbKey,
             attachments: [oSpec]
         }).then(function () {
             mHooks.showToast("attachmentUploaded");

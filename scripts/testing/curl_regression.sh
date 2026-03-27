@@ -65,11 +65,11 @@ req POST "$BASE_URL/CopyChecklist?DB_KEY=${ROOT_KEY}&SessionGuid=TEST-COPY-SESSI
 
 echo "[10] AutoSave sample"
 req POST "$BASE_URL/AutoSave" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: application/json' \
-  --data "{\"root\":{\"pcct_uuid\":\"${ROOT_KEY}\"},\"checks\":[],\"barriers\":[],\"client_version\":1,\"SessionGuid\":\"TEST-SESSION\"}" | head -c 350; echo
+--data "{\"root\":{\"db_key\":\"${ROOT_KEY}\"},\"checks\":[],\"barriers\":[],\"client_version\":1,\"SessionGuid\":\"TEST-SESSION\"}" | head -c 350; echo
 
 echo "[11] SaveChanges sample"
 req POST "$BASE_URL/SaveChanges" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: application/json' \
-  --data "{\"root\":{\"pcct_uuid\":\"${ROOT_KEY}\",\"equipment\":\"Pump A\"},\"checks\":[],\"barriers\":[],\"client_version\":1,\"SessionGuid\":\"TEST-SESSION\"}" | head -c 350; echo
+--data "{\"root\":{\"db_key\":\"${ROOT_KEY}\",\"equipment\":\"Pump A\"},\"checks\":[],\"barriers\":[],\"client_version\":1,\"SessionGuid\":\"TEST-SESSION\"}" | head -c 350; echo
 
 echo "[12] SetChecklistStatus sample"
 req POST "$BASE_URL/SetChecklistStatus" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: application/json' \

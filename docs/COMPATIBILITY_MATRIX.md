@@ -26,6 +26,8 @@
 4. Save and lock flows must agree across frontend, mock Gateway, and SAP backend on `DB_KEY`, `SessionGuid`, `ClientVersion`, and returned lock metadata.
 5. Attachment save semantics are canonical only through `DeltaPayloadBuilder` payloads; payload mappers may normalize rows but must not introduce a second attachment mutation source.
 6. Renderer-coupled CSS is limited to a reviewed UI5 1.71 compatibility allowlist. Dialog and ObjectPage overrides must be scoped through app-owned host classes where possible.
+7. Search orchestration is canonical only through `SearchFacade -> scenario runtimes`; controller behaviors must not introduce a second rebind owner.
+8. Detail edit-session semantics are canonical only through `DetailFacade -> DetailEditSessionRuntime`; dirty/reset/restore helpers must not become parallel workflow owners.
 
 ## Verification Commands
 

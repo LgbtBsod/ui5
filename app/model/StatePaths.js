@@ -36,7 +36,6 @@ sap.ui.define([], function () {
         REQUIRED_FIELDS: "/requiredFields",
         SEARCH_BARRIERS_FAIL_SEGMENT: "/search/barriersFailSegment",
         SEARCH_CHECKS_FAIL_SEGMENT: "/search/checksFailSegment",
-        SEARCH_FORCE_REFRESH_ON_RETURN: "/searchForceRefreshOnReturn",
         SEARCH_MODE: "/searchMode",
         SEARCH_RETURN_CONTEXT: "/searchReturnContext",
         SAVE_IN_FLIGHT: "/saveInFlight",

@@ -115,38 +115,35 @@ Mutating detail flows stay on dedicated resources/functions:
 - `CopyChecklist`
 - `ChecklistRootSet(<BINARY_LITERAL>)` for delete
 
-## Attachment save contract
+## Attachment contract
 
-- attachments are staged locally in the detail draft until explicit `CreateChecklist` or `SaveChanges`
-- no separate frontend media upload transport is used
-- attachment rows travel inside the same OData V2 payload as the rest of the save/create contract
+- persisted attachment upload uses only media upload to `AttachmentSet`
+- `SaveChanges` and `CreateChecklist` must not carry productive base64 attachment payloads
+- mock Gateway rejects save-time base64 via `ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN`
+- attachment binaries are opened only through `AttachmentSet('<AttachmentKey>')/$value`, `DownloadUrl`, or `DocumentHandle`
 
-### Expected attachment request row
+### Required media upload headers
 
-- `Key`
-- `DB_KEY`
-- `PARENT_KEY`
-- `FolderKey`
-- `CategoryKey`
-- `Type`
-- `FileName`
-- `Name`
-- `MimeType`
-- `Description`
-- `FileSize`
-- `FileSizeContent`
+- `X-DB-Key`
+- `X-Parent-Key`
+- `X-Folder-Key`
+- `X-Category-Key`
+- `X-Description`
+- `X-File-Name`
+- `Slug`
 
-### Attachment field semantics
+### Attachment metadata semantics
 
+- `DB_KEY` is the persisted checklist identity
+- `PARENT_KEY` is the persisted child relation and matches the owning checklist for root attachments
 - `CategoryKey` and `Type` stay aligned to the attachment-type dictionary seam
-- `DB_KEY` / `PARENT_KEY` identify the owning checklist and stay `Edm.Binary`
-- attachment content is opened through `DownloadUrl` / `DocumentHandle`; raw payload transfer is compatibility-only
-- `FileSize` and `FileSizeContent` stay aligned to the decoded binary length
+- `DownloadUrl` / `DocumentHandle` are the productive binary access seam
+- canonical metadata must not expose `Value`
 
 ### Productive adaptation boundary
 
-- if productive SAP Gateway uses different attachment payload field names, adapt only at `app/infra/adapters/ODataChecklistRepoAdapter.js`
-- do not reintroduce a separate REST/media upload fallback path
+- if productive SAP Gateway varies by field name or header naming, adapt only at the OData/frontend adapter boundary
+- do not reintroduce parallel JSON/base64 save transport
 
 ## Denied and failure response behavior
 

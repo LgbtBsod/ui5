@@ -3,12 +3,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailStateActionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailDirtyStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/runtime/DetailEditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (DetailPersonInputRuntime, ModelStateRuntime, DetailStateActionRuntime, CreateSentinel, DetailDirtyStateRuntime, ModelContracts) {
+], function (DetailPersonInputRuntime, ModelStateRuntime, DetailStateActionRuntime, CreateSentinel, DetailEditSessionRuntime, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var oDetailEditSessionRuntime = new DetailEditSessionRuntime();
     var STATE_PATHS = Object.freeze({
         SAVE_IN_FLIGHT: "/saveInFlight",
         VALIDATION_SUMMARY: "/validationSummary"
@@ -139,7 +140,7 @@ sap.ui.define([
                 if (sCurrentStatus !== sStatus) {
                     ModelStateRuntime.writeOnModel(oDetailModel, "/current/root/status", sStatus);
                     ModelStateRuntime.writeOnModel(oDetailModel, "/current/root/Status", sStatus);
-                    DetailDirtyStateRuntime.markDirty(this);
+                    oDetailEditSessionRuntime.markDirty(this);
                 }
                 return DetailStateActionRuntime.save(this, {
                     saveDetail: function () {

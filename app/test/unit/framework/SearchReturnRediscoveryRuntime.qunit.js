@@ -64,8 +64,7 @@ sap.ui.define([
                 mode: "save",
                 focusRequested: false,
                 selectionRequested: true
-            },
-            searchForceRefreshOnReturn: true
+            }
         }, {});
         var oMatchedItem = createItem({ Key: "ROOT-2", Id: "CHK-OTHER" });
         var oTable = createTable([
@@ -78,7 +77,6 @@ sap.ui.define([
         assert.strictEqual(oController.getModel("view").getProperty("/selectedRowDisplayId"), "CHK-OTHER", "display id comes from matched row");
         assert.strictEqual(oController.getModel("view").getProperty("/hasSelection"), true, "selection state is restored");
         assert.strictEqual(oController.getModel("state").getProperty(StatePaths.SEARCH_RETURN_CONTEXT), null, "return context is cleared");
-        assert.strictEqual(oController.getModel("state").getProperty("/searchForceRefreshOnReturn"), false, "legacy flag is cleared");
     });
 
     QUnit.test("falls back to checklist display id when root id is absent in visible rows", function (assert) {

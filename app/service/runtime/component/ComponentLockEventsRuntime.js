@@ -36,13 +36,13 @@ sap.ui.define([
 
     function shouldIgnoreProbePayload(oPayload, oStateModel, oStatePaths) {
         var oScope = readCurrentLockScope(oStateModel, oStatePaths);
-    var sPayloadRootId = String((oPayload && (oPayload.rootId || oPayload.dbKey || oPayload.objectUuid || oPayload.ObjectUuid)) || "").trim();
+        var sPayloadDbKey = String((oPayload && (oPayload.dbKey || oPayload.DB_KEY || oPayload.rootId)) || "").trim();
         var sPayloadSessionGuid = String((oPayload && (oPayload.sessionGuid || oPayload.SessionGuid)) || "").trim();
 
         if (!isActiveEditLockScope(oScope)) {
             return true;
         }
-        if (sPayloadRootId && oScope.dbKey && sPayloadRootId !== oScope.dbKey) {
+        if (sPayloadDbKey && oScope.dbKey && sPayloadDbKey !== oScope.dbKey) {
             return true;
         }
         if (sPayloadSessionGuid && oScope.sessionGuid && sPayloadSessionGuid !== oScope.sessionGuid) {

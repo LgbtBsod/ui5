@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Effects",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
-"PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartControlCoordinator"
-], function (Result, Effects, ChecklistIdentity, SearchSmartControlCoordinator) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSmartControlCoordinator"
+], function (Result, Effects, ChecklistIdentity, SearchSelectionStateRuntime, SearchSmartControlCoordinator) {
     "use strict";
 
     function SelectionChangedUseCase() {
@@ -12,13 +13,11 @@ sap.ui.define([
         };
     }
 
-function execute(mInput) {
+    function execute(mInput) {
         var aSelectedRowIds = [];
         var sSelectedRowId = "";
         var sSelectedRowDisplayId = "";
-        var iSelectionCount = 0;
-        var bHasSelection = false;
-        var bSingleSelection = false;
+        var mSelectionState;
         if (mInput && Array.isArray(mInput.selectedRowIds)) {
             aSelectedRowIds = mInput.selectedRowIds.slice(0);
         }
@@ -30,27 +29,24 @@ function execute(mInput) {
             aSelectedRowIds.unshift(sSelectedRowId);
         }
         aSelectedRowIds = ChecklistIdentity.normalizeChecklistIds(aSelectedRowIds);
-        sSelectedRowId = aSelectedRowIds[0] || "";
         sSelectedRowDisplayId = String((mInput && mInput.selectedRowDisplayId) || "").trim() || sSelectedRowId;
-        iSelectionCount = aSelectedRowIds.length;
-        bHasSelection = iSelectionCount > 0;
-        bSingleSelection = iSelectionCount === 1;
+        mSelectionState = SearchSelectionStateRuntime.buildSelectionStatePayload(aSelectedRowIds, sSelectedRowDisplayId);
 
         return Promise.resolve(Result.ok({
-            selectedRowId: sSelectedRowId,
-            selectedRowDisplayId: sSelectedRowDisplayId,
-            selectedRowIds: aSelectedRowIds,
-            selectionCount: iSelectionCount,
-            hasSelection: bHasSelection,
-            canCopy: bSingleSelection
+            selectedRowId: mSelectionState.selectedRowId,
+            selectedRowDisplayId: mSelectionState.selectedRowDisplayId,
+            selectedRowIds: mSelectionState.selectedRowIds,
+            selectionCount: mSelectionState.selectionCount,
+            hasSelection: mSelectionState.hasSelection,
+            canCopy: mSelectionState.canCopy
         }, [
-            Effects.modelPatch("view", "/selectedRowId", sSelectedRowId),
-            Effects.modelPatch("view", "/selectedRowDisplayId", sSelectedRowDisplayId),
-            Effects.modelPatch("view", "/selectedRowIds", aSelectedRowIds),
-            Effects.modelPatch("view", "/selectionCount", iSelectionCount),
-            Effects.modelPatch("view", "/hasSelection", bHasSelection),
-            Effects.modelPatch("view", "/canCopy", bSingleSelection),
-            Effects.modelPatch("view", "/canDelete", bSingleSelection)
+            Effects.modelPatch("view", "/selectedRowId", mSelectionState.selectedRowId),
+            Effects.modelPatch("view", "/selectedRowDisplayId", mSelectionState.selectedRowDisplayId),
+            Effects.modelPatch("view", "/selectedRowIds", mSelectionState.selectedRowIds),
+            Effects.modelPatch("view", "/selectionCount", mSelectionState.selectionCount),
+            Effects.modelPatch("view", "/hasSelection", mSelectionState.hasSelection),
+            Effects.modelPatch("view", "/canCopy", mSelectionState.canCopy),
+            Effects.modelPatch("view", "/canDelete", mSelectionState.canDelete)
         ]));
     }
 

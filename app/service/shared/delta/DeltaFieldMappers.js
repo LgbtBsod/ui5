@@ -25,12 +25,12 @@ sap.ui.define([
     return undefined;
   }
 
-  function mapRootFields(oRootDelta, oBasicDelta, sRootKey, sEditMode) {
+  function mapRootFields(oRootDelta, oBasicDelta, sDbKey, sEditMode) {
     var oRoot = {};
     var oRootChanges = oRootDelta || {};
     var oBasicChanges = oBasicDelta || {};
 
-    assignIfPresent(oRoot, "pcct_uuid", String(sRootKey || "").trim());
+    assignIfPresent(oRoot, "db_key", String(sDbKey || "").trim());
     assignIfPresent(oRoot, "edit_mode", DeltaContracts.normalizeEditMode(sEditMode, DeltaContracts.EDIT_MODE.UPDATE));
     assignIfPresent(oRoot, "status", pickValue(oRootChanges, ["status", "Status"]));
     assignIfPresent(oRoot, "checklist_id", pickValue(oRootChanges, ["Id", "RequestId", "id", "request_id", "checklist_id"]));
@@ -104,7 +104,7 @@ sap.ui.define([
     };
   }
 
-  function toAttachmentFields(oRow, iIndex, sEditMode, sRootKey) {
+  function toAttachmentFields(oRow, iIndex, sEditMode, sParentKey) {
     var sMode = DeltaContracts.normalizeEditMode(sEditMode, DeltaContracts.EDIT_MODE.UPDATE);
     var sKey = pickValue(oRow, IDENTITY.ATTACHMENT_KEY_FIELDS);
     var bCreate = sMode === DeltaContracts.EDIT_MODE.CREATE;
@@ -112,9 +112,9 @@ sap.ui.define([
       attach_uuid: bCreate ? "" : String(sKey || "").trim(),
       client_row_id: String(pickValue(oRow, ["client_row_id"].concat(IDENTITY.ATTACHMENT_KEY_FIELDS)) || "").trim(),
       edit_mode: sMode,
-      root_key: String(pickValue(oRow, IDENTITY.ROOT_KEY_FIELDS) || sRootKey || "").trim(),
-      parent_key: String(pickValue(oRow, IDENTITY.PARENT_KEY_FIELDS) || sRootKey || "").trim(),
-      folder_key: String(pickValue(oRow, ["FolderKey", "folderKey"].concat(IDENTITY.PARENT_KEY_FIELDS)) || sRootKey || "").trim(),
+      root_key: String(pickValue(oRow, IDENTITY.ROOT_KEY_FIELDS) || sParentKey || "").trim(),
+      parent_key: String(pickValue(oRow, IDENTITY.PARENT_KEY_FIELDS) || sParentKey || "").trim(),
+      folder_key: String(pickValue(oRow, ["FolderKey", "folderKey"].concat(IDENTITY.PARENT_KEY_FIELDS)) || sParentKey || "").trim(),
       category_key: String(pickValue(oRow, ["CategoryKey", "categoryKey", "Type", "type"]) || "GEN").trim() || "GEN",
       file_name: String(pickValue(oRow, IDENTITY.FILE_NAME_FIELDS) || "").trim(),
       mime_type: String(pickValue(oRow, IDENTITY.MIME_TYPE_FIELDS) || "application/octet-stream").trim() || "application/octet-stream",

@@ -69,7 +69,7 @@ CLASS zcl_zodata_read_service DEFINITION
 
     METHODS read_root_row
       IMPORTING
-        iv_rootkey TYPE sysuuid_x16
+        iv_db_key TYPE sysuuid_x16
       RETURNING
         VALUE(rs_root) TYPE ty_root_row
       RAISING
@@ -81,13 +81,13 @@ CLASS zcl_zodata_read_service DEFINITION
 
     METHODS read_check_rows
       IMPORTING
-        iv_rootkey TYPE sysuuid_x16 OPTIONAL
+        iv_parent_key TYPE sysuuid_x16 OPTIONAL
       RETURNING
         VALUE(rt_checks) TYPE tt_check_row.
 
     METHODS read_barrier_rows
       IMPORTING
-        iv_rootkey TYPE sysuuid_x16 OPTIONAL
+        iv_parent_key TYPE sysuuid_x16 OPTIONAL
       RETURNING
         VALUE(rt_barriers) TYPE tt_barrier_row.
 
@@ -131,16 +131,16 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
     SELECT SINGLE pcct_uuid checklist_id lpc lpc_text status integration_flag date_check time_check time_zone equipment bukrs observer_fullname observer_perner observer_position observer_orgunit observed_fullname observed_perner observed_position observed_orgunit location_key location_name location_text changed_on changed_by created_on created_by version_number lock_owner lock_session tab_session_id lock_expires_at
       FROM ztodata_hdr
       INTO CORRESPONDING FIELDS OF @rs_root
-      WHERE pcct_uuid = @iv_rootkey.
+      WHERE pcct_uuid = @iv_db_key.
     IF sy-subrc <> 0.
-    raise_busi_exception( iv_text = |ChecklistRoot not found for key { iv_rootkey }.| iv_code = zif_zodata_message_codes=>validation_error ).
+    raise_busi_exception( iv_text = |ChecklistRoot not found for key { iv_db_key }.| iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
 
     SELECT SINGLE pcct_uuid,
                   COUNT( * ) AS total,
                   SUM( CASE WHEN result = @abap_true THEN 1 ELSE 0 END ) AS success
       FROM zpcct_check
-      WHERE pcct_uuid = @iv_rootkey
+      WHERE pcct_uuid = @iv_db_key
       GROUP BY pcct_uuid
       INTO @ls_check_agg.
     IF sy-subrc = 0.
@@ -152,7 +152,7 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
                   COUNT( * ) AS total,
                   SUM( CASE WHEN result = @abap_true THEN 1 ELSE 0 END ) AS success
       FROM zpcct_barrier
-      WHERE pcct_uuid = @iv_rootkey
+      WHERE pcct_uuid = @iv_db_key
       GROUP BY pcct_uuid
       INTO @ls_barrier_agg.
     IF sy-subrc = 0.
@@ -216,7 +216,7 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD read_check_rows.
-    IF iv_rootkey IS INITIAL.
+    IF iv_parent_key IS INITIAL.
       SELECT check_uuid AS key_uuid pcct_uuid AS root_key checks_num check_text AS text comment_text result changed_on
         FROM zpcct_check
         INTO CORRESPONDING FIELDS OF TABLE @rt_checks.
@@ -225,11 +225,11 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
     SELECT check_uuid AS key_uuid pcct_uuid AS root_key checks_num check_text AS text comment_text result changed_on
       FROM zpcct_check
       INTO CORRESPONDING FIELDS OF TABLE @rt_checks
-      WHERE pcct_uuid = @iv_rootkey.
+      WHERE pcct_uuid = @iv_parent_key.
   ENDMETHOD.
 
   METHOD read_barrier_rows.
-    IF iv_rootkey IS INITIAL.
+    IF iv_parent_key IS INITIAL.
       SELECT barrier_uuid AS key_uuid pcct_uuid AS root_key barriers_num barrier_text AS text comment_text result changed_on
         FROM zpcct_barrier
         INTO CORRESPONDING FIELDS OF TABLE @rt_barriers.
@@ -238,6 +238,6 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
     SELECT barrier_uuid AS key_uuid pcct_uuid AS root_key barriers_num barrier_text AS text comment_text result changed_on
       FROM zpcct_barrier
       INTO CORRESPONDING FIELDS OF TABLE @rt_barriers
-      WHERE pcct_uuid = @iv_rootkey.
+      WHERE pcct_uuid = @iv_parent_key.
   ENDMETHOD.
 ENDCLASS.

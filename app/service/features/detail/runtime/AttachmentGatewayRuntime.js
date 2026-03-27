@@ -5,6 +5,11 @@ sap.ui.define([
 ], function (FileUploaderParameter, GatewayContractConstants, ODataKeyNormalizer) {
     "use strict";
 
+    var ERROR_CODES = Object.freeze({
+        UPLOADER_UNAVAILABLE: "attachment_uploader_unavailable",
+        UPLOAD_FAILED: "attachment_upload_failed"
+    });
+
     function normalizeRootKey(sValue) {
         return ODataKeyNormalizer.normalizeBinaryKey(sValue);
     }
@@ -61,7 +66,8 @@ sap.ui.define([
         if (iStatus < 200 || iStatus >= 300) {
             throw {
                 statusCode: iStatus,
-                message: sResponseRaw || "Attachment upload failed"
+                code: ERROR_CODES.UPLOAD_FAILED,
+                responseText: sResponseRaw
             };
         }
         if (!sResponseRaw) {
@@ -77,25 +83,27 @@ sap.ui.define([
     function uploadPendingAttachments(oController, mInput) {
         var oUploader = resolveUploader(oController);
         var oModel = oController && oController.getModel && oController.getModel("mainService");
-        var sRootId = normalizeRootKey(mInput && mInput.rootId);
+        var sDbKey = normalizeRootKey(mInput && (mInput.dbKey || mInput.parentKey || mInput.rootId));
         var aAttachments = Array.isArray(mInput && mInput.attachments) ? mInput.attachments : [];
         var oAttachment = aAttachments[0] || null;
         var sServiceUrl = resolveServiceUrl(oController);
         var sCsrfToken = String((oModel && oModel.getSecurityToken && oModel.getSecurityToken()) || "").trim();
         var sFileName = String((oAttachment && oAttachment.fileName) || (oAttachment && oAttachment.file && oAttachment.file.name) || "").trim();
         var sUploadUrl = sServiceUrl + "/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT;
+        var sParentKey = normalizeRootKey(oAttachment && (oAttachment.parentKey || oAttachment.dbKey)) || sDbKey;
+        var sFolderKey = String((oAttachment && oAttachment.folderKey) || sParentKey).trim() || sParentKey;
 
-        if (!oUploader || !sServiceUrl || !sRootId || !oAttachment) {
-            return Promise.reject(new Error("attachment_uploader_unavailable"));
+        if (!oUploader || !sServiceUrl || !sDbKey || !sParentKey || !oAttachment) {
+            return Promise.reject(new Error(ERROR_CODES.UPLOADER_UNAVAILABLE));
         }
 
         configureUploader(oUploader, sUploadUrl);
         clearHeaderParameters(oUploader);
         addHeaderParameter(oUploader, "X-CSRF-Token", sCsrfToken);
         addHeaderParameter(oUploader, "Slug", encodeURIComponent(sFileName || "attachment"));
-        addHeaderParameter(oUploader, "X-DB-Key", sRootId);
-        addHeaderParameter(oUploader, "X-Parent-Key", sRootId);
-        addHeaderParameter(oUploader, "X-Folder-Key", String((oAttachment && oAttachment.folderKey) || sRootId).trim() || sRootId);
+        addHeaderParameter(oUploader, "X-DB-Key", sDbKey);
+        addHeaderParameter(oUploader, "X-Parent-Key", sParentKey);
+        addHeaderParameter(oUploader, "X-Folder-Key", sFolderKey);
         addHeaderParameter(oUploader, "X-Category-Key", String((oAttachment && oAttachment.categoryKey) || "GEN").trim() || "GEN");
         addHeaderParameter(oUploader, "X-Description", String((oAttachment && oAttachment.description) || "").trim());
         addHeaderParameter(oUploader, "X-File-Name", sFileName || "attachment");

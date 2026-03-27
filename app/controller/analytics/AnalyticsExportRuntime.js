@@ -15,10 +15,14 @@ sap.ui.define([
     "use strict";
 
     var PATHS = AnalyticsContracts.PATHS;
+    var ERROR_CODES = Object.freeze({
+        BUILD_ROWS_FAILED: "analytics_export_rows_unavailable",
+        EXPORT_FAILED: "analytics_export_failed"
+    });
 
     function getLoggerPayload(oError, sFallbackMessage) {
         return {
-            message: String((oError && oError.message) || sFallbackMessage || "analytics_export_failed"),
+            code: String((oError && oError.code) || sFallbackMessage || ERROR_CODES.EXPORT_FAILED),
             stack: String((oError && oError.stack) || "")
         };
     }
@@ -90,7 +94,7 @@ sap.ui.define([
         try {
             aRows = AnalyticsExportRows.buildRows(oViewState, oBundle);
         } catch (oError) {
-            sErrorMessage = String((oError && oError.message) || "Analytics export data is unavailable");
+            sErrorMessage = String((oError && oError.code) || ERROR_CODES.BUILD_ROWS_FAILED);
             ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
             if (DebugLogger && typeof DebugLogger.error === "function") {
                 DebugLogger.error("AnalyticsExportRuntime", "build_rows_failed", getLoggerPayload(oError, sErrorMessage));
@@ -108,7 +112,7 @@ sap.ui.define([
                 showToast(oController, "searchExportSuccess", [], FeedbackConstants.SEVERITY.INFO);
                 return true;
             }).catch(function (oError) {
-                sErrorMessage = String((oError && oError.message) || "Analytics export failed");
+                sErrorMessage = String((oError && oError.code) || ERROR_CODES.EXPORT_FAILED);
                 ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
                 if (DebugLogger && typeof DebugLogger.error === "function") {
                     DebugLogger.error("AnalyticsExportRuntime", "export_failed", Object.assign({
@@ -119,7 +123,7 @@ sap.ui.define([
                 return false;
             });
         } catch (oError) {
-            sErrorMessage = String((oError && oError.message) || "Analytics export failed");
+            sErrorMessage = String((oError && oError.code) || ERROR_CODES.EXPORT_FAILED);
             ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
             if (DebugLogger && typeof DebugLogger.error === "function") {
                 DebugLogger.error("AnalyticsExportRuntime", "export_failed", Object.assign({

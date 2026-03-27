@@ -9,7 +9,7 @@ sap.ui.define([
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES, {
             Payload: {
                 root: {
-                    pcct_uuid: sRootId,
+            db_key: sRootId,
                     edit_mode: "D"
                 },
                 checks: [],

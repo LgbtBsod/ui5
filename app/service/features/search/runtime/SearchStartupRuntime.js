@@ -61,10 +61,6 @@ sap.ui.define([
             || SearchReturnRediscoveryRuntime.hasLegacyRefreshFlag(oController);
     }
 
-    function clearSearchRefreshFlag(oController) {
-        SearchReturnRediscoveryRuntime.clearLegacyRefreshFlag(oController);
-    }
-
     function resetReturnRefreshRetry(oController) {
         oController._iSearchReturnRefreshTimer = SchedulingRuntime.clearTimer(oController._iSearchReturnRefreshTimer);
         oController._iSearchReturnRefreshAttempts = 0;
@@ -95,9 +91,6 @@ sap.ui.define([
         if (!shouldRefreshSearchOnReturn(oController)) {
             resetReturnRefreshRetry(oController);
             return;
-        }
-        if (!SearchReturnRediscoveryRuntime.readContext(oController)) {
-            clearSearchRefreshFlag(oController);
         }
         if (!ControllerViewStateRuntime.get(oController, "/hasSearched", false)) {
             ControllerViewStateRuntime.set(oController, "/hasSearched", true);

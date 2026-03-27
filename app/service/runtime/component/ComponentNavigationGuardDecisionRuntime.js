@@ -4,6 +4,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/WorkflowDecisionRuntime"
 ], function (
     ModelStateRuntime,
@@ -11,6 +12,7 @@ sap.ui.define([
     WorkflowContracts,
     ComponentListenerContracts,
     JsRuntime,
+    BehaviorScopes,
     WorkflowDecisionRuntime
 ) {
     "use strict";
@@ -19,6 +21,7 @@ sap.ui.define([
     var VALUES = ComponentListenerContracts.VALUES;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
+    var oWorkflowScope = BehaviorScopes.workflow;
 
     function normalizeRouteName(vRouteName) {
         return String(vRouteName || "").trim();
@@ -115,14 +118,16 @@ sap.ui.define([
         oBlockedIntent = resolveNextRouteIntent(oEvent);
         preventAndQueueNavigation(oEvent, mOptions);
 
-        mOptions.workflowCoordinator.confirmUnsavedAndHandle({
-            getModel: oComponent.getModel.bind(oComponent),
-            getResourceBundle: function () {
-                return oComponent.getModel(ComponentListenerContracts.MODEL_NAMES.I18N).getResourceBundle();
-            }
-        }, function () {
-            return mOptions.runGuardedSave({ resumePendingNavigation: true });
-        }, {
+        oWorkflowScope.execute("confirmUnsavedAndHandle", {
+            controller: {
+                getModel: oComponent.getModel.bind(oComponent),
+                getResourceBundle: function () {
+                    return oComponent.getModel(ComponentListenerContracts.MODEL_NAMES.I18N).getResourceBundle();
+                }
+            },
+            onSave: function () {
+                return mOptions.runGuardedSave({ resumePendingNavigation: true });
+            },
             onCancel: function () {
                 if (typeof mOptions.restorePendingNavigationIntent === TYPE_FUNCTION) {
                     return mOptions.restorePendingNavigationIntent();
@@ -167,7 +172,11 @@ sap.ui.define([
         oEvent.preventDefault();
         mOptions.queuePendingNavigationIntent(oEvent);
 
-        Promise.resolve(mOptions.workflowCoordinator.releaseWithTrySave({ getModel: oComponent.getModel.bind(oComponent) })).finally(function () {
+        Promise.resolve(oWorkflowScope.execute("releaseWithTrySave", {
+            controller: {
+                getModel: oComponent.getModel.bind(oComponent)
+            }
+        })).finally(function () {
             mOptions.resetDetailNavigationState(oComponent);
             mOptions.resumePendingNavigationIntent();
         });

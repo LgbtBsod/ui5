@@ -38,7 +38,7 @@ def fetch_existing_root_id() -> str:
     if not rows:
         raise RuntimeError("ChecklistSearchSet returned no rows")
     row = rows[0]
-    root_id = str(row.get("Key") or row.get("RootKey") or row.get("Id") or "").strip().upper()
+    root_id = str(row.get("DB_KEY") or row.get("Key") or row.get("RootKey") or row.get("Id") or "").strip().upper()
     if not root_id:
         raise RuntimeError("Could not resolve existing root id")
     return root_id
@@ -236,27 +236,15 @@ def main() -> int:
             network[before_upload:],
             lambda item: "AttachmentSet" in item["url"] or "/$batch" in item["url"],
         )
-        has_metadata_create = any(
-            (
-                item["method"] == "POST"
-                and (
-                    "/AttachmentSet" in item["url"]
-                    or ("multipart/mixed" in str(item["headers"].get("content-type", "")) and "POST AttachmentSet" in item.get("post_data", ""))
-                )
-            )
-            for item in attachment_requests
-        )
-        has_value_put = any(
-            item["method"] == "PUT" and "/AttachmentSet(Key='" in item["url"] and "/$value" in item["url"]
-            for item in attachment_requests
-        )
+        has_metadata_create = any(item["method"] == "POST" and "/AttachmentSet" in item["url"] for item in attachment_requests)
+        has_base64_save = any("Value" in (item.get("post_data") or "") and "SaveChanges" in item["url"] for item in attachment_requests)
         ensure(
             checks,
             "attachment.upload.network",
-            has_metadata_create and has_value_put,
+            has_metadata_create and not has_base64_save,
             {"requests": attachment_requests},
         )
-        if not (has_metadata_create and has_value_put):
+        if not (has_metadata_create and not has_base64_save):
             bugs.append("attachment.upload.contract")
 
         invoke_detail(page, "onCloseDetail")

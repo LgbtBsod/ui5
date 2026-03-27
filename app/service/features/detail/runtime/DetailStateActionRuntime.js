@@ -3,9 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailResetRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/runtime/DetailEditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/UiDecisionDefaultHandlers",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowCoordinator",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/BehaviorScopes",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
@@ -18,9 +18,9 @@ sap.ui.define([
     LayoutStateRuntime,
     WorkspaceRouteNavigation,
     ModelStateRuntime,
-    DetailResetRuntime,
+    DetailEditSessionRuntime,
     UiDecisionDefaultHandlers,
-    WorkflowCoordinator,
+    BehaviorScopes,
     StatePaths,
     NavigationContracts,
     ModelContracts,
@@ -39,6 +39,8 @@ sap.ui.define([
     var DETAIL_SOURCES = OperationSourceContracts.DETAIL;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
+    var oDetailEditSessionRuntime = new DetailEditSessionRuntime();
+    var oWorkflowScope = BehaviorScopes.workflow;
 
     function getModel(oController, sName) {
         return oController && oController.getModel ? oController.getModel(sName) : null;
@@ -75,19 +77,22 @@ sap.ui.define([
         },
         close: function (oController, mHooks) {
             resetDeleteChecklistConfirmArmed(oController);
-            return WorkflowCoordinator.confirmUnsavedAndHandle(oController, function () {
-                return mHooks.saveDetail();
+            return oWorkflowScope.execute("confirmUnsavedAndHandle", {
+                controller: oController,
+                onSave: function () {
+                    return mHooks.saveDetail();
+                }
             }).then(function (sDecision) {
                 if (sDecision === WorkflowDecisionRuntime.RESULTS.CANCEL || sDecision === WorkflowDecisionRuntime.RESULTS.SAVE_FAILED) {
                     return false;
                 }
                 if (sDecision === WorkflowDecisionRuntime.RESULTS.DISCARD) {
-                    DetailResetRuntime.resetDetailWorkflowState(oController, {
+                    oDetailEditSessionRuntime.resetDetailWorkflowState(oController, {
                         [ModelPathContracts.SELECTED_ID]: "",
                         [ModelPathContracts.ACTIVE_OBJECT_ID]: ""
                     });
                     ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN);
-                    DetailResetRuntime.resetDetailRuntimeData(oController);
+                    oDetailEditSessionRuntime.resetDetailRuntimeData(oController);
                     WorkspaceRouteNavigation.navigateToSearch(oController);
                     return true;
                 }

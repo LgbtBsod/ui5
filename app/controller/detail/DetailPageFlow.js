@@ -1,6 +1,6 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/detail/internal/DetailAccessViewState",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailEditRestoreRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/runtime/DetailEditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailMatchedRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
@@ -14,13 +14,14 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (DetailAccessViewState, DetailEditRestoreRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime, ModelContracts, DetailUseCaseConstants) {
+], function (DetailAccessViewState, DetailEditSessionRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime, ModelContracts, DetailUseCaseConstants) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var DETAIL_CODES = DetailUseCaseConstants.CODES;
+    var oDetailEditSessionRuntime = new DetailEditSessionRuntime();
     var DETAIL_ROW_BUSY_PATHS = Object.freeze({
         CHECKS: "/checksBusy",
         BARRIERS: "/barriersBusy"
@@ -42,7 +43,7 @@ sap.ui.define([
     }
 
     function handleMatchFailure(oController, oError) {
-        DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
+        oDetailEditSessionRuntime.clearAnalyticsReturnRestore(oController);
         ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false);
         ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
         clearDeferredRowBusy(oController);
@@ -189,7 +190,7 @@ sap.ui.define([
             ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "");
             ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
             markDetailReady(oController, { mode: "hydratedReturn", rootId: mContext.sId });
-            DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
+            oDetailEditSessionRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
                 enterEdit: function (mInput) {
                     return runDetailCommand(oController, "enterEdit", mInput);
                 },
@@ -203,7 +204,7 @@ sap.ui.define([
             var oAccessState;
             if (oResult && oResult.ok === false) {
                 if (!oResult.error || oResult.error.code !== DETAIL_CODES.NO_VIEW_PERMISSION) {
-                    DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
+                    oDetailEditSessionRuntime.clearAnalyticsReturnRestore(oController);
                     return oResult;
                 }
                 oAccessState = ControllerViewStateRuntime.get(oController, "/accessState", {}) || {};
@@ -217,7 +218,7 @@ sap.ui.define([
                     message: String(oAccessState.message || "").trim(),
                     checkedAt: new Date().toISOString()
                 });
-                DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
+                oDetailEditSessionRuntime.clearAnalyticsReturnRestore(oController);
                 return oResult;
             }
             syncDetailCommandSurface(oController, {
@@ -225,7 +226,7 @@ sap.ui.define([
                 isCreateMode: false,
                 hasPersistedObject: true
             });
-            return DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
+            return oDetailEditSessionRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
                 enterEdit: function (mInput) {
                     return runDetailCommand(oController, "enterEdit", mInput);
                 },

@@ -542,11 +542,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     TRY.
         rv_rootkey = zcl_zodata_odata_util=>get_uuid_from_it_key_tab( it_key_tab = it_key_tab iv_name = 'DB_KEY' ).
       CATCH zcx_zodata_error INTO DATA(lx_rootkey).
-        TRY.
-            rv_rootkey = zcl_zodata_odata_util=>get_uuid_from_it_key_tab( it_key_tab = it_key_tab iv_name = 'ObjectUuid' ).
-          CATCH zcx_zodata_error.
-            raise_busi_exception( iv_text = lx_rootkey->get_message_text( ) iv_code = lx_rootkey->get_code( ) ).
-        ENDTRY.
+        raise_busi_exception( iv_text = lx_rootkey->get_message_text( ) iv_code = lx_rootkey->get_code( ) ).
     ENDTRY.
   ENDMETHOD.
 

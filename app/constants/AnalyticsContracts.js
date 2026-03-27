@@ -181,10 +181,10 @@ sap.ui.define([
             YEAR_PRESET_CHANGED: "yearPresetChanged"
         }),
         MESSAGES: Object.freeze({
-            ANALYTICS_LOAD_FAILED: "Analytics load failed",
-            ANALYTICS_REFRESH_FAILED: "Analytics refresh failed",
-            ANALYTICS_UNAVAILABLE: "Analytics unavailable",
-            INVALID_YEAR: "Analytics year is invalid"
+            ANALYTICS_LOAD_FAILED: "analytics_load_failed",
+            ANALYTICS_REFRESH_FAILED: "analytics_refresh_failed",
+            ANALYTICS_UNAVAILABLE: "analytics_unavailable",
+            INVALID_YEAR: "analytics_year_invalid"
         })
     });
 });

@@ -62,17 +62,8 @@ sap.ui.define([
         ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.SEARCH_RETURN_CONTEXT, null);
     }
 
-    function hasLegacyRefreshFlag(oController) {
-        return !!ModelStateRuntime.read(
-            oController,
-            STATE_MODEL,
-            ModelPathContracts.SEARCH_FORCE_REFRESH_ON_RETURN,
-            false
-        );
-    }
-
-    function clearLegacyRefreshFlag(oController) {
-        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.SEARCH_FORCE_REFRESH_ON_RETURN, false);
+    function hasLegacyRefreshFlag(_oController) {
+        return false;
     }
 
     function extractItemObject(oItem) {
@@ -184,7 +175,6 @@ sap.ui.define([
         if (oReturnContext.mode === MODES.DELETE) {
             handleDeleteReturn(oController, oInnerTable);
             clearContext(oController);
-            clearLegacyRefreshFlag(oController);
             return true;
         }
 
@@ -195,7 +185,6 @@ sap.ui.define([
             handleMissingReturnItem(oController, oInnerTable);
         }
         clearContext(oController);
-        clearLegacyRefreshFlag(oController);
         return true;
     }
 
@@ -204,7 +193,6 @@ sap.ui.define([
         applyAfterSearchSuccess: applyAfterSearchSuccess,
         buildContext: buildContext,
         clearContext: clearContext,
-        clearLegacyRefreshFlag: clearLegacyRefreshFlag,
         hasLegacyRefreshFlag: hasLegacyRefreshFlag,
         readContext: readContext
     };

@@ -91,16 +91,16 @@ sap.ui.define([
         var oMappedBasic = mapBasic(oBasicRow);
         var sAggChangedOn = oRootRow.ChangedOn || oRootRow.AggChangedOn || "";
         var iVersionNumber = Number(oRootRow.VersionNumber || oRootRow.version_number || 0) || 0;
-    var sRootId = String(oRootRow.DB_KEY || oRootRow.pcct_uuid || "").trim();
+    var sRootId = String(oRootRow.DB_KEY || oRootRow.db_key || "").trim();
         if (sAggChangedOn && !oRootRow.server_changed_on) {
             oRootRow.server_changed_on = sAggChangedOn;
         }
         if (sRootId && !oRootRow.id) {
             oRootRow.id = sRootId;
         }
-        if (sRootId && !oRootRow.pcct_uuid) {
-            oRootRow.pcct_uuid = sRootId;
-        }
+    if (sRootId && !oRootRow.db_key) {
+        oRootRow.db_key = sRootId;
+    }
         if (!oRootRow.status) {
             oRootRow.status = String(oRootRow.Status || "").trim();
         }

@@ -121,7 +121,8 @@ sap.ui.define([
         return {
             Payload: {
                 root: Object.assign({}, oIn.root || {}, {
-                    DB_KEY: normalizeRootKey((oIn.root && oIn.root.DB_KEY) || sRootId)
+                    DB_KEY: normalizeRootKey((oIn.root && (oIn.root.DB_KEY || oIn.root.db_key)) || sRootId),
+                    db_key: normalizeRootKey((oIn.root && (oIn.root.db_key || oIn.root.DB_KEY)) || sRootId)
                 }),
                 basic: Object.assign({}, oIn.basic || {}),
                 checks: Array.isArray(oIn.checks) ? oIn.checks.slice() : [],

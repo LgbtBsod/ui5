@@ -25,7 +25,7 @@ sap.ui.define([
     return "/Date(" + nMillis + ")/";
   }
 
-  function appendChildChanges(aOut, sRootKey, aCurrent, aBase, fnFieldsBuilder) {
+  function appendChildChanges(aOut, sParentKey, aCurrent, aBase, fnFieldsBuilder) {
     var mBase = DeltaCore.indexRows(aBase);
     var mCurrent = DeltaCore.indexRows(aCurrent);
 
@@ -33,22 +33,22 @@ sap.ui.define([
       var sKey = DeltaCore.rowKey(oRow);
       var oBaseRow = sKey ? mBase[sKey] : null;
       if (!sKey || !oBaseRow) {
-        aOut.push(fnFieldsBuilder(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sRootKey));
+        aOut.push(fnFieldsBuilder(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sParentKey));
         return;
       }
       if (!DeltaCore.eq(oRow, oBaseRow)) {
-        aOut.push(fnFieldsBuilder(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.UPDATE, sRootKey));
+        aOut.push(fnFieldsBuilder(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.UPDATE, sParentKey));
       }
     });
 
     Object.keys(mBase).forEach(function (sKey) {
       if (!mCurrent[sKey]) {
-        aOut.push(fnFieldsBuilder(DeltaCore.buildDeleteStub(mBase[sKey], sKey), 0, DeltaContracts.EDIT_MODE.DELETE, sRootKey));
+        aOut.push(fnFieldsBuilder(DeltaCore.buildDeleteStub(mBase[sKey], sKey), 0, DeltaContracts.EDIT_MODE.DELETE, sParentKey));
       }
     });
   }
 
-  function resolveRootKey(oCurrent, oBase) {
+  function resolveDbKey(oCurrent, oBase) {
     return String(
       (((oCurrent || {}).root || {})[IDENTITY.ROOT_CANONICAL_FIELDS[0]])
       || (((oCurrent || {}).root || {}).id)
@@ -81,7 +81,7 @@ sap.ui.define([
     var oCur = oCurrent || {};
     var oBas = oBase || {};
     var oOptions = mOptions || {};
-    var sRootKey = resolveRootKey(oCur, oBas);
+    var sDbKey = resolveDbKey(oCur, oBas);
     var aChecks = [];
     var aBarriers = [];
     var aParticipants = [];
@@ -89,15 +89,15 @@ sap.ui.define([
     var oRootDelta = DeltaCore.diffFields(oCur.root || {}, oBas.root || {});
     var oBasicDelta = DeltaCore.diffFields(oCur.basic || {}, oBas.basic || {});
     var sRootEditMode = DeltaContracts.normalizeEditMode(
-      oOptions.rootEditMode || ((oCur.root || {}).edit_mode) || (CreateSentinel.isCreateId(sRootKey) ? DeltaContracts.EDIT_MODE.CREATE : DeltaContracts.EDIT_MODE.UPDATE),
+      oOptions.rootEditMode || ((oCur.root || {}).edit_mode) || (CreateSentinel.isCreateId(sDbKey) ? DeltaContracts.EDIT_MODE.CREATE : DeltaContracts.EDIT_MODE.UPDATE),
       DeltaContracts.EDIT_MODE.UPDATE
     );
-    var oRootPayload = DeltaFieldMappers.mapRootFields(oRootDelta, oBasicDelta, sRootKey, sRootEditMode);
+    var oRootPayload = DeltaFieldMappers.mapRootFields(oRootDelta, oBasicDelta, sDbKey, sRootEditMode);
 
-    appendChildChanges(aChecks, sRootKey, oCur.checks || [], oBas.checks || [], DeltaFieldMappers.toCheckFields);
-    appendChildChanges(aBarriers, sRootKey, oCur.barriers || [], oBas.barriers || [], DeltaFieldMappers.toBarrierFields);
-    appendChildChanges(aParticipants, sRootKey, oCur.participants || [], oBas.participants || [], DeltaFieldMappers.toParticipantFields);
-    appendChildChanges(aAttachments, sRootKey, oCur.attachments || [], oBas.attachments || [], DeltaFieldMappers.toAttachmentFields);
+    appendChildChanges(aChecks, sDbKey, oCur.checks || [], oBas.checks || [], DeltaFieldMappers.toCheckFields);
+    appendChildChanges(aBarriers, sDbKey, oCur.barriers || [], oBas.barriers || [], DeltaFieldMappers.toBarrierFields);
+    appendChildChanges(aParticipants, sDbKey, oCur.participants || [], oBas.participants || [], DeltaFieldMappers.toParticipantFields);
+    appendChildChanges(aAttachments, sDbKey, oCur.attachments || [], oBas.attachments || [], DeltaFieldMappers.toAttachmentFields);
     if (Object.keys(oRootPayload).length === 2 && !aChecks.length && !aBarriers.length && !aParticipants.length && !aAttachments.length) { return null; }
 
     return {
@@ -120,21 +120,21 @@ sap.ui.define([
 
   function buildCreatePayload(oCurrent) {
     var oCur = oCurrent || {};
-    var sRootKey = resolveRootKey(oCur, {});
+    var sDbKey = resolveDbKey(oCur, {});
     return {
-      root: DeltaFieldMappers.mapRootFields(oCur.root || {}, oCur.basic || {}, sRootKey, DeltaContracts.EDIT_MODE.CREATE),
+      root: DeltaFieldMappers.mapRootFields(oCur.root || {}, oCur.basic || {}, sDbKey, DeltaContracts.EDIT_MODE.CREATE),
       basic: Object.assign({}, oCur.basic || {}),
       checks: (oCur.checks || []).map(function (oRow, iIndex) {
-        return DeltaFieldMappers.toCheckFields(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sRootKey);
+        return DeltaFieldMappers.toCheckFields(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sDbKey);
       }),
       barriers: (oCur.barriers || []).map(function (oRow, iIndex) {
-        return DeltaFieldMappers.toBarrierFields(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sRootKey);
+        return DeltaFieldMappers.toBarrierFields(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sDbKey);
       }),
       participants: (oCur.participants || []).map(function (oRow, iIndex) {
-        return DeltaFieldMappers.toParticipantFields(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sRootKey);
+        return DeltaFieldMappers.toParticipantFields(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sDbKey);
       }),
       attachments: (oCur.attachments || []).map(function (oRow, iIndex) {
-        return DeltaFieldMappers.toAttachmentFields(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sRootKey);
+        return DeltaFieldMappers.toAttachmentFields(oRow || {}, iIndex, DeltaContracts.EDIT_MODE.CREATE, sDbKey);
       }),
       client_version: 0,
       client_changed_on: null

@@ -160,7 +160,7 @@ sap.ui.define([
                 var oInitialSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
                     DetailSaveRuntime.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot)
                 );
-            var sServerRootId = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.pcct_uuid || oInitialSavedSnapshot.DB_KEY || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
+            var sServerRootId = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.db_key || oInitialSavedSnapshot.DB_KEY || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
                 var pLockAcquire = Promise.resolve(null);
                 if (bCreate && sServerRootId && !CreateSentinel.isCreateId(sServerRootId) && oLock && typeof oLock.acquire === "function" && sSessionGuid) {
                     pLockAcquire = Promise.resolve(oLock.acquire(DetailRuntimePayload.lockRequest({

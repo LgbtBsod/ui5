@@ -9,7 +9,6 @@ import sys
 import urllib.parse
 import urllib.request
 import uuid
-import base64
 from http.cookiejar import CookieJar
 from pathlib import Path
 from typing import Any
@@ -71,7 +70,7 @@ def existing_root(opener) -> str:
     rows = (((payload or {}).get("d") or {}).get("results")) or []
     if not rows:
         raise RuntimeError("ChecklistSearchSet returned no rows")
-    return str(rows[0].get("Key") or rows[0].get("RootKey") or rows[0].get("Id") or "").strip().upper()
+    return str(rows[0].get("DB_KEY") or rows[0].get("Key") or rows[0].get("Id") or "").strip().upper()
 
 
 def create_checklist(opener, token: str) -> dict[str, Any]:
@@ -187,12 +186,12 @@ def main() -> int:
         ensure(api_checks, "runtime.settings.gateway", status == 200 and bool(runtime_data.get("Key")), {"status": status, "key": runtime_data.get("Key")})
 
         created = create_checklist(opener, token)
-        created_root_id = str(created.get("RootKey") or created.get("Key") or "").strip().upper()
+        created_root_id = str(created.get("DB_KEY") or created.get("RootKey") or created.get("Key") or "").strip().upper()
         created_version = int(created.get("VersionNumber") or 1)
         ensure(api_checks, "create.gateway", bool(created_root_id) and created_version == 1, {"rootId": created_root_id, "version": created_version})
 
         session_guid = f"GW-SMOKE-{uuid.uuid4().hex[:12].upper()}"
-        query = urllib.parse.urlencode({"RootId": created_root_id, "SessionGuid": session_guid})
+        query = urllib.parse.urlencode({"DB_KEY": f"binary'{created_root_id}'", "SessionGuid": session_guid})
         acquire_status, acquire_payload, _headers = request(opener, "POST", f"{SERVICE_ROOT}/LockAcquire?{query}", headers={"X-CSRF-Token": token})
         heartbeat_status, heartbeat_payload, _headers = request(opener, "POST", f"{SERVICE_ROOT}/LockHeartbeat?{query}", headers={"X-CSRF-Token": token})
         ensure(
@@ -203,7 +202,7 @@ def main() -> int:
         )
 
         autosave_payload = {
-            "root": {"pcct_uuid": created_root_id},
+            "root": {"db_key": created_root_id},
             "checks": [{
                 "client_row_id": uuid.uuid4().hex.upper(),
                 "edit_mode": "C",
@@ -222,7 +221,7 @@ def main() -> int:
         ensure(api_checks, "autosave.gateway", autosave_status == 200 and autosave_version == 2, {"status": autosave_status, "version": autosave_version})
 
         save_payload = {
-            "root": {"pcct_uuid": created_root_id, "equipment": "Gateway Smoke Saved"},
+            "root": {"db_key": created_root_id, "equipment": "Gateway Smoke Saved"},
             "checks": [],
             "barriers": [],
             "client_version": autosave_version,
@@ -234,40 +233,29 @@ def main() -> int:
         ensure(api_checks, "save.gateway", save_status == 200 and save_version == 3, {"status": save_status, "version": save_version})
 
         attachment_body = b"gateway smoke attachment"
-        attachment_save_payload = {
-            "root": {"pcct_uuid": created_root_id, "equipment": "Gateway Smoke Saved"},
-            "checks": [],
-            "barriers": [],
-            "client_version": save_version,
-            "SessionGuid": session_guid,
-            "attachments": [{
-                "Key": "GW-ATT-1",
-                "RootKey": created_root_id,
-                "ParentKey": created_root_id,
-                "FolderKey": created_root_id,
-                "CategoryKey": "GEN",
-                "Type": "GEN",
-                "FileName": "gateway-smoke.txt",
-                "Name": "gateway-smoke.txt",
-                "MimeType": "text/plain",
-                "Description": "Gateway smoke attachment",
-                "FileSize": len(attachment_body),
-                "FileSizeContent": len(attachment_body),
-                "Value": base64.b64encode(attachment_body).decode("ascii"),
-            }],
-        }
         attachment_save_status, attachment_save_data, _headers = request(
             opener,
             "POST",
-            f"{SERVICE_ROOT}/SaveChanges",
-            headers={"X-CSRF-Token": token},
-            payload=attachment_save_payload,
+            f"{SERVICE_ROOT}/AttachmentSet",
+            headers={
+                "X-CSRF-Token": token,
+                "X-DB-Key": created_root_id,
+                "X-Parent-Key": created_root_id,
+                "X-Folder-Key": created_root_id,
+                "X-Category-Key": "GEN",
+                "X-Description": "Gateway smoke attachment",
+                "X-File-Name": "gateway-smoke.txt",
+                "Slug": "gateway-smoke.txt",
+                "Content-Type": "text/plain",
+            },
+            payload=attachment_body,
+            expect_json=True,
         )
         attachment_saved_body = (attachment_save_data or {}).get("d") or {}
         attachment_list_status, attachment_list_body, _headers = request(
             opener,
             "GET",
-            f"{SERVICE_ROOT}/AttachmentSet?$filter=RootKey%20eq%20'{created_root_id}'",
+            f"{SERVICE_ROOT}/AttachmentSet?$filter=PARENT_KEY%20eq%20binary'{created_root_id}'",
             headers={"X-CSRF-Token": token},
         )
         attachment_rows = (((attachment_list_body or {}).get("d") or {}).get("results")) or []
@@ -290,15 +278,16 @@ def main() -> int:
             api_checks,
             "attachment.gateway",
             attachment_save_status == 200
-            and int(attachment_saved_body.get("version_number") or 0) == 4
+            and attachment_saved_body.get("DownloadUrl")
+            and attachment_saved_body.get("DocumentHandle")
             and attachment_list_status == 200
             and len(attachment_rows) == 1
             and attachment_get_status == 200
-            and attachment_get_body.get("Value") == base64.b64encode(attachment_body).decode("ascii")
+            and not attachment_get_body.get("Value")
             and attachment_delete_status == 204,
             {
                 "saveStatus": attachment_save_status,
-                "saveVersion": attachment_saved_body.get("version_number"),
+                "documentHandle": attachment_saved_body.get("DocumentHandle"),
                 "listStatus": attachment_list_status,
                 "getStatus": attachment_get_status,
                 "deleteStatus": attachment_delete_status,
@@ -311,15 +300,15 @@ def main() -> int:
         ensure(api_checks, "lock.release.gateway", release_ok, {"status": release_status})
 
         browser_created = create_checklist(opener, token)
-        browser_root_id = str(browser_created.get("RootKey") or browser_created.get("Key") or "").strip().upper()
+        browser_root_id = str(browser_created.get("DB_KEY") or browser_created.get("RootKey") or browser_created.get("Key") or "").strip().upper()
         ensure(api_checks, "browser.root.created", bool(browser_root_id), {"rootId": browser_root_id})
 
         browser_attachment_created = create_checklist(opener, token)
-        browser_attachment_root_id = str(browser_attachment_created.get("RootKey") or browser_attachment_created.get("Key") or "").strip().upper()
+        browser_attachment_root_id = str(browser_attachment_created.get("DB_KEY") or browser_attachment_created.get("RootKey") or browser_attachment_created.get("Key") or "").strip().upper()
         ensure(api_checks, "browser.attachment.root.created", bool(browser_attachment_root_id), {"rootId": browser_attachment_root_id})
 
         browser_flow_created = create_checklist(opener, token)
-        browser_flow_root_id = str(browser_flow_created.get("RootKey") or browser_flow_created.get("Key") or "").strip().upper()
+        browser_flow_root_id = str(browser_flow_created.get("DB_KEY") or browser_flow_created.get("RootKey") or browser_flow_created.get("Key") or "").strip().upper()
         ensure(api_checks, "browser.flow.root.created", bool(browser_flow_root_id), {"rootId": browser_flow_root_id})
 
         browser_report = combine_browser_reports({

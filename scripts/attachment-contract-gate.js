@@ -56,11 +56,15 @@ if (/_boundary_parent_key\(item\)\s+or\s+root_hex/.test(mockApi) === false) {
 }
 
 const attachmentRepoRuntime = fs.readFileSync(path.join(ROOT, 'app', 'infra', 'adapters', 'shared', 'AttachmentRepoRuntime.js'), 'utf8');
-if (!/uploadMedia\s*\(/.test(attachmentRepoRuntime)) {
-  issues.push('AttachmentRepoRuntime must use media upload boundary instead of generic JSON create');
+if (/uploadMedia\s*\(/.test(attachmentRepoRuntime)) {
+  issues.push('AttachmentRepoRuntime must not expose a dead uploadMedia stub next to the canonical media upload owner');
 }
 if (/ContentBase64/.test(attachmentRepoRuntime)) {
   issues.push('AttachmentRepoRuntime must not emit ContentBase64 on the frontend upload path');
+}
+const attachmentGatewayRuntime = fs.readFileSync(path.join(ROOT, 'app', 'service', 'features', 'detail', 'runtime', 'AttachmentGatewayRuntime.js'), 'utf8');
+if (!/X-DB-Key/.test(attachmentGatewayRuntime) || !/X-Parent-Key/.test(attachmentGatewayRuntime) || !/ENTITY_SETS\.ATTACHMENT/.test(attachmentGatewayRuntime)) {
+  issues.push('AttachmentGatewayRuntime must remain the canonical media upload owner for AttachmentSet');
 }
 if (!/ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN/.test(mockApi)) {
   issues.push('mock gateway must explicitly reject base64 attachment payloads on SaveChanges');

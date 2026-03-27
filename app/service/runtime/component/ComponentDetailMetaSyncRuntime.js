@@ -1,11 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailResetRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/runtime/DetailEditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ModelStateRuntime, DetailResetRuntime, WorkflowContracts, ComponentListenerContracts, ModelPathContracts, ModelContracts) {
+], function (ModelStateRuntime, DetailEditSessionRuntime, WorkflowContracts, ComponentListenerContracts, ModelPathContracts, ModelContracts) {
     "use strict";
 
     var READINESS_STATUS = WorkflowContracts.READINESS_STATUS;
@@ -14,6 +14,7 @@ sap.ui.define([
     });
     var PATHS = ComponentListenerContracts.PATHS;
     var VALUES = ComponentListenerContracts.VALUES;
+    var oDetailEditSessionRuntime = new DetailEditSessionRuntime();
 
     function syncDetailMeta(oStateModel, StatePaths) {
         var oReadiness = ModelStateRuntime.readOnModel(oStateModel, StatePaths.READINESS_DETAIL, {}) || {};
@@ -56,12 +57,12 @@ sap.ui.define([
     }
 
     function resetDetailNavigationState(oComponent) {
-        DetailResetRuntime.resetDetailWorkflowState(oComponent, {
+        oDetailEditSessionRuntime.resetDetailWorkflowState(oComponent, {
             [ModelPathContracts.SELECTED_ID]: "",
             [ModelPathContracts.ACTIVE_OBJECT_ID]: ""
         });
         ModelStateRuntime.write(oComponent, ComponentListenerContracts.MODEL_NAMES.SHELL, ModelContracts.MODEL_PATHS.SHELL_LAYOUT, VALUES.ONE_COLUMN);
-        DetailResetRuntime.resetDetailRuntimeData(oComponent);
+        oDetailEditSessionRuntime.resetDetailRuntimeData(oComponent);
     }
 
     return {

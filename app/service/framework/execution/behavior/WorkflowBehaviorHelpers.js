@@ -2,22 +2,23 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DialogOrchestrator",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/FeedbackBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailResetRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/runtime/DetailEditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (DialogOrchestrator, FeedbackBehaviorHelpers, ModelStateRuntime, DetailResetRuntime, StatePaths, WorkflowContracts, ModelPathContracts, ModelContracts) {
+], function (DialogOrchestrator, FeedbackBehaviorHelpers, ModelStateRuntime, DetailEditSessionRuntime, StatePaths, WorkflowContracts, ModelPathContracts, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var oDetailEditSessionRuntime = new DetailEditSessionRuntime();
 
     function resolveText(oController, sKey, aArgs, sFallback) {
         return FeedbackBehaviorHelpers.resolveText(oController, sKey, aArgs || [], sFallback || sKey);
     }
 
     function resetDetailWorkflowState(oController) {
-        DetailResetRuntime.resetDetailWorkflowState(oController, {
+        oDetailEditSessionRuntime.resetDetailWorkflowState(oController, {
             [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE]: ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE) || WorkflowContracts.AUTOSAVE_STATES.IDLE,
             [StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT]: ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
             [StatePaths.WORKFLOW_AUTOSAVE_ENABLED]: ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false) === true,
