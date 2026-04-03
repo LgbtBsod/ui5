@@ -52,11 +52,11 @@ sap.ui.define([
         function handleTabSignal(oSignal) {
             var oPayload = oSignal || {};
             var sSignalType = String(oPayload.type || "").toUpperCase();
-            var sSignalRootId = String(oPayload.rootId || "").trim();
-            var sCurrentRootId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+            var sSignalDbKey = String(oPayload.dbKey || oPayload.rootId || "").trim();
+            var sCurrentDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
             var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
             var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
-            if (!sSignalType || oPayload.tabId === sThisTabId || !sSignalRootId || !sCurrentRootId || sSignalRootId !== sCurrentRootId) {
+            if (!sSignalType || oPayload.tabId === sThisTabId || !sSignalDbKey || !sCurrentDbKey || sSignalDbKey !== sCurrentDbKey) {
                 return;
             }
             if (sSignalType !== VALUES.LOCK_OWNED || sMode !== WorkflowContracts.EDIT_MODES.EDIT || sLockState !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {

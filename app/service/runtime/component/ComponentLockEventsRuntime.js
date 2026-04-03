@@ -107,7 +107,7 @@ sap.ui.define([
                 }));
             }
             return oComponent._detailFacade.onLockLost({
-                rootId: ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, ""),
+                dbKey: ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, ""),
                 reason: (oPayload && (oPayload.code || oPayload.reason_code)) || DETAIL_CODES.KILLED,
                 preserveDirty: false
             }, oComponent._ctx).then(function (oResult) {
@@ -199,7 +199,7 @@ sap.ui.define([
 
         oComponent._oStateLifecycleModel = oStateModel;
         oComponent._fnStateModelPropertyChange = function (oEvent) {
-            var sCurrentRootId;
+            var sCurrentDbKey;
             var sCurrentMode;
             var sCurrentLockState;
             var sPath = oEvent.getParameter("path") || "";
@@ -216,14 +216,14 @@ sap.ui.define([
                 fnEmitTelemetry(TELEMETRY_EVENT.LOCK_STATE_CHANGED, mOptions.telemetryRuntime.stateValue(oEvent.getParameter("value")));
             }
             if ([StatePaths.WORKFLOW_DETAIL_EDIT_MODE, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, PATHS.ACTIVE_OBJECT_ID].indexOf(sPath) >= 0) {
-                sCurrentRootId = String(ModelStateRuntime.readOnModel(oStateModel, PATHS.ACTIVE_OBJECT_ID, "") || "").trim();
+                sCurrentDbKey = String(ModelStateRuntime.readOnModel(oStateModel, PATHS.ACTIVE_OBJECT_ID, "") || "").trim();
                 sCurrentMode = mOptions.layoutStateRuntime.readMode(oStateModel, "");
                 sCurrentLockState = mOptions.layoutStateRuntime.readLockState(oStateModel, "");
-                if (sCurrentRootId && sCurrentMode === WorkflowContracts.EDIT_MODES.EDIT && sCurrentLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
+                if (sCurrentDbKey && sCurrentMode === WorkflowContracts.EDIT_MODES.EDIT && sCurrentLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                     ModelStateRuntime.writeOnModel(oStateModel, StatePaths.TAB_CONFLICT_STATE, { active: false, source: "", at: "" });
-                    fnPublishTabSignal(VALUES.LOCK_OWNED, { dbKey: sCurrentRootId });
-                } else if (sCurrentRootId && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sCurrentMode !== WorkflowContracts.EDIT_MODES.EDIT) {
-                    fnPublishTabSignal(VALUES.LOCK_RELEASED, { dbKey: sCurrentRootId });
+                    fnPublishTabSignal(VALUES.LOCK_OWNED, { dbKey: sCurrentDbKey });
+                } else if (sCurrentDbKey && sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sCurrentMode !== WorkflowContracts.EDIT_MODES.EDIT) {
+                    fnPublishTabSignal(VALUES.LOCK_RELEASED, { dbKey: sCurrentDbKey });
                 }
             }
         };

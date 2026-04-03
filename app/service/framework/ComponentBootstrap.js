@@ -36,6 +36,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/InteractionFX",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeService",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxAdapterFactory",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ComponentAppRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentFacadeEffectRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailFacade",
@@ -84,6 +85,7 @@ sap.ui.define([
     WorkflowTelemetry,
     InteractionFX,
     ThemeService,
+    CtxAdapterFactory,
     ComponentAppRuntime,
     ComponentFacadeEffectRuntime,
     DetailFacade,
@@ -97,23 +99,10 @@ sap.ui.define([
 ) {
     "use strict";
 
-    function buildActionRuntimeOptions(oComponent, mDeps, mModels) {
-        return {
-            bundleText: ComponentFacadeEffectRuntime.createBundleText(oComponent),
-            emitTelemetry: function (sEventName, oPayload) {
-                return mDeps.WorkflowTelemetry.emit(sEventName, {
-                    stateModel: mModels.stateModel,
-                    payload: oPayload || {}
-                });
-            }
-        };
-    }
-
-    function buildRuntimeModels(mModelBootstrap) {
-        return Object.assign({}, mModelBootstrap.models, {
-            mainServiceModel: mModelBootstrap.mainServiceModel
-        });
-    }
+    var BOOTSTRAP_ERROR_CODES = Object.freeze({
+        MISSING_MAIN_SERVICE_DATASOURCE: "bootstrap_main_service_datasource_missing",
+        MISSING_MAIN_SERVICE_MODEL: "bootstrap_main_service_model_missing"
+    });
 
     function initializeModelsStage(oComponent, mBootstrapDeps, oBootstrap) {
         var oModelBootstrap = bootstrapModels(oComponent, mBootstrapDeps);
@@ -128,26 +117,6 @@ sap.ui.define([
         return oModelBootstrap;
     }
 
-    function initializeRuntimeServicesStage(oComponent, mBootstrapDeps, oModelBootstrap, mActionRuntimeOptions) {
-        return mBootstrapDeps.ComponentRuntimeSettingsRuntime.initializeRuntimeSettings(oComponent, {
-            stateModel: oModelBootstrap.models.stateModel,
-            envState: oModelBootstrap.models.envState,
-            masterDataModel: oModelBootstrap.models.masterDataModel,
-            settingsManager: mBootstrapDeps.Managers && mBootstrapDeps.Managers.SettingsManager || mBootstrapDeps.SettingsManager,
-            gatewayBackendService: GatewayClient,
-            telemetryRuntime: TelemetryRuntime,
-            emitTelemetry: mActionRuntimeOptions.emitTelemetry
-        });
-    }
-
-    function attachLifecycleStage(oComponent, mBootstrapDeps, mActionRuntimeOptions, mRuntimeModels) {
-        return ComponentLifecycleRuntime.attachRuntime(
-            oComponent,
-            Object.assign({}, mBootstrapDeps, mActionRuntimeOptions),
-            mRuntimeModels
-        );
-    }
-
     function createMainServiceModel(oComponent, mDeps) {
         var oMainServiceModel = oComponent && oComponent.getModel ? oComponent.getModel("mainService") : null;
         var sManifestUri = oComponent && oComponent.getManifestEntry
@@ -156,10 +125,10 @@ sap.ui.define([
         var sResolvedServiceUrl;
 
         if (!sManifestUri) {
-            throw new Error("Manifest-driven mainService dataSource is missing. Check sap.app/dataSources/mainService/uri in manifest.json.");
+            throw new Error(BOOTSTRAP_ERROR_CODES.MISSING_MAIN_SERVICE_DATASOURCE);
         }
         if (!oMainServiceModel) {
-            throw new Error("Manifest-owned mainService model is missing on the component");
+            throw new Error(BOOTSTRAP_ERROR_CODES.MISSING_MAIN_SERVICE_MODEL);
         }
 
         sResolvedServiceUrl = String((oMainServiceModel && oMainServiceModel.sServiceUrl) || sManifestUri || "").replace(/\/+$/, "");
@@ -169,21 +138,23 @@ sap.ui.define([
     }
 
     function bootstrapModels(oComponent, mDeps) {
-        return {
+        var oBootstrapResult;
+
+        oBootstrapResult = {
             models: mDeps.ComponentModelInitRuntime.initializeModels(oComponent, mDeps),
             mainServiceModel: createMainServiceModel(oComponent, mDeps)
         };
+        oComponent._ctx = Object.assign({}, CtxAdapterFactory.buildInfraAdapters({
+            state: oBootstrapResult.models.stateModel,
+            masterData: oBootstrapResult.models.masterDataModel
+        }, {
+            uiState: null
+        }));
+
+        return oBootstrapResult;
     }
 
     function createBootstrapDeps() {
-        var oManagers = Object.freeze({
-            PollingManager: PollingManager,
-            GCDManager: GCDManager,
-            ActivityMonitor: ActivityMonitor,
-            AutoSaveCoordinator: AutoSaveCoordinator,
-            ConnectivityCoordinator: ConnectivityCoordinator,
-            SettingsManager: SettingsManager
-        });
         var mDeps = {
             UIComponent: UIComponent,
             JSONModel: JSONModel,
@@ -206,6 +177,9 @@ sap.ui.define([
             EffectApplier: EffectApplier,
             FeedbackPolicy: FeedbackPolicy,
             ComponentAutosaveRuntime: ComponentAutosaveRuntime,
+            ComponentModelInitRuntime: ComponentModelInitRuntime,
+            ComponentInitListenersRuntime: ComponentInitListenersRuntime,
+            ComponentLockEventsRuntime: ComponentLockEventsRuntime,
             TelemetryRuntime: TelemetryRuntime,
             LayoutStateRuntime: LayoutStateRuntime,
             ActionDispatcher: ActionDispatcher,
@@ -222,11 +196,10 @@ sap.ui.define([
             LoadCurrentUserUseCase: LoadCurrentUserUseCase,
             DiagnosticsUseCase: DiagnosticsUseCase
         };
-        mDeps.Managers = oManagers;
         mDeps.managers = {
-            GCDManager: oManagers.GCDManager,
-            ActivityMonitor: oManagers.ActivityMonitor,
-            AutoSaveCoordinator: oManagers.AutoSaveCoordinator
+            GCDManager: GCDManager,
+            ActivityMonitor: ActivityMonitor,
+            AutoSaveCoordinator: AutoSaveCoordinator
         };
         mDeps.ComponentRuntimeSupport = ComponentAppRuntime.buildComponentRuntimeSupport();
 
@@ -280,12 +253,32 @@ sap.ui.define([
 
         oModelBootstrap = initializeModelsStage(oComponent, mBootstrapDeps, oBootstrap);
         runDiagnostics(DiagnosticsUseCase, mBootstrapDeps, oModelBootstrap);
-        mRuntimeModels = buildRuntimeModels(oModelBootstrap);
-        mActionRuntimeOptions = buildActionRuntimeOptions(oComponent, {
-            WorkflowTelemetry: WorkflowTelemetry
-        }, oModelBootstrap.models);
-        oRuntimeSettingsRuntime = initializeRuntimeServicesStage(oComponent, mBootstrapDeps, oModelBootstrap, mActionRuntimeOptions);
-        oNavigationRuntime = attachLifecycleStage(oComponent, mBootstrapDeps, mActionRuntimeOptions, mRuntimeModels);
+        mRuntimeModels = Object.assign({}, oModelBootstrap.models, {
+            mainServiceModel: oModelBootstrap.mainServiceModel
+        });
+        mActionRuntimeOptions = {
+            bundleText: ComponentFacadeEffectRuntime.createBundleText(oComponent),
+            emitTelemetry: function (sEventName, oPayload) {
+                return WorkflowTelemetry.emit(sEventName, {
+                    stateModel: oModelBootstrap.models.stateModel,
+                    payload: oPayload || {}
+                });
+            }
+        };
+        oRuntimeSettingsRuntime = mBootstrapDeps.ComponentRuntimeSettingsRuntime.initializeRuntimeSettings(oComponent, {
+            stateModel: oModelBootstrap.models.stateModel,
+            envState: oModelBootstrap.models.envState,
+            masterDataModel: oModelBootstrap.models.masterDataModel,
+            settingsManager: mBootstrapDeps.SettingsManager,
+            gatewayBackendService: GatewayClient,
+            telemetryRuntime: TelemetryRuntime,
+            emitTelemetry: mActionRuntimeOptions.emitTelemetry
+        });
+        oNavigationRuntime = ComponentLifecycleRuntime.attachRuntime(
+            oComponent,
+            Object.assign({}, mBootstrapDeps, mActionRuntimeOptions),
+            mRuntimeModels
+        );
 
         return ComponentLifecycleRuntime.runBootSequence({
             component: oComponent,

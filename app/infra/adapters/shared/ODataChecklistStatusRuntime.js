@@ -5,11 +5,11 @@ sap.ui.define([
     "use strict";
 
     function deleteChecklist(mArgs, mDeps) {
-        var sRootId = mDeps.normalizeRootKey(mDeps.rootId(mArgs));
+        var sDbKey = mDeps.normalizeDbKey(mDeps.dbKey(mArgs));
         return GatewayClient.callFunctionImport(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES, {
             Payload: {
                 root: {
-            db_key: sRootId,
+                    db_key: sDbKey,
                     edit_mode: "D"
                 },
                 checks: [],
@@ -23,7 +23,7 @@ sap.ui.define([
         }).then(function () {
             return {
                 deleted: true,
-                rootId: sRootId
+                dbKey: sDbKey
             };
         });
     }

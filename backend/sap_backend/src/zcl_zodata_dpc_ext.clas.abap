@@ -82,14 +82,14 @@ CLASS zcl_zodata_dpc_ext DEFINITION PUBLIC INHERITING FROM zcl_zodata_dpc CREATE
       IMPORTING
         is_lock_request TYPE any
       RETURNING VALUE(rv_db_key) TYPE sysuuid_x16.
-    METHODS read_root_key
+    METHODS read_db_key
       IMPORTING
         it_key_tab TYPE /iwbep/t_mgw_name_value_pair
-      RETURNING VALUE(rv_rootkey) TYPE sysuuid_x16
+      RETURNING VALUE(rv_db_key) TYPE sysuuid_x16
       RAISING /iwbep/cx_mgw_busi_exception.
     METHODS build_permission_row
       IMPORTING
-        iv_rootkey TYPE sysuuid_x16
+        iv_db_key TYPE sysuuid_x16
       RETURNING VALUE(rs_result) TYPE zstr_pcct_permission_rs.
     METHODS build_current_user_row
       RETURNING VALUE(rs_result) TYPE zstr_pcct_current_user_rs.
@@ -292,14 +292,14 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   METHOD lockacquire_create_entity.
     DATA ls_req TYPE zstr_pcct_lock_acquire_rq.
     DATA ls_result TYPE zstr_pcct_lock_acquire_rs.
-    DATA lv_root_key TYPE sysuuid_x16.
+    DATA lv_db_key TYPE sysuuid_x16.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
-    lv_root_key = resolve_lock_db_key( ls_req ).
-    IF lv_root_key IS INITIAL OR ls_req-session_guid IS INITIAL.
+    lv_db_key = ls_req-db_key.
+    IF lv_db_key IS INITIAL OR ls_req-session_guid IS INITIAL.
       raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_acquire_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
-    DATA(ls_auth_lock) = mo_read_service->read_root_row( lv_root_key ).
+    DATA(ls_auth_lock) = mo_read_service->read_root_row( lv_db_key ).
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_change
       iv_bukrs    = ls_auth_lock-bukrs
@@ -308,7 +308,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     TRY.
         mo_lock_manager->acquire(
           EXPORTING
-            is_key   = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = lv_root_key )
+            is_key   = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = lv_db_key )
             is_owner = VALUE zif_zodata_lock_manager=>ty_owner( uname = sy-uname session_guid = ls_req-session_guid tab_session_id = ls_req-tab_session_id )
             iv_force_takeover = xsdbool( ls_req-force_takeover = abap_true )
           CHANGING
@@ -324,17 +324,17 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   METHOD lockheartbeat_create_entity.
     DATA ls_req TYPE zstr_pcct_lock_heartbeat_rq.
     DATA ls_result TYPE zstr_pcct_lock_heartbeat_rs.
-    DATA lv_root_key TYPE sysuuid_x16.
+    DATA lv_db_key TYPE sysuuid_x16.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
-    lv_root_key = resolve_lock_db_key( ls_req ).
-    IF lv_root_key IS INITIAL OR ls_req-session_guid IS INITIAL.
+    lv_db_key = ls_req-db_key.
+    IF lv_db_key IS INITIAL OR ls_req-session_guid IS INITIAL.
       raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_heartbeat_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     TRY.
         mo_lock_manager->heartbeat(
           EXPORTING
-            is_key          = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = lv_root_key )
+            is_key          = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = lv_db_key )
             iv_session_guid = ls_req-session_guid
           CHANGING
             cs_result       = ls_result ).
@@ -348,17 +348,17 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA ls_req TYPE zstr_pcct_lock_release_rq.
     DATA ls_result TYPE zstr_pcct_lock_release_rs.
     DATA lv_now_ts TYPE timestampl.
-    DATA lv_root_key TYPE sysuuid_x16.
+    DATA lv_db_key TYPE sysuuid_x16.
     ensure_deps( ).
     io_data_provider->read_entry_data( IMPORTING es_data = ls_req ).
-    lv_root_key = resolve_lock_db_key( ls_req ).
-    IF lv_root_key IS INITIAL OR ls_req-session_guid IS INITIAL.
+    lv_db_key = ls_req-db_key.
+    IF lv_db_key IS INITIAL OR ls_req-session_guid IS INITIAL.
       raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_lock_release_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     TRY.
         mo_lock_manager->unlock(
           EXPORTING
-            is_key          = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = lv_root_key )
+            is_key          = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = lv_db_key )
             iv_session_guid = ls_req-session_guid ).
       CATCH zcx_lock_error INTO DATA(lx_release_lock).
         raise_busi_exception( iv_text = lx_release_lock->get_text( ) iv_code = zif_zodata_message_codes=>lock_not_owned_by_session ).
@@ -370,7 +370,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
       EXPORTING
         iv_ok                  = abap_true
         iv_code                = zif_zodata_message_codes=>lock_ok
-        iv_db_key              = lv_root_key
+        iv_db_key              = lv_db_key
         iv_owner_session       = ls_req-session_guid
         iv_server_now          = lv_now_ts
         iv_lock_refreshed      = abap_false
@@ -382,10 +382,10 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
 
   METHOD lockstatusset_get_entity.
     DATA ls_result TYPE zstr_pcct_lock_acquire_rs.
-    DATA lv_rootkey TYPE sysuuid_x16.
+    DATA lv_db_key TYPE sysuuid_x16.
     DATA lv_session_guid TYPE string.
     ensure_deps( ).
-    lv_rootkey = read_root_key( it_key_tab ).
+    lv_db_key = read_db_key( it_key_tab ).
     READ TABLE it_key_tab ASSIGNING FIELD-SYMBOL(<ls_session_guid>) WITH KEY name = 'SessionGuid'.
     IF sy-subrc = 0.
       lv_session_guid = <ls_session_guid>-value.
@@ -393,7 +393,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     TRY.
         mo_lock_manager->status(
           EXPORTING
-            is_key          = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = lv_rootkey )
+            is_key          = VALUE zif_zodata_lock_manager=>ty_key( bo_key = zif_i_bo_c=>sc_bo_key object_id = lv_db_key )
             iv_session_guid = lv_session_guid
           CHANGING
             cs_result       = ls_result ).
@@ -423,7 +423,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   METHOD checklistrootset_get_entity.
     DATA ls_row TYPE zcl_zodata_read_service=>ty_root_row.
     ensure_deps( ).
-    ls_row = mo_read_service->read_root_row( read_root_key( it_key_tab ) ).
+    ls_row = mo_read_service->read_root_row( read_db_key( it_key_tab ) ).
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_view
       iv_bukrs    = ls_row-bukrs
@@ -444,46 +444,46 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD checklistcheckset_get_entityset.
-    DATA lv_rootkey TYPE sysuuid_x16.
+    DATA lv_db_key TYPE sysuuid_x16.
     DATA lt_rows TYPE zcl_zodata_read_service=>tt_check_row.
     DATA ls_root_auth TYPE zcl_zodata_read_service=>ty_root_row.
     ensure_deps( ).
-    TRY. lv_rootkey = read_root_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_rootkey. ENDTRY.
-    IF lv_rootkey IS INITIAL.
+    TRY. lv_db_key = read_db_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_db_key. ENDTRY.
+    IF lv_db_key IS INITIAL.
       RETURN.
     ENDIF.
-    ls_root_auth = mo_read_service->read_root_row( lv_rootkey ).
+    ls_root_auth = mo_read_service->read_root_row( lv_db_key ).
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_view
       iv_bukrs    = ls_root_auth-bukrs
         iv_text     = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_permission_no_view )
       iv_code     = zif_zodata_message_codes=>no_view_auth ).
-    lt_rows = mo_read_service->read_check_rows( lv_rootkey ).
+    lt_rows = mo_read_service->read_check_rows( lv_db_key ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
   ENDMETHOD.
 
   METHOD checklistbarriers_get_entityset.
-    DATA lv_rootkey TYPE sysuuid_x16.
+    DATA lv_db_key TYPE sysuuid_x16.
     DATA lt_rows TYPE zcl_zodata_read_service=>tt_barrier_row.
     DATA ls_root_auth TYPE zcl_zodata_read_service=>ty_root_row.
     ensure_deps( ).
-    TRY. lv_rootkey = read_root_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_rootkey. ENDTRY.
-    IF lv_rootkey IS INITIAL.
+    TRY. lv_db_key = read_db_key( it_key_tab ). CATCH /iwbep/cx_mgw_busi_exception. CLEAR lv_db_key. ENDTRY.
+    IF lv_db_key IS INITIAL.
       RETURN.
     ENDIF.
-    ls_root_auth = mo_read_service->read_root_row( lv_rootkey ).
+    ls_root_auth = mo_read_service->read_root_row( lv_db_key ).
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_view
       iv_bukrs    = ls_root_auth-bukrs
         iv_text     = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_permission_no_view )
       iv_code     = zif_zodata_message_codes=>no_view_auth ).
-    lt_rows = mo_read_service->read_barrier_rows( lv_rootkey ).
+    lt_rows = mo_read_service->read_barrier_rows( lv_db_key ).
     copy_data_to_ref( EXPORTING is_data = lt_rows CHANGING cr_data = er_entityset ).
   ENDMETHOD.
 
   METHOD checklistpermissions_get_entity.
     DATA ls_result TYPE zstr_pcct_permission_rs.
-    ls_result = build_permission_row( read_root_key( it_key_tab ) ).
+    ls_result = build_permission_row( read_db_key( it_key_tab ) ).
     copy_data_to_ref( EXPORTING is_data = ls_result CHANGING cr_data = er_entity ).
   ENDMETHOD.
 
@@ -512,9 +512,9 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
 
   METHOD build_permission_row.
     ensure_deps( ).
-    DATA(ls_root) = mo_read_service->read_root_row( iv_rootkey ).
+    DATA(ls_root) = mo_read_service->read_root_row( iv_db_key ).
     rs_result = mo_frontend_context->build_permission_result(
-      iv_root_key = iv_rootkey
+      iv_root_key = iv_db_key
       iv_bukrs    = ls_root-bukrs ).
   ENDMETHOD.
 
@@ -542,18 +542,16 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     rs_result-uploadpolicyjson = ls_runtime_settings-upload_policy_json.
   ENDMETHOD.
 
-  METHOD read_root_key.
+  METHOD read_db_key.
     TRY.
-        rv_rootkey = zcl_zodata_odata_util=>get_uuid_from_it_key_tab( it_key_tab = it_key_tab iv_name = 'DB_KEY' ).
-      CATCH zcx_zodata_error INTO DATA(lx_rootkey).
-        raise_busi_exception( iv_text = lx_rootkey->get_message_text( ) iv_code = lx_rootkey->get_code( ) ).
+        rv_db_key = zcl_zodata_odata_util=>get_uuid_from_it_key_tab( it_key_tab = it_key_tab iv_name = 'DB_KEY' ).
+      CATCH zcx_zodata_error INTO DATA(lx_db_key).
+        raise_busi_exception( iv_text = lx_db_key->get_message_text( ) iv_code = lx_db_key->get_code( ) ).
     ENDTRY.
   ENDMETHOD.
 
   METHOD resolve_lock_db_key.
-    rv_db_key = COND #( WHEN is_lock_request-db_key IS NOT INITIAL
-                        THEN is_lock_request-db_key
-                        ELSE is_lock_request-db_key ).
+    rv_db_key = is_lock_request-db_key.
   ENDMETHOD.
 
   METHOD raise_busi_exception.

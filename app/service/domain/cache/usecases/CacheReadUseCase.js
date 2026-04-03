@@ -10,13 +10,17 @@ sap.ui.define([
         };
     }
 
-function execute(mInput, mCtx) {
-        var sRootId = (mInput && mInput.rootId) || "";
+    function execute(mInput, mCtx) {
+        var sRequestedDbKey = (mInput && (mInput.dbKey || mInput.rootId)) || "";
         var sEntityKind = (mInput && mInput.entityKind) || "detailSnapshot";
         var oCache = mCtx && mCtx.cache;
         var bPortLike = !!(BrowserCachePort && BrowserCachePort.prototype && typeof oCache.read === "function");
-        if (!sRootId || !oCache || !bPortLike) return Promise.resolve(Result.ok({ snapshot: null }));
-        return Promise.resolve(oCache.read(sRootId, sEntityKind)).then(function (oEntry) {
+
+        if (!sRequestedDbKey || !oCache || !bPortLike) {
+            return Promise.resolve(Result.ok({ snapshot: null }));
+        }
+
+        return Promise.resolve(oCache.read(sRequestedDbKey, sEntityKind)).then(function (oEntry) {
             return Result.ok({
                 entry: oEntry || null,
                 snapshot: (oEntry && oEntry.payload) || null

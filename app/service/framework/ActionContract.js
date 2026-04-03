@@ -38,16 +38,18 @@ sap.ui.define([
 
     function normalizeTakeoverPayload(vPayload) {
         var oPayload = RuntimeInput.asObject(vPayload);
+        var sCanonicalDbKey = RuntimeInput.asString(oPayload.dbKey || oPayload.DB_KEY || oPayload.rootId || "").trim();
         return {
-            rootId: RuntimeInput.asString(oPayload.rootId || "").trim(),
+            dbKey: sCanonicalDbKey,
             forceTakeover: RuntimeInput.asBoolean(oPayload.forceTakeover !== undefined ? oPayload.forceTakeover : oPayload.force, false)
         };
     }
 
     function normalizeEnterEditPayload(vPayload) {
         var oPayload = RuntimeInput.asObject(vPayload);
+        var sCanonicalDbKey = RuntimeInput.asString(oPayload.dbKey || oPayload.DB_KEY || oPayload.rootId || "").trim();
         return {
-            rootId: RuntimeInput.asString(oPayload.rootId || "").trim(),
+            dbKey: sCanonicalDbKey,
             state: RuntimeInput.asBoolean(oPayload.state, true),
             confirmedIntegration: RuntimeInput.asBoolean(oPayload.confirmedIntegration, false)
         };

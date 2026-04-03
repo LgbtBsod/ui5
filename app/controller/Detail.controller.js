@@ -255,6 +255,42 @@ sap.ui.define([
             onOpenAttachmentPicker: function () {
                 return AttachmentUploadCore.openNativeFilePicker(this);
             },
+            onOpenChecksNumberValueHelp: function (oEvent) {
+                return DetailInteractionRuntime.onOpenChecksNumberValueHelp.call(this, oEvent);
+            },
+            onOpenBarriersNumberValueHelp: function (oEvent) {
+                return DetailInteractionRuntime.onOpenBarriersNumberValueHelp.call(this, oEvent);
+            },
+            onOpenLocationValueHelp: function (oEvent) {
+                return DetailInteractionRuntime.onOpenLocationValueHelp.call(this, oEvent);
+            },
+            onLocationValueHelpSearch: function (oEvent) {
+                return DetailInteractionRuntime.onLocationValueHelpSearch.call(this, oEvent);
+            },
+            onLocationValueHelpSearchSubmit: function (oEvent) {
+                return DetailInteractionRuntime.onLocationValueHelpSearchSubmit.call(this, oEvent);
+            },
+            onLocationTreeSelectionChange: function (oEvent) {
+                return DetailInteractionRuntime.onLocationTreeSelectionChange.call(this, oEvent);
+            },
+            onConfirmLocationValueHelp: function () {
+                return DetailInteractionRuntime.onConfirmLocationValueHelp.call(this);
+            },
+            onCloseLocationValueHelp: function () {
+                return DetailInteractionRuntime.onCloseLocationValueHelp.call(this);
+            },
+            onChecksNumberChange: function (oEvent) {
+                return DetailInteractionRuntime.onChecksNumberChange.call(this, oEvent);
+            },
+            onBarriersNumberChange: function (oEvent) {
+                return DetailInteractionRuntime.onBarriersNumberChange.call(this, oEvent);
+            },
+            onLpcChange: function (oEvent) {
+                return DetailInteractionRuntime.onLpcChange.call(this, oEvent);
+            },
+            onProfessionChange: function (oEvent) {
+                return DetailInteractionRuntime.onProfessionChange.call(this, oEvent);
+            },
             onOpenWorkflowAnalytics: function () {
                 return DetailInteractionRuntime.openWorkflowAnalytics(this);
             },

@@ -46,7 +46,7 @@ sap.ui.define([
                     confirmAction: ActionContract.ACTIONS.DETAIL_CONFIRM_ENTER_EDIT,
                     cancelAction: ActionContract.ACTIONS.DETAIL_CANCEL_ENTER_EDIT,
                     payload: {
-                        rootId: (mInput && mInput.rootId) || "",
+                        dbKey: (mInput && (mInput.dbKey || mInput.rootId)) || "",
                         state: true,
                         confirmedIntegration: true
                     }
@@ -64,7 +64,7 @@ sap.ui.define([
             Effects.confirm("takeoverOwnLock", sTextKey, {
                 confirmAction: ActionContract.ACTIONS.DETAIL_TAKEOVER_LOCK,
                 cancelAction: ActionContract.ACTIONS.DETAIL_CANCEL_ENTER_EDIT,
-                payload: { rootId: (mInput && mInput.rootId) || "" }
+                payload: { dbKey: (mInput && (mInput.dbKey || mInput.rootId)) || "" }
             })
         ]);
         return Object.assign({}, oResult, { effects: aEffects });

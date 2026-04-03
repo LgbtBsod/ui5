@@ -16,6 +16,11 @@ ODATA_NS = "Z_EHS_PRODUCTION_CONTROL_CKLT_SRV"
 def format_datetime(value: datetime | None) -> str | None:
     if value is None:
         return None
+    if isinstance(value, str):
+        s_value = value.strip()
+        if not s_value:
+            return None
+        value = datetime.fromisoformat(s_value.replace("Z", "+00:00"))
     return to_odata_date_ms(value)
 
 

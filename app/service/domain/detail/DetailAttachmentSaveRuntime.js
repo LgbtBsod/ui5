@@ -13,16 +13,16 @@ sap.ui.define([
 
     function syncAfterSave(mOptions) {
         var oRepo = mOptions.repo;
-        var sRootId = String(mOptions.rootId || "").trim();
+        var sCurrentDbKey = String(mOptions.dbKey || mOptions.rootId || "").trim();
         var bCreate = !!mOptions.createMode;
         var aCurrentAttachments = Array.isArray(mOptions.currentAttachments) ? mOptions.currentAttachments : [];
         var oSavedSnapshot = mOptions.savedSnapshot || {};
-        var sServerRootId = ODataKeyNormalizer.normalizeBinaryKey(mOptions.serverRootId);
+        var sPersistedDbKey = ODataKeyNormalizer.normalizeBinaryKey(mOptions.serverRootId);
         var bNeedsAttachmentReload = bCreate;
-        var sEffectiveRootId = sServerRootId || ODataKeyNormalizer.normalizeBinaryKey(sRootId);
+        var sEffectiveDbKey = sPersistedDbKey || ODataKeyNormalizer.normalizeBinaryKey(sCurrentDbKey);
         return DetailAttachmentDeltaRuntime.refreshAttachments(
             oRepo,
-            sEffectiveRootId,
+            sEffectiveDbKey,
             bCreate ? [] : aCurrentAttachments,
             bNeedsAttachmentReload
         ).then(function (aSyncedAttachmentsRaw) {

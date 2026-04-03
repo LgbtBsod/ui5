@@ -32,7 +32,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "sap/ui/core/Core",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/AppShellDomRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SemanticDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
 ], function (
     BaseController,
     ControllerResourceCleanup,
@@ -67,7 +68,8 @@ sap.ui.define([
     ThemeDomRuntime,
     Core,
     AppShellDomRuntime,
-    SemanticDomRuntime
+    SemanticDomRuntime,
+    MessageCodeConstants
 ) {
     "use strict";
 
@@ -75,6 +77,7 @@ sap.ui.define([
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var SHELL_MODEL = MODELS.SHELL;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var DETAIL_MESSAGE_CODES = MessageCodeConstants.DETAIL;
     var getText = ControllerTextRuntime.getText;
     var _RESIZE_END_DELAY_MS = 520;
     var _RESIZE_SAFETY_DELAY_MS = 1800;
@@ -143,7 +146,7 @@ sap.ui.define([
 
     function refreshSecurityToken(oModel) {
         if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
-            return Promise.reject(new Error("security_token_refresh_unavailable"));
+            return Promise.reject(new Error(DETAIL_MESSAGE_CODES.TECHNICAL_ERROR));
         }
         return new Promise(function (resolve, reject) {
             oModel.refreshSecurityToken(function () { resolve(true); }, reject, true);
@@ -165,7 +168,7 @@ sap.ui.define([
             syncShellUi();
             return bRefreshed;
         }).catch(function (oError) {
-                UiDecisionDefaultHandlers.handlers.notifyShellRefreshFailure({ controller: oController, error: oError });
+            UiDecisionDefaultHandlers.handlers.notifyShellRefreshFailure({ controller: oController, error: oError });
             syncShellUi();
             throw oError;
         });

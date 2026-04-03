@@ -100,6 +100,11 @@ CLASS zcl_zodata_read_service DEFINITION
         iv_code TYPE string
       RAISING
         zcx_zodata_error.
+    METHODS build_db_key_not_found_text
+      IMPORTING
+        iv_db_key TYPE sysuuid_x16
+      RETURNING
+        VALUE(rv_text) TYPE string.
 ENDCLASS.
 
 CLASS zcl_zodata_read_service IMPLEMENTATION.
@@ -112,6 +117,10 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
       EXPORTING
         iv_code = iv_code
         iv_msg  = iv_text.
+  ENDMETHOD.
+
+  METHOD build_db_key_not_found_text.
+    rv_text = |{ zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_checklist_root_not_found_prefix ) } { iv_db_key }.|.
   ENDMETHOD.
 
   METHOD read_root_row.
@@ -133,7 +142,7 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
       INTO CORRESPONDING FIELDS OF @rs_root
       WHERE pcct_uuid = @iv_db_key.
     IF sy-subrc <> 0.
-    raise_busi_exception( iv_text = |ChecklistRoot not found for key { iv_db_key }.| iv_code = zif_zodata_message_codes=>validation_error ).
+    raise_busi_exception( iv_text = build_db_key_not_found_text( iv_db_key ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
 
     SELECT SINGLE pcct_uuid,

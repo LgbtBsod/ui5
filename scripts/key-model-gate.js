@@ -68,7 +68,11 @@ if ((mockApi.match(/re\.sub\(r"\\bRootKey\\b\|\\bRootId\\b"/g) || []).length !==
 const allowlist = new Set([
   'backend/mock_gateway/api/gateway_canonical_api.py',
   'backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap',
-  'app/localService/metadata.xml'
+  'backend/sap_backend/src/zcl_zodata_read_service.clas.abap',
+  'app/localService/metadata.xml',
+  'docs/ui-runtime-audit-latest.json',
+  'docs/artifacts/gateway-browser-attachment-dirty-report.json',
+  'docs/artifacts/gateway-only-smoke-report.json'
 ]);
 
 function walk(dir) {
@@ -103,6 +107,9 @@ walk(path.join(ROOT, 'app')).concat(walk(path.join(ROOT, 'backend'))).forEach((f
     }
     if (/\bRootKey\b|\bRootId\b/.test(lineText)) {
       issues.push(`${relative}:${index + 1} legacy RootKey/RootId leaked outside boundary`);
+    }
+    if (/\bObjectUuid\b|\bobjectUuid\b/.test(lineText)) {
+      issues.push(`${relative}:${index + 1} legacy ObjectUuid alias leaked outside boundary`);
     }
   });
 });

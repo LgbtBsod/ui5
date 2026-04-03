@@ -8,13 +8,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, ModelPathContracts, MessageKeyConstants, RuntimeEventContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, ModelPathContracts, MessageKeyConstants, RuntimeEventContracts, MessageCodeConstants) {
     "use strict";
 
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
     var BANNER_TEXT_KEY = ComponentSaveGuardContracts.BANNER_TEXT_KEY;
     var VIEW_MESSAGE_KEYS = MessageKeyConstants.VIEW;
+    var TECHNICAL_CODES = MessageCodeConstants.TECHNICAL;
 
     function createUiStateAdapter(oStateModel) {
         return {
@@ -26,10 +28,10 @@ sap.ui.define([
 
     function hasHealthyAutosaveLockState(oStateModel, StatePaths) {
         var oUiState = createUiStateAdapter(oStateModel);
-        var sActiveId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        var sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
         return DetailPersistenceRuntime.canAutosaveFromState(oUiState, {
-            rootId: sActiveId,
-            isCreateDraft: CreateSentinel.isCreateId(sActiveId)
+            dbKey: sActiveDbKey,
+            isCreateDraft: CreateSentinel.isCreateId(sActiveDbKey)
         });
     }
 
@@ -72,18 +74,18 @@ sap.ui.define([
             },
             guardFn: function () {
                 var oUiState = createUiStateAdapter(oStateModel);
-                var sActiveId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+                var sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
                 return DetailPersistenceRuntime.canScheduleAutosave(oUiState, {
-                    rootId: sActiveId,
-                    isCreateDraft: CreateSentinel.isCreateId(sActiveId)
+                    dbKey: sActiveDbKey,
+                    isCreateDraft: CreateSentinel.isCreateId(sActiveDbKey)
                 });
             },
             shouldSave: function () {
                 var oUiState = createUiStateAdapter(oStateModel);
-                var sActiveId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+                var sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
                 return DetailPersistenceRuntime.canScheduleAutosave(oUiState, {
-                    rootId: sActiveId,
-                    isCreateDraft: CreateSentinel.isCreateId(sActiveId)
+                    dbKey: sActiveDbKey,
+                    isCreateDraft: CreateSentinel.isCreateId(sActiveDbKey)
                 });
             },
             buildPayload: function () {
@@ -102,12 +104,12 @@ sap.ui.define([
             saveFn: function (oPayload) {
                 var oLatestCtx = fnBuildLatestCtx ? fnBuildLatestCtx() : oComponent._ctx;
                 if (!oComponent._detailFacade || !oLatestCtx) {
-                    return Promise.reject(new Error("Autosave unavailable: detail context missing"));
+                    return Promise.reject(new Error(TECHNICAL_CODES.AUTOSAVE_CONTEXT_MISSING));
                 }
-                return oComponent._detailFacade.autosave({ rootId: oPayload.id, delta: oPayload.payload }, oLatestCtx).then(function (oResult) {
+                return oComponent._detailFacade.autosave({ dbKey: oPayload.id, delta: oPayload.payload }, oLatestCtx).then(function (oResult) {
                     fnApplyFacadeResult(oResult);
                     if (!oResult || oResult.ok === false) {
-                        return Promise.reject((oResult && oResult.error) || new Error("Autosave usecase failed"));
+                        return Promise.reject((oResult && oResult.error) || new Error(TECHNICAL_CODES.AUTOSAVE_USECASE_FAILED));
                     }
                     return oResult.data || {};
                 });

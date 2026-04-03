@@ -18,7 +18,7 @@ if (!/LOCAL_METADATA_PATH/.test(builder) || !/metadata\.xml/.test(builder)) {
 }
 
 try {
-  const builtMetadata = childProcess.execFileSync('python', ['-c', 'from backend.mock_gateway.services.metadata_builder import build_metadata; print(build_metadata(), end="")'], {
+  const builtMetadata = childProcess.execFileSync('python', ['-c', 'from backend.mock_gateway.services.metadata_builder import build_metadata; import sys; sys.stdout.buffer.write(build_metadata().encode("utf-8"))'], {
     cwd: ROOT,
     encoding: 'utf8'
   });
@@ -36,7 +36,7 @@ try {
 });
 
 if (/\bRootId\b/.test(abap)) {
-  issues.push('ABAP DPC still reads RootId instead of canonical DB_KEY boundary');
+  issues.push('ABAP DPC still references legacy RootId instead of strict DB_KEY boundary semantics');
 }
 
 if (issues.length) {

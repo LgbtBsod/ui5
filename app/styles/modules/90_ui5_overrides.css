@@ -225,3 +225,195 @@
 .chkApp .detailPage .sapUxAPObjectPageHeaderDetailsHidden {
   background-color: transparent;
 }
+
+/* Analytics renderer quarantine: keep SAP control internals out of page bundles. */
+.chkApp .shellAnalyticsBtn .sapMBtnInner {
+  min-width: 3.2rem;
+  min-height: 2.45rem;
+  padding-inline: 0.82rem;
+}
+
+.chkApp .shellAnalyticsBtn .sapMBtnIcon {
+  font-size: 1.08rem;
+}
+
+.chkApp .analyticsToolbarInput .sapMInputBaseContentWrapper,
+.chkApp .analyticsControlSelect,
+.chkApp .analyticsControlSelect.sapMComboBoxBase {
+  background: color-mix(in srgb, var(--surface-2) 34%, transparent);
+  border-color: color-mix(in srgb, var(--border-soft) 14%, transparent);
+  box-shadow: none;
+}
+
+body.chkAppRoot .analyticsYearPickerPopover,
+body.chkAppRoot .analyticsYearPickerPopover .sapMPopoverCont,
+body.chkAppRoot .analyticsYearPickerPopover .sapMDialogScrollCont {
+  border-radius: 1rem;
+}
+
+.chkApp .analyticsYearPickerButton .sapMBtnInner {
+  width: 100%;
+}
+
+.chkApp .analyticsTabBar .sapMITBHead {
+  gap: 0.28rem;
+  background: transparent;
+  border: 0;
+}
+
+.chkApp .analyticsTabBar .sapMITBFilter {
+  min-height: 2.16rem;
+  padding: 0.18rem 0.34rem 0.16rem;
+  border-radius: 0.8rem;
+  background: transparent;
+  border: 0;
+}
+
+.chkApp .analyticsTabBar .sapMITBFilter .sapMITBText {
+  font-size: 0.68rem;
+}
+
+.chkApp .analyticsTabBar .sapMITBFilter .sapUiIcon {
+  font-size: 0.9rem;
+}
+
+.chkApp .analyticsTabBar .sapMITBText,
+.chkApp .analyticsTabBar .sapMITBItem .sapMITBText,
+.chkApp .analyticsTabBar .sapMITBSelected .sapMITBText {
+  color: var(--text-main);
+}
+
+.chkApp .analyticsTabBar .sapMITBSelected::after {
+  background: var(--accent);
+}
+
+.chkApp .analyticsControlToolbar .analyticsToolbarButton .sapMBtnInner,
+.chkApp .analyticsControlToolbar .analyticsToolbarInput .sapMInputBaseContentWrapper,
+.chkApp .analyticsControlToolbar .analyticsControlSelect {
+  min-height: 2.08rem;
+}
+
+.chkApp .analyticsPanelSurface,
+.chkApp .analyticsPanelSurface.sapMPanel,
+.chkApp .analyticsPanelSurface .sapMPanelContent {
+  border-radius: calc(var(--radius-lg) - 0.12rem);
+}
+
+.chkApp .analyticsPanelSurface .sapMPanelHdr,
+.chkApp .analyticsChartPanel .sapMPanelHdr,
+.chkApp .analyticsScreenTitle.sapMTitle,
+.chkApp .analyticsScreenSubtitle.sapMText,
+.chkApp .analyticsToplineMetaGrid .sapMText {
+  color: var(--text-main);
+}
+
+.chkApp .analyticsPanelSurface .sapMPanelHdr {
+  min-height: 2.8rem;
+  padding: 0.72rem 1rem 0.3rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.chkApp .analyticsPanelSurface .sapMPanelHdr,
+.chkApp .analyticsPanelSurface .sapMPanelContent {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.chkApp .analyticsChartPanel,
+.chkApp .analyticsChartPanel.sapMPanel,
+.chkApp .analyticsChartPanel .sapMPanelContent,
+.chkApp .analyticsChartPanel .sapMPanelExpandablePart,
+.chkApp .analyticsChartPanel .sapMPanelBGTransparent,
+.chkApp .analyticsChartPanel .sapMPanelWrappingDiv,
+.chkApp .analyticsChartPanel .sapMVIZVIZFrame,
+.chkApp .analyticsChartPanel .v-m-root,
+.chkApp .analyticsChartPanel svg,
+.chkApp .analyticsChartPanel .sapVizFrame,
+.chkApp .analyticsChartPanel .sapVizKitViewport,
+.chkApp .analyticsMatrixTable.sapMList,
+.chkApp .analyticsMatrixTable .sapMListTblCell,
+.chkApp .analyticsMatrixTable .sapMListTblHeaderCell {
+  background: transparent;
+  background-image: none;
+}
+
+.chkApp .analyticsChartPanel .sapMPanelContent {
+  border-top: 0;
+}
+
+body.chkAppRoot.appLight .chkApp .analyticsChartPanel.sapMPanel,
+body.chkAppRoot.appLight .chkApp .analyticsChartPanel .sapMPanelContent {
+  background-color: rgba(248, 252, 255, 0.04);
+}
+
+body.chkAppRoot.appDark .chkApp .analyticsChartPanel.sapMPanel,
+body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
+  background-color: rgba(10, 20, 40, 0.22);
+}
+
+.chkApp .analyticsMatrixTable .sapMListTbl {
+  border-collapse: separate;
+  border-spacing: 0 0.36rem;
+}
+
+.chkApp .analyticsMatrixTable .sapMListTblCell {
+  background: color-mix(in srgb, var(--theme-table-cell-bg) 70%, transparent);
+}
+
+.chkApp .analyticsMatrixTable .sapMListTblCell:first-child {
+  border-top-left-radius: var(--theme-table-row-radius);
+  border-bottom-left-radius: var(--theme-table-row-radius);
+}
+
+.chkApp .analyticsMatrixTable .sapMListTblCell:last-child {
+  border-top-right-radius: var(--theme-table-row-radius);
+  border-bottom-right-radius: var(--theme-table-row-radius);
+}
+
+.chkApp .searchAnalyticsChartCard .sapMText,
+.chkApp .kpiCard .sapMObjectNumberText,
+.chkApp .searchAnalyticsCard .sapMObjectNumberText,
+.chkApp .analyticsTile .sapMNCValue {
+  font-variant-numeric: tabular-nums;
+}
+
+.chkApp .kpiCard .sapMObjectNumberText,
+.chkApp .searchAnalyticsCard .sapMObjectNumberText {
+  font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+  font-weight: 860;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.chkApp .governedDialog .sapMDialogSection,
+.chkApp .governedDialog .sapMDialogScrollCont,
+.chkApp .governedDialog .sapMDialogScroll {
+  background: transparent;
+}
+
+.chkApp .analyticsReportDialog .sapMDialogSection {
+  background: color-mix(in srgb, var(--theme-block-bg) 96%, transparent);
+}
+
+.chkApp .analyticsReportTitle.sapMTitle,
+.chkApp .analyticsReportSummaryValue .sapMObjectNumberText,
+.chkApp .analyticsReportSummaryValue .sapMObjStatusText {
+  color: var(--text-main);
+}
+
+.chkApp .analyticsReportSubtitle.sapMText,
+.chkApp .analyticsReportSummaryKey.sapMText {
+  color: var(--text-subtle);
+}
+
+.chkApp .analyticsReportSummaryList.sapMList,
+.chkApp .analyticsReportSummaryList .sapMLIB {
+  background: transparent;
+  border: 0;
+}
+
+.chkApp .analyticsReportSummaryList .sapMLIB {
+  padding-inline: 0;
+}

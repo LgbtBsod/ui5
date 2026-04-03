@@ -51,6 +51,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/GatewayClient.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ActionDispatcher.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SmartControlsAdapter.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ODataChecklistReadRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ODataKeyNormalizer.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/EffectMixin.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/SearchFilterLifecycleBehavior.qunit"

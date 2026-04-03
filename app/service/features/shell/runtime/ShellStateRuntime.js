@@ -8,14 +8,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts"
-], function (LayoutStateRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants, ComponentBootstrapContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
+], function (LayoutStateRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants, ComponentBootstrapContracts, UiSemanticConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
     var STATE_MODEL = MODELS.STATE;
     var SHELL_MODEL = MODELS.SHELL;
+    var MESSAGE_TYPE = UiSemanticConstants.MESSAGE_TYPE;
     var PERMISSION_TEXT_KEY_MAP = {
         "01": MessageKeyConstants.SHELL.PERMISSION_CREATE,
         "02": MessageKeyConstants.SHELL.PERMISSION_CHANGE,
@@ -36,7 +38,7 @@ sap.ui.define([
     }
 
     function buildPermissionSheets(oController, aPermissionRules, mHooks) {
-        return PermissionPresentation.buildPermissionSheets(aPermissionRules, {
+        var aSheets = PermissionPresentation.buildPermissionSheets(aPermissionRules, {
             codeOrder: ["01", "02", "03", "06"],
             scopeLabel: function (oRule) {
                 var sScopeKind = String(oRule && oRule.scopeKind || "all").trim().toLowerCase() || "all";
@@ -46,16 +48,24 @@ sap.ui.define([
                     : resolveText(mHooks, oController, MessageKeyConstants.SHELL.PERMISSION_SCOPE_ALL);
             },
             codeLabel: function (oRule) {
-                return resolveText(mHooks, oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || MessageKeyConstants.SHELL.PERMISSION_UNKNOWN, [oRule.code]);
+                return resolveText(mHooks, oController, PERMISSION_TEXT_KEY_MAP[oRule.code] || MessageKeyConstants.SHELL.PERMISSION_UNKNOWN, [oRule.code]) || oRule.code;
             }
+        });
+
+        return aSheets.map(function (oSheet) {
+            var oNext = Object.assign({}, oSheet);
+            if (String(oNext.title || "").trim().toUpperCase() === "ALL") {
+                oNext.title = resolveText(mHooks, oController, MessageKeyConstants.SHELL.PERMISSION_SCOPE_ALL) || oNext.title;
+            }
+            return oNext;
         });
     }
 
     function buildUserSummaryText(oController, aPermissionSheets, sBackendSummary, mHooks) {
         return PermissionPresentation.buildSummaryText(
-            sBackendSummary,
+            "",
             aPermissionSheets,
-            resolveText(mHooks, oController, MessageKeyConstants.SHELL.USER_PERMISSIONS_EMPTY)
+            resolveText(mHooks, oController, MessageKeyConstants.SHELL.USER_PERMISSIONS_EMPTY) || sBackendSummary
         );
     }
 
@@ -87,7 +97,7 @@ sap.ui.define([
                 userLabel: "",
                 userMeta: "",
                 userSessionLabel: "",
-                userSessionState: "Information",
+                userSessionState: MESSAGE_TYPE.INFORMATION,
                 userActionVisible: false,
                 userActionText: "",
                 userActionIcon: "sap-icon://employee-lookup",
@@ -128,28 +138,29 @@ sap.ui.define([
     }
 
     function resolveShellLockState(oStateModel) {
-        var sActiveDbKey;
+        var sCurrentDbKey;
         var sEditMode;
         var sLockState;
         var bOwnsActiveLock;
+        var sHydratedDbKey;
+        var sActiveDbKey;
+        var sSelectedDbKey;
 
-        sActiveDbKey = String(
-            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
-            || ""
-        ).trim();
+        sHydratedDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
+        sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        sSelectedDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "") || "").trim();
+        sCurrentDbKey = sHydratedDbKey || sActiveDbKey || sSelectedDbKey;
         sEditMode = WorkflowContracts.normalizeEditMode(
             ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/editMode", WorkflowContracts.EDIT_MODES.READ)
         );
         sLockState = WorkflowContracts.normalizeLockState(
             ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/lock/state", WorkflowContracts.LOCK_STATES.IDLE)
         );
-        bOwnsActiveLock = !!sActiveDbKey
+        bOwnsActiveLock = !!sCurrentDbKey
             && sEditMode === WorkflowContracts.EDIT_MODES.EDIT
             && sLockState === WorkflowContracts.LOCK_STATES.EDIT_LOCKED;
         return {
-            currentDbKey: sActiveDbKey,
+            currentDbKey: sCurrentDbKey,
             lock: {
                 ok: bOwnsActiveLock,
                 reason: bOwnsActiveLock ? WorkflowContracts.REASONS.OWNED_BY_YOU : WorkflowContracts.REASONS.FREE,
@@ -161,7 +172,7 @@ sap.ui.define([
     function syncShellState(oController, mHooks) {
         var oState = getModel(oController, STATE_MODEL);
         var mShellPatch = {};
-        var sSelectedId;
+        var sSelectedDbKey;
         var sMode;
         var sCurrentRouteName;
         var oCurrentUser;
@@ -182,7 +193,7 @@ sap.ui.define([
 
         ensureShellDefaults(oController);
         oShellLockState = resolveShellLockState(oState);
-        sSelectedId = String(
+        sSelectedDbKey = String(
             ModelStateRuntime.readOnModel(oState, ModelPathContracts.ACTIVE_OBJECT_ID, "")
             || ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, "")
             || ""
@@ -203,7 +214,7 @@ sap.ui.define([
             || ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.BACKEND_MODE, "")
             || ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE.GATEWAY_RUNTIME
         );
-        bSearchWorkspace = !sSelectedId;
+        bSearchWorkspace = !sSelectedDbKey;
         bEditWorkspace = !bSearchWorkspace && sMode === WorkflowContracts.EDIT_MODES.EDIT;
 
         mShellPatch["/shell/eyebrow"] = bSearchWorkspace
@@ -215,9 +226,9 @@ sap.ui.define([
         mShellPatch["/shell/routeLabel"] = sCurrentRouteName;
         mShellPatch["/shell/contextSubtitle"] = sCurrentRouteName === NavigationContracts.ROUTES.ANALYTICS
             ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_ANALYTICS)
-            : (!sSelectedId ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_SEARCH)
-                : (CreateSentinel.isCreateId(sSelectedId) ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_DRAFT)
-                    : resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_DETAIL, [sSelectedId])));
+            : (!sSelectedDbKey ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_SEARCH)
+                : (CreateSentinel.isCreateId(sSelectedDbKey) ? resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_DRAFT)
+                    : resolveText(mHooks, oController, MessageKeyConstants.SHELL.CONTEXT_DETAIL, [sSelectedDbKey])));
         mShellPatch["/shell/userLabel"] = buildHeaderUserLabel(sFullName, aPermissionSheets);
         mShellPatch["/shell/userMeta"] = sFullName;
         mShellPatch["/shell/userLoginLabel"] = "";
@@ -226,8 +237,8 @@ sap.ui.define([
         mShellPatch["/shell/userSummaryText"] = sUserSummaryText;
         mShellPatch["/shell/userSessionLabel"] = resolveText(mHooks, oController, MessageKeyConstants.SHELL.USER_SESSION_MANAGED);
         mShellPatch["/shell/userSessionState"] = hasResolvedCurrentUser(oCurrentUser)
-            ? (aPermissionRules.length || aPermissions.length ? "Success" : "Warning")
-            : "Information";
+            ? (aPermissionRules.length || aPermissions.length ? MESSAGE_TYPE.SUCCESS : MESSAGE_TYPE.WARNING)
+            : MESSAGE_TYPE.INFORMATION;
         mShellPatch["/shell/userActionVisible"] = false;
         mShellPatch["/shell/userActionText"] = "";
         mShellPatch["/shell/userActionIcon"] = "sap-icon://employee";

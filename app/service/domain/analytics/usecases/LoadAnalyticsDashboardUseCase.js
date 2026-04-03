@@ -6,11 +6,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
     "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/AnalyticsContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, AnalyticsUiContracts, YearValue, AnalyticsStateConstants, ModelContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
+], function (Result, Effects, AnalyticsPayloadNormalizer, StatePaths, WorkflowTelemetry, AnalyticsContracts, YearValue, ModelContracts, MessageCodeConstants) {
     "use strict";
 
+    var TECHNICAL_CODES = MessageCodeConstants.TECHNICAL;
     var TELEMETRY_EVENTS = Object.freeze({
         ERROR: "analytics.dashboard.error",
         LOADED: "analytics.dashboard.loaded",
@@ -21,9 +22,9 @@ sap.ui.define([
         VIEW: ModelContracts.MODELS.VIEW
     });
     var VIEW_PATHS = Object.freeze({
-        ANALYTICS: AnalyticsUiContracts.PATHS.ANALYTICS,
+        ANALYTICS: AnalyticsContracts.PATHS.ANALYTICS,
         BUSY: "/busy",
-        ERROR: AnalyticsUiContracts.PATHS.ERROR
+        ERROR: AnalyticsContracts.PATHS.ERROR
     });
     function buildNormalizedRequest(mInput) {
         return {
@@ -34,14 +35,15 @@ sap.ui.define([
     }
 
     function resolveErrorMessage(oError) {
-        return String((oError && oError.message) || AnalyticsUiContracts.MESSAGES.ANALYTICS_UNAVAILABLE);
+        var sCode = String((oError && oError.code) || "").trim();
+        return sCode || AnalyticsContracts.MESSAGES.ANALYTICS_UNAVAILABLE;
     }
 
     function buildReadyEffects(oDashboard, sReadyAt) {
         return [
             Effects.modelPatch(MODEL_NAMES.STATE, StatePaths.UI_BUSY_ANALYTICS, false),
             Effects.modelPatch(MODEL_NAMES.STATE, StatePaths.READINESS_ANALYTICS, {
-                status: AnalyticsStateConstants.LOAD_STATUS.READY,
+                status: AnalyticsContracts.LOAD_STATUS.READY,
                 ready: true,
                 readyAt: sReadyAt,
                 error: ""
@@ -56,13 +58,13 @@ sap.ui.define([
         return [
             Effects.modelPatch(MODEL_NAMES.STATE, StatePaths.UI_BUSY_ANALYTICS, false),
             Effects.modelPatch(MODEL_NAMES.STATE, StatePaths.READINESS_ANALYTICS, {
-                status: AnalyticsStateConstants.LOAD_STATUS.ERROR,
+                status: AnalyticsContracts.LOAD_STATUS.ERROR,
                 ready: false,
                 readyAt: "",
                 error: sErrorMessage
             }),
             Effects.modelPatch(MODEL_NAMES.VIEW, VIEW_PATHS.BUSY, false),
-            Effects.modelPatch(MODEL_NAMES.VIEW, VIEW_PATHS.ERROR, sErrorMessage || AnalyticsUiContracts.MESSAGES.ANALYTICS_UNAVAILABLE)
+            Effects.modelPatch(MODEL_NAMES.VIEW, VIEW_PATHS.ERROR, sErrorMessage || AnalyticsContracts.MESSAGES.ANALYTICS_UNAVAILABLE)
         ];
     }
 
@@ -72,7 +74,7 @@ sap.ui.define([
         };
     }
 
-function execute(mInput, mCtx) {
+    function execute(mInput, mCtx) {
         var oAnalytics = mCtx && mCtx.analytics;
         var mRequest = buildNormalizedRequest(mInput);
         var sReadyAt = new Date().toISOString();
@@ -95,7 +97,7 @@ function execute(mInput, mCtx) {
             return Result.ok({ analytics: oDashboard }, buildReadyEffects(oDashboard, sReadyAt));
         }).catch(function (oError) {
             var sErrorMessage = resolveErrorMessage(oError);
-            if (String((oError && oError.code) || "").trim().toUpperCase() === "OUTDATED_RESPONSE") {
+            if (String((oError && oError.code) || "").trim().toUpperCase() === TECHNICAL_CODES.OUTDATED_RESPONSE) {
                 WorkflowTelemetry.emit(TELEMETRY_EVENTS.STALE, {
                     stateModel: mCtx && mCtx.stateModel,
                     payload: {

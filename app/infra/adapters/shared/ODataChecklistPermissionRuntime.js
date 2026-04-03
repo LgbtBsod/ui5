@@ -13,14 +13,14 @@ sap.ui.define([
         }).filter(Boolean);
     }
 
-    function normalizePermissionResponse(oPermission, sRootId, sActivity) {
+    function normalizePermissionResponse(oPermission, sDbKey, sActivity) {
         var aGranted = parseGrantedOperations(oPermission && oPermission.GrantedOperations);
         var bCanCreate = !!(oPermission && oPermission.CanCreate) || aGranted.indexOf("01") >= 0;
         var bCanView = !!(oPermission && oPermission.CanView) || aGranted.indexOf("03") >= 0;
         var bCanEdit = !!(oPermission && oPermission.CanEdit) || aGranted.indexOf("02") >= 0;
         var bCanDelete = !!(oPermission && oPermission.CanDelete) || aGranted.indexOf("06") >= 0;
         return AccessPayload.normalizePermission({
-            rootId: sRootId,
+            dbKey: sDbKey,
             userId: String((oPermission && (oPermission.UserId || oPermission.userId)) || "").trim(),
             canCreate: bCanCreate,
             canView: bCanView,
@@ -29,7 +29,7 @@ sap.ui.define([
             reasonCode: String((oPermission && (oPermission.ReasonCode || oPermission.reasonCode)) || "AUTHORIZED").trim() || "AUTHORIZED",
             message: String((oPermission && (oPermission.Message || oPermission.message)) || "").trim(),
             requestedActivity: sActivity
-        }, sRootId, {
+        }, sDbKey, {
             requestedActivity: sActivity
         });
     }
@@ -46,21 +46,20 @@ sap.ui.define([
     }
 
     function checkChecklistPermission(mArgs, mDeps) {
-        var normalizeRootKey = mDeps.normalizeRootKey;
         var firstRow = mDeps.firstRow;
-        var sRootId = normalizeRootKey(mDeps.rootId(mArgs));
+        var sDbKey = mDeps.normalizeDbKey(mDeps.dbKey(mArgs));
         var sActivity = String((mArgs && (mArgs.activity || mArgs.ACTVT)) || "").trim();
-        if (!sRootId) {
+        if (!sDbKey) {
             if (sActivity !== "01") {
                 return Promise.resolve(AccessPayload.normalizePermission({
-                    rootId: "",
+                    dbKey: "",
                     userId: "",
                     canCreate: false,
                     canView: false,
                     canEdit: false,
                     canDelete: false,
                     reasonCode: "INVALID_PERMISSION_TARGET",
-                    message: "DB_KEY is required for non-create permissions",
+                    message: "",
                     requestedActivity: sActivity
                 }, "", {
                     requestedActivity: sActivity
@@ -68,14 +67,14 @@ sap.ui.define([
             }
             return checkCreatePermission(sActivity, mDeps);
         }
-        return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_PERMISSION, sRootId, {
+        return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_PERMISSION, sDbKey, {
             name: "DB_KEY",
             type: ODataKeyContracts.TYPES.DB_KEY
         }), {
             ACTVT: sActivity,
             "$select": ODataKeyContracts.SELECTS.CHECKLIST_PERMISSION
         }).then(function (oResponse) {
-            return normalizePermissionResponse(firstRow(oResponse), sRootId, sActivity);
+            return normalizePermissionResponse(firstRow(oResponse), sDbKey, sActivity);
         });
     }
 

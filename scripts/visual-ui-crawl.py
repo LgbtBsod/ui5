@@ -140,7 +140,7 @@ def shell_state(page: Page) -> dict[str, Any]:
     return page.evaluate(
         """
         () => ({
-          shellButtons: Array.from(document.querySelectorAll('.appShellHeader .sapMBtn')).map((node) => (node.innerText || node.getAttribute('title') || '').trim()).filter(Boolean),
+          shellButtons: Array.from(document.querySelectorAll('.appShellHeader .shellActionBtn, .appShellHeader .shellUserBtn')).map((node) => (node.innerText || node.getAttribute('title') || '').trim()).filter(Boolean),
           themeSwitchPresent: !!document.querySelector('.themeDockSwitch'),
           stickySearchPresent: !!document.querySelector('.searchFilterExperienceShell'),
           stickyDetailPresent: !!document.querySelector('.detailControlStickyBlock')
@@ -149,9 +149,9 @@ def shell_state(page: Page) -> dict[str, Any]:
     )
 
 
-def get_first_root_id(page: Page) -> str:
+def get_first_db_key(page: Page) -> str:
     try:
-        root_id = page.evaluate(
+        db_key = page.evaluate(
             """
             () => {
               if (typeof sap === 'undefined' || !sap.ui || !sap.ui.getCore) {
@@ -167,21 +167,21 @@ def get_first_root_id(page: Page) -> str:
               for (const item of listItems) {
                 const ctx = item && item.getBindingContext && item.getBindingContext();
                 const obj = ctx && ctx.getObject && ctx.getObject();
-                if (obj && (obj.Key || obj.Id)) {
-                  return String(obj.Key || obj.Id || '');
+                if (obj && (obj.Key || obj.Id || obj.DB_KEY)) {
+                  return String(obj.Key || obj.DB_KEY || obj.Id || '');
                 }
               }
               return '';
             }
             """
         )
-        return str(root_id or "").strip()
+        return str(db_key or "").strip()
     except Error:
         return ""
 
 
 def trigger_search_if_needed(page: Page) -> None:
-    if get_first_root_id(page):
+    if get_first_db_key(page):
         return
     page.evaluate(
         """
@@ -214,12 +214,12 @@ def toggle_theme(page: Page, times: int = 1, pause: int = 450) -> None:
 
 
 def open_analytics(page: Page) -> bool:
-    return safe_click(page, ".appShellHeader .shellActionBtn:has(.sapUiIcon[data-sap-ui-icon-content]), .appShellHeader .shellActionBtn")
+    return safe_click(page, ".appShellHeader .shellAnalyticsBtn")
 
 
 def click_shell_button_by_text(page: Page, text: str) -> bool:
     try:
-        button = page.locator(".appShellHeader .sapMBtn").filter(has_text=text).first
+        button = page.locator(".appShellHeader .shellActionBtn, .appShellHeader .shellUserBtn").filter(has_text=text).first
         button.wait_for(state="visible", timeout=5000)
         button.click(timeout=5000)
         page.wait_for_timeout(450)
@@ -235,7 +235,7 @@ def scroll_search(page: Page, distance: int) -> None:
         """
         (value) => {
           const candidates = [
-            document.querySelector('.sapMPageEnableScrolling'),
+            document.querySelector('.searchWorkbenchDock'),
             document.querySelector('#checklist_app_comp---searchTargetPage'),
             document.scrollingElement
           ].filter(Boolean);
@@ -275,8 +275,8 @@ def maybe_open_table_overflow(page: Page) -> bool:
     selectors = [
         "#checklist_app_comp---searchTargetPage--smartTableCustomToolbar-overflowButton",
         "#checklist_app_comp---searchTargetPage--searchResultsActionRail-overflowButton",
-        ".searchSmartToolbarRail .sapMTBOverflowButton",
-        ".searchResultsActionRail .sapMTBOverflowButton",
+        ".searchActionRailStack [id$='overflowButton']",
+        ".searchResultsActionRail [id$='overflowButton']",
     ]
     for selector in selectors:
         if safe_click(page, selector, timeout=2500):
@@ -286,12 +286,12 @@ def maybe_open_table_overflow(page: Page) -> bool:
 
 def open_first_detail(page: Page) -> str:
     trigger_search_if_needed(page)
-    root_id = get_first_root_id(page)
-    if not root_id:
+    db_key = get_first_db_key(page)
+    if not db_key:
         return ""
-    page.goto(f"{URL}#/checklist/{root_id}", wait_until="networkidle", timeout=90000)
+    page.goto(f"{URL}#/checklist/{db_key}", wait_until="networkidle", timeout=90000)
     wait_for_detail_ready(page, 1700)
-    return root_id
+    return db_key
 
 
 def run() -> int:
@@ -380,10 +380,10 @@ def run() -> int:
         set_viewport(page, 1440, 960)
         page.goto(URL, wait_until="networkidle", timeout=90000)
         wait_for_app_ready(page, 1600)
-        root_id = open_first_detail(page)
-        report["runtime"]["firstRootId"] = root_id
+        db_key = open_first_detail(page)
+        report["runtime"]["firstDbKey"] = db_key
 
-        if root_id:
+        if db_key:
             capture(page, report["screenshots"], "detail-desktop-top", "Detail page top section", full_page=True)
             scroll_detail(page, 780)
             capture(page, report["screenshots"], "detail-desktop-scrolled", "Detail page after scroll into content", full_page=True)

@@ -47,12 +47,12 @@ sap.ui.define([
         return String(sEntityKind || DEFAULT_ENTITY_KIND).trim() || DEFAULT_ENTITY_KIND;
     }
 
-    function normalizeRootId(sRootId) {
-        return String(sRootId || "").trim();
+    function normalizeDbKey(sDbKey) {
+        return String(sDbKey || "").trim();
     }
 
-    function buildStoreKey(sTabSessionId, sEntityKind, sRootId) {
-        return [String(sTabSessionId || "").trim(), normalizeEntityKind(sEntityKind), normalizeRootId(sRootId)].join("|");
+    function buildStoreKey(sTabSessionId, sEntityKind, sDbKey) {
+        return [String(sTabSessionId || "").trim(), normalizeEntityKind(sEntityKind), normalizeDbKey(sDbKey)].join("|");
     }
 
     /* Этот блок оборачивает IndexedDB request в Promise.
@@ -238,28 +238,28 @@ sap.ui.define([
         }
 
         return {
-            read: function (sRootId, sEntityKind) {
-                var sResolvedRootId = normalizeRootId(sRootId);
+            read: function (sDbKey, sEntityKind) {
+                var sResolvedDbKey = normalizeDbKey(sDbKey);
                 var sResolvedEntityKind = normalizeEntityKind(sEntityKind);
                 var sTabSessionId = resolveTabSessionId();
-                if (!sResolvedRootId || !sTabSessionId) {
+                if (!sResolvedDbKey || !sTabSessionId) {
                     return Promise.resolve(null);
                 }
                 return withStore("readonly", function (st) {
                     return requestAsPromise(
-                        st.get(buildStoreKey(sTabSessionId, sResolvedEntityKind, sResolvedRootId)),
+                        st.get(buildStoreKey(sTabSessionId, sResolvedEntityKind, sResolvedDbKey)),
                         "indexeddb_read_failed"
                     ).then(function (oEntry) {
                         return oEntry || null;
                     });
                 });
             },
-            write: function (sRootId, oData, mMeta) {
-                var sResolvedRootId = normalizeRootId(sRootId);
+            write: function (sDbKey, oData, mMeta) {
+                var sResolvedDbKey = normalizeDbKey(sDbKey);
                 var sResolvedEntityKind = normalizeEntityKind(mMeta && mMeta.entityKind);
                 var sTabSessionId = resolveTabSessionId();
-                var sStoreKey = buildStoreKey(sTabSessionId, sResolvedEntityKind, sResolvedRootId);
-                if (!sResolvedRootId || !sTabSessionId) {
+                var sStoreKey = buildStoreKey(sTabSessionId, sResolvedEntityKind, sResolvedDbKey);
+                if (!sResolvedDbKey || !sTabSessionId) {
                     return Promise.resolve(null);
                 }
                 return withStore("readwrite", function (st) {
@@ -274,7 +274,7 @@ sap.ui.define([
                             storeKey: sStoreKey,
                             tabSessionId: sTabSessionId,
                             entityKind: sResolvedEntityKind,
-                            rootId: sResolvedRootId,
+                            rootId: sResolvedDbKey,
                             payload: oData || null,
                             lastChangeSet: String(oMeta.lastChangeSet || "").trim(),
                             createdAt: sCreatedAt,
@@ -286,15 +286,15 @@ sap.ui.define([
                     });
                 });
             },
-            clear: function (sRootId, sEntityKind) {
-                var sResolvedRootId = normalizeRootId(sRootId);
+            clear: function (sDbKey, sEntityKind) {
+                var sResolvedDbKey = normalizeDbKey(sDbKey);
                 var sResolvedEntityKind = normalizeEntityKind(sEntityKind);
                 var sTabSessionId = resolveTabSessionId();
-                if (!sResolvedRootId || !sTabSessionId) {
+                if (!sResolvedDbKey || !sTabSessionId) {
                     return Promise.resolve(false);
                 }
                 return withStore("readwrite", function (st) {
-                    st.delete(buildStoreKey(sTabSessionId, sResolvedEntityKind, sResolvedRootId));
+                    st.delete(buildStoreKey(sTabSessionId, sResolvedEntityKind, sResolvedDbKey));
                     return true;
                 });
             },

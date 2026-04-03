@@ -35,9 +35,9 @@ sap.ui.define([
         };
     }
 
-    function saveFailure(sRootId, oError, sCorrelationId) {
+    function saveFailure(sDbKey, oError, sCorrelationId) {
         return {
-            rootId: String(sRootId || ""),
+            dbKey: String(sDbKey || ""),
             code: String((oError && oError.code) || ""),
             statusCode: Number((oError && oError.statusCode) || 0) || 0,
             correlationId: String(sCorrelationId || "")

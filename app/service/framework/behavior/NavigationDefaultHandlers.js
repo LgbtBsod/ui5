@@ -164,10 +164,10 @@ sap.ui.define([
             return WorkspaceRouteNavigation.navigateToSearch(mContext.controller);
         },
         navigateToDetail: function (mContext) {
-            return WorkspaceRouteNavigation.navigateToDetail(mContext.controller, mContext.rootId, mContext.layout);
+            return WorkspaceRouteNavigation.navigateToDetail(mContext.controller, mContext.dbKey || mContext.rootId, mContext.layout);
         },
         buildDetailHash: function (mContext) {
-            return WorkspaceRouteNavigation.buildDetailHash(mContext.controller, mContext.rootId);
+            return WorkspaceRouteNavigation.buildDetailHash(mContext.controller, mContext.dbKey || mContext.rootId);
         },
         navigateToAnalytics: function (mContext) {
             return WorkspaceRouteNavigation.navigateToAnalytics(mContext.controller);

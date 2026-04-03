@@ -6,6 +6,9 @@ const { collectFilesByExtensions } = require('./qa-shared');
 
 const ROOT = process.cwd();
 const scanFiles = collectFilesByExtensions(ROOT, ['app', 'backend'], ['.js', '.xml', '.abap', '.py', '.css']);
+const sapInternalCssAllowlist = JSON.parse(
+  fs.readFileSync(path.join(ROOT, 'scripts', 'sap-internal-css-allowlist.json'), 'utf8')
+);
 
 function read(file) {
   return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
@@ -30,6 +33,8 @@ const OBJECTUUID_ALLOWLIST = [
   'backend/mock_gateway/tests/test_gateway_contract_frontend_aliases.py',
   'backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap'
 ];
+ROOT_ALIAS_ALLOWLIST.push('backend/mock_gateway/tests/test_closeout_invariants.py');
+const CSS_PRIVATE_SELECTOR_ALLOWLIST = new Set(Object.keys(sapInternalCssAllowlist || {}));
 
 for (const file of scanFiles) {
   const text = read(path.join(ROOT, file));
@@ -57,6 +62,14 @@ for (const file of scanFiles) {
 
   if (/return\s+Object\.freeze\(\s*\{\s*\}\s*\)/.test(text) || /return\s+\w+;\s*$/.test(text)) {
     issues.push(`${file}: suspicious trivial export; review for wrapper sprawl`);
+  }
+
+  if (
+    file.endsWith('.css') &&
+    !CSS_PRIVATE_SELECTOR_ALLOWLIST.has(file) &&
+    /\.(sapUiCompFilterBarToolbar|sapUxAPObjectPage[A-Za-z-]*|sapMSwtCont|sapUiTable(?:Cnt|Ctrl|CtrlScr|CCnt)?|sapMDialogScrollCont)\b/.test(text)
+  ) {
+    issues.push(`${file}: private UI5 selectors must be quarantined to the compatibility allowlist`);
   }
 }
 
@@ -94,6 +107,35 @@ for (const file of scanFiles.filter((f) => f.endsWith('.js') && /constants/i.tes
 const backendText = read(path.join(ROOT, 'backend/sap_backend/src/zif_zodata_contract_constants.intf.abap'));
 if (/c_code_|c_msg_/.test(backendText)) {
   issues.push('backend/sap_backend/src/zif_zodata_contract_constants.intf.abap: technical contract must not contain machine-readable codes or human-readable texts');
+}
+
+const analyticsController = read(path.join(ROOT, 'app/controller/Analytics.controller.js'));
+if (/AnalyticsContracts\.MESSAGES\.(ANALYTICS_LOAD_FAILED|ANALYTICS_REFRESH_FAILED|ANALYTICS_UNAVAILABLE)/.test(analyticsController) && !/_resolveAnalyticsMessage/.test(analyticsController)) {
+  issues.push('app/controller/Analytics.controller.js: analytics UI error path must translate message keys through i18n before writing view>/error');
+}
+const analyticsExportRuntime = read(path.join(ROOT, 'app/controller/analytics/AnalyticsExportRuntime.js'));
+['nothingToExport', 'searchExportSuccess', 'exportFailed'].forEach((key) => {
+  if (analyticsExportRuntime.indexOf(`"${key}"`) >= 0) {
+    issues.push(`app/controller/analytics/AnalyticsExportRuntime.js: raw i18n key literal ${key} must be routed through MessageKeyConstants`);
+  }
+});
+const appController = read(path.join(ROOT, 'app/controller/App.controller.js'));
+if (appController.indexOf('security_token_refresh_unavailable') >= 0) {
+  issues.push('app/controller/App.controller.js: raw technical diagnostics must use a dedicated code owner');
+}
+const attachmentReadme = read(path.join(ROOT, 'backend/mock_gateway/README_ODATA.md'));
+if (!/media upload to `AttachmentSet`/i.test(attachmentReadme) || !/no parallel repository upload boundary/i.test(attachmentReadme)) {
+  issues.push('backend/mock_gateway/README_ODATA.md: attachment contract docs must state the final media-only architecture');
+}
+const smokePack = read(path.join(ROOT, 'scripts/gateway-only-smoke-pack.py'));
+if (smokePack.indexOf('ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN') < 0) {
+  issues.push('scripts/gateway-only-smoke-pack.py: smoke coverage must prove the base64 save path stays forbidden');
+}
+if (fs.existsSync(path.join(ROOT, 'dist/infra/adapters/shared/AttachmentRepoRuntime.js'))) {
+  issues.push('dist/infra/adapters/shared/AttachmentRepoRuntime.js: stale attachment upload seam must stay deleted from dist output');
+}
+if (fs.existsSync(path.join(ROOT, 'dist/service/framework/WorkflowCoordinator.js'))) {
+  issues.push('dist/service/framework/WorkflowCoordinator.js: stale workflow wrapper must stay deleted from dist output');
 }
 
 const outputs = issues.length ? ['FAIL final-residual-cleanup-gate', ...issues.map((i) => `- ${i}`)] : ['PASS final-residual-cleanup-gate'];

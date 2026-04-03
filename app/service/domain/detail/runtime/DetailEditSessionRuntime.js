@@ -77,8 +77,8 @@ sap.ui.define([
         return DetailEditRestoreRuntime.clearAnalyticsReturnRestore(oController);
     };
 
-    DetailEditSessionRuntime.prototype.restoreAnalyticsEditIfNeeded = function (oController, sRootId, mHooks) {
-        return DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(oController, sRootId, mHooks);
+    DetailEditSessionRuntime.prototype.restoreAnalyticsEditIfNeeded = function (oController, sDbKey, mHooks) {
+        return DetailEditRestoreRuntime.restoreAnalyticsEditIfNeeded(oController, sDbKey, mHooks);
     };
 
     DetailEditSessionRuntime.prototype.resetDetailWorkflowState = function (oController, mPatch) {

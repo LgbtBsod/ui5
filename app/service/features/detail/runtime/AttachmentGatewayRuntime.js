@@ -10,7 +10,7 @@ sap.ui.define([
         UPLOAD_FAILED: "attachment_upload_failed"
     });
 
-    function normalizeRootKey(sValue) {
+    function normalizeDbKey(sValue) {
         return ODataKeyNormalizer.normalizeBinaryKey(sValue);
     }
 
@@ -83,14 +83,14 @@ sap.ui.define([
     function uploadPendingAttachments(oController, mInput) {
         var oUploader = resolveUploader(oController);
         var oModel = oController && oController.getModel && oController.getModel("mainService");
-        var sDbKey = normalizeRootKey(mInput && (mInput.dbKey || mInput.parentKey || mInput.rootId));
+        var sDbKey = normalizeDbKey(mInput && (mInput.dbKey || mInput.parentKey));
         var aAttachments = Array.isArray(mInput && mInput.attachments) ? mInput.attachments : [];
         var oAttachment = aAttachments[0] || null;
         var sServiceUrl = resolveServiceUrl(oController);
         var sCsrfToken = String((oModel && oModel.getSecurityToken && oModel.getSecurityToken()) || "").trim();
         var sFileName = String((oAttachment && oAttachment.fileName) || (oAttachment && oAttachment.file && oAttachment.file.name) || "").trim();
         var sUploadUrl = sServiceUrl + "/" + GatewayContractConstants.ENTITY_SETS.ATTACHMENT;
-        var sParentKey = normalizeRootKey(oAttachment && (oAttachment.parentKey || oAttachment.dbKey)) || sDbKey;
+        var sParentKey = normalizeDbKey(oAttachment && (oAttachment.parentKey || oAttachment.dbKey)) || sDbKey;
         var sFolderKey = String((oAttachment && oAttachment.folderKey) || sParentKey).trim() || sParentKey;
 
         if (!oUploader || !sServiceUrl || !sDbKey || !sParentKey || !oAttachment) {

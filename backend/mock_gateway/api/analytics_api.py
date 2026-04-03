@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from services.analytics_service import AnalyticsService, TASK_KEY_ANALYTICS_REFRESH
-from utils.odata import ODATA_NS, SERVICE_ROOT, odata_error_response, odata_payload
+from utils.odata import ODATA_NS, SERVICE_ROOT, format_datetime, odata_error_response, odata_payload
 from utils.odata_response import odata_entity
 
 router = APIRouter(tags=["Analytics"])
@@ -64,7 +64,7 @@ def _to_summary_row(payload: dict) -> dict:
         "AvgChecksRate": float(payload.get("avgChecksRate") or 0),
         "AvgBarriersRate": float(payload.get("avgBarriersRate") or 0),
         "Healthy": int(payload.get("healthy") or 0),
-        "RefreshedAt": str(payload.get("refreshedAt") or "-"),
+        "RefreshedAt": format_datetime(payload.get("refreshedAt")),
         "Source": source,
         "SourceText": str(payload.get("sourceText") or source),
     }
@@ -91,11 +91,11 @@ def _to_refresh_state_row(payload: dict) -> dict:
         "TaskName": str(payload.get("taskName") or task_key),
         "Status": str(payload.get("status") or "IDLE"),
         "IsRunning": bool(payload.get("isRunning")),
-        "RequestedAt": str(payload.get("requestedAt") or ""),
+        "RequestedAt": format_datetime(payload.get("requestedAt")),
         "RequestedBy": str(payload.get("requestedBy") or ""),
-        "StartedAt": str(payload.get("startedAt") or ""),
-        "FinishedAt": str(payload.get("finishedAt") or ""),
-        "LastSuccessAt": str(payload.get("lastSuccessAt") or ""),
+        "StartedAt": format_datetime(payload.get("startedAt")),
+        "FinishedAt": format_datetime(payload.get("finishedAt")),
+        "LastSuccessAt": format_datetime(payload.get("lastSuccessAt")),
         "LastError": str(payload.get("lastError") or ""),
         "LastMessage": str(payload.get("lastMessage") or ""),
         "ActiveRunId": str(payload.get("activeRunId") or ""),

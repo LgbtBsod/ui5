@@ -46,14 +46,14 @@ sap.ui.define([
             || TimerDefaults.cacheToleranceMs.defaultValue;
     }
 
-    function resolveCanonicalRootId(oRepo, sRootId) {
-        if (!oRepo || typeof oRepo.resolveRootId !== "function" || !sRootId || CreateSentinel.isCreateId(sRootId)) {
-            return Promise.resolve(sRootId);
+    function resolveCanonicalDbKey(oRepo, sRequestedDbKey) {
+        if (!oRepo || typeof oRepo.resolveDbKey !== "function" || !sRequestedDbKey || CreateSentinel.isCreateId(sRequestedDbKey)) {
+            return Promise.resolve(sRequestedDbKey);
         }
-        return Promise.resolve(oRepo.resolveRootId({ rootId: sRootId })).then(function (sResolvedRootId) {
-            return String(sResolvedRootId || sRootId).trim() || sRootId;
+        return Promise.resolve(oRepo.resolveDbKey({ dbKey: sRequestedDbKey })).then(function (sResolvedDbKey) {
+            return String(sResolvedDbKey || sRequestedDbKey).trim() || sRequestedDbKey;
         }).catch(function () {
-            return sRootId;
+            return sRequestedDbKey;
         });
     }
 
@@ -92,11 +92,11 @@ sap.ui.define([
         ];
     }
 
-    function resolveLoadedAttachments(oUiState, sRootId) {
-        var sSelectedRootId = String((oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT_ID)) || "").trim();
+    function resolveLoadedAttachments(oUiState, sCurrentDbKey) {
+        var sSelectedDbKey = String((oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT_ID)) || "").trim();
         var bAttachmentsLoaded = !!(oUiState && oUiState.get(VIEW_MODEL, ViewPathContracts.ATTACHMENTS_LOADED));
         var aAttachments = (oUiState && oUiState.get(DETAIL_MODEL, DETAIL_MODEL_PATHS.ATTACHMENTS)) || [];
-        if (!sRootId || sSelectedRootId !== sRootId || !bAttachmentsLoaded || !Array.isArray(aAttachments)) {
+        if (!sCurrentDbKey || sSelectedDbKey !== sCurrentDbKey || !bAttachmentsLoaded || !Array.isArray(aAttachments)) {
             return [];
         }
         return aAttachments;
@@ -107,13 +107,13 @@ sap.ui.define([
         return Array.isArray(aSessionAttachments) ? aSessionAttachments : [];
     }
 
-    function resolveEditableOpenState(oUiState, sRootId) {
-        var sHydratedRootId = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID)) || "").trim();
-        var sActiveRootId = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
+    function resolveEditableOpenState(oUiState, sCurrentDbKey) {
+        var sHydratedDbKey = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID)) || "").trim();
+        var sActiveDbKey = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
         var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
-        var bMatchesRoot = !!sRootId && (sHydratedRootId === sRootId || sActiveRootId === sRootId);
-        var bEditable = bMatchesRoot && WorkflowContracts.isEditLocked(sEditMode, sLockState);
+        var bMatchesDbKey = !!sCurrentDbKey && (sHydratedDbKey === sCurrentDbKey || sActiveDbKey === sCurrentDbKey);
+        var bEditable = bMatchesDbKey && WorkflowContracts.isEditLocked(sEditMode, sLockState);
 
         return {
             editMode: bEditable ? WorkflowContracts.EDIT_MODES.EDIT : WorkflowContracts.EDIT_MODES.READ,
@@ -122,10 +122,10 @@ sap.ui.define([
         };
     }
 
-    function resolveSameRootSnapshot(oUiState, sRootId, sPath) {
+    function resolveSameDbKeySnapshot(oUiState, sCurrentDbKey, sPath) {
         var oSnapshot = (oUiState && oUiState.get(DETAIL_MODEL, sPath)) || null;
-        var sSnapshotRootId = String((oSnapshot && oSnapshot.root && oSnapshot.root.id) || "").trim();
-        if (!sRootId || !sSnapshotRootId || sSnapshotRootId !== sRootId) {
+        var sSnapshotDbKey = String((oSnapshot && oSnapshot.root && oSnapshot.root.id) || "").trim();
+        if (!sCurrentDbKey || !sSnapshotDbKey || sSnapshotDbKey !== sCurrentDbKey) {
             return null;
         }
         return oSnapshot;
@@ -227,8 +227,8 @@ sap.ui.define([
 
         var oCacheValidation = mCtx && mCtx.cacheValidation;
 
-        return resolveCanonicalRootId(oRepo, sDbKey).then(function (sCanonicalRootId) {
-            return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sCanonicalRootId, {
+        return resolveCanonicalDbKey(oRepo, sDbKey).then(function (sCanonicalDbKey) {
+            return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sCanonicalDbKey, {
                 activity: DetailAuthorizationRuntime.OPERATIONS.DISPLAY
             }).then(function (oPermission) {
             var pValidation;
@@ -239,7 +239,7 @@ sap.ui.define([
                         ready: false,
                         readyAt: "",
                         error: DETAIL_CODES.NO_VIEW_PERMISSION,
-                        rootId: sCanonicalRootId,
+                        rootId: sCanonicalDbKey,
                         mode: WorkflowContracts.EDIT_MODES.READ,
                         permissionKnown: true,
                         lockKnown: false
@@ -247,7 +247,7 @@ sap.ui.define([
                 ]).concat(DetailAuthorizationRuntime.openDeniedEffects(oPermission)));
             }
             pValidation = (oCacheValidation && typeof oCacheValidation.execute === "function")
-                ? Promise.resolve(oCacheValidation.execute({ rootId: sCanonicalRootId, toleranceMs: resolveCacheTolerance(mCtx) }, mCtx || {})).catch(function () { return null; })
+                ? Promise.resolve(oCacheValidation.execute({ rootId: sCanonicalDbKey, toleranceMs: resolveCacheTolerance(mCtx) }, mCtx || {})).catch(function () { return null; })
                 : Promise.resolve(null);
             return pValidation.then(function (oValidation) {
                 var oValidationData = (oValidation && oValidation.ok && oValidation.data) ? oValidation.data : null;
@@ -255,26 +255,26 @@ sap.ui.define([
                     return {
                         snapshot: oValidationData.snapshot,
                         permission: oPermission,
-                        rootId: sCanonicalRootId
+                        dbKey: sCanonicalDbKey
                     };
                 }
-                return Promise.resolve(oRepo.loadDetailSnapshot({ rootId: sCanonicalRootId, includeChildren: false })).then(function (oSnapshot) {
+                return Promise.resolve(oRepo.loadDetailSnapshot({ dbKey: sCanonicalDbKey, includeChildren: false })).then(function (oSnapshot) {
                     var oCacheWrite = mCtx && mCtx.cacheWrite;
                     if (oCacheWrite && typeof oCacheWrite.execute === "function") {
-                        return Promise.resolve(oCacheWrite.execute({ rootId: sCanonicalRootId, snapshot: oSnapshot }, mCtx || {})).catch(function () {
+                        return Promise.resolve(oCacheWrite.execute({ dbKey: sCanonicalDbKey, snapshot: oSnapshot }, mCtx || {})).catch(function () {
                             return null;
                         }).then(function () {
                             return {
                                 snapshot: oSnapshot,
                                 permission: oPermission,
-                                rootId: sCanonicalRootId
+                                dbKey: sCanonicalDbKey
                             };
                         });
                     }
                     return {
                         snapshot: oSnapshot,
                         permission: oPermission,
-                        rootId: sCanonicalRootId
+                        dbKey: sCanonicalDbKey
                     };
                 });
             });
@@ -285,13 +285,13 @@ sap.ui.define([
             }
             var oSnapshot = oResolved && oResolved.snapshot;
             var oPermission = oResolved && oResolved.permission;
-            var sCanonicalRootId = String((oResolved && oResolved.rootId) || sDbKey).trim() || sDbKey;
-            var oCurrentSelected = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.ROOT);
-            var oCurrentSnapshot = resolveSameRootSnapshot(oUiState, sCanonicalRootId, DETAIL_MODEL_PATHS.BASE);
-            var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalRootId);
+            var sCanonicalDbKey = String((oResolved && oResolved.dbKey) || sDbKey).trim() || sDbKey;
+            var oCurrentSelected = resolveSameDbKeySnapshot(oUiState, sCanonicalDbKey, DETAIL_MODEL_PATHS.ROOT);
+            var oCurrentSnapshot = resolveSameDbKeySnapshot(oUiState, sCanonicalDbKey, DETAIL_MODEL_PATHS.BASE);
+            var aLoadedAttachments = resolveLoadedAttachments(oUiState, sCanonicalDbKey);
             var aSessionAttachments = resolveSessionAttachments(oUiState);
             var aEffectiveAttachments = aLoadedAttachments.length ? aLoadedAttachments : [];
-            var oEditState = resolveEditableOpenState(oUiState, sCanonicalRootId);
+            var oEditState = resolveEditableOpenState(oUiState, sCanonicalDbKey);
             var bPreserveCurrentRows = oEditState.autosaveEnabled && (
                 !!((oCurrentSelected && oCurrentSelected.checks && oCurrentSelected.checks.length) || (oCurrentSnapshot && oCurrentSnapshot.checks && oCurrentSnapshot.checks.length))
                 || !!((oCurrentSelected && oCurrentSelected.barriers && oCurrentSelected.barriers.length) || (oCurrentSnapshot && oCurrentSnapshot.barriers && oCurrentSnapshot.barriers.length))
@@ -307,14 +307,14 @@ sap.ui.define([
                     ready: true,
                     readyAt: sReadyAt,
                     error: "",
-                    rootId: sCanonicalRootId,
+                    rootId: sCanonicalDbKey,
                     mode: oEditState.editMode,
                     permissionKnown: true,
                     lockKnown: true
                 }),
-                Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sCanonicalRootId),
-                Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sCanonicalRootId),
-                Effects.modelPatch(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sCanonicalRootId),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sCanonicalDbKey),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sCanonicalDbKey),
+                Effects.modelPatch(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sCanonicalDbKey),
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, oEditState.editMode),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, oEditState.lockState),

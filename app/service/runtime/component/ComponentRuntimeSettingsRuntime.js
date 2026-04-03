@@ -57,18 +57,22 @@ sap.ui.define([
                     return applyRuntimeSettings(oRuntime);
                 }).catch(function (oError) {
                     var oOriginalError = normalizeRuntimeSettingsError(oError);
+                    var sFallbackCode = ComponentBootstrapContracts.STAGE_ERRORS.RUNTIME_SETTINGS_LOAD_FAILED;
                     ModelStateRuntime.writeOnModel(oStateModel, "/frontendConfigSource", ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE.GATEWAY_RUNTIME_ERROR);
                     fnEmitTelemetry("runtime.config.fallback_applied", TelemetryRuntime.runtimeConfig(
                         FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
-                        "runtime_settings_fallback_applied",
+                        sFallbackCode,
                         oOriginalError
                     ));
                     fnEmitTelemetry("runtime.config.load_failed", TelemetryRuntime.runtimeConfig(
                         FrontendConfigConstants.SOURCES.RUNTIME_SETTINGS_GLOBAL,
-                        oOriginalError.message || "runtime_settings_load_failed",
+                        oOriginalError.message || sFallbackCode,
                         oOriginalError
                     ));
-                    throw oError || new Error("runtime_settings_load_failed");
+                    if (oError) {
+                        throw oError;
+                    }
+                    throw new Error(sFallbackCode);
                 });
             }
         };

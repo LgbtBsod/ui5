@@ -1,18 +1,18 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "sap/ui/core/format/DateFormat"
+], function (DateFormat) {
     "use strict";
+
+    var oDateTimeFormatter = DateFormat.getDateTimeInstance({
+        pattern: "dd.MM.yyyy, HH:mm"
+    });
 
     function formatHumanDateTime(vDate) {
         var oDate = vDate instanceof Date ? vDate : new Date(vDate || Date.now());
         if (Number.isNaN(oDate.getTime())) {
             oDate = new Date();
         }
-        return oDate.toLocaleString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit"
-        });
+        return oDateTimeFormatter.format(oDate);
     }
 
     function eventPayload(oEvent) {

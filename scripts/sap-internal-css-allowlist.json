@@ -3,7 +3,6 @@
   "app/styles/modules/23_dialogs.css": "Dialog and popover styling is still quarantined on SAP dialog internals, but only inside the dedicated dialog bundle while app-owned host classes are being introduced.",
   "app/styles/modules/40_page_search.css": "Search page bundle still carries scoped UI5 1.71 search/table compatibility selectors while toolbar and result-shell wrappers are being narrowed.",
   "app/styles/modules/41_page_detail.css": "Detail page bundle still carries scoped UI5 1.71 attachment/object-page compatibility selectors while renderer-coupled section shells are being reduced.",
-  "app/styles/modules/42_page_analytics.css": "Analytics viz and responsive layout styling still bridges SAP control internals until chart host wrappers replace them.",
   "app/styles/modules/90_ui5_overrides.css": "Central override layer is the explicit quarantine zone for unavoidable SAP theme overrides, including search/detail renderer compatibility extracted from page bundles.",
   "app/styles/modules/controls/22_feedback_and_status.css": "Feedback strip/status styling still needs SAP internals for message strip parity; keep quarantined to feedback controls.",
   "app/styles/modules/controls/23_shell_controls.css": "Shell controls still bridge UI5 button renderer internals inside a dedicated control bundle; remaining selectors are quarantined until shell button variants move to pure app-owned classes.",

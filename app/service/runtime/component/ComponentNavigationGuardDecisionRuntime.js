@@ -35,7 +35,7 @@ sap.ui.define([
         return sRouteName === NavigationContracts.ROUTES.DETAIL;
     }
 
-    function resolveCurrentRootId(oStateModel) {
+    function resolveCurrentDbKey(oStateModel) {
         return normalizeId(
             ModelStateRuntime.readOnModel(oStateModel, "/postOpenHydratedRootId", "") ||
             ModelStateRuntime.readOnModel(oStateModel, PATHS.ACTIVE_OBJECT_ID, "") ||
@@ -49,22 +49,22 @@ sap.ui.define([
         return {
             routeName: normalizeRouteName(oRouteEvent && oRouteEvent.getParameter && oRouteEvent.getParameter("name")),
             routeArgs: mArgs,
-            rootId: normalizeId(mArgs && mArgs.id)
+            dbKey: normalizeId(mArgs && mArgs.id)
         };
     }
 
     function isSameDetailTarget(oStateModel, oRouteEvent) {
         var oNextIntent = resolveNextRouteIntent(oRouteEvent);
-        var sCurrentRootId = resolveCurrentRootId(oStateModel);
+        var sCurrentDbKey = resolveCurrentDbKey(oStateModel);
 
-        return !!(sCurrentRootId && isDetailRoute(oNextIntent.routeName) && oNextIntent.rootId === sCurrentRootId);
+        return !!(sCurrentDbKey && isDetailRoute(oNextIntent.routeName) && oNextIntent.dbKey === sCurrentDbKey);
     }
 
     function shouldGuardDetailNavigation(oStateModel, oRouteEvent) {
-        var sCurrentRootId = resolveCurrentRootId(oStateModel);
+        var sCurrentDbKey = resolveCurrentDbKey(oStateModel);
         var oNextIntent = resolveNextRouteIntent(oRouteEvent);
 
-        return !!(sCurrentRootId && !isSameDetailTarget(oStateModel, oRouteEvent) && oNextIntent.routeName);
+        return !!(sCurrentDbKey && !isSameDetailTarget(oStateModel, oRouteEvent) && oNextIntent.routeName);
     }
 
     function shouldReleaseDetailLock(oStateModel, oRouteEvent, StatePaths) {

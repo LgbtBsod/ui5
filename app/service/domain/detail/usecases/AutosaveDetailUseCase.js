@@ -64,11 +64,11 @@ sap.ui.define([
         return DeltaPayloadBuilder.buildDeltaPayload(oMappedCurrent, oSnapshot) || null;
     }
 
-    function isAutosaveAllowed(sRootId, mCtx) {
+    function isAutosaveAllowed(sDbKey, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         return DetailPersistenceRuntime.canAutosaveFromState(oUiState, {
-            rootId: sRootId,
-            isCreateDraft: CreateSentinel.isCreateId(sRootId)
+            dbKey: sDbKey,
+            isCreateDraft: CreateSentinel.isCreateId(sDbKey)
         });
     }
 
@@ -81,20 +81,20 @@ sap.ui.define([
         );
     }
 
-    function writeDetailCache(oCacheWrite, sRootId, oSnapshot, mCtx) {
-        if (!oCacheWrite || typeof oCacheWrite.execute !== "function" || !sRootId || !oSnapshot) {
+    function writeDetailCache(oCacheWrite, sDbKey, oSnapshot, mCtx) {
+        if (!oCacheWrite || typeof oCacheWrite.execute !== "function" || !sDbKey || !oSnapshot) {
             return Promise.resolve(null);
         }
         return Promise.resolve(oCacheWrite.execute({
-            rootId: sRootId,
+            dbKey: sDbKey,
             snapshot: oSnapshot
         }, mCtx || {})).catch(function () {
             return null;
         });
     }
 
-    function mergeDeltaAttachments(oDelta, aCurrentAttachments, sRootId) {
-        var aPendingAttachmentRows = DetailAttachmentDeltaRuntime.listPendingStagedAttachments(aCurrentAttachments, sRootId);
+    function mergeDeltaAttachments(oDelta, aCurrentAttachments, sDbKey) {
+        var aPendingAttachmentRows = DetailAttachmentDeltaRuntime.listPendingStagedAttachments(aCurrentAttachments, sDbKey);
         if (!aPendingAttachmentRows.length) {
             return oDelta;
         }
@@ -149,11 +149,11 @@ sap.ui.define([
             var oSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
                 DetailSaveRuntime.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrentChecklist, oCurrentChecklist, oBaseSnapshot)
             );
-            return DetailAttachmentSaveRuntime.syncAfterSave({
-                attachmentGateway: mCtx && mCtx.attachmentGateway,
-                repo: oRepo,
-                rootId: sDbKey,
-                createMode: false,
+                return DetailAttachmentSaveRuntime.syncAfterSave({
+                    attachmentGateway: mCtx && mCtx.attachmentGateway,
+                    repo: oRepo,
+                    dbKey: sDbKey,
+                    createMode: false,
                 currentAttachments: aCurrentAttachments,
                 sessionGuid: sSessionGuid,
                 savedResult: oSaved,

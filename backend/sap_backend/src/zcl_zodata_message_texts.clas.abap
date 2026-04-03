@@ -33,6 +33,7 @@ CLASS zcl_zodata_message_texts DEFINITION
     CONSTANTS c_key_no_edit_auth TYPE string VALUE 'NO_EDIT_AUTH'.
     CONSTANTS c_key_no_edit_auth_save TYPE string VALUE 'NO_EDIT_AUTH_SAVE'.
     CONSTANTS c_key_mpl_tree_read_failed_prefix TYPE string VALUE 'MPL_TREE_READ_FAILED_PREFIX'.
+    CONSTANTS c_key_checklist_root_not_found_prefix TYPE string VALUE 'CHECKLIST_ROOT_NOT_FOUND_PREFIX'.
 
     CLASS-METHODS get_text
       IMPORTING
@@ -113,6 +114,8 @@ CLASS zcl_zodata_message_texts IMPLEMENTATION.
         rv_msgno = '027'.
       WHEN c_key_mpl_tree_read_failed_prefix.
         rv_msgno = '028'.
+      WHEN c_key_checklist_root_not_found_prefix.
+        rv_msgno = '029'.
       WHEN OTHERS.
         CLEAR rv_msgno.
     ENDCASE.

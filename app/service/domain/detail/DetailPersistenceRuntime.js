@@ -266,7 +266,7 @@ sap.ui.define([
 
     function canAutosaveFromState(oUiState, mOptions) {
         var STATE_MODEL_NAME = (mOptions && mOptions.stateModelName) || STATE_MODEL;
-        var sRootId = String((mOptions && mOptions.rootId) || "").trim();
+        var sCurrentDbKey = String((mOptions && (mOptions.dbKey || mOptions.rootId)) || "").trim();
         var bIsCreateDraft = !!(mOptions && mOptions.isCreateDraft);
         var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL_NAME, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL_NAME, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
@@ -280,7 +280,7 @@ sap.ui.define([
             bHasValidLock &&
             bLockOwnerSessionMatches &&
             !bHasConflict &&
-            !!sRootId &&
+            !!sCurrentDbKey &&
             !bIsCreateDraft;
     }
 

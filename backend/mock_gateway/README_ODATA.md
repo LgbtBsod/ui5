@@ -4,7 +4,7 @@ This document defines the frontend adapter-boundary contract for the mock Gatewa
 
 Canonical service root: `/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/`
 Frontend manifest alias: `mainService`
-Productive UI5 baseline target: `1.71.28`
+Productive UI5 baseline target: `1.71.70`
 
 ## Productive create-permission seam rules:
 
@@ -118,6 +118,9 @@ Mutating detail flows stay on dedicated resources/functions:
 ## Attachment contract
 
 - persisted attachment upload uses only media upload to `AttachmentSet`
+- staged attachment previews may exist only as client-side transient draft state before save
+- frontend upload ownership stays in `AttachmentGatewayRuntime` + `AttachmentUploadRuntime`; no parallel repository upload boundary is allowed
+- `AttachmentRepoRuntime` stays deleted in both source and shipped dist output; do not reintroduce a stub or facade upload seam next to the canonical media boundary
 - `SaveChanges` and `CreateChecklist` must not carry productive base64 attachment payloads
 - mock Gateway rejects save-time base64 via `ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN`
 - attachment binaries are opened only through `AttachmentSet('<AttachmentKey>')/$value`, `DownloadUrl`, or `DocumentHandle`
@@ -144,6 +147,7 @@ Mutating detail flows stay on dedicated resources/functions:
 
 - if productive SAP Gateway varies by field name or header naming, adapt only at the OData/frontend adapter boundary
 - do not reintroduce parallel JSON/base64 save transport
+- `AttachmentValueCodec` is not a productive persisted attachment transport owner
 
 ## Denied and failure response behavior
 

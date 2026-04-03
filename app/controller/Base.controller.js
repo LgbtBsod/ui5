@@ -4,10 +4,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/EffectMixin",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ThemeMixin",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxRuntimeFactory",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/EncodingUtils"
-], function (Controller, RouterMixin, EffectMixin, ThemeMixin, LockAdapter, ModelContracts, JsRuntime, EncodingUtils) {
+], function (Controller, RouterMixin, EffectMixin, ThemeMixin, LockAdapter, CtxRuntimeFactory, ModelContracts, JsRuntime, EncodingUtils) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -26,7 +27,19 @@ sap.ui.define([
             || null;
     }
 
+    function buildViewRefs(oController) {
+        var oSmartTable = oController && typeof oController.byId === TYPE_FUNCTION ? oController.byId("searchSmartTable") : null;
+        return {
+            smartFilterBar: oController && typeof oController.byId === TYPE_FUNCTION ? oController.byId("searchSmartFilterBar") : null,
+            smartTable: oSmartTable,
+            innerTable: oSmartTable && typeof oSmartTable.getTable === TYPE_FUNCTION ? oSmartTable.getTable() : null
+        };
+    }
+
     return Controller.extend("PRODUCTION_CONTROL_CHECKLIST.controller.Base", Object.assign({}, RouterMixin, EffectMixin, ThemeMixin, {
+        _ctx: function () {
+            return CtxRuntimeFactory.build(this, buildViewRefs(this));
+        },
         getModel: function (sName) {
             if (typeof sName === TYPE_UNDEFINED) {
                 return resolveNamedModel(this, undefined);

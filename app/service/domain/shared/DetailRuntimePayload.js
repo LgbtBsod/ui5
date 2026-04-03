@@ -20,12 +20,12 @@ sap.ui.define([
 
     function resolveCanonicalDbKey(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
-        var sInputDbKey = sanitizeId((mInput && (mInput.dbKey || mInput.DB_KEY)) || UseCaseValue.rootId(mInput));
-        var sSelectedRootId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, "/postOpenHydratedRootId"));
-        var sSelectedSnapshotRootId = sanitizeId(oUiState && oUiState.get(DETAIL_MODEL, "/current/root/id"));
-        var sActiveRootId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID));
+        var sInputDbKey = sanitizeId((mInput && (mInput.dbKey || mInput.DB_KEY)) || UseCaseValue.requestedDbKey(mInput));
+        var sHydratedDbKey = sanitizeId(oUiState && oUiState.get(STATE_MODEL, "/postOpenHydratedRootId"));
+        var sSnapshotDbKey = sanitizeId(oUiState && oUiState.get(DETAIL_MODEL, "/current/root/id"));
+        var sActiveDbKey = sanitizeId(oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID));
         var sSelectedId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.SELECTED_ID));
-        var aCandidates = [sInputDbKey, sSelectedSnapshotRootId, sSelectedRootId, sActiveRootId, sSelectedId];
+        var aCandidates = [sInputDbKey, sSnapshotDbKey, sHydratedDbKey, sActiveDbKey, sSelectedId];
         var i;
         for (i = 0; i < aCandidates.length; i += 1) {
             if (isRealId(aCandidates[i])) {
@@ -44,7 +44,7 @@ sap.ui.define([
         return resolveCanonicalDbKey(mInput, mCtx);
     }
 
-    function rootId(mInput, mCtx) {
+    function requestedDbKey(mInput, mCtx) {
         return dbKey(mInput, mCtx);
     }
 
@@ -66,13 +66,13 @@ sap.ui.define([
         ).trim();
     }
 
-    function normalizeRootKey(sRootId) {
-        return CreateSentinel.isCreateId(sRootId) ? "" : String(sRootId || "").trim();
+    function normalizePersistedDbKey(sDbKey) {
+        return CreateSentinel.isCreateId(sDbKey) ? "" : String(sDbKey || "").trim();
     }
 
     function saveRequest(mInput) {
         return {
-            dbKey: String((mInput && (mInput.dbKey || mInput.DB_KEY)) || UseCaseValue.rootId(mInput) || "").trim(),
+            dbKey: String((mInput && (mInput.dbKey || mInput.DB_KEY)) || UseCaseValue.requestedDbKey(mInput) || "").trim(),
             sessionGuid: String((mInput && mInput.sessionGuid) || "").trim(),
             delta: (mInput && mInput.delta) || {},
             attachments: (mInput && mInput.attachments) || []
@@ -80,10 +80,9 @@ sap.ui.define([
     }
 
     function lockRequest(mInput, mCtx) {
-        var sRootId = dbKey(mInput, mCtx);
+        var sDbKey = dbKey(mInput, mCtx);
         return {
-            dbKey: sRootId,
-            rootId: sRootId,
+            dbKey: sDbKey,
             sessionGuid: sessionGuid(mInput, mCtx),
             tabSessionId: tabSessionId(mInput, mCtx)
         };
@@ -92,10 +91,10 @@ sap.ui.define([
     return {
         resolveCanonicalDbKey: resolveCanonicalDbKey,
         dbKey: dbKey,
-        rootId: rootId,
+        requestedDbKey: requestedDbKey,
         sessionGuid: sessionGuid,
         tabSessionId: tabSessionId,
-        normalizeRootKey: normalizeRootKey,
+        normalizePersistedDbKey: normalizePersistedDbKey,
         saveRequest: saveRequest,
         lockRequest: lockRequest
     };

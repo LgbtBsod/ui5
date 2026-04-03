@@ -33,14 +33,14 @@ sap.ui.define([
 
     function buildContext(mInput) {
         var oContext = mInput || {};
-        var sRootId = normalizeString(oContext.rootId);
+        var sDbKey = normalizeString(oContext.dbKey || oContext.rootId);
         var sChecklistId = normalizeString(oContext.checklistId);
         var sMode = normalizeMode(oContext.mode);
-        if (!sMode && !sRootId && !sChecklistId) {
+        if (!sMode && !sDbKey && !sChecklistId) {
             return null;
         }
         return {
-            rootId: sRootId,
+            dbKey: sDbKey,
             checklistId: sChecklistId,
             reason: normalizeString(oContext.reason),
             mode: sMode || MODES.SAVE,
@@ -76,13 +76,13 @@ sap.ui.define([
     }
 
     function findMatchingItem(oInnerTable, oReturnContext) {
-        var sRootId = normalizeString(oReturnContext && oReturnContext.rootId);
+        var sDbKey = normalizeString(oReturnContext && oReturnContext.dbKey);
         var sChecklistId = normalizeString(oReturnContext && oReturnContext.checklistId);
         return resolveVisibleItems(oInnerTable).find(function (oItem) {
             var oObject = extractItemObject(oItem);
-            var sRowRootId = ChecklistIdentity.extractChecklistId(oObject);
+            var sRowDbKey = ChecklistIdentity.extractChecklistId(oObject);
             var sRowChecklistId = ChecklistIdentity.extractChecklistDisplayId(oObject);
-            if (sRootId && sRowRootId === sRootId) {
+            if (sDbKey && sRowDbKey === sDbKey) {
                 return true;
             }
             return !!sChecklistId && sRowChecklistId === sChecklistId;
@@ -140,13 +140,13 @@ sap.ui.define([
 
     function handleFoundReturnItem(oController, oInnerTable, oItem, oReturnContext) {
         var oObject = extractItemObject(oItem);
-        var sSelectedRowId = ChecklistIdentity.extractChecklistId(oObject) || normalizeString(oReturnContext.rootId);
+        var sSelectedDbKey = ChecklistIdentity.extractChecklistId(oObject) || normalizeString(oReturnContext.dbKey);
         var sSelectedRowDisplayId = ChecklistIdentity.extractChecklistDisplayId(oObject) || normalizeString(oReturnContext.checklistId);
 
         if (oReturnContext.selectionRequested !== false) {
             selectTableItem(oInnerTable, oItem);
             applySelectionState(oController, {
-                selectedRowId: sSelectedRowId,
+                selectedRowId: sSelectedDbKey,
                 selectedRowDisplayId: sSelectedRowDisplayId
             });
         } else {

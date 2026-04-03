@@ -5,7 +5,7 @@ sap.ui.define([
 
     QUnit.module("framework/ActionDispatcher");
 
-    QUnit.test("dispatch forwards normalized payload without validator layer", function (assert) {
+    QUnit.test("dispatch forwards canonical dbKey payload without validator layer", function (assert) {
         var done = assert.async();
         var oDispatcher = new ActionDispatcher();
         var oCaptured = null;
@@ -15,9 +15,9 @@ sap.ui.define([
             return Promise.resolve();
         });
 
-        oDispatcher.dispatch("detail.takeoverLock", { rootId: "CHK-00001", force: true }).then(function (bHandled) {
+        oDispatcher.dispatch("detail.takeoverLock", { dbKey: "CHK-00001", force: true }).then(function (bHandled) {
             assert.strictEqual(bHandled, true, "registered action is handled");
-            assert.deepEqual(oCaptured, { rootId: "CHK-00001", force: true }, "payload passes directly to the canonical handler");
+            assert.deepEqual(oCaptured, { dbKey: "CHK-00001", force: true }, "payload passes directly to the canonical handler");
             done();
         });
     });

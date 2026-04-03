@@ -99,7 +99,7 @@ sap.ui.define([
             avgBarriersRate: AnalyticsChartValueRuntime.toNumber(firstDefined(o.avgBarriersRate, o.AvgBarriersRate)),
             refreshedAt: formatAnalyticsDateTime(firstDefined(o.refreshedAt, o.RefreshedAt, "")),
             source: String(firstDefined(o.source, o.Source, AnalyticsContracts.SOURCES.ALL)),
-            sourceText: String(firstDefined(o.sourceText, o.SourceText, o.source, o.Source, "All")),
+            sourceText: String(firstDefined(o.sourceText, o.SourceText, o.source, o.Source, AnalyticsContracts.SOURCES.ALL)),
             compareYearHasData: AnalyticsChartValueRuntime.hasAnyChartValue(o.comparisonCharts && o.comparisonCharts.monthlyTotal),
             refreshState: AnalyticsRefreshStateRuntime.normalizeRefreshState(o.refreshState, formatAnalyticsDateTime),
             monthlyComparison: aMonthlyComparison,
@@ -167,7 +167,7 @@ sap.ui.define([
             avgBarriersRate: AnalyticsChartValueRuntime.toNumber(firstDefined(o.avgBarriersRate, o.AvgBarriersRate)),
             refreshedAtText: formatAnalyticsDateTime(firstDefined(o.refreshedAt, o.RefreshedAt, "")),
             sourceKey: String(firstDefined(o.source, o.Source, AnalyticsContracts.SOURCES.ALL)),
-            sourceText: String(firstDefined(o.sourceText, o.SourceText, o.source, o.Source, "All"))
+            sourceText: String(firstDefined(o.sourceText, o.SourceText, o.source, o.Source, AnalyticsContracts.SOURCES.ALL))
         };
     }
 

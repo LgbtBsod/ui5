@@ -60,7 +60,7 @@ sap.ui.define([
             : "";
         var sActiveObjectId = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
         var sSelectedId = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "") || "").trim();
-        var sRootId = isDetailIntent(oIntent) ? (sActiveObjectId || sSelectedId) : "";
+        var sActiveDbKey = isDetailIntent(oIntent) ? (sActiveObjectId || sSelectedId) : "";
 
         if (!sHash) {
             sHash = buildHashFromIntent(oRouter, oIntent);
@@ -68,8 +68,8 @@ sap.ui.define([
 
         return {
             hash: sHash,
-            activeObjectId: sRootId,
-            selectedId: sRootId
+            activeObjectId: sActiveDbKey,
+            selectedId: sActiveDbKey
         };
     }
 
@@ -137,14 +137,14 @@ sap.ui.define([
         var oStateModel = readStateModel(oController);
         var oReturn = cloneArgs(ModelStateRuntime.readOnModel(oStateModel, "/analyticsNavReturn", {}) || {});
         var oHashChanger = readHashChanger();
-        var sTargetRootId;
+        var sTargetDbKey;
         var sTargetHash = String((oReturn && oReturn.hash) || "").trim();
 
-        sTargetRootId = String((oReturn && (oReturn.activeObjectId || oReturn.selectedId)) || "").trim();
-        if (oReturn && oReturn.restoreEdit && sTargetRootId) {
+        sTargetDbKey = String((oReturn && (oReturn.activeObjectId || oReturn.selectedId)) || "").trim();
+        if (oReturn && oReturn.restoreEdit && sTargetDbKey) {
             ModelStateRuntime.writeOnModel(oStateModel, "/analyticsReturnRestoreEdit", {
-                activeObjectId: sTargetRootId,
-                selectedId: sTargetRootId,
+                activeObjectId: sTargetDbKey,
+                selectedId: sTargetDbKey,
                 requestedAt: new Date().toISOString()
             });
         } else {
@@ -173,9 +173,9 @@ sap.ui.define([
         }
     }
 
-    function navigateToDetail(oController, sRootId, sLayout) {
+    function navigateToDetail(oController, sDbKey, sLayout) {
         var oRouter = oController && oController.getRouter && oController.getRouter();
-        var sId = String(sRootId || "").trim();
+        var sId = String(sDbKey || "").trim();
         var sResolvedLayout = LayoutStateRuntime.normalizeLayout(sLayout);
 
         if (!oRouter || typeof oRouter[METHODS.NAV_TO] !== TYPEOF.FUNCTION || !sId) {
@@ -188,9 +188,9 @@ sap.ui.define([
         oRouter[METHODS.NAV_TO](NavigationContracts.ROUTES.DETAIL, { id: sId }, false);
     }
 
-    function buildDetailHash(oController, sRootId) {
+    function buildDetailHash(oController, sDbKey) {
         var oRouter = oController && oController.getRouter && oController.getRouter();
-        var sId = String(sRootId || "").trim();
+        var sId = String(sDbKey || "").trim();
 
         if (!oRouter || typeof oRouter[METHODS.GET_URL] !== TYPEOF.FUNCTION || !sId) {
             return "";

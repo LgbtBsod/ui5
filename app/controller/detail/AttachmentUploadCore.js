@@ -92,15 +92,14 @@ sap.ui.define([
         return Promise.resolve();
     }
 
-    function resolveTextFromBundle(oResourceBundle, sTextKey, aArgs, sFallbackText) {
+    function resolveTextFromBundle(oResourceBundle, sTextKey, aArgs) {
         try {
             if (oResourceBundle && typeof oResourceBundle.getText === "function") {
-                return String(oResourceBundle.getText(sTextKey, aArgs) || sFallbackText || sTextKey);
+                return String(oResourceBundle.getText(sTextKey, aArgs) || "");
             }
         } catch (_bundleError) {
-            // Fall back to the provided static text below.
         }
-        return String(sFallbackText || sTextKey || "");
+        return "";
     }
 
     function formatUploadHint(oResourceBundle, aExtensions, iMaxSizeMb) {
@@ -109,17 +108,14 @@ sap.ui.define([
         }).filter(Boolean).join(", ");
         var iSafeMaxSize = Number(iMaxSizeMb || 0) || 0;
         var sSize = String(iSafeMaxSize);
-        var sFallbackText;
 
         if (!sTypes && iSafeMaxSize <= 0) {
             return "";
         }
-        sFallbackText = [sTypes, iSafeMaxSize > 0 ? sSize + " MB" : ""].filter(Boolean).join(ATTACHMENT_CONSTANTS.HINT_FALLBACK_SEPARATOR);
         return resolveTextFromBundle(
             oResourceBundle,
             ATTACHMENT_CONSTANTS.HINT_TEXT_KEY,
-            [sTypes || ATTACHMENT_CONSTANTS.HINT_FALLBACK_EMPTY_TOKEN, sSize],
-            sFallbackText
+            [sTypes || ATTACHMENT_CONSTANTS.HINT_FALLBACK_EMPTY_TOKEN, sSize]
         );
     }
 

@@ -16,7 +16,7 @@ sap.ui.define([
     var bDefaultsRegistered = false;
 
     function resolveText(mContext) {
-        return FeedbackBehaviorHelpers.resolveText(mContext.controller, mContext.textKey, mContext.args || [], mContext.fallback || mContext.textKey);
+        return FeedbackBehaviorHelpers.resolveText(mContext.controller, mContext.textKey, mContext.args || [], mContext.fallback || "");
     }
 
     function applyUseCaseResult(mContext) {
@@ -84,7 +84,7 @@ sap.ui.define([
                     controller: mContext.controller,
                     textKey: sKey,
                     args: mContext.args || [],
-                    fallback: sKey
+                    fallback: ""
                 });
             }
         });

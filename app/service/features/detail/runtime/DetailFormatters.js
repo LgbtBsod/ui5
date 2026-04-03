@@ -1,11 +1,11 @@
 sap.ui.define([
-    "sap/ui/core/Core",
+    "sap/ui/core/format/DateFormat",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
-], function (Core, ControllerTextRuntime, CreateSentinel, WorkflowContracts, MessageKeyConstants, UiSemanticConstants) {
+], function (DateFormat, ControllerTextRuntime, CreateSentinel, WorkflowContracts, MessageKeyConstants, UiSemanticConstants) {
     "use strict";
 
     var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
@@ -44,6 +44,12 @@ sap.ui.define([
         conflict: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR,
         idle: UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION
     };
+    var oDateFormatter = DateFormat.getDateInstance({
+        pattern: "dd.MM.yyyy"
+    });
+    var oTimeFormatter = DateFormat.getTimeInstance({
+        pattern: "HH:mm"
+    });
     LOCK_ACTIVE_STATES[WorkflowContracts.LOCK_STATES.EDIT_LOCKED] = true;
     LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK] = true;
     LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE] = true;
@@ -101,11 +107,7 @@ sap.ui.define([
         if (!oDate) {
             return "";
         }
-        return oDate.toLocaleDateString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "2-digit"
-        });
+        return oDateFormatter.format(oDate);
     }
 
     function formatDateTimeCardValue(oController, sDate, sTime, sTimezone) {
@@ -121,26 +123,10 @@ sap.ui.define([
 
     function formatAutosaveTime(vValue) {
         var oDate = parseDateLike(vValue);
-        var oConfiguration;
-        var oLanguageTag;
-        var sLanguageTag = "";
         if (!oDate) {
             return vValue || "-";
         }
-        oConfiguration = Core && typeof Core.getConfiguration === "function" ? Core.getConfiguration() : null;
-        oLanguageTag = oConfiguration && typeof oConfiguration.getLanguageTag === "function" ? oConfiguration.getLanguageTag() : null;
-        sLanguageTag = oLanguageTag && typeof oLanguageTag.toString === "function" ? String(oLanguageTag.toString() || "") : "";
-        try {
-            return oDate.toLocaleTimeString(sLanguageTag || undefined, {
-                hour: "2-digit",
-                minute: "2-digit"
-            });
-        } catch (oLocaleError) {
-            return oDate.toLocaleTimeString(undefined, {
-                hour: "2-digit",
-                minute: "2-digit"
-            });
-        }
+        return oTimeFormatter.format(oDate);
     }
 
     return {

@@ -7,7 +7,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue"
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/YearValue",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
 ], function (
     ControllerViewStateRuntime,
     ModelStateRuntime,
@@ -17,7 +18,8 @@ sap.ui.define([
     ReadinessTelemetryRuntime,
     ModelContracts,
     AnalyticsViewStateReader,
-    YearValue
+    YearValue,
+    MessageCodeConstants
 ) {
     "use strict";
 
@@ -25,6 +27,7 @@ sap.ui.define([
     var MESSAGES = AnalyticsContracts.MESSAGES;
     var PATHS = AnalyticsContracts.PATHS;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var TECHNICAL_CODES = MessageCodeConstants.TECHNICAL;
 
     function setReadinessState(oController, sStatus, bReady, sReadyAt, sError) {
         ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.READINESS_ANALYTICS, {
@@ -56,11 +59,15 @@ sap.ui.define([
     }
 
     function validateLoadInput(oController, oLoadInput) {
+        var sInvalidYearMessage;
         if (oLoadInput.selectedYear !== null) {
             return true;
         }
-        ControllerViewStateRuntime.set(oController, PATHS.ERROR, MESSAGES.INVALID_YEAR);
-        setReadinessState(oController, AnalyticsContracts.LOAD_STATUS.ERROR, false, "", MESSAGES.INVALID_YEAR);
+        sInvalidYearMessage = typeof oController._resolveAnalyticsMessage === "function"
+            ? oController._resolveAnalyticsMessage(MESSAGES.INVALID_YEAR)
+            : MESSAGES.INVALID_YEAR;
+        ControllerViewStateRuntime.set(oController, PATHS.ERROR, sInvalidYearMessage);
+        setReadinessState(oController, AnalyticsContracts.LOAD_STATUS.ERROR, false, "", sInvalidYearMessage);
         return false;
     }
 
@@ -116,7 +123,9 @@ sap.ui.define([
     }
 
     function handleLoadFailure(oController, oError) {
-        var sErrorMessage = String((oError && oError.message) || MESSAGES.ANALYTICS_LOAD_FAILED);
+        var sErrorMessage = typeof oController._resolveAnalyticsError === "function"
+            ? oController._resolveAnalyticsError(oError, MESSAGES.ANALYTICS_LOAD_FAILED)
+            : String((oError && oError.message) || MESSAGES.ANALYTICS_LOAD_FAILED);
         ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
         setReadinessState(oController, AnalyticsContracts.LOAD_STATUS.ERROR, false, "", sErrorMessage);
         throw oError;
@@ -125,7 +134,7 @@ sap.ui.define([
     function executeAnalyticsLoad(oController, oLoadInput, mHooks) {
         var oFacade = oController && oController._facade;
         if (!oController || !oFacade || typeof oFacade.load !== "function" || typeof oController.executeFacadeMethod !== "function") {
-            return Promise.reject(new Error("ANALYTICS_LOAD_UNAVAILABLE"));
+            return Promise.reject(new Error(TECHNICAL_CODES.ANALYTICS_LOAD_UNAVAILABLE));
         }
         return Promise.resolve(oController.executeFacadeMethod(
             oFacade,

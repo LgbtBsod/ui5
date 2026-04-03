@@ -18,10 +18,10 @@ sap.ui.define([
     }
 
     function normalizeAggregatePayload(mArgs, mDeps) {
-        var sRootId = mDeps.rootId(mArgs);
+        var sDbKey = mDeps.dbKey(mArgs);
         var oDelta = (mArgs && mArgs.delta) || {};
         var aAttachments = (mArgs && mArgs.attachments) || [];
-        var oPayload = ODataChecklistPayloadMapper.normalizeSavePayload(sRootId, oDelta, aAttachments);
+        var oPayload = ODataChecklistPayloadMapper.normalizeSavePayload(sDbKey, oDelta, aAttachments);
         return buildAggregateEnvelope(
             oPayload,
             mArgs && mArgs.sessionGuid,
@@ -29,8 +29,8 @@ sap.ui.define([
         );
     }
 
-    function enrichSnapshot(oServerPayload, sFallbackRootId, mDeps) {
-        return mDeps.enrichServerSnapshot(oServerPayload, sFallbackRootId).then(function (oServerSnapshot) {
+    function enrichSnapshot(oServerPayload, sFallbackDbKey, mDeps) {
+        return mDeps.enrichServerSnapshot(oServerPayload, sFallbackDbKey).then(function (oServerSnapshot) {
             return {
                 lastChangeSet: {},
                 serverResponse: oServerPayload || {},
@@ -40,9 +40,9 @@ sap.ui.define([
     }
 
     function executeAggregateWrite(sFunctionImport, mArgs, mDeps) {
-        var sRootId = mDeps.rootId(mArgs);
+        var sDbKey = mDeps.dbKey(mArgs);
         return GatewayClient.callFunctionImport(sFunctionImport, normalizeAggregatePayload(mArgs, mDeps)).then(function (oServerPayload) {
-            return enrichSnapshot(oServerPayload, sRootId, mDeps);
+            return enrichSnapshot(oServerPayload, sDbKey, mDeps);
         });
     }
 
@@ -55,10 +55,10 @@ sap.ui.define([
     }
 
     function copyChecklist(mArgs, mDeps) {
-        var sRootId = mDeps.rootId(mArgs);
+        var sDbKey = mDeps.dbKey(mArgs);
         var sSessionGuid = String((mArgs && mArgs.sessionGuid) || "").trim();
         return GatewayClient.callFunctionImport(FUNCTION_IMPORTS.COPY_CHECKLIST, {
-            DB_KEY: mDeps.normalizeRootKey(sRootId),
+            DB_KEY: mDeps.normalizeDbKey(sDbKey),
             SessionGuid: sSessionGuid
         }).then(function (oServerPayload) {
             return mDeps.enrichServerSnapshot(oServerPayload, "").then(function (oServerSnapshot) {
@@ -75,7 +75,7 @@ sap.ui.define([
             FUNCTION_IMPORTS.AUTO_SAVE,
             normalizeAggregatePayload(mArgs, mDeps)
         ).then(function (oServerPayload) {
-            return mDeps.enrichServerSnapshot(oServerPayload, mDeps.rootId(mArgs)).then(function (oServerSnapshot) {
+            return mDeps.enrichServerSnapshot(oServerPayload, mDeps.dbKey(mArgs)).then(function (oServerSnapshot) {
                 return {
                     autosavedAt: new Date().toISOString(),
                     serverHints: oServerPayload || {},

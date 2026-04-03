@@ -20,8 +20,9 @@ sap.ui.define([
         var bPermissionKnown = !!oReadiness.permissionKnown;
         var sReadinessStatus = String(oReadiness.status || WorkflowContracts.READINESS_STATUS.IDLE).trim() || WorkflowContracts.READINESS_STATUS.IDLE;
         var bAllowed = bPermissionKnown && sReadinessStatus !== WorkflowContracts.READINESS_STATUS.DENIED && sReadinessStatus !== WorkflowContracts.READINESS_STATUS.ERROR;
+        var sActiveDbKey = String(oReadiness.rootId || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
         ModelStateRuntime.writeOnModel(oStateModel, StatePaths.DETAIL_META, {
-            rootId: String(oReadiness.rootId || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim(),
+            rootId: sActiveDbKey,
             readiness: {
                 status: sReadinessStatus,
                 ready: !!oReadiness.ready,

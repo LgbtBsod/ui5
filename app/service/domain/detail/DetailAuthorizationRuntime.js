@@ -54,9 +54,9 @@ sap.ui.define([
         }
     }
 
-    function normalizePermission(oPermission, sRootId, mOptions) {
+    function normalizePermission(oPermission, sDbKey, mOptions) {
         var sRequestedActivity = resolveRequestedActivity(mOptions);
-        var oResolved = AccessPayload.normalizePermission(oPermission, sRootId, {
+        var oResolved = AccessPayload.normalizePermission(oPermission, sDbKey, {
             reasonCode: DETAIL_CODES.AUTHORIZED,
             requestedActivity: sRequestedActivity
         });
@@ -73,29 +73,31 @@ sap.ui.define([
         return oResolved;
     }
 
-    function deniedPermission(sRootId, sRequestedActivity, sReasonCode, sMessage) {
+    function deniedPermission(sDbKey, sRequestedActivity, sReasonCode, sMessage) {
         return normalizePermission({
-            rootId: sRootId,
+            dbKey: sDbKey,
             canCreate: false,
             canView: false,
             canEdit: false,
             canDelete: false,
             reasonCode: sReasonCode || defaultDeniedReason(sRequestedActivity),
             message: sMessage || ""
-        }, sRootId, {
+        }, sDbKey, {
             activity: sRequestedActivity
         });
     }
 
     function emitPermissionDenied(mCtx, oPermission, sRequestedActivity) {
         var oResolved = oPermission || {};
+        var sResolvedDbKey;
         if (oResolved.allowed) {
             return;
         }
+        sResolvedDbKey = String(oResolved.dbKey || oResolved.rootId || "").trim();
         WorkflowTelemetry.emit("permission.denied", {
             stateModel: mCtx && mCtx.stateModel,
             payload: {
-                rootId: String(oResolved.rootId || "").trim(),
+                dbKey: sResolvedDbKey,
                 activity: String(sRequestedActivity || "").trim(),
                 reasonCode: String(oResolved.reasonCode || "").trim(),
                 message: String(oResolved.message || "").trim()
@@ -104,10 +106,10 @@ sap.ui.define([
     }
 
     function buildAccessState(oPermission, bDenied) {
-        var oResolved = normalizePermission(oPermission, (oPermission && oPermission.rootId) || "");
+        var oResolved = normalizePermission(oPermission, (oPermission && (oPermission.dbKey || oPermission.rootId)) || "");
         return {
             denied: !!bDenied,
-            rootId: oResolved.rootId,
+            dbKey: oResolved.dbKey,
             userId: oResolved.userId,
             canView: !!oResolved.canView,
             canEdit: !!oResolved.canEdit,
@@ -127,7 +129,7 @@ sap.ui.define([
     }
 
     function openDeniedEffects(oPermission) {
-        var oResolved = normalizePermission(oPermission, (oPermission && oPermission.rootId) || "", {
+        var oResolved = normalizePermission(oPermission, (oPermission && (oPermission.dbKey || oPermission.rootId)) || "", {
             activity: OPERATIONS.DISPLAY
         });
         return [
@@ -152,14 +154,14 @@ sap.ui.define([
         ]);
     }
 
-    function fetchPermission(mCtx, sRootId, mOptions) {
+    function fetchPermission(mCtx, sDbKey, mOptions) {
         var oRepo = mCtx && mCtx.repo;
-        var sResolvedRootId = String(sRootId || "").trim();
+        var sResolvedDbKey = String(sDbKey || "").trim();
         var sRequestedActivity = resolveRequestedActivity(mOptions);
 
         if (!oRepo || typeof oRepo.checkChecklistPermission !== "function") {
             var oMissingPermission = deniedPermission(
-                sResolvedRootId,
+                sResolvedDbKey,
                 sRequestedActivity,
                 DETAIL_CODES.PERMISSION_CHECK_UNAVAILABLE,
                 ""
@@ -169,17 +171,17 @@ sap.ui.define([
         }
 
         return Promise.resolve(oRepo.checkChecklistPermission({
-            rootId: sResolvedRootId,
+            dbKey: sResolvedDbKey,
             activity: sRequestedActivity
         })).then(function (oPermission) {
-            var oResolved = normalizePermission(oPermission, sResolvedRootId, {
+            var oResolved = normalizePermission(oPermission, sResolvedDbKey, {
                 activity: sRequestedActivity
             });
             emitPermissionDenied(mCtx, oResolved, sRequestedActivity);
             return oResolved;
         }).catch(function () {
             var oFailedPermission = deniedPermission(
-                sResolvedRootId,
+                sResolvedDbKey,
                 sRequestedActivity,
                 DETAIL_CODES.PERMISSION_CHECK_FAILED,
                 ""

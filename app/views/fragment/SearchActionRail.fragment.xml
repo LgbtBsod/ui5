@@ -3,7 +3,7 @@
     xmlns:core="sap.ui.core">
     <VBox id="searchActionRailStack" width="100%" renderType="Bare" class="searchActionRailStack">
         <OverflowToolbar id="searchResultsActionRail" width="100%" class="toolbarTransparent searchActionToolbar searchResultsActionRail actionToolbarSurface">
-            <Button text="{i18n>createButton}" icon="sap-icon://task" press=".onCreate" tooltip="{i18n>searchShortcutCreate}" enabled="{= !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }" class="searchPrimaryAction searchToolbarAction searchCreateActionBtn">
+            <Button text="{i18n>createButton}" icon="sap-icon://task" press=".onCreate" tooltip="{i18n>searchShortcutCreate}" enabled="{= !!${state>/currentUser/canCreate} &amp;&amp; !${view>/bootstrapBusy} &amp;&amp; !${view>/createActionBusy} }" visible="{= !!${state>/currentUser/canCreate} }" class="searchPrimaryAction searchToolbarAction searchCreateActionBtn">
                 <layoutData><OverflowToolbarLayoutData priority="NeverOverflow" moveToOverflow="false"/></layoutData>
             </Button>
             <Button text="{i18n>copyButton}" icon="sap-icon://copy" press=".onCopy" enabled="{view>/canCopy}" visible="{view>/hasSelection}" tooltip="{= ${view>/selectionCount} > 1 ? ${i18n>searchCopySingleSelectionHint} : ${i18n>searchShortcutCopy} }" class="searchToolbarGhostAction searchToolbarAction searchCopyActionBtn">

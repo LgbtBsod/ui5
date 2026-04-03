@@ -23,7 +23,7 @@ exitWithColonIssues(
   'gateway-only-smoke-gate',
   issues,
   {
-    createdRootId: report.createdRootId || '-',
+  createdDbKey: report.createdDbKey || '-',
     apiChecks: (((report || {}).api || {}).checks || []).length,
     browserChecks: (((report || {}).browser || {}).checks || []).length
   },

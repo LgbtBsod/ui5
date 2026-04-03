@@ -46,6 +46,7 @@ sap.ui.define([
             fullName: normalizeText(oData.FullName || oData.fullName || ""),
             permissions: normalizePermissionCodes(oData.PermissionsCsv || oData.permissionsCsv),
             permissionRules: normalizePermissionRules(oData.PermissionRulesJson || oData.permissionRulesJson || oData.permissionRules),
+            canCreate: !!(oData.CanCreate || oData.canCreate),
             canView: !!(oData.CanView || oData.canView),
             canEdit: !!(oData.CanEdit || oData.canEdit),
             canDelete: !!(oData.CanDelete || oData.canDelete),
@@ -69,6 +70,9 @@ sap.ui.define([
 
     function permissionKeys(oProfile) {
         var aLabels = [];
+        if (oProfile && oProfile.canCreate) {
+            aLabels.push("create");
+        }
         if (oProfile && oProfile.canView) {
             aLabels.push("view");
         }

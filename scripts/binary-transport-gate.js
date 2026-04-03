@@ -17,7 +17,6 @@ function add(issue) {
 const keyNormalizer = read("app/service/shared/ODataKeyNormalizer.js");
 const odataUtils = read("app/infra/adapters/shared/ODataAdapterUtils.js");
 const detailRead = read("app/infra/adapters/shared/ODataChecklistReadRuntime.js");
-const attachmentRepo = read("app/infra/adapters/shared/AttachmentRepoRuntime.js");
 const permissionRuntime = read("app/infra/adapters/shared/ODataChecklistPermissionRuntime.js");
 const lastChangeAdapter = read("app/infra/adapters/LastChangeSetAdapter.js");
 const metadata = read("app/localService/metadata.xml");
@@ -42,16 +41,12 @@ if (!/normalizeBinaryKey/.test(detailRead)) {
   add("app/infra/adapters/shared/ODataChecklistReadRuntime.js must normalize binary root ids before canonical reads");
 }
 
-if (!/buildEqFilter\(oFilterContract\.property,\s*ODataKeyNormalizer\.normalizeBinaryKey\(sRootId\),\s*oFilterContract\.type\)/.test(detailRead.replace(/\r?\n/g, " "))) {
+if (!/buildEqFilter\(oFilterContract\.property,\s*ODataKeyNormalizer\.normalizeBinaryKey\(sDbKey\),\s*oFilterContract\.type\)/.test(detailRead.replace(/\r?\n/g, " "))) {
   add("app/infra/adapters/shared/ODataChecklistReadRuntime.js must pass normalized binary keys into standard typed filter generation");
 }
 
-if (!/buildEqFilter\("PARENT_KEY", sRootId, ODataKeyContracts\.TYPES\.PARENT_KEY\)/.test(attachmentRepo)) {
-  add("app/infra/adapters/shared/AttachmentRepoRuntime.js must use binary-safe PARENT_KEY filter generation");
-}
-
-if (!/PARENT_KEY: normalizeRootKey/.test(attachmentRepo)) {
-  add("app/infra/adapters/shared/AttachmentRepoRuntime.js upload payload must normalize canonical PARENT_KEY");
+if (fs.existsSync(path.join(ROOT, "app/infra/adapters/shared/AttachmentRepoRuntime.js"))) {
+  add("app/infra/adapters/shared/AttachmentRepoRuntime.js must stay deleted after media-upload boundary cleanup");
 }
 
 if (!/name: "DB_KEY"/.test(permissionRuntime) || !/ODataKeyContracts\.TYPES\.DB_KEY/.test(permissionRuntime)) {

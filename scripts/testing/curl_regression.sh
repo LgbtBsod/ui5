@@ -2,7 +2,7 @@
 set -euo pipefail
 
 BASE_URL="${BASE_URL:-http://localhost:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV}"
-ROOT_KEY="${ROOT_KEY:-00000000000000000000000000000001}"
+DB_KEY="${DB_KEY:-00000000000000000000000000000001}"
 COOKIE_JAR="${COOKIE_JAR:-/tmp/ui5_gateway_cookie.txt}"
 TOKEN=""
 
@@ -53,38 +53,38 @@ echo "[7] ChecklistSearchSet/$count"
 req GET "$BASE_URL/ChecklistSearchSet/\$count" -b "$COOKIE_JAR"; echo
 
 echo "[8] LastChangeSet"
-req GET "$BASE_URL/LastChangeSet(DB_KEY='${ROOT_KEY}')" -b "$COOKIE_JAR" | head -c 400; echo
+req GET "$BASE_URL/LastChangeSet(DB_KEY=binary'${DB_KEY}')" -b "$COOKIE_JAR" | head -c 400; echo
 
 echo "[9] LockAcquire / LockHeartbeat / LockRelease"
-req POST "$BASE_URL/LockAcquire?DB_KEY=${ROOT_KEY}&SessionGuid=TEST-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
-req POST "$BASE_URL/LockHeartbeat?DB_KEY=${ROOT_KEY}&SessionGuid=TEST-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
-req POST "$BASE_URL/LockRelease?DB_KEY=${ROOT_KEY}&SessionGuid=TEST-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
+req POST "$BASE_URL/LockAcquire?DB_KEY=binary'${DB_KEY}'&SessionGuid=TEST-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
+req POST "$BASE_URL/LockHeartbeat?DB_KEY=binary'${DB_KEY}'&SessionGuid=TEST-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
+req POST "$BASE_URL/LockRelease?DB_KEY=binary'${DB_KEY}'&SessionGuid=TEST-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
 
 echo "[10] CopyChecklist"
-req POST "$BASE_URL/CopyChecklist?DB_KEY=${ROOT_KEY}&SessionGuid=TEST-COPY-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
+req POST "$BASE_URL/CopyChecklist?DB_KEY=binary'${DB_KEY}'&SessionGuid=TEST-COPY-SESSION" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'X-Requested-With: XMLHttpRequest' | head -c 350; echo
 
 echo "[10] AutoSave sample"
 req POST "$BASE_URL/AutoSave" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: application/json' \
---data "{\"root\":{\"db_key\":\"${ROOT_KEY}\"},\"checks\":[],\"barriers\":[],\"client_version\":1,\"SessionGuid\":\"TEST-SESSION\"}" | head -c 350; echo
+--data "{\"root\":{\"db_key\":\"${DB_KEY}\"},\"checks\":[],\"barriers\":[],\"client_version\":1,\"SessionGuid\":\"TEST-SESSION\"}" | head -c 350; echo
 
 echo "[11] SaveChanges sample"
 req POST "$BASE_URL/SaveChanges" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: application/json' \
---data "{\"root\":{\"db_key\":\"${ROOT_KEY}\",\"equipment\":\"Pump A\"},\"checks\":[],\"barriers\":[],\"client_version\":1,\"SessionGuid\":\"TEST-SESSION\"}" | head -c 350; echo
+--data "{\"root\":{\"db_key\":\"${DB_KEY}\",\"equipment\":\"Pump A\"},\"checks\":[],\"barriers\":[],\"client_version\":1,\"SessionGuid\":\"TEST-SESSION\"}" | head -c 350; echo
 
 echo "[12] SetChecklistStatus sample"
 req POST "$BASE_URL/SetChecklistStatus" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: application/json' \
-  --data "{\"DB_KEY\":\"${ROOT_KEY}\",\"NewStatus\":\"SUBMITTED\",\"ClientAggChangedOn\":\"/Date(0)/\"}" | head -c 350; echo
+  --data "{\"DB_KEY\":\"${DB_KEY}\",\"NewStatus\":\"SUBMITTED\",\"ClientAggChangedOn\":\"/Date(0)/\"}" | head -c 350; echo
 
 echo "[13] GetHierarchy sample"
 req GET "$BASE_URL/GetHierarchy?DateCheck=datetime'2026-03-01T00:00:00'&Method='location_tree'" -b "$COOKIE_JAR" | head -c 350; echo
 
 echo "[14] ReportExport sample"
 req POST "$BASE_URL/ReportExport" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: application/json' \
-  --data "{\"Entity\":\"screen\",\"SelectionMode\":\"selected\",\"RootKeys\":[\"${ROOT_KEY}\"],\"Limit\":200000}" | head -c 350; echo
+  --data "{\"Entity\":\"screen\",\"SelectionMode\":\"selected\",\"DBKeys\":[\"${DB_KEY}\"],\"Limit\":200000}" | head -c 350; echo
 
-echo "[15] Attachment stream PUT/GET"
-ATT_KEY="${ROOT_KEY}::sample.txt"
-req PUT "$BASE_URL/AttachmentSet(Key='${ATT_KEY}')/\$value" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: text/plain' --data 'hello attachment' | head -c 300; echo
-req GET "$BASE_URL/AttachmentSet(Key='${ATT_KEY}')/\$value" -b "$COOKIE_JAR" | head -c 100; echo
+echo "[15] Attachment media upload + metadata read"
+req POST "$BASE_URL/AttachmentSet" -b "$COOKIE_JAR" -H "X-CSRF-Token: ${TOKEN}" -H 'Content-Type: text/plain' -H "Slug: curl-regression.txt" -H "X-DB-Key: ${DB_KEY}" -H "X-Parent-Key: ${DB_KEY}" -H "X-Folder-Key: ${DB_KEY}" -H 'X-Category-Key: GEN' -H 'X-Description: curl regression attachment' -H 'X-File-Name: curl-regression.txt' --data 'hello attachment' | head -c 400; echo
+req GET "$BASE_URL/AttachmentSet?\$filter=PARENT_KEY%20eq%20binary'${DB_KEY}'" -b "$COOKIE_JAR" | head -c 350; echo
+echo "Persisted attachment binaries must be opened through DownloadUrl or DocumentHandle."
 
 echo "Done"

@@ -1,0 +1,667 @@
+{
+  "result": "BLOCKED_SAP_ENV",
+  "dbKey": "9128EFA79F584D18ACF5DE2945B68C96",
+  "checks": [
+    {
+      "name": "static.attachment-contract-gate.js",
+      "ok": true,
+      "detail": {
+        "stdout": "PASS attachment-contract-gate",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "static.key-model-gate.js",
+      "ok": true,
+      "detail": {
+        "stdout": "PASS key-model-gate",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "static.legacy-alias-leakage-gate.js",
+      "ok": true,
+      "detail": {
+        "stdout": "PASS legacy-alias-leakage-gate",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "static.naming-debt-gate.js",
+      "ok": true,
+      "detail": {
+        "stdout": "PASS naming-debt-gate",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "static.raw-ui-text-gate.js",
+      "ok": true,
+      "detail": {
+        "stdout": "PASS raw-ui-text-gate",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "static.wrapper-sprawl-gate.js",
+      "ok": true,
+      "detail": {
+        "stdout": "PASS wrapper-sprawl-gate",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "static.sap-internal-css-gate.js",
+      "ok": true,
+      "detail": {
+        "stdout": "PASS sap-internal-css-gate",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "startup.search.visible",
+      "ok": true,
+      "detail": {
+        "geometry": {
+          "routeName": "search",
+          "layout": "OneColumn",
+          "fclClass": "sapFFCL appRootFcl appRootFclTransparent sapMFlexItem",
+          "left": {
+            "x": 0,
+            "y": 144.53125,
+            "width": 1440,
+            "height": 815.46875,
+            "top": 144.53125,
+            "right": 1440,
+            "bottom": 960,
+            "left": 0
+          },
+          "right": {
+            "x": 0,
+            "y": 0,
+            "width": 0,
+            "height": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0
+          },
+          "bodyScrollHeight": 960,
+          "winY": 0,
+          "visibleText": "PRODUCTION CONTROL CHECKLISTS\nProduction Control Checklists\nОператор смены - All: 01, 02, 03, 06\nTOTAL CHECKLISTS\n117\nSource: All\nTHIS MONTH\n117\nUpdated: 28.03.2026, 14:14\nFAILED CHECKS\n174\nChecks success rate: 72.73%\nFAILED BARRIERS\n50\nBarriers success rate: 88.01%\nStandard\nHide Filter Bar\nClear\nGo\nChecks result\nAll\nFailed\nSuccess\nBarrier status\nAll\nFailed\nSuccess\nChecklist ID\nDate\nLPC level\nProfession\nStatus\nSource\nNo selection\nBackend top\nMax objects\nMode: Exact\nON\nOFF\nSort\nGroup\nResults (0)\nStandard\n\t\n\t\nID чек-листа\n\t\nОписание LPC\n\t\nПрофессия\n\t\nЛокация\n\t\nСтатус\n\t\nУспешность проверок\n\t\nУспешность барьеров\n\t\nДата проверки\n\t\nTo start, set the relevant filters."
+        },
+        "currentUser": {
+          "fullName": "Оператор смены",
+          "permissions": [
+            "01",
+            "02",
+            "03",
+            "06"
+          ],
+          "permissionRules": [
+            {
+              "code": "01",
+              "scopeKind": "all",
+              "scopeValue": "ALL"
+            },
+            {
+              "code": "02",
+              "scopeKind": "all",
+              "scopeValue": "ALL"
+            },
+            {
+              "code": "03",
+              "scopeKind": "all",
+              "scopeValue": "ALL"
+            },
+            {
+              "code": "06",
+              "scopeKind": "all",
+              "scopeValue": "ALL"
+            }
+          ],
+          "canCreate": false,
+          "canView": true,
+          "canEdit": true,
+          "canDelete": true,
+          "summaryText": "Permissions: ALL: 01,02,03,06",
+          "fetchedAt": "2026-03-28T10:26:59.908Z",
+          "permissionKeys": [
+            "view",
+            "edit",
+            "delete"
+          ]
+        }
+      }
+    },
+    {
+      "name": "create.flow.skipped.no_permission",
+      "ok": true,
+      "detail": {
+        "currentUser": {
+          "fullName": "Оператор смены",
+          "permissions": [
+            "01",
+            "02",
+            "03",
+            "06"
+          ],
+          "permissionRules": [
+            {
+              "code": "01",
+              "scopeKind": "all",
+              "scopeValue": "ALL"
+            },
+            {
+              "code": "02",
+              "scopeKind": "all",
+              "scopeValue": "ALL"
+            },
+            {
+              "code": "03",
+              "scopeKind": "all",
+              "scopeValue": "ALL"
+            },
+            {
+              "code": "06",
+              "scopeKind": "all",
+              "scopeValue": "ALL"
+            }
+          ],
+          "canCreate": false,
+          "canView": true,
+          "canEdit": true,
+          "canDelete": true,
+          "summaryText": "Permissions: ALL: 01,02,03,06",
+          "fetchedAt": "2026-03-28T10:26:59.908Z",
+          "permissionKeys": [
+            "view",
+            "edit",
+            "delete"
+          ]
+        }
+      }
+    },
+    {
+      "name": "gateway.detail_accessible_key",
+      "ok": true,
+      "detail": {
+        "checked": [
+          {
+            "dbKey": "9128EFA79F584D18ACF5DE2945B68C96",
+            "access": {
+              "denied": false,
+              "reasonCode": "",
+              "lockState": "READ_ONLY",
+              "editMode": "READ",
+              "dbKey": "9128EFA79F584D18ACF5DE2945B68C96",
+              "hasEditSwitch": true,
+              "editSwitchEnabled": true,
+              "attachmentMetaEditable": false
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "existing.opens.split",
+      "ok": true,
+      "detail": {
+        "routeName": "detail",
+        "layout": "OneColumn",
+        "fclClass": "sapFFCL appRootFcl appRootFclTransparent sapMFlexItem",
+        "left": {
+          "x": 0,
+          "y": 144.53125,
+          "width": 469.78125,
+          "height": 815.46875,
+          "top": 144.53125,
+          "right": 469.78125,
+          "bottom": 960,
+          "left": 0
+        },
+        "right": {
+          "x": 485.609375,
+          "y": 144.53125,
+          "width": 954.390625,
+          "height": 815.46875,
+          "top": 144.53125,
+          "right": 1440,
+          "bottom": 960,
+          "left": 485.609375
+        },
+        "bodyScrollHeight": 960,
+        "winY": 0,
+        "visibleText": "CHECKLIST WORKSPACE\nProduction Control Checklists\nОператор смены - All: 01, 02, 03, 06\nTOTAL CHECKLISTS\n117\nSource: All\nTHIS MONTH\n117\nUpdated: 28.03.2026, 14:14\nFAILED CHECKS\n174\nChecks success rate: 72.73%\nFAILED BARRIERS\n50\nBarriers success rate: 88.01%\nStandard\nHide Filter Bar\nClear\nGo\nChecks result\nAll\nFailed\nSuccess\nBarrier status\nAll\nFailed\nSuccess\nChecklist ID\nDate\nLPC level\nProfession\nStatus\nSource\nNo selection\nBackend top\nMode: Exact\nON\nOFF\nSort\nResults (0)\nStandard\n\t\n\t\nID чек-листа\n\t\nTo start, set the relevant filters.\nCHECKLIST\nCHK-00118\nOVERALL RESULT\n-\nCHECKLIST STATUS\nDraft\nDATE\n02.03.2026\nOverview\nChecks\nBarriers\nAttachments\nDraft\nDraft synchronized\nHeartbeat paused (read-only mode)\nNo pending changes\nClose\nON\nOFF\nRead\nCopy checklist link\nToggle detail focus\nCHECKLIST WORKSPACE\nParticipants & Location\nDATE & TIME\nDate: 02.03.2026\nTime: -\nTimezone: Europe/Saratov\nLOCATION\nArea A\nEQUIPMENT\nPump Local A2\nINSPECTOR\nObserver One\nPERNER: -\nPosition: -\nOrg unit: -\nINSPECTED\nObserved One\nPERNER: -\nPosition: PR1\nOrg unit: -\nPROFESSION\nPR1\nLPC\nL2\nChecks\nChecks\n0\n-\nExpand\n\t\n\t\nChecks number\n\t\nCheck\n\t\nStatus\n\t\nComment\n\t\n\t\t\t\t\nON\nOFF\n\t\n\t\nAttachments\nAttachments\nShow uploaded files"
+      }
+    },
+    {
+      "name": "edit.lock.requested",
+      "ok": true,
+      "detail": {
+        "before": 0,
+        "after": 1
+      }
+    },
+    {
+      "name": "edit.enter.runtime",
+      "ok": false,
+      "detail": {
+        "attempt": {
+          "ok": false,
+          "error": {
+            "kind": "LOCK",
+            "code": "LOCKED",
+            "messageKey": "lockConflictError",
+            "params": {
+              "correlationId": ""
+            },
+            "severity": "warning",
+            "retriable": true
+          },
+          "effects": [
+            {
+              "type": "modelPatch",
+              "modelName": "view",
+              "path": "/accessState",
+              "value": {
+                "denied": false,
+                "dbKey": "9128EFA79F584D18ACF5DE2945B68C96",
+                "rootId": "9128EFA79F584D18ACF5DE2945B68C96",
+                "userId": "operator",
+                "canView": true,
+                "canEdit": true,
+                "canDelete": true,
+                "reasonCode": "AUTHORIZED",
+                "message": "Checklist access granted",
+                "titleKey": "",
+                "messageKey": "",
+                "illustrationSrc": "assets/illustrations/detail-access-denied-light.svg"
+              }
+            },
+            {
+              "type": "modelPatch",
+              "modelName": "state",
+              "path": "/workflow/detail/editMode",
+              "value": "READ"
+            },
+            {
+              "type": "modelPatch",
+              "modelName": "state",
+              "path": "/workflow/detail/lock/state",
+              "value": "READ_ONLY"
+            },
+            {
+              "type": "modelPatch",
+              "modelName": "state",
+              "path": "/autosaveEnabled",
+              "value": false
+            },
+            {
+              "type": "dialog",
+              "variant": "warning",
+              "textKey": "lockAcquireFailed"
+            }
+          ],
+          "isOk": null,
+          "getValue": null,
+          "getError": null
+        },
+        "detailAccess": {
+          "denied": false,
+          "reasonCode": "",
+          "lockState": "READ_ONLY",
+          "editMode": "READ",
+          "dbKey": "9128EFA79F584D18ACF5DE2945B68C96",
+          "hasEditSwitch": true,
+          "editSwitchEnabled": true,
+          "attachmentMetaEditable": false
+        }
+      }
+    }
+  ],
+  "bugs": [],
+  "staticGates": [
+    {
+      "name": "attachment-contract-gate.js",
+      "ok": true,
+      "stdout": "PASS attachment-contract-gate",
+      "stderr": ""
+    },
+    {
+      "name": "key-model-gate.js",
+      "ok": true,
+      "stdout": "PASS key-model-gate",
+      "stderr": ""
+    },
+    {
+      "name": "legacy-alias-leakage-gate.js",
+      "ok": true,
+      "stdout": "PASS legacy-alias-leakage-gate",
+      "stderr": ""
+    },
+    {
+      "name": "naming-debt-gate.js",
+      "ok": true,
+      "stdout": "PASS naming-debt-gate",
+      "stderr": ""
+    },
+    {
+      "name": "raw-ui-text-gate.js",
+      "ok": true,
+      "stdout": "PASS raw-ui-text-gate",
+      "stderr": ""
+    },
+    {
+      "name": "wrapper-sprawl-gate.js",
+      "ok": true,
+      "stdout": "PASS wrapper-sprawl-gate",
+      "stderr": ""
+    },
+    {
+      "name": "sap-internal-css-gate.js",
+      "ok": true,
+      "stdout": "PASS sap-internal-css-gate",
+      "stderr": ""
+    }
+  ],
+  "network": {
+    "count": 753,
+    "sample": [
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/m/BusyIndicator.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/m/SelectDialogRenderer.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/m/BusyIndicatorRenderer.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/ui/fl/PreprocessorImpl.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/f/GridList.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/ui/layout/cssgrid/GridLayoutDelegate.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/ui/layout/cssgrid/GridItemLayoutData.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/f/GridListRenderer.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/ui/layout/cssgrid/GridLayoutBase.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/uxap/messagebundle_en_US.properties",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "x-requested-with": "XMLHttpRequest",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "accept": "text/plain, */*; q=0.01",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/ui/unified/FileUploader.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/ui/unified/FileUploaderRenderer.js",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/ui/unified/messagebundle_en_US.properties",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "x-requested-with": "XMLHttpRequest",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "accept": "text/plain, */*; q=0.01",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "GET",
+        "url": "http://127.0.0.1:8080/resources/sap/uxap/messagebundle_en.properties",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "x-requested-with": "XMLHttpRequest",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "accept": "text/plain, */*; q=0.01",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0"
+        },
+        "post_data": ""
+      },
+      {
+        "method": "POST",
+        "url": "http://127.0.0.1:8080/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$batch",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "dataserviceversion": "2.0",
+          "x-csrf-token": "cbe79a18aa244cedb79d93fa298de5e3",
+          "sap-cancel-on-close": "true",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "accept-language": "en-US",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0",
+          "sap-contextid-accept": "header",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "accept": "multipart/mixed",
+          "content-type": "multipart/mixed;boundary=batch_2db4-60e6-732e",
+          "maxdataserviceversion": "2.0"
+        },
+        "post_data": "\r\n--batch_2db4-60e6-732e\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET ChecklistPermissionSet(DB_KEY=binary'9128EFA79F584D18ACF5DE2945B68C96')?ACTVT=03&$select=DB_KEY%2CCanCreate%2CCanView%2CCanEdit%2CCanDelete%2CReasonCode%2CMessage HTTP/1.1\r\nsap-cancel-on-close: true\r\nX-Correlation-ID: req-mna6rfv5-7w5m0vyn\r\nX-Request-ID: req-mna6rfv5-7w5m0vyn\r\nsap-contextid-accept: header\r\nAccept: application/json\r\nAccept-Language: en-US\r\nDataServiceVersion: 2.0\r\nMaxDataServiceVersion: 2.0\r\nx-csrf-token: cbe79a18aa244cedb79d93fa298de5e3\r\n\r\n\r\n--batch_2db4-60e6-732e--\r\n"
+      },
+      {
+        "method": "POST",
+        "url": "http://127.0.0.1:8080/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$batch",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "dataserviceversion": "2.0",
+          "x-csrf-token": "cbe79a18aa244cedb79d93fa298de5e3",
+          "sap-cancel-on-close": "true",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "accept-language": "en-US",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0",
+          "sap-contextid-accept": "header",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "accept": "multipart/mixed",
+          "content-type": "multipart/mixed;boundary=batch_b0f1-967d-c508",
+          "maxdataserviceversion": "2.0"
+        },
+        "post_data": "\r\n--batch_b0f1-967d-c508\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET LastChangeSet(DB_KEY=binary'9128EFA79F584D18ACF5DE2945B68C96') HTTP/1.1\r\nsap-cancel-on-close: true\r\nX-Correlation-ID: req-mna6rfwe-lsbrrlfu\r\nX-Request-ID: req-mna6rfwe-lsbrrlfu\r\nsap-contextid-accept: header\r\nAccept: application/json\r\nAccept-Language: en-US\r\nDataServiceVersion: 2.0\r\nMaxDataServiceVersion: 2.0\r\nx-csrf-token: cbe79a18aa244cedb79d93fa298de5e3\r\n\r\n\r\n--batch_b0f1-967d-c508--\r\n"
+      },
+      {
+        "method": "POST",
+        "url": "http://127.0.0.1:8080/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$batch",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "dataserviceversion": "2.0",
+          "x-csrf-token": "cbe79a18aa244cedb79d93fa298de5e3",
+          "sap-cancel-on-close": "true",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "accept-language": "en-US",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0",
+          "sap-contextid-accept": "header",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "accept": "multipart/mixed",
+          "content-type": "multipart/mixed;boundary=batch_d8c5-449f-da6b",
+          "maxdataserviceversion": "2.0"
+        },
+        "post_data": "\r\n--batch_d8c5-449f-da6b\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET ChecklistRootSet(DB_KEY=binary'9128EFA79F584D18ACF5DE2945B68C96')?$select=DB_KEY%2CRequestId%2CId%2CChangedOn%2CCreatedOn%2CVersionNumber%2CStatus%2CIntegrationFlag%2CHasFailedChecks%2CHasFailedBarriers%2CSuccessChecksRate%2CSuccessBarriersRate%2CChecksTotal%2CBarriersTotal HTTP/1.1\r\nsap-cancel-on-close: true\r\nX-Correlation-ID: req-mna6rfww-sf0i383o\r\nX-Request-ID: req-mna6rfww-sf0i383o\r\nsap-contextid-accept: header\r\nAccept: application/json\r\nAccept-Language: en-US\r\nDataServiceVersion: 2.0\r\nMaxDataServiceVersion: 2.0\r\nx-csrf-token: cbe79a18aa244cedb79d93fa298de5e3\r\n\r\n\r\n--batch_d8c5-449f-da6b\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET ChecklistBasicInfoSet?$filter=DB_KEY%20eq%20binary'9128EFA79F584D18ACF5DE2945B68C96'&$select=DB_KEY%2CChecklistId%2CLocationKey%2CLocationName%2CLocationText%2CBukrs%2CObserverPernr%2CObserverName%2CObserverFullname%2CObserverPosition%2CObserverOrgUnit%2CObservedPernr%2CObservedName%2CObservedFullname%2CObservedPosition%2CObservedOrgUnit%2CLpc%2CLpcText%2CProfession%2CProfessionText%2CChecksNumber%2CChecksNumberText%2CBarriersNumber%2CBarriersNumberText%2CDateCheck%2CTimeCheck%2CTimeZone%2CEquipName HTTP/1.1\r\nsap-cancel-on-close: true\r\nX-Correlation-ID: req-mna6rfww-0rkzaq11\r\nX-Request-ID: req-mna6rfww-0rkzaq11\r\nsap-contextid-accept: header\r\nAccept: application/json\r\nAccept-Language: en-US\r\nDataServiceVersion: 2.0\r\nMaxDataServiceVersion: 2.0\r\nx-csrf-token: cbe79a18aa244cedb79d93fa298de5e3\r\n\r\n\r\n--batch_d8c5-449f-da6b--\r\n"
+      },
+      {
+        "method": "POST",
+        "url": "http://127.0.0.1:8080/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$batch",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "dataserviceversion": "2.0",
+          "x-csrf-token": "cbe79a18aa244cedb79d93fa298de5e3",
+          "sap-cancel-on-close": "true",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "accept-language": "en-US",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0",
+          "sap-contextid-accept": "header",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "accept": "multipart/mixed",
+          "content-type": "multipart/mixed;boundary=batch_2c65-ea51-060c",
+          "maxdataserviceversion": "2.0"
+        },
+        "post_data": "\r\n--batch_2c65-ea51-060c\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET ChecklistCheckSet?$filter=PARENT_KEY%20eq%20binary'9128EFA79F584D18ACF5DE2945B68C96'&$select=DB_KEY%2CPARENT_KEY%2CChecksNum%2CText%2CComment%2CResult%2CChangedOn&$top=20&$skip=0 HTTP/1.1\r\nsap-cancel-on-close: true\r\nX-Correlation-ID: req-mna6rfyo-1wuesdn5\r\nX-Request-ID: req-mna6rfyo-1wuesdn5\r\nsap-contextid-accept: header\r\nAccept: application/json\r\nAccept-Language: en-US\r\nDataServiceVersion: 2.0\r\nMaxDataServiceVersion: 2.0\r\nx-csrf-token: cbe79a18aa244cedb79d93fa298de5e3\r\n\r\n\r\n--batch_2c65-ea51-060c\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET ChecklistBarrierSet?$filter=PARENT_KEY%20eq%20binary'9128EFA79F584D18ACF5DE2945B68C96'&$select=DB_KEY%2CPARENT_KEY%2CBarriersNum%2CText%2CComment%2CResult%2CChangedOn&$top=20&$skip=0 HTTP/1.1\r\nsap-cancel-on-close: true\r\nX-Correlation-ID: req-mna6rfyo-tpo7g1aa\r\nX-Request-ID: req-mna6rfyo-tpo7g1aa\r\nsap-contextid-accept: header\r\nAccept: application/json\r\nAccept-Language: en-US\r\nDataServiceVersion: 2.0\r\nMaxDataServiceVersion: 2.0\r\nx-csrf-token: cbe79a18aa244cedb79d93fa298de5e3\r\n\r\n\r\n--batch_2c65-ea51-060c--\r\n"
+      },
+      {
+        "method": "POST",
+        "url": "http://127.0.0.1:8080/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$batch",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "dataserviceversion": "2.0",
+          "x-csrf-token": "cbe79a18aa244cedb79d93fa298de5e3",
+          "sap-cancel-on-close": "true",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "accept-language": "en-US",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0",
+          "sap-contextid-accept": "header",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "accept": "multipart/mixed",
+          "content-type": "multipart/mixed;boundary=batch_f467-b3b2-34a9",
+          "maxdataserviceversion": "2.0"
+        },
+        "post_data": "\r\n--batch_f467-b3b2-34a9\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET ChecklistPermissionSet(DB_KEY=binary'9128EFA79F584D18ACF5DE2945B68C96')?ACTVT=02&$select=DB_KEY%2CCanCreate%2CCanView%2CCanEdit%2CCanDelete%2CReasonCode%2CMessage HTTP/1.1\r\nsap-cancel-on-close: true\r\nX-Correlation-ID: req-mna6rhrd-t8s9rqe5\r\nX-Request-ID: req-mna6rhrd-t8s9rqe5\r\nsap-contextid-accept: header\r\nAccept: application/json\r\nAccept-Language: en-US\r\nDataServiceVersion: 2.0\r\nMaxDataServiceVersion: 2.0\r\nx-csrf-token: cbe79a18aa244cedb79d93fa298de5e3\r\n\r\n\r\n--batch_f467-b3b2-34a9--\r\n"
+      },
+      {
+        "method": "POST",
+        "url": "http://127.0.0.1:8080/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/$batch",
+        "headers": {
+          "sec-ch-ua-platform": "\"Windows\"",
+          "dataserviceversion": "2.0",
+          "x-csrf-token": "cbe79a18aa244cedb79d93fa298de5e3",
+          "sap-cancel-on-close": "false",
+          "referer": "http://127.0.0.1:8080/index.html",
+          "accept-language": "en-US",
+          "sec-ch-ua": "\"Not:A-Brand\";v=\"99\", \"HeadlessChrome\";v=\"145\", \"Chromium\";v=\"145\"",
+          "sec-ch-ua-mobile": "?0",
+          "sap-contextid-accept": "header",
+          "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/145.0.7632.6 Safari/537.36",
+          "accept": "multipart/mixed",
+          "content-type": "multipart/mixed;boundary=batch_d772-a461-ae3a",
+          "maxdataserviceversion": "2.0"
+        },
+        "post_data": "\r\n--batch_d772-a461-ae3a\r\nContent-Type: multipart/mixed; boundary=changeset_d649-e630-db15\r\n\r\n--changeset_d649-e630-db15\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nPOST LockAcquire HTTP/1.1\r\nX-Correlation-ID: req-mna6rhsi-gt2kusrl\r\nX-Request-ID: req-mna6rhsi-gt2kusrl\r\nsap-contextid-accept: header\r\nAccept: application/json\r\nAccept-Language: en-US\r\nDataServiceVersion: 2.0\r\nMaxDataServiceVersion: 2.0\r\nx-csrf-token: cbe79a18aa244cedb79d93fa298de5e3\r\nContent-Type: application/json\r\nContent-Length: 142\r\n\r\n{\"DB_KEY\":\"9128EFA79F584D18ACF5DE2945B68C96\",\"SessionGuid\":\"St5oexiofgzdmna6rcvs\",\"TabSessionId\":\"Tfwt57drgb0rmna6rcvt\",\"ForceTakeover\":false}\r\n--changeset_d649-e630-db15--\r\n\r\n--batch_d772-a461-ae3a--\r\n"
+      }
+    ]
+  }
+}

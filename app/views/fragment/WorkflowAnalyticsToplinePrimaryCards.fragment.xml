@@ -5,7 +5,7 @@
             <Text text="{i18n>kpiVisible}" class="kpiLabel"/>
         </HBox>
         <Title text="{view>/analytics/total}" level="H3" class="kpiValue analyticsValue"/>
-        <Text text="{view>/analytics/sourceText}" class="analyticsToplineSubhead"/>
+        <Text text="{path:'view>/analytics/source', formatter:'.formatAnalyticsSourceText'}" class="analyticsToplineSubhead"/>
         <Text text="{= ${i18n>analyticsDeltaShort} + ' ' + ${view>/analytics/compareYear} + ': ' + ${view>/analytics/deltas/total/text} }" class="analyticsToplineMeta"/>
     </VBox>
 

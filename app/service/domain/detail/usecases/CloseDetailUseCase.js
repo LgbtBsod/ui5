@@ -29,7 +29,7 @@ sap.ui.define([
 function execute(mInput, mCtx) {
         var oUiState = mCtx && mCtx.uiState;
         var oLockPort = mCtx && mCtx.lock;
-        var sRootId = DetailRuntimePayload.rootId(mInput, mCtx) ||
+        var sDbKey = DetailRuntimePayload.dbKey(mInput, mCtx) ||
             (oUiState && typeof oUiState.get === "function" && (
                 oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID) ||
                 oUiState.get(STATE_MODEL, ModelPathContracts.SELECTED_ID)
@@ -42,8 +42,8 @@ function execute(mInput, mCtx) {
             sLockState === WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK ||
             sLockState === WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE;
         var bShouldRelease = !!(
-            sRootId
-            && !CreateSentinel.isCreateId(sRootId)
+            sDbKey
+            && !CreateSentinel.isCreateId(sDbKey)
             && sSessionGuid
             && oLockPort
             && typeof oLockPort.release === "function"
@@ -67,7 +67,7 @@ function execute(mInput, mCtx) {
                     {
                         stateModel: mCtx && mCtx.stateModel,
                         payload: {
-                            rootId: sRootId,
+                            dbKey: sDbKey,
                             source: "close_detail"
                         }
                     }
@@ -79,6 +79,7 @@ function execute(mInput, mCtx) {
                     ready: false,
                     readyAt: "",
                     error: "",
+                    dbKey: "",
                     rootId: "",
                     mode: WorkflowContracts.EDIT_MODES.READ,
                     permissionKnown: false,

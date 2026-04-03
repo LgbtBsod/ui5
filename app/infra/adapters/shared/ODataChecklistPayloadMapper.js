@@ -18,32 +18,35 @@ sap.ui.define([
         Profession: Object.freeze(["Profession", "PROF_KEY"])
     });
 
-    function normalizeRootKey(sRootId) {
-        return ODataKeyNormalizer.normalizeBinaryKey(sRootId);
+    function normalizeDbKey(sDbKey) {
+        return ODataKeyNormalizer.normalizeBinaryKey(sDbKey);
     }
 
-    function resolveServerRootId(oPayload, sFallbackRootId) {
+    function resolveServerDbKey(oPayload, sFallbackDbKey) {
         var oData = oPayload || {};
-        return normalizeRootKey(
+        var oRoot = oData.root || {};
+        return normalizeDbKey(
             oData[IDENTITY.ROOT_CANONICAL_FIELDS[0]] ||
             oData[IDENTITY.ROOT_ALIAS_FIELDS[0]] ||
             oData[IDENTITY.ROOT_CANONICAL_FIELDS[1]] ||
             oData[IDENTITY.ROOT_ALIAS_FIELDS[1]] ||
             oData[IDENTITY.ROOT_ALIAS_FIELDS[2]] ||
-            (oData.root && (oData.root[IDENTITY.ROOT_ALIAS_FIELDS[2]] || oData.root[IDENTITY.ROOT_CANONICAL_FIELDS[0]] || oData.root[IDENTITY.ROOT_CANONICAL_FIELDS[1]])) ||
-            (oData.root && oData.root.id) ||
-            sFallbackRootId ||
+            oRoot[IDENTITY.ROOT_ALIAS_FIELDS[2]] ||
+            oRoot[IDENTITY.ROOT_CANONICAL_FIELDS[0]] ||
+            oRoot[IDENTITY.ROOT_CANONICAL_FIELDS[1]] ||
+            oRoot.id ||
+            sFallbackDbKey ||
             ""
         );
     }
 
-    function normalizeAttachmentRows(aAttachments, sRootId) {
+    function normalizeAttachmentRows(aAttachments, sDbKey) {
         return (Array.isArray(aAttachments) ? aAttachments : []).map(function (oAttachment) {
             var oRow = Object.assign({}, oAttachment || {});
-            var sParentKey = normalizeRootKey(oRow.PARENT_KEY || sRootId);
-            oRow.DB_KEY = normalizeRootKey(oRow.DB_KEY || "");
+            var sParentKey = normalizeDbKey(oRow.PARENT_KEY || sDbKey);
+            oRow.DB_KEY = normalizeDbKey(oRow.DB_KEY || "");
             oRow.PARENT_KEY = sParentKey;
-            oRow.FolderKey = String(oRow.FolderKey || sParentKey || sRootId || "").trim();
+            oRow.FolderKey = String(oRow.FolderKey || sParentKey || sDbKey || "").trim();
             oRow.CategoryKey = String(oRow.CategoryKey || oRow.Type || "GEN").trim() || "GEN";
             oRow.Type = String(oRow.Type || oRow.CategoryKey || "GEN").trim() || "GEN";
             oRow.FileName = String(oRow.FileName || oRow.Name || "").trim();
@@ -60,18 +63,18 @@ sap.ui.define([
         });
     }
 
-    function normalizeMutationAttachmentRows(aAttachments, sRootId) {
+    function normalizeMutationAttachmentRows(aAttachments, sDbKey) {
         return (Array.isArray(aAttachments) ? aAttachments : []).map(function (oAttachment) {
             var oRow = Object.assign({}, oAttachment || {});
-            var sParentKey = normalizeRootKey(oRow.PARENT_KEY || oRow.parent_key || sRootId);
+            var sParentKey = normalizeDbKey(oRow.PARENT_KEY || oRow.parent_key || sDbKey);
             var sAttachmentKey = String(oRow.AttachmentKey || oRow.attach_uuid || oRow.client_row_id || oRow.Key || "").trim();
             return {
                 attach_uuid: String(oRow.attach_uuid || (String(oRow.edit_mode || oRow.EditMode || "").toUpperCase() === "C" ? "" : sAttachmentKey)).trim(),
                 client_row_id: String(oRow.client_row_id || sAttachmentKey || "").trim(),
                 edit_mode: String(oRow.edit_mode || oRow.EditMode || "U").trim().toUpperCase() || "U",
-                root_key: normalizeRootKey(oRow.root_key || oRow.DB_KEY || sRootId),
+                root_key: normalizeDbKey(oRow.root_key || oRow.DB_KEY || sDbKey),
                 parent_key: sParentKey,
-                folder_key: String(oRow.folder_key || oRow.FolderKey || sParentKey || sRootId || "").trim(),
+                folder_key: String(oRow.folder_key || oRow.FolderKey || sParentKey || sDbKey || "").trim(),
                 category_key: String(oRow.category_key || oRow.CategoryKey || oRow.Type || "GEN").trim() || "GEN",
                 file_name: String(oRow.file_name || oRow.FileName || oRow.Name || "").trim(),
                 mime_type: String(oRow.mime_type || oRow.MimeType || "application/octet-stream").trim() || "application/octet-stream",
@@ -112,17 +115,17 @@ sap.ui.define([
         return undefined;
     }
 
-    function normalizeSavePayload(sRootId, oPayload, aAttachments) {
+    function normalizeSavePayload(sDbKey, oPayload, aAttachments) {
         var oIn = oPayload || {};
         var aCanonicalAttachments = Array.isArray(oIn.attachments) && oIn.attachments.length
             ? oIn.attachments
             : aAttachments;
-        var aNormalizedAttachments = normalizeMutationAttachmentRows(aCanonicalAttachments, sRootId);
+        var aNormalizedAttachments = normalizeMutationAttachmentRows(aCanonicalAttachments, sDbKey);
         return {
             Payload: {
                 root: Object.assign({}, oIn.root || {}, {
-                    DB_KEY: normalizeRootKey((oIn.root && (oIn.root.DB_KEY || oIn.root.db_key)) || sRootId),
-                    db_key: normalizeRootKey((oIn.root && (oIn.root.db_key || oIn.root.DB_KEY)) || sRootId)
+                    DB_KEY: normalizeDbKey((oIn.root && (oIn.root.DB_KEY || oIn.root.db_key)) || sDbKey),
+                    db_key: normalizeDbKey((oIn.root && (oIn.root.db_key || oIn.root.DB_KEY)) || sDbKey)
                 }),
                 basic: Object.assign({}, oIn.basic || {}),
                 checks: Array.isArray(oIn.checks) ? oIn.checks.slice() : [],
@@ -140,9 +143,9 @@ sap.ui.define([
         mapBasicFieldName: mapBasicFieldName,
         normalizeAttachmentRows: normalizeAttachmentRows,
         normalizeMutationAttachmentRows: normalizeMutationAttachmentRows,
-        normalizeRootKey: normalizeRootKey,
+        normalizeDbKey: normalizeDbKey,
         normalizeSavePayload: normalizeSavePayload,
         pickBasicFieldValue: pickBasicFieldValue,
-        resolveServerRootId: resolveServerRootId
+        resolveServerDbKey: resolveServerDbKey
     };
 });

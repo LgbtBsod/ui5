@@ -31,14 +31,14 @@ sap.ui.define([
         applyLayoutState: function (oController, vLayout, mOptions) {
             var oRouter = oController.getRouter && oController.getRouter();
             var bSyncRoute = !mOptions || mOptions.syncRoute !== false;
-            var sRootId;
+            var sDbKey;
             var sLayout;
 
             if (!getModel(oController, ModelContracts.MODELS.STATE)) {
                 return;
             }
 
-            sRootId = resolveActiveDbKey(oController);
+            sDbKey = resolveActiveDbKey(oController);
             sLayout = LayoutStateRuntime.normalizeLayout(vLayout);
             ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, sLayout);
             if (!bSyncRoute || !oRouter) {
@@ -48,10 +48,10 @@ sap.ui.define([
                 WorkspaceRouteNavigation.navigateToSearch(oController);
                 return;
             }
-            if (!sRootId) {
+            if (!sDbKey) {
                 return;
             }
-            WorkspaceRouteNavigation.navigateToDetail(oController, sRootId, sLayout);
+            WorkspaceRouteNavigation.navigateToDetail(oController, sDbKey, sLayout);
         }
     };
 });

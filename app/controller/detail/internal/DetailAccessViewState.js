@@ -3,10 +3,11 @@ sap.ui.define([
 ], function (UiAssetPaths) {
     "use strict";
 
-    function createDefaultState(sRootId) {
+    function createDefaultState(sDbKey) {
+        var sCanonicalDbKey = String(sDbKey || "").trim();
         return {
             denied: false,
-            rootId: String(sRootId || "").trim(),
+            dbKey: sCanonicalDbKey,
             userId: "",
             canView: true,
             canEdit: true,

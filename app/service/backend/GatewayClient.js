@@ -1,17 +1,19 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants"
-], function (GatewayErrorNormalizer, GatewayContractConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
+], function (GatewayErrorNormalizer, GatewayContractConstants, MessageCodeConstants) {
     "use strict";
 
     var _oModel = null;
     var _sServiceUrl = "";
     var mResponseGuardTokens = {};
     var REQUEST = GatewayContractConstants.REQUEST;
+    var TECHNICAL_CODES = MessageCodeConstants.TECHNICAL;
 
     function createModelError() {
-        var oError = new Error("GatewayClient model is not initialized");
-        oError.code = "GATEWAY_MODEL_NOT_INITIALIZED";
+        var oError = new Error(TECHNICAL_CODES.GATEWAY_MODEL_NOT_INITIALIZED);
+        oError.code = TECHNICAL_CODES.GATEWAY_MODEL_NOT_INITIALIZED;
         return oError;
     }
 
@@ -81,7 +83,7 @@ sap.ui.define([
     function assertCanonicalPath(sPath) {
         FORBIDDEN_PATH_PATTERNS.forEach(function (oPattern) {
             if (oPattern.test(sPath)) {
-                throw new Error("Forbidden non-canonical OData path: " + sPath);
+                throw new Error(TECHNICAL_CODES.FORBIDDEN_NON_CANONICAL_ODATA_PATH);
             }
         });
         return sPath;
@@ -90,10 +92,10 @@ sap.ui.define([
     function assertAllowedFunctionName(sName) {
         var sResolved = String(sName || "").trim();
         if (!sResolved) {
-            throw new Error("Function import name is required");
+            throw new Error(TECHNICAL_CODES.FUNCTION_IMPORT_NAME_REQUIRED);
         }
         if (FORBIDDEN_PATH_PATTERNS.some(function (oPattern) { return oPattern.test("/" + sResolved); })) {
-            throw new Error("Forbidden non-canonical function import: " + sResolved);
+            throw new Error(TECHNICAL_CODES.FORBIDDEN_NON_CANONICAL_FUNCTION_IMPORT);
         }
         return sResolved;
     }
@@ -137,8 +139,8 @@ sap.ui.define([
 
     function createOutdatedError(sCorrelationId, sGuardKey) {
         return {
-            code: "OUTDATED_RESPONSE",
-            message: "Outdated response ignored",
+            code: TECHNICAL_CODES.OUTDATED_RESPONSE,
+            message: TECHNICAL_CODES.OUTDATED_RESPONSE,
             statusCode: 0,
             correlationId: sCorrelationId,
             responseGuardKey: String(sGuardKey || ""),
@@ -251,7 +253,7 @@ sap.ui.define([
             var sFunctionName = assertAllowedFunctionName(name);
             var oOptions = mOptions || {};
             if (oOptions.async === false) {
-                return Promise.reject(new Error("Synchronous function imports are not supported"));
+                return Promise.reject(new Error(TECHNICAL_CODES.SYNCHRONOUS_FUNCTION_IMPORTS_UNSUPPORTED));
             }
             return executeMutatingRequest(REQUEST.POST_FUNCTION, function (resolve, reject, mHeaders) {
                 if (allowlisted(sFunctionName, DIRECT_FUNCTION_QUERY_ALLOWLIST)) {
@@ -272,13 +274,13 @@ sap.ui.define([
                     });
                     return;
                 }
-                reject(new Error("Unsupported function import: " + sFunctionName));
+                reject(new Error(TECHNICAL_CODES.UNSUPPORTED_FUNCTION_IMPORT));
             }, oOptions);
         },
         callGetFunctionImport: function (name, mParams, mOptions) {
             var sFunctionName = assertAllowedFunctionName(name);
             if (!allowlisted(sFunctionName, DIRECT_GET_FUNCTION_ALLOWLIST)) {
-                return Promise.reject(new Error("Unsupported GET function import: " + sFunctionName));
+                return Promise.reject(new Error(TECHNICAL_CODES.UNSUPPORTED_GET_FUNCTION_IMPORT));
             }
             return executeReadRequest(REQUEST.GET_FUNCTION, mOptions, function (resolve, reject, mHeaders) {
                 ensureModel().callFunction("/" + sFunctionName, {
@@ -293,8 +295,8 @@ sap.ui.define([
         deletePath: function (path, mOptions) {
             var sPath = assertCanonicalPath(normalizePath(path));
             return Promise.reject(normalizeError({
-                code: "DIRECT_DELETE_UNSUPPORTED",
-                message: "Direct DELETE is not supported in target Gateway contract",
+                code: TECHNICAL_CODES.DIRECT_DELETE_UNSUPPORTED,
+                message: TECHNICAL_CODES.DIRECT_DELETE_UNSUPPORTED,
                 path: sPath
             }, REQUEST.DELETE, String((mOptions && mOptions.correlationId) || "").trim()));
         },
@@ -315,7 +317,7 @@ sap.ui.define([
             return new Promise(function (resolve, reject) {
                 var oModel = ensureModel();
                 if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
-                    reject(new Error("security_token_refresh_unavailable"));
+                    reject(new Error(TECHNICAL_CODES.SECURITY_TOKEN_REFRESH_UNAVAILABLE));
                     return;
                 }
                 oModel.refreshSecurityToken(function () {

@@ -165,7 +165,10 @@ sap.ui.define([
             NONE: UiSemanticConstants.VALUE_STATE.NONE
         }),
         TEXT_KEYS: Object.freeze({
-            COMPARE_YEAR_INVALID: "analyticsCompareYearInvalid"
+            COMPARE_YEAR_INVALID: "analyticsCompareYearInvalid",
+            LOAD_FAILED: "analyticsLoadFailed",
+            REFRESH_FAILED: "analyticsRefreshFailed",
+            UNAVAILABLE: "analyticsUnavailable"
         }),
         FRAGMENT_IDS: Object.freeze({
             YEAR_PICKER: "analyticsYearPicker"

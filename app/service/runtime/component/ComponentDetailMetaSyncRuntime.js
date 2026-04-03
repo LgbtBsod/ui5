@@ -32,9 +32,10 @@ sap.ui.define([
         var bPermissionKnown = !!oReadiness.permissionKnown;
         var sReadinessStatus = String(oReadiness.status || READINESS_STATUS.IDLE).trim() || READINESS_STATUS.IDLE;
         var bAllowed = bPermissionKnown && sReadinessStatus !== READINESS_STATUS.DENIED && sReadinessStatus !== READINESS_STATUS.ERROR;
+        var sActiveDbKey = sActiveObjectId;
 
         ModelStateRuntime.writeOnModel(oStateModel, StatePaths.DETAIL_META, {
-            rootId: sActiveObjectId,
+            rootId: sActiveDbKey,
             readiness: { status: sReadinessStatus, ready: !!oReadiness.ready, readyAt: String(oReadiness.readyAt || ""), error: String(oReadiness.error || "") },
             mode: sMode,
             lock: { state: sLockState, known: !!oReadiness.lockKnown },

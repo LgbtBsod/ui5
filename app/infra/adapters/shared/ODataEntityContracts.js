@@ -48,7 +48,7 @@ sap.ui.define([
     var SELECTS = Object.freeze({
         ATTACHMENT: "AttachmentKey,DB_KEY,PARENT_KEY,FolderKey,CategoryKey,CategoryText,Type,FileName,Name,MimeType,Description,FileSize,FileSizeContent,DownloadUrl,DocumentHandle,ScanStatus,ScannedOn,CreatedOn,ChangedOn",
         ATTACHMENT_CONTENT: "AttachmentKey,FileName,MimeType,DownloadUrl,DocumentHandle",
-        CHECKLIST_BASIC_INFO: "DB_KEY,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverName,ObserverFullname,ObservedPernr,ObservedName,ObservedFullname,Lpc,Profession,DateCheck,TimeCheck,TimeZone,EquipName",
+        CHECKLIST_BASIC_INFO: "DB_KEY,ChecklistId,LocationKey,LocationName,LocationText,Bukrs,ObserverPernr,ObserverName,ObserverFullname,ObserverPosition,ObserverOrgUnit,ObservedPernr,ObservedName,ObservedFullname,ObservedPosition,ObservedOrgUnit,Lpc,LpcText,Profession,ProfessionText,ChecksNumber,ChecksNumberText,BarriersNumber,BarriersNumberText,DateCheck,TimeCheck,TimeZone,EquipName",
         CHECKLIST_BARRIER: "DB_KEY,PARENT_KEY,BarriersNum,Text,Comment,Result,ChangedOn",
         CHECKLIST_CHECK: "DB_KEY,PARENT_KEY,ChecksNum,Text,Comment,Result,ChangedOn",
         CHECKLIST_ROOT: "DB_KEY,RequestId,Id,ChangedOn,CreatedOn,VersionNumber,Status,IntegrationFlag,HasFailedChecks,HasFailedBarriers,SuccessChecksRate,SuccessBarriersRate,ChecksTotal,BarriersTotal",

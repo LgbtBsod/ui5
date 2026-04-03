@@ -272,21 +272,21 @@ async function main() {
 
       steps.push(runStep(process.execPath, ['scripts/gateway-live-smoke-runner.js'], 'gateway-live-smoke-runner'));
       const smokeReport = existingJson(path.join(ROOT, 'docs/artifacts/gateway-only-smoke-report.json')) || {};
-      const createdRootId = String(smokeReport.createdRootId || '').trim();
+const createdDbKey = String(smokeReport.createdDbKey || '').trim();
 
       steps.push(runStep(PYTHON_BIN, ['scripts/gateway-detail-lifecycle-proof.py', UI_URL, SERVICE_URL], 'gateway-detail-lifecycle-proof'));
-      steps.push(runStep(PYTHON_BIN, ['scripts/browser-smoke-gateway-only-flow.py', UI_URL, createdRootId], 'browser-smoke-gateway-only-flow'));
-      if (createdRootId) {
-        steps.push(runStep(PYTHON_BIN, ['scripts/gateway-lock-multisession-replay.py', SERVICE_URL, createdRootId], 'gateway-lock-multisession-replay'));
+      steps.push(runStep(PYTHON_BIN, ['scripts/browser-smoke-gateway-only-flow.py', UI_URL, createdDbKey], 'browser-smoke-gateway-only-flow'));
+      if (createdDbKey) {
+        steps.push(runStep(PYTHON_BIN, ['scripts/gateway-lock-multisession-replay.py', SERVICE_URL, createdDbKey], 'gateway-lock-multisession-replay'));
       } else {
         steps.push({
           name: 'gateway-lock-multisession-replay',
           command: PYTHON_BIN,
-          args: ['scripts/gateway-lock-multisession-replay.py', SERVICE_URL, '<missing-root-id>'],
+          args: ['scripts/gateway-lock-multisession-replay.py', SERVICE_URL, '<missing-db-key>'],
           exitCode: 1,
           ok: false,
           stdout: '',
-          stderr: 'missing createdRootId from gateway-only-smoke-report.json'
+          stderr: 'missing createdDbKey from gateway-only-smoke-report.json'
         });
       }
 

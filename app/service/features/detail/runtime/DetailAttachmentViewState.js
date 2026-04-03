@@ -31,8 +31,8 @@ sap.ui.define([
     }
 
     function hasPersistedUploadRoot(oController) {
-        var sCanonicalRootId = resolveActiveDbKey(oController);
-        return !!sCanonicalRootId && !CreateSentinel.isCreateId(sCanonicalRootId);
+        var sActiveDbKey = resolveActiveDbKey(oController);
+        return !!sActiveDbKey && !CreateSentinel.isCreateId(sActiveDbKey);
     }
 
     function sync(oController) {

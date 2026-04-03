@@ -22,7 +22,10 @@ def _sample_root(client: TestClient):
     payload = client.get(f"{SERVICE_ROOT}/ChecklistSearchSet", params={"$top": 1}).json()
     rows = payload.get("d", {}).get("results", [])
     assert rows
-    return rows[0]["DB_KEY"]
+    row = rows[0]
+    assert row.get("DB_KEY")
+    assert row.get("Key") == row.get("DB_KEY")
+    return row["DB_KEY"]
 
 
 def _as_user(user_name: str) -> dict:
@@ -122,6 +125,17 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         assert len(seeded_basic_rows) == 1
         assert seeded_basic_rows[0].get("DateCheck")
         assert seeded_basic_rows[0].get("EquipName")
+        assert seeded_basic_rows[0].get("ChecklistId")
+        assert "ObserverFullname" in seeded_basic_rows[0]
+        assert "ObserverPosition" in seeded_basic_rows[0]
+        assert "ObserverOrgUnit" in seeded_basic_rows[0]
+        assert "ObservedFullname" in seeded_basic_rows[0]
+        assert "ObservedPosition" in seeded_basic_rows[0]
+        assert "ObservedOrgUnit" in seeded_basic_rows[0]
+        assert "LocationName" in seeded_basic_rows[0]
+        assert "LocationText" in seeded_basic_rows[0]
+        assert "LpcText" in seeded_basic_rows[0]
+        assert "ProfessionText" in seeded_basic_rows[0]
         assert len(checks.json().get("d", {}).get("results", [])) >= 1
         assert isinstance(barriers.json().get("d", {}).get("results", []), list)
 
@@ -387,6 +401,7 @@ def test_checklist_search_exposes_rate_totals_for_column_visibility():
         row = rows[0]
         assert "__metadata" in row
         assert row["__metadata"]["type"] == ODATA_NS + ".ChecklistSearch"
+        assert row["Key"] == row["DB_KEY"]
         assert "SuccessChecksRate" in row
         assert "SuccessBarriersRate" in row
         assert "ChecksTotal" in row
@@ -404,6 +419,7 @@ def test_checklist_search_preserves_metadata_under_select():
         row = rows[0]
         assert "__metadata" in row
         assert row["__metadata"]["type"] == ODATA_NS + ".ChecklistSearch"
+        assert row["Key"]
 
 
 def test_workflow_analytics_exposes_summary_and_breakdowns():

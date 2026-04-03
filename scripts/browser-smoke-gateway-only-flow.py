@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+﻿#!/usr/bin/env python3
 """Browser smoke: Gateway-only Smart/OData runtime flow.
 
 Result classes:
@@ -30,7 +30,7 @@ from browser_route_bootstrap import (
 
 
 UI_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
-ROOT_ID = sys.argv[2] if len(sys.argv) > 2 else ""
+DB_KEY = sys.argv[2] if len(sys.argv) > 2 else ""
 REPORT_PATH = Path("docs/artifacts/gateway-browser-smoke-report.json")
 SEARCH_VIEW_ID = "checklist_app_comp---searchTargetPage"
 DETAIL_VIEW_ID = "checklist_app_comp---detailTargetPage"
@@ -98,7 +98,6 @@ def fetch_seed_root_candidates(ui_url: str, limit: int = 5) -> list[str]:
         value = str(
             (item or {}).get("Key")
             or (item or {}).get("DB_KEY")
-            or (item or {}).get("RootKey")
             or (item or {}).get("Id")
             or ""
         ).strip()
@@ -135,33 +134,33 @@ def wait_for_search_ready(page) -> None:
     shared_wait_for_search_ready(page, timeout=30000)
 
 
-def wait_for_detail_ready(page, root_id: str) -> None:
-    shared_wait_for_detail_ready(page, root_id, timeout=30000)
+def wait_for_detail_ready(page, db_key: str) -> None:
+    shared_wait_for_detail_ready(page, db_key, timeout=30000)
 
 
-def wait_for_edit_detail_ready(page, root_id: str) -> None:
+def wait_for_edit_detail_ready(page, db_key: str) -> None:
     wait_for_ui5_bootstrap(page)
     page.wait_for_function(
         """
-        (expectedRootId) => {
+        (expectedDbKey) => {
           const core = sap.ui.getCore();
           const app = core.byId('checklist_app_comp---app');
           const detail = core.byId('checklist_app_comp---detailTargetPage');
           const appState = app && app.getModel && app.getModel('state');
           const state = detail && detail.getModel && detail.getModel('state');
           const selected = detail && detail.getModel && detail.getModel('selected');
-          const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+          const selectedDbKey = selected && selected.getProperty ? String(selected.getProperty('/root/DB_KEY') || selected.getProperty('/root/id') || '') : '';
           return !!detail
             && !!appState
             && !!state
-            && rootId === expectedRootId
+            && selectedDbKey === expectedDbKey
             && appState.getProperty('/currentRouteName') === 'detail'
             && state.getProperty('/workflow/detail/editMode') === 'EDIT'
             && state.getProperty('/workflow/detail/lock/state') === 'EDIT_LOCKED'
             && !!detail.getDomRef();
         }
         """,
-        arg=root_id,
+        arg=db_key,
         timeout=30000,
     )
     page.wait_for_timeout(900)
@@ -182,7 +181,7 @@ def detail_route_state(page) -> dict[str, Any]:
             currentRouteName: appState && appState.getProperty ? String(appState.getProperty('/currentRouteName') || '') : '',
             layout: appState && appState.getProperty ? String(appState.getProperty('/layout') || '') : '',
             selectedId: appState && appState.getProperty ? String(appState.getProperty('/selectedId') || '') : '',
-            rootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
+            dbKey: selected && selected.getProperty ? String(selected.getProperty('/root/DB_KEY') || selected.getProperty('/root/id') || '') : '',
             mode: state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '',
             lockState: state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '',
             busyDetail: !!(state && state.getProperty && state.getProperty('/ui/busy/detail')),
@@ -283,7 +282,7 @@ def collect_search_root_candidates(page, limit: int = 5) -> list[str]:
           if (smartControls && typeof smartControls.getBoundRows === 'function') {
             return Promise.resolve(smartControls.getBoundRows(Number(maxCount || 5))).then((rows) => {
               return (rows || []).map((item) => {
-                return String((item && (item.Key || item.RootKey || item.Id)) || '').trim();
+                return String((item && (item.Key || item.DB_KEY || item.Id)) || '').trim();
               }).filter((value) => !!value && value !== '__CREATE').slice(0, Number(maxCount || 5));
             });
           }
@@ -297,7 +296,7 @@ def collect_search_root_candidates(page, limit: int = 5) -> list[str]:
           return rows.map((item) => {
             const ctx2 = item && item.getBindingContext ? item.getBindingContext() : null;
             const data = ctx2 && ctx2.getObject ? ctx2.getObject() : null;
-            return String((data && (data.Key || data.RootKey || data.Id)) || '').trim();
+            return String((data && (data.Key || data.DB_KEY || data.Id)) || '').trim();
           }).filter((value) => !!value && value !== '__CREATE').slice(0, Number(maxCount || 5));
         }
         """,
@@ -362,7 +361,7 @@ def detail_view_candidates(page) -> list[dict[str, Any]]:
               return {
                 id: view && view.getId ? String(view.getId()) : '',
                 domReady: !!(view && view.getDomRef && view.getDomRef()),
-                rootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
+                dbKey: selected && selected.getProperty ? String(selected.getProperty('/root/DB_KEY') || selected.getProperty('/root/id') || '') : '',
                 mode: state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '',
                 lockState: state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : ''
               };
@@ -399,17 +398,17 @@ def classify_route_open_diagnostic(diag: dict[str, Any]) -> str:
     detail = diag.get("detailState") or {}
     network_reads = diag.get("recentNetworkByMarker") or {}
     has_reads = any(network_reads.get(marker) for marker in DETAIL_READ_MARKERS)
-    if route_snapshot.get("currentRouteName") == ROUTE_DETAIL and detail.get("rootId") and detail.get("rootId") != diag.get("requestedRootId"):
+    if route_snapshot.get("currentRouteName") == ROUTE_DETAIL and detail.get("dbKey") and detail.get("dbKey") != diag.get("requestedDbKey"):
         return RESULT_FAIL
     if not has_reads:
         return RESULT_BLOCKED
     return RESULT_FAIL if route_snapshot.get("currentRouteName") == ROUTE_DETAIL else RESULT_BLOCKED
 
 
-def open_detail_candidate(page, root_id: str, network: list[dict[str, Any]]) -> dict[str, Any]:
+def open_detail_candidate(page, db_key: str, network: list[dict[str, Any]]) -> dict[str, Any]:
     before_counts = {marker: len(matching_requests(network, marker)) for marker in DETAIL_READ_MARKERS}
     diag = {
-        "requestedRootId": root_id,
+        "requestedDbKey": db_key,
         "routeSnapshot": {},
         "detailState": {},
         "bootstrap": {},
@@ -419,8 +418,8 @@ def open_detail_candidate(page, root_id: str, network: list[dict[str, Any]]) -> 
         "ok": False,
     }
     try:
-        navigate_to_detail(page, root_id)
-        wait_for_detail_ready(page, root_id)
+        navigate_to_detail(page, db_key)
+        wait_for_detail_ready(page, db_key)
         page.wait_for_timeout(1200)
         diag["routeSnapshot"] = capture_route_snapshot(page, "detail.routeCandidate")
         diag["detailState"] = detail_state(page)
@@ -430,7 +429,7 @@ def open_detail_candidate(page, root_id: str, network: list[dict[str, Any]]) -> 
             marker: matching_requests(network, marker)[before_counts[marker]:]
             for marker in DETAIL_READ_MARKERS
         }
-        diag["ok"] = diag["detailState"].get("rootId") == root_id and diag["routeSnapshot"].get("currentRouteName") == ROUTE_DETAIL
+        diag["ok"] = diag["detailState"].get("dbKey") == db_key and diag["routeSnapshot"].get("currentRouteName") == ROUTE_DETAIL
         diag["classification"] = RESULT_PASS if diag["ok"] else classify_route_open_diagnostic(diag)
         return diag
     except Exception as exc:  # noqa: BLE001
@@ -475,10 +474,10 @@ def reset_to_search(page) -> None:
     wait_for_search_ready(page)
 
 
-def resolve_smoke_root(page, network: list[dict[str, Any]], preferred_root_id: str) -> dict[str, Any]:
+def resolve_smoke_root(page, network: list[dict[str, Any]], preferred_db_key: str) -> dict[str, Any]:
     diagnostics: list[dict[str, Any]] = []
     candidates: list[str] = []
-    preferred = str(preferred_root_id or "").strip()
+    preferred = str(preferred_db_key or "").strip()
     if preferred and preferred != "__CREATE":
         candidates.append(preferred)
     for candidate in fetch_seed_root_candidates(UI_URL):
@@ -489,12 +488,12 @@ def resolve_smoke_root(page, network: list[dict[str, Any]], preferred_root_id: s
             candidates.append(candidate)
     for candidate in candidates:
         route_diag = open_detail_candidate(page, candidate, network)
-        route_diag["candidateRootId"] = candidate
+        route_diag["candidateDbKey"] = candidate
         diagnostics.append(route_diag)
         if route_diag.get("ok"):
             return {
                 "ok": True,
-                "selectedRootId": candidate,
+                "selectedDbKey": candidate,
                 "routeOpenDiagnostics": route_diag,
                 "rootSelectionDiagnostics": diagnostics,
                 "candidateSequence": candidates,
@@ -502,7 +501,7 @@ def resolve_smoke_root(page, network: list[dict[str, Any]], preferred_root_id: s
         reset_to_search(page)
     return {
         "ok": False,
-        "selectedRootId": "",
+        "selectedDbKey": "",
         "routeOpenDiagnostics": diagnostics[-1] if diagnostics else {},
         "rootSelectionDiagnostics": diagnostics,
         "candidateSequence": candidates,
@@ -541,7 +540,7 @@ def build_report(
     report = {
         "generatedAt": int(time.time()),
         "uiUrl": UI_URL,
-        "rootId": ROOT_ID,
+        "dbKey": DB_KEY,
         "ok": not failures,
         "checks": checks,
         "failures": failures,
@@ -572,7 +571,7 @@ def capture_route_snapshot(page, label: str) -> dict[str, Any]:
             layout: appState && appState.getProperty ? String(appState.getProperty('/layout') || '') : '',
             selectedId: appState && appState.getProperty ? String(appState.getProperty('/selectedId') || '') : '',
             activeObjectId: appState && appState.getProperty ? String(appState.getProperty('/activeObjectId') || '') : '',
-            detailRootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
+            detailDbKey: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
             detailMode: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/editMode') || '') : '',
             detailLockState: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/lock/state') || '') : '',
             detailAutosaveState: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/autosave/state') || detailState.getProperty('/autosaveState') || '') : '',
@@ -685,7 +684,7 @@ def detail_state(page) -> dict[str, Any]:
           const autosave = window.__gatewaySmokeAutosave || {};
           return {
             currentRouteName: appState && appState.getProperty ? String(appState.getProperty('/currentRouteName') || '') : '',
-            rootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
+            dbKey: selected && selected.getProperty ? String(selected.getProperty('/root/DB_KEY') || selected.getProperty('/root/id') || '') : '',
             version: selected && selected.getProperty ? Number(selected.getProperty('/root/version_number') || selected.getProperty('/root/VersionNumber') || 0) : 0,
             equipment: selected && selected.getProperty ? String(selected.getProperty('/basic/equipment') || '') : '',
             mode: state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '',
@@ -701,19 +700,19 @@ def detail_state(page) -> dict[str, Any]:
     )
 
 
-def wait_for_detail_mutation_ready(page, root_id: str, timeout: int = 45000) -> dict[str, Any]:
+def wait_for_detail_mutation_ready(page, db_key: str, timeout: int = 45000) -> dict[str, Any]:
     wait_error = ""
     try:
         page.wait_for_function(
             """
-            ({ expectedRootId, autosaveSaving }) => {
+            ({ expectedDbKey, autosaveSaving }) => {
               const core = sap.ui.getCore();
               const app = core.byId('checklist_app_comp---app');
               const view = core.byId('checklist_app_comp---detailTargetPage');
               const appState = app && app.getModel && app.getModel('state');
               const selected = view && view.getModel && view.getModel('selected');
               const state = view && view.getModel && view.getModel('state');
-              const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+              const selectedDbKey = selected && selected.getProperty ? String(selected.getProperty('/root/DB_KEY') || selected.getProperty('/root/id') || '') : '';
               const routeName = appState && appState.getProperty ? String(appState.getProperty('/currentRouteName') || '') : '';
               const mode = state && state.getProperty ? String(state.getProperty('/workflow/detail/editMode') || '') : '';
               const lockState = state && state.getProperty ? String(state.getProperty('/workflow/detail/lock/state') || '') : '';
@@ -721,7 +720,7 @@ def wait_for_detail_mutation_ready(page, root_id: str, timeout: int = 45000) -> 
               const busyDetail = !!(state && state.getProperty && state.getProperty('/ui/busy/detail'));
               const saveInFlight = !!(state && state.getProperty && state.getProperty('/saveInFlight'));
               return routeName === 'detail'
-                && rootId === String(expectedRootId || '')
+                && selectedDbKey === String(expectedDbKey || '')
                 && mode === 'EDIT'
                 && lockState === 'EDIT_LOCKED'
                 && !!(view && view.getDomRef && view.getDomRef())
@@ -730,7 +729,7 @@ def wait_for_detail_mutation_ready(page, root_id: str, timeout: int = 45000) -> 
                 && autosaveState !== String(autosaveSaving || '');
             }
             """,
-            arg={"expectedRootId": root_id, "autosaveSaving": AUTOSAVE_STATE_SAVING},
+            arg={"expectedDbKey": db_key, "autosaveSaving": AUTOSAVE_STATE_SAVING},
             timeout=timeout,
         )
     except Exception as exc:  # noqa: BLE001
@@ -739,7 +738,7 @@ def wait_for_detail_mutation_ready(page, root_id: str, timeout: int = 45000) -> 
     route_snapshot = capture_route_snapshot(page, "detail.mutationReady")
     ok = (
         state.get("currentRouteName") == ROUTE_DETAIL
-        and state.get("rootId") == root_id
+        and state.get("dbKey") == db_key
         and state.get("mode") == MODE_EDIT
         and state.get("lockState") == LOCK_EDIT_LOCKED
         and not state.get("busyDetail")
@@ -756,38 +755,38 @@ def wait_for_detail_mutation_ready(page, root_id: str, timeout: int = 45000) -> 
     }
 
 
-def wait_for_analytics_close_ready(page, root_id: str, network: list[dict[str, Any]], timeout: int = 45000) -> dict[str, Any]:
+def wait_for_analytics_close_ready(page, db_key: str, network: list[dict[str, Any]], timeout: int = 45000) -> dict[str, Any]:
     wait_error = ""
     try:
-        wait_for_detail_ready(page, root_id)
+        wait_for_detail_ready(page, db_key)
         page.wait_for_function(
             """
-            (expectedRootId) => {
+            (expectedDbKey) => {
               const core = sap.ui.getCore();
               const app = core.byId('checklist_app_comp---app');
               const detail = core.byId('checklist_app_comp---detailTargetPage');
               const appState = app && app.getModel && app.getModel('state');
               const selected = detail && detail.getModel && detail.getModel('selected');
-              const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+              const selectedDbKey = selected && selected.getProperty ? String(selected.getProperty('/root/DB_KEY') || selected.getProperty('/root/id') || '') : '';
               const routeName = appState && appState.getProperty ? String(appState.getProperty('/currentRouteName') || '') : '';
               return routeName === 'detail'
-                && rootId === String(expectedRootId || '')
+                && selectedDbKey === String(expectedDbKey || '')
                 && !!(detail && detail.getDomRef && detail.getDomRef());
             }
             """,
-            arg=root_id,
+            arg=db_key,
             timeout=timeout,
         )
     except Exception as exc:  # noqa: BLE001
         wait_error = str(exc)
-    mutation_ready = wait_for_detail_mutation_ready(page, root_id, timeout=timeout)
+    mutation_ready = wait_for_detail_mutation_ready(page, db_key, timeout=timeout)
     route_snapshot = capture_route_snapshot(page, "detail.afterAnalyticsClose")
     state = detail_state(page)
     transport = recent_network_by_markers(network, [MARKER_SAVE, MARKER_AUTOSAVE, MARKER_LOCK_HEARTBEAT], limit=6)
     route_ok = (
         route_snapshot.get("currentRouteName") == ROUTE_DETAIL
-        and route_snapshot.get("detailRootId") == root_id
-        and state.get("rootId") == root_id
+        and route_snapshot.get("detailDbKey") == db_key
+        and state.get("dbKey") == db_key
     )
     ok = route_ok and mutation_ready.get("ok")
     classification = RESULT_PASS if ok else RESULT_FAIL
@@ -949,7 +948,7 @@ def main() -> int:
     analytics_close_diagnostics: dict[str, Any] = {}
     attachment_readiness_diagnostics: dict[str, Any] = {}
     current_step = "startup"
-    selected_root_id = ""
+    selected_db_key = ""
     attachment_file = Path("docs/runtime/gateway-smoke-attachment.txt")
     attachment_file.parent.mkdir(parents=True, exist_ok=True)
     attachment_file.write_text("gateway browser smoke attachment payload", encoding="utf-8")
@@ -1011,13 +1010,13 @@ def main() -> int:
             current_step = "root.selection"
             if not fetch_seed_root_candidates(UI_URL, limit=1):
                 ensure_search_results_loaded(page)
-            root_resolution = resolve_smoke_root(page, network, ROOT_ID)
+            root_resolution = resolve_smoke_root(page, network, DB_KEY)
             root_selection_diagnostics = root_resolution.get("rootSelectionDiagnostics") or []
             route_open_diagnostics = root_resolution.get("routeOpenDiagnostics") or {}
-            selected_root_id = str(root_resolution.get("selectedRootId") or "").strip()
+            selected_db_key = str(root_resolution.get("selectedDbKey") or "").strip()
             ensure(checks, "detail.root.selection", bool(root_resolution.get("ok")), {
-                "preferredRootId": ROOT_ID,
-                "selectedRootId": selected_root_id,
+                "preferredDbKey": DB_KEY,
+                "selectedDbKey": selected_db_key,
                 "candidateSequence": root_resolution.get("candidateSequence") or [],
                 "rootSelectionDiagnostics": root_selection_diagnostics,
             })
@@ -1028,14 +1027,14 @@ def main() -> int:
                     "lastState": last_state,
                     "rootSelectionDiagnostics": root_selection_diagnostics,
                     "routeOpenDiagnostics": route_open_diagnostics,
-                    "selectedRootId": selected_root_id,
+                    "selectedDbKey": selected_db_key,
                 }))
 
             route_snapshots.append(capture_route_snapshot(page, "detail.initial"))
 
             opened = detail_state(page)
             last_state = opened
-            ok_open = opened.get("rootId") == selected_root_id
+            ok_open = opened.get("dbKey") == selected_db_key
             ensure(checks, "detail.route.opened", ok_open, {
                 "stateEvidence": opened,
                 "routeOpenDiagnostics": route_open_diagnostics,
@@ -1073,7 +1072,7 @@ def main() -> int:
                     "rootSelectionDiagnostics": root_selection_diagnostics,
                     "routeOpenDiagnostics": route_open_diagnostics,
                     "lockAcquireDiagnostics": lock_acquire_diagnostics,
-                    "selectedRootId": selected_root_id,
+                    "selectedDbKey": selected_db_key,
                 }))
 
             current_step = "detail.save"
@@ -1272,13 +1271,13 @@ def main() -> int:
                 failures.append("analytics.screen.gateway")
             current_step = "analytics.close"
             invoke_view_controller_method(page, "checklist_app_comp---analyticsTargetPage", "onCloseAnalytics")
-            analytics_close_diagnostics = wait_for_analytics_close_ready(page, selected_root_id, network)
+            analytics_close_diagnostics = wait_for_analytics_close_ready(page, selected_db_key, network)
             analytics_return_state = analytics_close_diagnostics.get("stateEvidence") or detail_route_state(page)
             route_snapshots.append(analytics_close_diagnostics.get("routeSnapshot") or capture_route_snapshot(page, "detail.afterAnalyticsClose"))
             ok_analytics_return = (
                 analytics_close_diagnostics.get("ok") is True
                 and analytics_return_state.get("currentRouteName") == ROUTE_DETAIL
-                and analytics_return_state.get("rootId") == selected_root_id
+                and analytics_return_state.get("dbKey") == selected_db_key
                 and analytics_return_state.get("mode") == MODE_EDIT
                 and analytics_return_state.get("lockState") == LOCK_EDIT_LOCKED
             )
@@ -1287,7 +1286,7 @@ def main() -> int:
                 failures.append("analytics.close.gateway")
 
             current_step = "attachments.expand"
-            attachment_readiness_diagnostics = wait_for_detail_mutation_ready(page, selected_root_id)
+            attachment_readiness_diagnostics = wait_for_detail_mutation_ready(page, selected_db_key)
             ensure(checks, "detail.attachment.ready", bool(attachment_readiness_diagnostics.get("ok")), attachment_readiness_diagnostics)
             if not attachment_readiness_diagnostics.get("ok"):
                 failures.append("detail.attachment.ready")
@@ -1466,7 +1465,7 @@ def main() -> int:
                   const smartTable = all.find((item) => item && item.getId && String(item.getId()).endsWith('searchSmartTable'));
                   const text = document.body && document.body.innerText ? String(document.body.innerText) : '';
                   return {
-                    hasCreateButton: text.indexOf('Create') >= 0 || text.indexOf('Создать') >= 0 || text.indexOf('Ð¡Ð¾Ð·Ð´Ð°Ñ‚ÑŒ') >= 0,
+                    hasCreateButton: text.indexOf('Create') >= 0 || text.indexOf('\u0421\u043e\u0437\u0434\u0430\u0442\u044c') >= 0,
                     smartTable: !!smartTable
                   };
                 }
@@ -1479,13 +1478,13 @@ def main() -> int:
 
             current_step = "route.repeat.detail"
             repeat_detail_before = len(matching_requests(network, MARKER_LOCK_ACQUIRE))
-            navigate_to_detail(page, selected_root_id)
-            wait_for_detail_ready(page, selected_root_id)
+            navigate_to_detail(page, selected_db_key)
+            wait_for_detail_ready(page, selected_db_key)
             route_snapshots.append(capture_route_snapshot(page, "detail.repeatOpen"))
             repeat_open_state = detail_route_state(page)
             ok_repeat_open = (
                 repeat_open_state.get("currentRouteName") == "detail"
-                and repeat_open_state.get("rootId") == selected_root_id
+                and repeat_open_state.get("dbKey") == selected_db_key
                 and repeat_open_state.get("mode") in ("READ", "EDIT")
             )
             ensure(checks, "detail.route.repeat_open", ok_repeat_open, repeat_open_state)
@@ -1561,7 +1560,7 @@ def main() -> int:
         "lockAcquireDiagnostics": lock_acquire_diagnostics,
         "analyticsCloseDiagnostics": analytics_close_diagnostics,
         "attachmentReadinessDiagnostics": attachment_readiness_diagnostics,
-        "selectedRootId": selected_root_id,
+        "selectedDbKey": selected_db_key,
         "failureContext": {
             "step": current_step,
             "classification": classify_failure(current_step, failures[-1] if failures else "")
@@ -1571,3 +1570,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

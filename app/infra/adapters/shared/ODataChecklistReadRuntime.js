@@ -1,4 +1,4 @@
-sap.ui.define([
+﻿sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistSnapshotRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
@@ -9,38 +9,32 @@ sap.ui.define([
 ], function (GatewayClient, ODataChecklistSnapshotRuntime, ODataAdapterUtils, ODataEntityContracts, ChecklistSnapshotMapper, GatewayContractConstants, ODataKeyNormalizer) {
     "use strict";
 
-    /* Этот блок задает размер чанка для догрузки строк detail-разделов.
-     * Результат: проверки и барьеры приходят порциями, а initial open остается легким. */
+    /* Chunked detail loading keeps initial open light while checks and barriers load in bounded pages. */
     var DETAIL_ROW_CHUNK_SIZE = 20;
 
-    /*
-     * AB-01 FIX: Standardized filter helpers.
-     *
-     * buildStringEqFilter  → Edm.String  (for text fields: Id, RootId lookup by human key)
-     * buildBinaryEqFilter  → Edm.Binary  (for binary UUID fields: RootKey)
-     *
-     * Both delegate to ODataAdapterUtils.buildEqFilter which calls
-     * sap.ui.model.odata.ODataUtils.formatValue internally.
-     * Verify accepted format via st05 trace on target BASIS before changing type.
-     */
-    /* Этот блок собирает строковый eq-filter для lookup по человекочитаемому идентификатору.
-     * Результат: запрос к search/read-модели формируется в одном стандартизованном виде. */
+    /* Filter helpers stay centralized on ODataAdapterUtils so string and binary predicates use one typed formatting seam. */
+    /* String lookup is limited to human-readable checklist identifiers before canonical DB_KEY resolution. */
     function buildStringEqFilter(sProperty, sValue) {
         return ODataAdapterUtils.buildEqFilter(sProperty, sValue);
     }
 
-    /* Этот блок собирает канонический фильтр для detail entity set.
-     * Результат: все children/read запросы используют один и тот же boundary-контракт. */
+    /* Canonical detail reads always filter by typed DB_KEY/PARENT_KEY boundary fields. */
     function buildDetailFilter(oFilterContract, sDbKey) {
         return ODataAdapterUtils.buildEqFilter(oFilterContract.property, ODataKeyNormalizer.normalizeBinaryKey(sDbKey), oFilterContract.type);
     }
 
-    /* Этот блок разрешает входной route/id в реальный backend root key.
-     * Результат: downstream detail flow работает с техническим ключом, а не с display-id. */
-    function resolveDbKey(mArgs, mDeps) {
-        var sRequestedDbKey = String(mDeps.rootId(mArgs) || "").trim();
+    function isCanonicalBinaryKey(sValue) {
+        return /^[A-F0-9]{32}$/.test(String(sValue || "").trim().toUpperCase());
+    }
+
+    /* Route input is normalized once into the canonical backend DB_KEY before any detail read happens. */
+    function resolveChecklistDbKey(mArgs, mDeps) {
+        var sRequestedDbKey = String(mDeps.dbKey(mArgs) || "").trim();
         if (!sRequestedDbKey) {
             return Promise.resolve("");
+        }
+        if (isCanonicalBinaryKey(sRequestedDbKey)) {
+            return Promise.resolve(ODataKeyNormalizer.normalizeBinaryKey(sRequestedDbKey));
         }
         return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.CHECKLIST_SEARCH, {
             "$filter": buildStringEqFilter("Id", sRequestedDbKey),
@@ -54,10 +48,9 @@ sap.ui.define([
         });
     }
 
-    /* Этот блок загружает phase-1 snapshot карточки.
-     * Результат: на initial open приходят root + basic, а heavy rows остаются отложенными. */
+    /* Phase-one snapshot keeps the open path focused on checklist header/basic data and defers heavy child collections. */
     function fetchDetailSnapshot(mArgs, mDeps) {
-        var sDbKey = ODataKeyNormalizer.normalizeBinaryKey(mDeps.rootId(mArgs));
+        var sDbKey = ODataKeyNormalizer.normalizeBinaryKey(mDeps.dbKey(mArgs));
         var bIncludeChildren = !mArgs || mArgs.includeChildren !== false;
         var oBasicFilter = ODataEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BASIC_INFO;
         var pRoot = GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.CHECKLIST_ROOT, sDbKey, {
@@ -73,7 +66,7 @@ sap.ui.define([
             "$select": ODataEntityContracts.SELECTS.CHECKLIST_BASIC_INFO
         });
         var pRows = bIncludeChildren ? loadDetailRows({
-            rootId: sDbKey,
+            dbKey: sDbKey,
             includeChecks: true,
             includeBarriers: true
         }, mDeps) : Promise.resolve({ checks: [], barriers: [] });
@@ -85,8 +78,7 @@ sap.ui.define([
         });
     }
 
-    /* Этот блок постранично читает коллекцию дочерних строк из OData.
-     * Результат: большие наборы данных не грузятся одним тяжелым запросом. */
+    /* Child collections are paged to avoid single heavy reads on large checklists. */
     function loadChunkedCollection(oFilterContract, sDbKey, sSelect, fnMapRow) {
         var aRows = [];
 
@@ -109,10 +101,9 @@ sap.ui.define([
         return loadPage(0);
     }
 
-    /* Этот блок объединяет чтение checks и barriers в один отложенный owner.
-     * Результат: контроллер и use case получают уже нормализованный набор строк. */
+    /* Checks and barriers stay behind one normalized deferred-read owner. */
     function loadDetailRows(mArgs, mDeps) {
-        var sDbKey = ODataKeyNormalizer.normalizeBinaryKey(mDeps.rootId(mArgs));
+        var sDbKey = ODataKeyNormalizer.normalizeBinaryKey(mDeps.dbKey(mArgs));
         var bChecks = !mArgs || mArgs.includeChecks !== false;
         var bBarriers = !mArgs || mArgs.includeBarriers !== false;
         var pChecks = bChecks
@@ -140,14 +131,12 @@ sap.ui.define([
         });
     }
 
-    /* Этот блок после save/read достраивает полный snapshot из backend-ответа.
-     * Результат: UI получает согласованный root/meta state даже после переходных payload-ов. */
-    function enrichServerSnapshot(oServerPayload, sFallbackRootId, mDeps) {
-        var sResolvedRootId = mDeps.resolveServerRootId(oServerPayload, sFallbackRootId);
-        if (!sResolvedRootId || mDeps.isCreateId(sResolvedRootId)) {
+    function enrichServerSnapshot(oServerPayload, sFallbackDbKey, mDeps) {
+        var sResolvedDbKey = mDeps.resolveServerDbKey(oServerPayload, sFallbackDbKey);
+        if (!sResolvedDbKey || mDeps.isCreateId(sResolvedDbKey)) {
             return Promise.resolve(oServerPayload || {});
         }
-        return fetchDetailSnapshot({ rootId: sResolvedRootId, includeChildren: true }, mDeps).then(function (oSnapshot) {
+        return fetchDetailSnapshot({ dbKey: sResolvedDbKey, includeChildren: true }, mDeps).then(function (oSnapshot) {
             var oResolvedSnapshot = oSnapshot || {};
             var oMeta = Object.assign({}, oResolvedSnapshot.meta || {});
             var oRoot = Object.assign({}, oResolvedSnapshot.root || {});
@@ -164,7 +153,7 @@ sap.ui.define([
             }
             return Object.assign({}, oResolvedSnapshot, {
                 root: Object.assign({}, oRoot, {
-                    id: String(oRoot.id || sResolvedRootId).trim()
+                    id: String(oRoot.id || sResolvedDbKey).trim()
                 }),
                 meta: oMeta
             });
@@ -178,7 +167,6 @@ sap.ui.define([
         buildDetailFilter: buildDetailFilter,
         loadDetailRows: loadDetailRows,
         loadDetailSnapshot: fetchDetailSnapshot,
-        resolveDbKey: resolveDbKey,
-        resolveRootId: resolveDbKey
+        resolveDbKey: resolveChecklistDbKey
     };
 });

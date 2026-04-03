@@ -6,14 +6,14 @@ sap.ui.define([
 ], function (DetailAuthorizationRuntime, UseCaseValue, CreateSentinel, NavigationContracts) {
     "use strict";
 
-    function resolveCanonicalRootId(oRepo, sRootId) {
-        if (!oRepo || typeof oRepo.resolveRootId !== "function" || !sRootId || CreateSentinel.isCreateId(sRootId)) {
-            return Promise.resolve(sRootId);
+    function resolveCanonicalDbKey(oRepo, sDbKey) {
+        if (!oRepo || typeof oRepo.resolveDbKey !== "function" || !sDbKey || CreateSentinel.isCreateId(sDbKey)) {
+            return Promise.resolve(sDbKey);
         }
-        return Promise.resolve(oRepo.resolveRootId({ rootId: sRootId })).then(function (sResolvedRootId) {
-            return String(sResolvedRootId || sRootId).trim() || sRootId;
+        return Promise.resolve(oRepo.resolveDbKey({ dbKey: sDbKey })).then(function (sResolvedDbKey) {
+            return String(sResolvedDbKey || sDbKey).trim() || sDbKey;
         }).catch(function () {
-            return sRootId;
+            return sDbKey;
         });
     }
 
@@ -24,12 +24,12 @@ sap.ui.define([
     }
 
 function execute(mInput, mCtx) {
-        var sRootId = UseCaseValue.rootId(mInput);
+        var sDbKey = UseCaseValue.dbKey(mInput);
         var sRouteName = String((mInput && mInput.routeName) || NavigationContracts.ROUTES.DETAIL).trim() || NavigationContracts.ROUTES.DETAIL;
         var mRouteArgs = (mInput && mInput.routeArgs) || {};
         var oRepo = mCtx && mCtx.repo;
 
-        if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
+        if (!sDbKey || CreateSentinel.isCreateId(sDbKey)) {
             return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, "", {
                 activity: DetailAuthorizationRuntime.OPERATIONS.CREATE
             }).then(function (oPermission) {
@@ -42,8 +42,8 @@ function execute(mInput, mCtx) {
             });
         }
 
-        return resolveCanonicalRootId(oRepo, sRootId).then(function (sCanonicalRootId) {
-            return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sCanonicalRootId, {
+        return resolveCanonicalDbKey(oRepo, sDbKey).then(function (sCanonicalDbKey) {
+            return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sCanonicalDbKey, {
                 activity: DetailAuthorizationRuntime.OPERATIONS.DISPLAY
             }).then(function (oPermission) {
             var bAllowed = !!(oPermission && oPermission.allowed);
@@ -51,7 +51,7 @@ function execute(mInput, mCtx) {
             return {
                 allowed: bAllowed,
                 routeName: bAllowed ? sRouteName : NavigationContracts.ROUTES.DETAIL,
-                routeArgs: bAllowed ? Object.assign({}, mRouteArgs, { id: sCanonicalRootId }) : { id: sCanonicalRootId },
+                routeArgs: bAllowed ? Object.assign({}, mRouteArgs, { id: sCanonicalDbKey }) : { id: sCanonicalDbKey },
                 permission: oPermission || {}
             };
         });

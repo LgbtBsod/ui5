@@ -13,6 +13,7 @@ const ALLOWLIST = new Set([]);
 const PATTERNS = [
   { regex: /message\s*:\s*"[^"]*[A-Za-z][^"]*\s+[A-Za-z][^"]*"/, label: "raw message text" },
   { regex: /fallback\s*:\s*"[^"]*[A-Za-z][^"]*\s+[A-Za-z][^"]*"/, label: "raw fallback text" },
+  { regex: /new Error\(\s*"[^"]*[A-Za-z][^"]*"\s*\)/, label: "raw error text" },
   { regex: /\b(?:ControllerTextRuntime\.)?getText\s*\([^)]*,\s*"[^"]+"\s*,\s*[^,)]*(?:,\s*"[^"]*[A-Za-z][^"]*")\s*\)/, label: "raw i18n fallback text" },
   { regex: /\bfnGetText\s*\(\s*"[^"]+"\s*,\s*[^,)]*(?:,\s*"[^"]*[A-Za-z][^"]*")\s*\)/, label: "raw i18n fallback text" }
 ];

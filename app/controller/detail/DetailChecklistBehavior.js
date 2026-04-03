@@ -101,13 +101,10 @@ sap.ui.define([
                 || "";
         },
 
-        _currentRootId: function () {
-            return this._currentChecklistDbKey();
-        },
-
         _dispatchDetailCommand: function (sMethod, mInput) {
             var oDetailService = this._detailService;
             var oCtx = typeof this._ctx === "function" ? this._ctx() : {};
+            var fnApplyUseCaseEffects = this.applyUseCaseEffects;
 
             if (!oDetailService || typeof oDetailService[sMethod] !== "function") {
                 return Promise.resolve(false);
@@ -116,9 +113,14 @@ sap.ui.define([
                 oDetailService[sMethod].call(oDetailService, Object.assign({}, mInput || {}), Object.assign({}, oCtx, {
                     attachmentGateway: AttachmentGatewayRuntime.createGateway(this)
                 }))
-            ).then(function () {
-                return true;
-            });
+            ).then(function (oResult) {
+                if (typeof fnApplyUseCaseEffects === "function") {
+                    return Promise.resolve(fnApplyUseCaseEffects.call(this, oResult)).then(function () {
+                        return oResult;
+                    });
+                }
+                return oResult;
+            }.bind(this));
         },
 
         _attachmentGateway: function () {

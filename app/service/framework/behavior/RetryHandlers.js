@@ -1,12 +1,14 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/RuntimeInput",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry"
-], function (ActionContract, RuntimeInput, BehaviorRegistry) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
+], function (ActionContract, RuntimeInput, BehaviorRegistry, MessageCodeConstants) {
     "use strict";
 
     var RETRY_SCOPE = "retry";
     var bDefaultsRegistered = false;
+    var TECHNICAL_CODES = MessageCodeConstants.TECHNICAL;
 
     function dispatchByName(oOptions, sActionName, oPayload) {
         var oDispatcher = oOptions && oOptions.actionDispatcher;
@@ -37,7 +39,7 @@ sap.ui.define([
 
     function refreshSecurityToken(oModel) {
         if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
-            return Promise.reject(new Error("security_token_refresh_unavailable"));
+            return Promise.reject(new Error(TECHNICAL_CODES.SECURITY_TOKEN_REFRESH_UNAVAILABLE));
         }
         return new Promise(function (resolve, reject) {
             oModel.refreshSecurityToken(function () { resolve(true); }, reject, true);

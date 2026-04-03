@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentSaveGuardPolicy",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (ModelStateRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, ModelPathContracts, DetailPersistenceRuntime, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
+], function (ModelStateRuntime, TelemetryRuntime, SchedulingRuntime, ComponentSaveGuardContracts, ComponentSaveGuardPolicy, ModelPathContracts, DetailPersistenceRuntime, WorkflowContracts, MessageCodeConstants) {
     "use strict";
 
     var BANNER_DETAIL = ComponentSaveGuardContracts.BANNER_DETAIL;
@@ -15,10 +16,11 @@ sap.ui.define([
     var ERROR_MESSAGE = ComponentSaveGuardContracts.ERROR_MESSAGE;
     var PATHS = ComponentSaveGuardContracts.PATHS;
     var TELEMETRY_EVENT = ComponentSaveGuardContracts.TELEMETRY_EVENT;
+    var TECHNICAL_CODES = MessageCodeConstants.TECHNICAL;
 
     function refreshSecurityToken(oModel) {
         if (!oModel || typeof oModel.refreshSecurityToken !== "function") {
-            return Promise.reject(new Error("security_token_refresh_unavailable"));
+            return Promise.reject(new Error(TECHNICAL_CODES.SECURITY_TOKEN_REFRESH_UNAVAILABLE));
         }
         return new Promise(function (resolve, reject) {
             oModel.refreshSecurityToken(function () { resolve(true); }, reject, true);
@@ -57,12 +59,12 @@ sap.ui.define([
 
         return function (mRunOptions) {
             var bResumePendingNavigation = !!(mRunOptions && mRunOptions.resumePendingNavigation);
-            var sRootId;
+            var sDbKey;
             if (ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SAVE_IN_FLIGHT, false)) {
                 return oComponent._pGuardedSavePromise || Promise.resolve(false);
             }
-            sRootId = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
-            if (!sRootId) {
+            sDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+            if (!sDbKey) {
                 return Promise.resolve(false);
             }
             ModelStateRuntime.setManyOnModel(oStateModel, (function () {
@@ -86,7 +88,7 @@ sap.ui.define([
                     fnSetGlobalBanner(ComponentSaveGuardPolicy.buildWorkingBannerPayload());
                 }
             }, DELAY_MS.SAVE_WORKING_BANNER);
-            oComponent._pGuardedSavePromise = Promise.resolve(oDetailFacade.save({ rootId: sRootId }, fnBuildLatestCtx())).then(function (oResult) {
+            oComponent._pGuardedSavePromise = Promise.resolve(oDetailFacade.save({ dbKey: sDbKey }, fnBuildLatestCtx())).then(function (oResult) {
                 fnApplyFacadeResult(oResult);
                 if (!oResult || oResult.ok === false) {
                     return Promise.reject((oResult && oResult.error) || new Error(ERROR_MESSAGE.SAVE_FAILED));
@@ -96,7 +98,7 @@ sap.ui.define([
                     ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") === WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
                     rescheduleHeartbeat();
                 }
-                fnEmitTelemetry(TELEMETRY_EVENT.GUARDED_SUCCESS, { rootId: sRootId });
+                fnEmitTelemetry(TELEMETRY_EVENT.GUARDED_SUCCESS, { dbKey: sDbKey });
                 if (bResumePendingNavigation && ModelStateRuntime.readOnModel(oStateModel, oStatePaths.PENDING_NAVIGATION_INTENT, null)) {
                     fnResumePendingNavigationIntent();
                 }
@@ -133,7 +135,7 @@ sap.ui.define([
                     detail: sDetail,
                     correlationId: sCorrelationId
                 }));
-                fnEmitTelemetry(TELEMETRY_EVENT.GUARDED_FAILED, TelemetryRuntime.saveFailure(sRootId, oError, sCorrelationId));
+                fnEmitTelemetry(TELEMETRY_EVENT.GUARDED_FAILED, TelemetryRuntime.saveFailure(sDbKey, oError, sCorrelationId));
                 return false;
             }).finally(function () {
                 oComponent._iSaveWorkingTimer = SchedulingRuntime.clearTimer(oComponent._iSaveWorkingTimer);

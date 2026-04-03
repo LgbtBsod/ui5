@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""SAP Gateway-only smoke pack: API + browser flow over mock Gateway."""
+"""SAP Gateway-only smoke pack: DB_KEY/PARENT_KEY API with media-first attachments over Gateway."""
 
 from __future__ import annotations
 
@@ -8,6 +8,7 @@ import subprocess
 import sys
 import urllib.parse
 import urllib.request
+import urllib.error
 import uuid
 from http.cookiejar import CookieJar
 from pathlib import Path
@@ -17,11 +18,34 @@ from typing import Any
 UI_URL = sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8080/index.html"
 SERVICE_ROOT = (sys.argv[2] if len(sys.argv) > 2 else "http://127.0.0.1:8000/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV").rstrip("/")
 REPORT_PATH = Path("docs/artifacts/gateway-only-smoke-report.json")
-ROOT_DELETE_WARNING = "cleanup.delete.failed"
+DB_KEY_DELETE_WARNING = "cleanup.delete.failed"
+ATTACHMENT_ARCHITECTURE_CODE = "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN"
 
 
 def ensure(checks: list[dict[str, Any]], name: str, ok: bool, detail: Any) -> None:
     checks.append({"name": name, "ok": bool(ok), "detail": detail})
+
+
+def assert_attachment_base64_path_forbidden(opener, token: str, db_key: str) -> tuple[bool, dict[str, Any]]:
+    payload = {
+        "root": {"db_key": db_key},
+        "attachments": [{
+            "edit_mode": "C",
+            "parent_key": db_key,
+            "file_name": "forbidden.txt",
+            "mime_type": "text/plain",
+            "Value": "Zm9yYmlkZGVu"
+        }],
+        "client_version": 3
+    }
+    status, body, _headers = request(opener, "POST", f"{SERVICE_ROOT}/SaveChanges", headers={"X-CSRF-Token": token}, payload=payload)
+    data = (body or {}).get("d") or {}
+    reason_code = str(data.get("reason_code") or data.get("ReasonCode") or "").strip()
+    return reason_code == ATTACHMENT_ARCHITECTURE_CODE, {"status": status, "reasonCode": reason_code, "dbKey": db_key}
+
+
+def db_key_from_payload(payload: dict[str, Any]) -> str:
+    return str(payload.get("DB_KEY") or payload.get("Key") or "").strip().upper()
 
 
 def build_opener() -> tuple[urllib.request.OpenerDirector, CookieJar]:
@@ -48,14 +72,23 @@ def request(
             data = json.dumps(payload).encode("utf-8")
             req_headers.setdefault("Content-Type", "application/json")
     req = urllib.request.Request(url, data=data, method=method.upper(), headers=req_headers)
-    with opener.open(req, timeout=30) as resp:
-        body = resp.read()
-        resp_headers = {k: v for (k, v) in resp.headers.items()}
+    try:
+        with opener.open(req, timeout=30) as resp:
+            body = resp.read()
+            resp_headers = {k: v for (k, v) in resp.headers.items()}
+            if not expect_json:
+                return resp.status, body, resp_headers
+            if not body:
+                return resp.status, {}, resp_headers
+            return resp.status, json.loads(body.decode("utf-8")), resp_headers
+    except urllib.error.HTTPError as exc:
+        body = exc.read()
+        resp_headers = {k: v for (k, v) in exc.headers.items()}
         if not expect_json:
-            return resp.status, body, resp_headers
+            return exc.code, body, resp_headers
         if not body:
-            return resp.status, {}, resp_headers
-        return resp.status, json.loads(body.decode("utf-8")), resp_headers
+            return exc.code, {}, resp_headers
+        return exc.code, json.loads(body.decode("utf-8")), resp_headers
 
 
 def fetch_csrf(opener) -> str:
@@ -76,7 +109,7 @@ def existing_db_key(opener) -> str:
 def create_checklist(opener, token: str) -> dict[str, Any]:
     payload = {
         "FullPayload": {
-            "root": {"id": "__CREATE", "status": "DRAFT"},
+        "root": {"id": "__CREATE", "status": "DRAFT"},
             "basic": {
                 "date": "2026-03-04",
                 "equipment": "Gateway Smoke Pump",
@@ -100,11 +133,11 @@ def create_checklist(opener, token: str) -> dict[str, Any]:
     return (data or {}).get("d") or {}
 
 
-def delete_checklist(opener, token: str, root_id: str) -> bool:
+def delete_checklist(opener, token: str, db_key: str) -> bool:
     status, _body, _headers = request(
         opener,
         "DELETE",
-        f"{SERVICE_ROOT}/ChecklistRootSet('{root_id}')",
+        f"{SERVICE_ROOT}/ChecklistRootSet('{db_key}')",
         headers={"X-CSRF-Token": token},
         expect_json=False,
     )
@@ -167,10 +200,10 @@ def main() -> int:
     opener, _jar = build_opener()
     api_checks: list[dict[str, Any]] = []
     warnings: list[str] = []
-    created_root_id = ""
-    browser_root_id = ""
-    browser_attachment_root_id = ""
-    browser_flow_root_id = ""
+    created_db_key = ""
+    browser_db_key = ""
+    browser_attachment_db_key = ""
+    browser_flow_db_key = ""
     browser_report: dict[str, Any] = {}
     token = ""
     browser_failures: list[str] = []
@@ -179,19 +212,19 @@ def main() -> int:
         token = fetch_csrf(opener)
         ensure(api_checks, "csrf.fetch", bool(token), {"tokenPresent": bool(token)})
         existing = existing_db_key(opener)
-        ensure(api_checks, "search.root.available", bool(existing), {"dbKey": existing})
+        ensure(api_checks, "search.db_key.available", bool(existing), {"dbKey": existing})
 
         status, runtime_payload, _headers = request(opener, "GET", f"{SERVICE_ROOT}/RuntimeSettingsSet('GLOBAL')")
         runtime_data = (runtime_payload or {}).get("d") or {}
         ensure(api_checks, "runtime.settings.gateway", status == 200 and bool(runtime_data.get("Key")), {"status": status, "key": runtime_data.get("Key")})
 
         created = create_checklist(opener, token)
-        created_root_id = str(created.get("DB_KEY") or created.get("RootKey") or created.get("Key") or "").strip().upper()
+        created_db_key = db_key_from_payload(created)
         created_version = int(created.get("VersionNumber") or 1)
-        ensure(api_checks, "create.gateway", bool(created_root_id) and created_version == 1, {"rootId": created_root_id, "version": created_version})
+        ensure(api_checks, "create.gateway", bool(created_db_key) and created_version == 1, {"dbKey": created_db_key, "version": created_version})
 
         session_guid = f"GW-SMOKE-{uuid.uuid4().hex[:12].upper()}"
-        query = urllib.parse.urlencode({"DB_KEY": f"binary'{created_root_id}'", "SessionGuid": session_guid})
+        query = urllib.parse.urlencode({"DB_KEY": f"binary'{created_db_key}'", "SessionGuid": session_guid})
         acquire_status, acquire_payload, _headers = request(opener, "POST", f"{SERVICE_ROOT}/LockAcquire?{query}", headers={"X-CSRF-Token": token})
         heartbeat_status, heartbeat_payload, _headers = request(opener, "POST", f"{SERVICE_ROOT}/LockHeartbeat?{query}", headers={"X-CSRF-Token": token})
         ensure(
@@ -202,7 +235,7 @@ def main() -> int:
         )
 
         autosave_payload = {
-            "root": {"db_key": created_root_id},
+            "root": {"db_key": created_db_key},
             "checks": [{
                 "client_row_id": uuid.uuid4().hex.upper(),
                 "edit_mode": "C",
@@ -221,7 +254,7 @@ def main() -> int:
         ensure(api_checks, "autosave.gateway", autosave_status == 200 and autosave_version == 2, {"status": autosave_status, "version": autosave_version})
 
         save_payload = {
-            "root": {"db_key": created_root_id, "equipment": "Gateway Smoke Saved"},
+            "root": {"db_key": created_db_key, "equipment": "Gateway Smoke Saved"},
             "checks": [],
             "barriers": [],
             "client_version": autosave_version,
@@ -239,9 +272,9 @@ def main() -> int:
             f"{SERVICE_ROOT}/AttachmentSet",
             headers={
                 "X-CSRF-Token": token,
-                "X-DB-Key": created_root_id,
-                "X-Parent-Key": created_root_id,
-                "X-Folder-Key": created_root_id,
+                "X-DB-Key": created_db_key,
+                "X-Parent-Key": created_db_key,
+                "X-Folder-Key": created_db_key,
                 "X-Category-Key": "GEN",
                 "X-Description": "Gateway smoke attachment",
                 "X-File-Name": "gateway-smoke.txt",
@@ -255,7 +288,7 @@ def main() -> int:
         attachment_list_status, attachment_list_body, _headers = request(
             opener,
             "GET",
-            f"{SERVICE_ROOT}/AttachmentSet?$filter=PARENT_KEY%20eq%20binary'{created_root_id}'",
+            f"{SERVICE_ROOT}/AttachmentSet?$filter=PARENT_KEY%20eq%20binary'{created_db_key}'",
             headers={"X-CSRF-Token": token},
         )
         attachment_rows = (((attachment_list_body or {}).get("d") or {}).get("results")) or []
@@ -276,7 +309,7 @@ def main() -> int:
         )
         ensure(
             api_checks,
-            "attachment.gateway",
+            "attachment.media.gateway",
             attachment_save_status == 200
             and attachment_saved_body.get("DownloadUrl")
             and attachment_saved_body.get("DocumentHandle")
@@ -288,47 +321,50 @@ def main() -> int:
             {
                 "saveStatus": attachment_save_status,
                 "documentHandle": attachment_saved_body.get("DocumentHandle"),
+                "downloadUrl": attachment_saved_body.get("DownloadUrl"),
                 "listStatus": attachment_list_status,
                 "getStatus": attachment_get_status,
                 "deleteStatus": attachment_delete_status,
                 "attachmentCount": len(attachment_rows),
             },
         )
+        base64_forbidden_ok, base64_forbidden_detail = assert_attachment_base64_path_forbidden(opener, token, created_db_key)
+        ensure(api_checks, "attachment.base64.save.forbidden", base64_forbidden_ok, base64_forbidden_detail)
 
         release_status, release_payload, _headers = request(opener, "POST", f"{SERVICE_ROOT}/LockRelease?{query}", headers={"X-CSRF-Token": token})
         release_ok = release_status == 200 and bool(((release_payload or {}).get("d") or {}).get("Ok"))
         ensure(api_checks, "lock.release.gateway", release_ok, {"status": release_status})
 
         browser_created = create_checklist(opener, token)
-        browser_root_id = str(browser_created.get("DB_KEY") or browser_created.get("RootKey") or browser_created.get("Key") or "").strip().upper()
-        ensure(api_checks, "browser.root.created", bool(browser_root_id), {"rootId": browser_root_id})
+        browser_db_key = db_key_from_payload(browser_created)
+        ensure(api_checks, "browser.root.created", bool(browser_db_key), {"dbKey": browser_db_key})
 
         browser_attachment_created = create_checklist(opener, token)
-        browser_attachment_root_id = str(browser_attachment_created.get("DB_KEY") or browser_attachment_created.get("RootKey") or browser_attachment_created.get("Key") or "").strip().upper()
-        ensure(api_checks, "browser.attachment.root.created", bool(browser_attachment_root_id), {"rootId": browser_attachment_root_id})
+        browser_attachment_db_key = db_key_from_payload(browser_attachment_created)
+        ensure(api_checks, "browser.attachment.root.created", bool(browser_attachment_db_key), {"dbKey": browser_attachment_db_key})
 
         browser_flow_created = create_checklist(opener, token)
-        browser_flow_root_id = str(browser_flow_created.get("DB_KEY") or browser_flow_created.get("RootKey") or browser_flow_created.get("Key") or "").strip().upper()
-        ensure(api_checks, "browser.flow.root.created", bool(browser_flow_root_id), {"rootId": browser_flow_root_id})
+        browser_flow_db_key = db_key_from_payload(browser_flow_created)
+        ensure(api_checks, "browser.flow.root.created", bool(browser_flow_db_key), {"dbKey": browser_flow_db_key})
 
         browser_report = combine_browser_reports({
             "facadeContract": run_browser_smoke_script("browser-smoke-domain-facade-contract.py", UI_URL),
-            "attachmentDirtyInvariant": run_browser_smoke_script("browser-smoke-detail-attachment-dirty-invariant.py", UI_URL, browser_attachment_root_id),
-            "gatewayOnlyFlow": run_browser_smoke_script("browser-smoke-gateway-only-flow.py", UI_URL, browser_flow_root_id),
+            "attachmentDirtyInvariant": run_browser_smoke_script("browser-smoke-detail-attachment-dirty-invariant.py", UI_URL, browser_attachment_db_key),
+            "gatewayOnlyFlow": run_browser_smoke_script("browser-smoke-gateway-only-flow.py", UI_URL, browser_flow_db_key),
         })
         browser_failures = list(browser_report.get("failures") or [])
     except Exception as exc:  # noqa: BLE001
         ensure(api_checks, "gateway.pack.exception", False, {"error": str(exc)})
         browser_failures.append("pack.exception")
     finally:
-        for root_id in [created_root_id, browser_root_id, browser_attachment_root_id, browser_flow_root_id]:
-            if not root_id or not token:
+        for db_key in [created_db_key, browser_db_key, browser_attachment_db_key, browser_flow_db_key]:
+            if not db_key or not token:
                 continue
             try:
-                if not delete_checklist(opener, token, root_id):
-                    warnings.append(ROOT_DELETE_WARNING)
+                if not delete_checklist(opener, token, db_key):
+                    warnings.append(DB_KEY_DELETE_WARNING)
             except Exception:  # noqa: BLE001
-                warnings.append(ROOT_DELETE_WARNING)
+                warnings.append(DB_KEY_DELETE_WARNING)
 
     api_failures = [item["name"] for item in api_checks if not item["ok"]]
     ok = not api_failures and not browser_failures and bool(browser_report.get("ok", False))
@@ -337,8 +373,8 @@ def main() -> int:
         "uiUrl": UI_URL,
         "serviceRoot": SERVICE_ROOT,
         "status": "ok" if ok else "failed",
-        "createdRootId": created_root_id,
-        "browserRootId": browser_root_id,
+        "createdDbKey": created_db_key,
+        "browserDbKey": browser_db_key,
         "api": {
             "ok": not api_failures,
             "checks": api_checks,

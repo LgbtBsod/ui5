@@ -49,7 +49,37 @@ sap.ui.define([
     }
 
     function getBundleText(oController, sKey, aArgs, sFallback) {
-        return ControllerTextRuntime.getText(oController, sKey, aArgs || [], sFallback || "");
+        return ControllerTextRuntime.getText(oController, sKey, aArgs || [], sFallback);
+    }
+
+    function resolveAnalyticsMessage(oController, sMessageKey) {
+        var mTextKeyMap = AnalyticsContracts.TEXT_KEYS;
+        if (sMessageKey === AnalyticsContracts.MESSAGES.INVALID_YEAR) {
+            return getBundleText(oController, mTextKeyMap.COMPARE_YEAR_INVALID, [], "");
+        }
+        if (sMessageKey === AnalyticsContracts.MESSAGES.ANALYTICS_LOAD_FAILED) {
+            return getBundleText(oController, mTextKeyMap.LOAD_FAILED, [], "");
+        }
+        if (sMessageKey === AnalyticsContracts.MESSAGES.ANALYTICS_REFRESH_FAILED) {
+            return getBundleText(oController, mTextKeyMap.REFRESH_FAILED, [], "");
+        }
+        if (sMessageKey === AnalyticsContracts.MESSAGES.ANALYTICS_UNAVAILABLE) {
+            return getBundleText(oController, mTextKeyMap.UNAVAILABLE, [], "");
+        }
+        return "";
+    }
+
+    function resolveAnalyticsError(oController, oError, sFallbackMessageKey) {
+        var sErrorCode = String((oError && (oError.code || oError.message)) || "").trim();
+        if (!sErrorCode) {
+            return resolveAnalyticsMessage(oController, sFallbackMessageKey);
+        }
+        if (Object.keys(AnalyticsContracts.MESSAGES).some(function (sKey) {
+            return AnalyticsContracts.MESSAGES[sKey] === sErrorCode;
+        })) {
+            return resolveAnalyticsMessage(oController, sErrorCode);
+        }
+        return resolveAnalyticsMessage(oController, sFallbackMessageKey);
     }
 
     function extractYearValueFromEvent(oEvent) {
@@ -97,6 +127,51 @@ sap.ui.define([
 
     function queueAnalyticsDrilldown(oController, sFieldName, sFieldValue, mPayload) {
         return AnalyticsDrilldownRuntime.queueAnalyticsDrilldown(oController, sFieldName, sFieldValue, mPayload);
+    }
+
+    function localizeAnalyticsRows(aRows, fnLocalizeLabel) {
+        return (Array.isArray(aRows) ? aRows : []).map(function (oRow) {
+            var oNext = Object.assign({}, oRow);
+            if (Object.prototype.hasOwnProperty.call(oNext, "monthLabel")) {
+                oNext.monthLabel = fnLocalizeLabel(oNext.monthLabel);
+            }
+            if (Object.prototype.hasOwnProperty.call(oNext, "label")) {
+                oNext.label = fnLocalizeLabel(oNext.label);
+            }
+            if (Object.prototype.hasOwnProperty.call(oNext, "labelShort")) {
+                oNext.labelShort = fnLocalizeLabel(oNext.labelShort);
+            }
+            return oNext;
+        });
+    }
+
+    function localizeAnalyticsViewState(oController) {
+        var oViewModel = oController.getModel && oController.getModel(VIEW_MODEL);
+        var oAnalytics;
+        var fnLocalizeLabel;
+        var aChartKeys;
+
+        if (!oViewModel || !oViewModel.getProperty || !oViewModel.setProperty) {
+            return;
+        }
+        try {
+            oAnalytics = oViewModel.getProperty(PATHS.ANALYTICS);
+            if (!oAnalytics || typeof oAnalytics !== "object") {
+                return;
+            }
+            fnLocalizeLabel = function (sLabel) {
+                return AnalyticsFormatRuntime.localizeChartLabel(sLabel, getBundleText.bind(null, oController));
+            };
+            aChartKeys = Object.keys(oAnalytics.charts || {});
+
+            oViewModel.setProperty(PATHS.ANALYTICS + "/comparisonChartRows", localizeAnalyticsRows(oAnalytics.comparisonChartRows, fnLocalizeLabel));
+            oViewModel.setProperty(PATHS.ANALYTICS + "/monthlyComparison", localizeAnalyticsRows(oAnalytics.monthlyComparison, fnLocalizeLabel));
+            aChartKeys.forEach(function (sChartKey) {
+                oViewModel.setProperty(PATHS.ANALYTICS + "/charts/" + sChartKey, localizeAnalyticsRows(oAnalytics.charts[sChartKey], fnLocalizeLabel));
+            });
+            oViewModel.setProperty(PATHS.BUILDER_CHART_ROWS, localizeAnalyticsRows(oViewModel.getProperty(PATHS.BUILDER_CHART_ROWS), fnLocalizeLabel));
+        } catch (_localizeAnalyticsError) {
+        }
     }
 
     function onSelectAnalyticsMetric(oController, oEvent) {
@@ -202,7 +277,7 @@ sap.ui.define([
         }).then(function () {
             return oController._loadAnalytics("manualRefresh");
         }).catch(function (oError) {
-            ControllerViewStateRuntime.set(oController, PATHS.ERROR, String((oError && oError.message) || AnalyticsContracts.MESSAGES.ANALYTICS_REFRESH_FAILED));
+            ControllerViewStateRuntime.set(oController, PATHS.ERROR, resolveAnalyticsError(oController, oError, AnalyticsContracts.MESSAGES.ANALYTICS_REFRESH_FAILED));
             throw oError;
         }).finally(function () {
             ControllerViewStateRuntime.set(oController, PATHS.REFRESH_BUSY, false);
@@ -271,7 +346,16 @@ sap.ui.define([
             });
         },
         _loadAnalytics: function (sReason) {
-            return loadAnalyticsBehavior(this, sReason, buildCtx);
+            return loadAnalyticsBehavior(this, sReason, buildCtx).then(function (oResult) {
+                localizeAnalyticsViewState(this);
+                return oResult;
+            }.bind(this));
+        },
+        _resolveAnalyticsError: function (oError, sFallbackMessageKey) {
+            return resolveAnalyticsError(this, oError, sFallbackMessageKey);
+        },
+        _resolveAnalyticsMessage: function (sMessageKey) {
+            return resolveAnalyticsMessage(this, sMessageKey);
         },
         _pollRefreshStateUntilSettled: function (iAttemptsLeft) {
             return pollRefreshStateUntilSettledBehavior(this, iAttemptsLeft, buildCtx);
@@ -283,7 +367,7 @@ sap.ui.define([
                     return oController._loadAnalytics(sReason);
                 });
             }.bind(this)).catch(function (oError) {
-                ControllerViewStateRuntime.set(this, PATHS.ERROR, String((oError && oError.message) || AnalyticsContracts.MESSAGES.ANALYTICS_LOAD_FAILED));
+                ControllerViewStateRuntime.set(this, PATHS.ERROR, resolveAnalyticsError(this, oError, AnalyticsContracts.MESSAGES.ANALYTICS_LOAD_FAILED));
                 return null;
             }.bind(this));
         },
@@ -445,6 +529,9 @@ sap.ui.define([
         },
         formatAnalyticsSourceContext: function (sSelectedSource) {
             return AnalyticsFormatRuntime.formatSourceContext(sSelectedSource, getBundleText.bind(null, this));
+        },
+        formatAnalyticsSourceText: function (sSelectedSource) {
+            return AnalyticsFormatRuntime.formatSourceText(sSelectedSource, getBundleText.bind(null, this));
         },
         formatRefreshStatusState: function (oRefreshState) { return AnalyticsFormatRuntime.formatRefreshStatusState(oRefreshState); },
         formatRefreshStatusText: function (oRefreshState) { return AnalyticsFormatRuntime.formatRefreshStatusText(oRefreshState, getBundleText.bind(null, this)); },

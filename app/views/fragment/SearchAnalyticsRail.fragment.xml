@@ -13,7 +13,7 @@
                     <VBox class="appSkeleton appSkeletonLine appSkeletonLineMedium" renderType="Bare"/>
                 </VBox>
                 <Title text="{view>/analyticsRail/total}" level="H4" visible="{= !${view>/analyticsRailBusy} }" class="appSkeletonReveal kpiValue"/>
-                <Text text="{= ${i18n>analyticsSource} + ': ' + (${view>/analyticsRail/sourceText} || '-') }" class="searchAnalyticsMeta" visible="{= !${view>/analyticsRailBusy} }"/>
+                <Text text="{path:'view>/analyticsRail/sourceKey', formatter:'.formatAnalyticsSourceContext'}" class="searchAnalyticsMeta" visible="{= !${view>/analyticsRailBusy} }"/>
             </VBox>
             <VBox class="kpiCard searchAnalyticsCard">
                 <HBox class="kpiLabelRow" renderType="Bare" alignItems="Center">

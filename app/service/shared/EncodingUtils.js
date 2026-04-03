@@ -1,5 +1,9 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
+], function (MessageCodeConstants) {
     "use strict";
+
+    var TECHNICAL_CODES = MessageCodeConstants.TECHNICAL;
 
     function decodeBase64(sBase64) {
         if (typeof window !== "undefined" && typeof window.atob === "function") {
@@ -8,7 +12,7 @@ sap.ui.define([], function () {
         if (typeof atob === "function") {
             return atob(sBase64);
         }
-        throw new Error("base64_decode_unavailable");
+        throw new Error(TECHNICAL_CODES.BASE64_DECODE_UNAVAILABLE);
     }
 
     function base64ToHex(sBase64) {

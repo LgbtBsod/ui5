@@ -69,7 +69,7 @@ sap.ui.define([
         var bPreserveDirty = !!(mInput && mInput.preserveDirty) && !isLockLostReason(sReason);
         var oUiState = mCtx && mCtx.uiState;
         var oLockPort = mCtx && mCtx.lock;
-        var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
+        var sDbKey = DetailRuntimePayload.dbKey(mInput, mCtx);
         var sSessionGuid = DetailRuntimePayload.sessionGuid(mInput, mCtx, StatePaths);
         var sMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
@@ -81,9 +81,9 @@ sap.ui.define([
             : (isLockLostReason(sReason) ? WorkflowContracts.LOCK_STATES.LOCK_LOST : WorkflowContracts.LOCK_STATES.FORCED_READ_ONLY);
         var bRestoreSnapshotState = shouldRestoreSnapshotState(sReason, bPreserveDirty);
         var bShouldRelease = !!(
-            sRootId &&
+            sDbKey &&
             sSessionGuid &&
-            !CreateSentinel.isCreateId(sRootId) &&
+            !CreateSentinel.isCreateId(sDbKey) &&
             WorkflowContracts.isEditLocked(sMode, sLockState) &&
             oLockPort &&
             typeof oLockPort.release === "function"
@@ -93,7 +93,7 @@ sap.ui.define([
             ModelStateRuntime.writeOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, sTransitionState);
         }
         var pRelease = bShouldRelease
-            ? Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(mInput, mCtx, StatePaths))).catch(function () {
+            ? Promise.resolve(oLockPort.release(DetailRuntimePayload.lockRequest(Object.assign({}, mInput || {}, { dbKey: sDbKey }), mCtx, StatePaths))).catch(function () {
                 return { ok: false, released: false, messageKey: DETAIL_MESSAGE_KEYS.LOCK_RELEASE_FAILED };
             })
             : Promise.resolve(null);

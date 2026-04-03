@@ -33,7 +33,7 @@ sap.ui.define([
         var aChecks = Array.isArray(oSnap && oSnap.checks) ? oSnap.checks : [];
         var aBarriers = Array.isArray(oSnap && oSnap.barriers) ? oSnap.barriers : [];
         var oMeta = oSnap && oSnap.meta || {};
-        var bHasRootId = !!String(oRoot.id || oRoot.DB_KEY || "").trim();
+        var bHasDbKey = !!String(oRoot.id || oRoot.DB_KEY || "").trim();
         var bCreateDraft = CreateSentinel.isCreateId(oRoot.id);
         var bHasBasicPayload = Object.keys(oBasic).some(function (sKey) {
             return !!String(oBasic[sKey] || "").trim();
@@ -41,10 +41,10 @@ sap.ui.define([
         var bHasMetaStamp = !!String(oMeta.aggChangedOn || oSnap && oSnap._aggChangedOn || "").trim();
         var iExpectedRows = Number(oRoot.ChecksTotal || oRoot.checks_total || 0) + Number(oRoot.BarriersTotal || oRoot.barriers_total || 0);
 
-        if (bHasMetaStamp && !bHasRootId && !bHasBasicPayload && !aChecks.length && !aBarriers.length) {
+        if (bHasMetaStamp && !bHasDbKey && !bHasBasicPayload && !aChecks.length && !aBarriers.length) {
             return true;
         }
-        if (!bHasRootId) {
+        if (!bHasDbKey) {
             return false;
         }
         if (bCreateDraft) {
@@ -65,7 +65,7 @@ sap.ui.define([
         };
     }
 
-function emit(mCtx, oPayload) {
+    function emit(mCtx, oPayload) {
         WorkflowTelemetry.emit("cache.validation", {
             stateModel: mCtx && mCtx.stateModel,
             payload: oPayload || {}
@@ -73,20 +73,20 @@ function emit(mCtx, oPayload) {
     }
 
     function execute(mInput, mCtx) {
-        var sRootId = (mInput && mInput.rootId) || "";
+        var sRequestedDbKey = (mInput && (mInput.dbKey || mInput.rootId)) || "";
         var sEntityKind = (mInput && mInput.entityKind) || "detailSnapshot";
         var iTolerance = Number((mInput && mInput.toleranceMs) || 5500);
         var oCache = mCtx && mCtx.cache;
         var oLastChangeSet = mCtx && mCtx.lastChangeSet;
         var bCachePortLike = !!(oCache && typeof oCache.read === "function");
         var bLcsPortLike = !!(oLastChangeSet && typeof oLastChangeSet.readAggChangedOn === "function");
-        if (!sRootId || !oCache || !oLastChangeSet || !bCachePortLike || !bLcsPortLike) {
-            emit(mCtx, { rootId: sRootId, valid: false, reason: "cache_ports_missing" });
+        if (!sRequestedDbKey || !oCache || !oLastChangeSet || !bCachePortLike || !bLcsPortLike) {
+            emit(mCtx, { dbKey: sRequestedDbKey, valid: false, reason: "cache_ports_missing" });
             return Promise.resolve(Result.ok({ valid: false, reason: "cache_ports_missing" }));
         }
         return Promise.all([
-            Promise.resolve(oCache.read(sRootId, sEntityKind)),
-            Promise.resolve(oLastChangeSet.readAggChangedOn(sRootId))
+            Promise.resolve(oCache.read(sRequestedDbKey, sEntityKind)),
+            Promise.resolve(oLastChangeSet.readAggChangedOn(sRequestedDbKey))
         ]).then(function (a) {
             var oEntry = a[0] || null;
             var oSnap = oEntry && oEntry.payload || null;
@@ -98,27 +98,27 @@ function emit(mCtx, oPayload) {
             var bValid = bHydratedSnapshot && iStampDeltaMs <= iTolerance;
             var bInvalidate = bHasSnapshot && !bValid;
             var pInvalidate = (bInvalidate && typeof oCache.clear === "function")
-                ? Promise.resolve(oCache.clear(sRootId, sEntityKind)).catch(function () { return null; })
+                ? Promise.resolve(oCache.clear(sRequestedDbKey, sEntityKind)).catch(function () { return null; })
                 : Promise.resolve(null);
             return pInvalidate.then(function () {
                 if (!bHasSnapshot) {
                     WorkflowTelemetry.emit("cache.miss", {
                         stateModel: mCtx && mCtx.stateModel,
-                        payload: { rootId: sRootId, entityKind: sEntityKind }
+                        payload: { dbKey: sRequestedDbKey, entityKind: sEntityKind }
                     });
                 } else if (bValid) {
                     WorkflowTelemetry.emit("cache.hit", {
                         stateModel: mCtx && mCtx.stateModel,
-                        payload: { rootId: sRootId, entityKind: sEntityKind }
+                        payload: { dbKey: sRequestedDbKey, entityKind: sEntityKind }
                     });
                 } else if (bInvalidate) {
                     WorkflowTelemetry.emit("cache.invalidated", {
                         stateModel: mCtx && mCtx.stateModel,
-                        payload: { rootId: sRootId, entityKind: sEntityKind }
+                        payload: { dbKey: sRequestedDbKey, entityKind: sEntityKind }
                     });
                 }
                 emit(mCtx, {
-                    rootId: sRootId,
+                    dbKey: sRequestedDbKey,
                     valid: bValid,
                     invalidated: bInvalidate,
                     hydrated: bHydratedSnapshot,

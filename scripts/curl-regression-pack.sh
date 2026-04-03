@@ -50,10 +50,25 @@ echo "[12] hierarchy"
 curl -sS "$BASE/GetHierarchy?DateCheck=datetime'2025-01-01T00:00:00'&Method=location_tree"
 echo
 
-echo "[13] report export"
+echo "[13] attachment media upload"
+curl -sS -X POST -H "X-CSRF-Token: $TOKEN" -H 'X-Requested-With: XMLHttpRequest' -H 'Content-Type: text/plain' -H "Slug: curl-pack.txt" -H "X-DB-Key: $DB_KEY" -H "X-Parent-Key: $DB_KEY" -H "X-Folder-Key: $DB_KEY" -H 'X-Category-Key: GEN' -H 'X-Description: curl regression attachment' -H 'X-File-Name: curl-pack.txt' --data-binary 'curl regression attachment' "$BASE/AttachmentSet"
+echo
+
+echo "[13b] attachment list"
+curl -sS "$BASE/AttachmentSet?\$filter=PARENT_KEY%20eq%20binary'$DB_KEY'"
+echo
+
+echo "[13bb] attachment persisted access seam"
+echo "Persisted binaries must be reopened through DownloadUrl or DocumentHandle only"
+
+echo "[13c] attachment base64 save path must stay forbidden (media upload is the only productive path)"
+curl -sS -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' -d '{"root":{"db_key":"'$DB_KEY'"},"attachments":[{"edit_mode":"C","parent_key":"'$DB_KEY'","file_name":"forbidden.txt","mime_type":"text/plain","Value":"Zm9yYmlkZGVu"}],"client_version":1}' "$BASE/SaveChanges"
+echo
+
+echo "[14] report export"
 curl -sS -H "X-CSRF-Token: $TOKEN" -H 'Content-Type: application/json' -d '{"Entity":"screen","SelectionMode":"selected","DBKeys":["'$DB_KEY'"],"Limit":200000}' "$BASE/ReportExport"
 echo
 
-echo "[14] batch read"
+echo "[15] batch read"
 B="batch_123"
 curl -sS -H "Content-Type: multipart/mixed; boundary=$B" -H "X-CSRF-Token: $TOKEN" --data-binary $'--'$B'\r\nContent-Type: application/http\r\nContent-Transfer-Encoding: binary\r\n\r\nGET /sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV/ChecklistSearchSet?$top=1 HTTP/1.1\r\n\r\n--'$B'--\r\n' "$BASE/\$batch" >/dev/null && echo ok

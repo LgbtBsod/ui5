@@ -32,7 +32,7 @@ sap.ui.define([
         ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ANALYTICS_RETURN_RESTORE_EDIT, null);
     }
 
-    function requestAnalyticsEditRestore(oController, sRootId, mHooks) {
+    function requestAnalyticsEditRestore(oController, sDbKey, mHooks) {
         if (!oController) {
             return Promise.resolve(false);
         }
@@ -41,18 +41,18 @@ sap.ui.define([
                 return isEditLockedState(oController);
             });
         }
-        return Promise.resolve(mHooks.enterEdit({ rootId: sRootId })).then(function () {
+        return Promise.resolve(mHooks.enterEdit({ dbKey: sDbKey })).then(function () {
             return isEditLockedState(oController);
         });
     }
 
-    function restoreAnalyticsEditIfNeeded(oController, sRootId, mHooks) {
+    function restoreAnalyticsEditIfNeeded(oController, sDbKey, mHooks) {
         var oRestore = readAnalyticsReturnRestore(oController);
-        var sRestoreRootId = String((oRestore && oRestore.rootId) || "").trim();
+        var sRequestedDbKey = String((oRestore && oRestore.rootId) || (oRestore && oRestore.dbKey) || "").trim();
         var iAttempts;
         var oRestorePlan;
 
-        if (!sRootId || !sRestoreRootId || sRestoreRootId !== sRootId) {
+        if (!sDbKey || !sRequestedDbKey || sRequestedDbKey !== sDbKey) {
             return Promise.resolve(false);
         }
         if (isEditLockedState(oController)) {
@@ -62,7 +62,7 @@ sap.ui.define([
         iAttempts = Number((oRestore && oRestore.attempts) || 0);
         oRestorePlan = DetailRuntimePolicy.analyticsEditRestorePlan({
             controller: oController,
-            rootId: sRootId,
+            dbKey: sDbKey,
             restoreState: oRestore
         });
         if (iAttempts >= oRestorePlan.maxAttempts) {
@@ -70,19 +70,19 @@ sap.ui.define([
             return Promise.resolve(false);
         }
         ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ANALYTICS_RETURN_RESTORE_EDIT, {
-            rootId: sRestoreRootId,
+            dbKey: sRequestedDbKey,
             requestedAt: oRestore && oRestore.requestedAt ? oRestore.requestedAt : new Date().toISOString(),
             attempts: iAttempts + 1
         });
 
-        return requestAnalyticsEditRestore(oController, sRootId, mHooks).then(function (bRestored) {
+        return requestAnalyticsEditRestore(oController, sDbKey, mHooks).then(function (bRestored) {
             if (bRestored) {
                 clearAnalyticsReturnRestore(oController);
                 return true;
             }
             return new Promise(function (resolve) {
                 setTimeout(function () {
-                    requestAnalyticsEditRestore(oController, sRootId, mHooks)
+                    requestAnalyticsEditRestore(oController, sDbKey, mHooks)
                         .then(function (bRetryRestored) {
                             if (bRetryRestored) {
                                 clearAnalyticsReturnRestore(oController);

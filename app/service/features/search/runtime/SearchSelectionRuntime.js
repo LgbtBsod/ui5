@@ -17,7 +17,7 @@ sap.ui.define([
     var METHODS = JsRuntime.METHODS;
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var FILTER_CONTROL_SELECTORS = ["input", "button", "[role='search']", "[role='combobox']"];
-    var RESULTS_CONTROL_SELECTORS = ["[role='row']", "[role='grid']", "[role='table']", "tr", ".sapMLIB", ".sapMListTblRow"];
+    var RESULTS_CONTROL_SELECTORS = ["[role='row']", "[role='grid']", "[role='table']", "tr"];
     var TOOLBAR_CONTROL_SELECTORS = ["input", "button", "[role='button']", "[role='combobox']"];
     var FILTER_VIEW_SELECTORS = [
         ".searchFilterSurface input",
@@ -27,8 +27,6 @@ sap.ui.define([
     ];
     var RESULTS_VIEW_SELECTORS = [
         ".searchResultsTable [role='row']",
-        ".searchResultsTable .sapMLIB",
-        ".searchResultsTable .sapMListTblRow",
         ".searchResultsTable [role='grid']",
         ".searchResultsTable [role='table']"
     ];

@@ -67,7 +67,7 @@ def main() -> int:
 
     def post(session: requests.Session, session_guid: str, token_value: str, name: str):
         return session.post(
-            f'{base}/{name}?RootId={root}&SessionGuid={session_guid}',
+            f"{base}/{name}?DB_KEY=binary'{root}'&SessionGuid={session_guid}",
             headers={'X-CSRF-Token': token_value},
             timeout=20
         )

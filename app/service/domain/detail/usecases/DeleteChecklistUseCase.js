@@ -38,9 +38,9 @@ sap.ui.define([
 
     function execute(mInput, mCtx) {
         var oRepo = mCtx && mCtx.repo;
-        var sRootId = DetailRuntimePayload.rootId(mInput, mCtx);
+        var sDbKey = DetailRuntimePayload.dbKey(mInput, mCtx);
 
-        if (!sRootId || CreateSentinel.isCreateId(sRootId)) {
+        if (!sDbKey || CreateSentinel.isCreateId(sDbKey)) {
             return Promise.resolve(Result.fail({ messageKey: DETAIL_VIEW_KEYS.NOTHING_TO_DELETE, code: DETAIL_CODES.NO_CHECKLIST }, [
                 Effects.toast(DETAIL_VIEW_KEYS.NOTHING_TO_DELETE, "warning"),
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false)
@@ -53,7 +53,7 @@ sap.ui.define([
             ]));
         }
 
-        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sRootId, {
+        return DetailAuthorizationRuntime.fetchPermission(mCtx || {}, sDbKey, {
             activity: DetailAuthorizationRuntime.OPERATIONS.DELETE
         }).then(function (oPermission) {
             if (!oPermission.allowed) {
@@ -61,8 +61,8 @@ sap.ui.define([
                     Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false)
                 ]));
             }
-            return Promise.resolve(oRepo.deleteChecklist({ rootId: sRootId })).then(function () {
-                return Result.ok({ deleted: true, rootId: sRootId }, [
+            return Promise.resolve(oRepo.deleteChecklist({ dbKey: sDbKey })).then(function () {
+                return Result.ok({ deleted: true, dbKey: sDbKey }, [
                     Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT, {}),
                     Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.BASE, {}),
                     Effects.modelPatch(STATE_MODEL, StatePaths.READINESS_DETAIL, {
@@ -70,12 +70,14 @@ sap.ui.define([
                         ready: false,
                         readyAt: "",
                         error: "",
+                        dbKey: "",
                         rootId: "",
                         mode: WorkflowContracts.EDIT_MODES.READ,
                         permissionKnown: false,
                         lockKnown: false
                     }),
                     Effects.modelPatch(VIEW_MODEL, ViewPathContracts.ACCESS_STATE, DetailAuthorizationRuntime.buildAccessState({
+                        dbKey: "",
                         rootId: "",
                         userId: "",
                         canView: true,
@@ -95,7 +97,7 @@ sap.ui.define([
                     Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, null),
                     Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, null),
                     Effects.modelPatch(STATE_MODEL, ModelPathContracts.SEARCH_RETURN_CONTEXT, SearchReturnRediscoveryRuntime.buildContext({
-                        rootId: sRootId,
+                        dbKey: sDbKey,
                         reason: DETAIL_REASONS.DETAIL_DELETE_COMPLETED,
                         mode: SearchReturnRediscoveryRuntime.MODES.DELETE,
                         focusRequested: false,

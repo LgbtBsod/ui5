@@ -58,9 +58,9 @@ sap.ui.define([
             || ChecklistIdentity.extractChecklistDisplayId(oSavedSnapshot);
     }
 
-    function buildSearchReturnContext(sMode, sRootId, oCurrentChecklist, oSelectedChecklist, oSavedSnapshot) {
+    function buildSearchReturnContext(sMode, sDbKey, oCurrentChecklist, oSelectedChecklist, oSavedSnapshot) {
         return SearchReturnRediscoveryRuntime.buildContext({
-            rootId: sRootId,
+            dbKey: sDbKey,
             checklistId: resolveChecklistDisplayId(oCurrentChecklist, oSelectedChecklist, oSavedSnapshot),
             reason: DETAIL_REASONS.DETAIL_SAVE_COMPLETED,
             mode: sMode,
@@ -69,12 +69,12 @@ sap.ui.define([
         });
     }
 
-    function writeDetailCache(oCacheWrite, sRootId, oSnapshot, mCtx) {
-        if (!oCacheWrite || typeof oCacheWrite.execute !== "function" || !sRootId || !oSnapshot) {
+    function writeDetailCache(oCacheWrite, sDbKey, oSnapshot, mCtx) {
+        if (!oCacheWrite || typeof oCacheWrite.execute !== "function" || !sDbKey || !oSnapshot) {
             return Promise.resolve(null);
         }
         return Promise.resolve(oCacheWrite.execute({
-            rootId: sRootId,
+            dbKey: sDbKey,
             snapshot: Object.assign({}, oSnapshot, {
                 attachments: []
             })
@@ -83,8 +83,8 @@ sap.ui.define([
         });
     }
 
-    function mergeDeltaAttachments(oDelta, aCurrentAttachments, sRootId) {
-        var aPendingAttachmentRows = DetailAttachmentDeltaRuntime.listPendingStagedAttachments(aCurrentAttachments, sRootId);
+    function mergeDeltaAttachments(oDelta, aCurrentAttachments, sDbKey) {
+        var aPendingAttachmentRows = DetailAttachmentDeltaRuntime.listPendingStagedAttachments(aCurrentAttachments, sDbKey);
         if (!aPendingAttachmentRows.length) {
             return oDelta;
         }
@@ -160,11 +160,11 @@ sap.ui.define([
                 var oInitialSavedSnapshot = DetailSaveRuntime.normalizeOverallResult(
                     DetailSaveRuntime.preserveBasicFields((oSaved && oSaved.serverSnapshot) || oCurrent || {}, oCurrent, oSnapshot)
                 );
-            var sServerRootId = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.db_key || oInitialSavedSnapshot.DB_KEY || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
+                var sServerDbKey = String((oInitialSavedSnapshot && (oInitialSavedSnapshot.db_key || oInitialSavedSnapshot.DB_KEY || (oInitialSavedSnapshot.root && oInitialSavedSnapshot.root.id))) || "").trim();
                 var pLockAcquire = Promise.resolve(null);
-                if (bCreate && sServerRootId && !CreateSentinel.isCreateId(sServerRootId) && oLock && typeof oLock.acquire === "function" && sSessionGuid) {
+                if (bCreate && sServerDbKey && !CreateSentinel.isCreateId(sServerDbKey) && oLock && typeof oLock.acquire === "function" && sSessionGuid) {
                     pLockAcquire = Promise.resolve(oLock.acquire(DetailRuntimePayload.lockRequest({
-                        rootId: sServerRootId,
+                        dbKey: sServerDbKey,
                         sessionGuid: sSessionGuid
                     }, null, StatePaths))).catch(function () {
                         return null;
@@ -175,7 +175,7 @@ sap.ui.define([
                     DetailAttachmentSaveRuntime.syncAfterSave({
                         attachmentGateway: mCtx && mCtx.attachmentGateway,
                         repo: oRepo,
-                        rootId: sDbKey,
+                        dbKey: sDbKey,
                         createMode: bCreate,
                         currentAttachments: aCurrentAttachments,
                         sessionGuid: sSessionGuid,
@@ -184,7 +184,7 @@ sap.ui.define([
                         savedSnapshot: oInitialSavedSnapshot,
                         baseSnapshot: oSnapshot,
                         ctx: mCtx,
-                        serverRootId: sServerRootId,
+                        serverRootId: sServerDbKey,
                         hasStagedPayload: false
                     }),
                     pLockAcquire
@@ -195,7 +195,7 @@ sap.ui.define([
                         DetailSaveRuntime.preserveBasicFields(oAttachmentSync.snapshot, oCurrent, oSnapshot)
                     );
                     var oSelectedSnapshot = CloneUtil.clone(oAttachmentSync.selectedSnapshot, {});
-                    return writeDetailCache(oCacheWrite, sServerRootId, oSavedSnapshot, mCtx).then(function () {
+                    return writeDetailCache(oCacheWrite, sServerDbKey, oSavedSnapshot, mCtx).then(function () {
                         var aEffects = [
                             Effects.toast(DETAIL_DETAIL_KEYS.OBJECT_SAVED, "success"),
                             Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, false),
@@ -208,23 +208,23 @@ sap.ui.define([
                             lockOwnerSessionMatches: WorkflowContracts.normalizeEditMode(sMode) === WorkflowContracts.EDIT_MODES.EDIT,
                             lastLockRefreshAt: oSaved && oSaved.lock_refreshed ? sNow : null
                         }));
-                        if (sServerRootId && !CreateSentinel.isCreateId(sServerRootId)) {
+                        if (sServerDbKey && !CreateSentinel.isCreateId(sServerDbKey)) {
                             aEffects.push(Effects.modelPatch(
                                 STATE_MODEL,
                                 ModelPathContracts.SEARCH_RETURN_CONTEXT,
                                 buildSearchReturnContext(
                                     bCreate ? SearchReturnRediscoveryRuntime.MODES.CREATE : SearchReturnRediscoveryRuntime.MODES.SAVE,
-                                    sServerRootId,
+                                    sServerDbKey,
                                     oCurrent,
                                     oSelectedChecklist,
                                     oSavedSnapshot
                                 )
                             ));
-                            aEffects.push(Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT_ID, sServerRootId));
+                            aEffects.push(Effects.modelPatch(DETAIL_MODEL, DETAIL_MODEL_PATHS.ROOT_ID, sServerDbKey));
                             if (bCreate) {
                                 var bLockAcquired = !!(oLockResult && oLockResult.ok);
                                 if (bLockAcquired) {
-                                    aEffects = aEffects.concat(DetailPostOpenRuntime.buildEditableDetailEffects(sServerRootId, {
+                                    aEffects = aEffects.concat(DetailPostOpenRuntime.buildEditableDetailEffects(sServerDbKey, {
                                         snapshot: oSelectedSnapshot,
                                         autosaveEnabled: true
                                     }));
@@ -237,17 +237,17 @@ sap.ui.define([
                                         isKilled: false
                                     }));
                                 } else {
-                                    aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
-                                    aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sServerRootId));
-                                    aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sServerRootId));
+                                    aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sServerDbKey));
+                                    aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sServerDbKey));
+                                    aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sServerDbKey));
                                     aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
                                     aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
                                     aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false));
                                 }
-                                aEffects.push(Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sServerRootId }, true));
+                                aEffects.push(Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sServerDbKey }, true));
                             } else {
-                                aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sServerRootId));
-                                aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sServerRootId));
+                                aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sServerDbKey));
+                                aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sServerDbKey));
                             }
                         }
                         return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);

@@ -6,6 +6,20 @@ from __future__ import annotations
 from typing import Any
 
 
+SEARCH_VIEW_CANDIDATES = (
+    "checklist_app_comp---searchView",
+    "checklist_app_comp---searchTargetPage",
+)
+DETAIL_VIEW_CANDIDATES = (
+    "checklist_app_comp---detailView",
+    "checklist_app_comp---detailTargetPage",
+)
+ANALYTICS_VIEW_CANDIDATES = (
+    "checklist_app_comp---analyticsView",
+    "checklist_app_comp---analyticsTargetPage",
+)
+
+
 def is_navigation_race(exc: Exception) -> bool:
     message = str(exc or "")
     return "Execution context was destroyed" in message or "Cannot find context with specified id" in message
@@ -141,6 +155,24 @@ def wait_for_app_ready(page, timeout: int = 90000) -> None:
     )
 
 
+def resolve_existing_view_id(page, candidates: tuple[str, ...], controller_name: str) -> str:
+    for candidate in candidates:
+        result = safe_evaluate(
+            page,
+            """
+            (viewId) => {
+              const core = sap.ui.getCore();
+              const view = core && core.byId ? core.byId(viewId) : null;
+              return view && view.getId ? String(view.getId()) : '';
+            }
+            """,
+            candidate,
+        )
+        if result:
+            return str(result)
+    return resolve_view_id(page, controller_name)
+
+
 def collect_bootstrap_diagnostics(page) -> dict[str, Any]:
     return safe_evaluate(
         page,
@@ -182,8 +214,8 @@ def collect_bootstrap_diagnostics(page) -> dict[str, Any]:
             hasRouter: !!router,
             routeName: state && state.getProperty ? String(state.getProperty('/currentRouteName') || '') : '',
             layout: state && state.getProperty ? String(state.getProperty('/layout') || '') : '',
-            selectedId: state && state.getProperty ? String(state.getProperty('/selectedId') || '') : '',
-            activeObjectId: state && state.getProperty ? String(state.getProperty('/activeObjectId') || '') : '',
+            selectedDbKey: state && state.getProperty ? String(state.getProperty('/selectedId') || '') : '',
+            activeDbKey: state && state.getProperty ? String(state.getProperty('/activeObjectId') || '') : '',
             fclId: fcl && fcl.getId ? String(fcl.getId()) : '',
             fclBusy: !!(fcl && fcl.getBusy && fcl.getBusy()),
             searchViewId: searchView && searchView.getId ? String(searchView.getId()) : '',
@@ -193,7 +225,7 @@ def collect_bootstrap_diagnostics(page) -> dict[str, Any]:
             smartTableId: smartTable && smartTable.getId ? String(smartTable.getId()) : '',
             smartFilterBarId: smartFilterBar && smartFilterBar.getId ? String(smartFilterBar.getId()) : '',
             detailObjectPageId: detailObjectPage && detailObjectPage.getId ? String(detailObjectPage.getId()) : '',
-            detailRootId: selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '',
+            detailDbKey: selected && selected.getProperty ? String(selected.getProperty('/root/DB_KEY') || selected.getProperty('/root/id') || '') : '',
             detailMode: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/editMode') || '') : '',
             detailLockState: detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/lock/state') || '') : ''
           };
@@ -269,13 +301,13 @@ def navigate_to_search(page) -> dict[str, Any]:
     return wait_for_search_ready(page)
 
 
-def navigate_to_detail(page, root_id: str, layout: str | None = None) -> dict[str, Any]:
+def navigate_to_detail(page, db_key: str, layout: str | None = None) -> dict[str, Any]:
     wait_for_app_ready(page)
-    payload = {"rootId": root_id, "layout": layout or ""}
+    payload = {"dbKey": db_key, "layout": layout or ""}
     safe_evaluate(
         page,
         """
-        ({ rootId, layout }) => new Promise((resolve, reject) => {
+        ({ dbKey, layout }) => new Promise((resolve, reject) => {
           const core = sap.ui.getCore();
           const app = core.byId('checklist_app_comp---app');
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
@@ -303,14 +335,14 @@ def navigate_to_detail(page, root_id: str, layout: str | None = None) -> dict[st
           sap.ui.require(['PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation'], function (WorkspaceRouteNavigation) {
             try {
               if (controller && WorkspaceRouteNavigation && typeof WorkspaceRouteNavigation.navigateToDetail === 'function') {
-                Promise.resolve(WorkspaceRouteNavigation.navigateToDetail(controller, String(rootId || ''), layout || undefined)).then(resolve).catch(reject);
+                Promise.resolve(WorkspaceRouteNavigation.navigateToDetail(controller, String(dbKey || ''), layout || undefined)).then(resolve).catch(reject);
                 return;
               }
               if (router && typeof router.navTo === 'function') {
                 if (layout) {
-                  router.navTo('detail', { id: String(rootId || ''), layout: String(layout) }, false);
+                  router.navTo('detail', { id: String(dbKey || ''), layout: String(layout) }, false);
                 } else {
-                  router.navTo('detail', { id: String(rootId || '') }, false);
+                  router.navTo('detail', { id: String(dbKey || '') }, false);
                 }
                 resolve(true);
                 return;
@@ -324,28 +356,40 @@ def navigate_to_detail(page, root_id: str, layout: str | None = None) -> dict[st
         """,
         payload,
     )
-    return wait_for_detail_ready(page, root_id, layout or "")
+    return wait_for_detail_ready(page, db_key, layout or "")
 
 
 def wait_for_search_ready(page, timeout: int = 45000) -> dict[str, Any]:
     wait_for_app_ready(page, timeout=max(timeout, 60000))
+    search_view_id = resolve_existing_view_id(
+        page,
+        SEARCH_VIEW_CANDIDATES,
+        "PRODUCTION_CONTROL_CHECKLIST.controller.Search",
+    )
+    page.wait_for_selector(f"#{search_view_id}", timeout=timeout)
     page.wait_for_timeout(min(timeout, 15000))
     diagnostics = collect_bootstrap_diagnostics(page)
     body_text = safe_evaluate(page, "() => document.body && document.body.innerText ? document.body.innerText : ''")
     if diagnostics.get("routeName") != "search":
         raise RuntimeError(f"search route not ready: {diagnostics}")
-    if "Create" not in body_text and "Создать" not in body_text:
+    if "Create" not in body_text and "\u0421\u043e\u0437\u0434\u0430\u0442\u044c" not in body_text:
         raise RuntimeError("search create action not rendered")
     page.wait_for_timeout(1200)
     return diagnostics
 
 
-def wait_for_detail_ready(page, root_id: str, layout: str = "", timeout: int = 45000) -> dict[str, Any]:
+def wait_for_detail_ready(page, db_key: str, layout: str = "", timeout: int = 45000) -> dict[str, Any]:
     wait_for_app_ready(page, timeout=max(timeout, 60000))
-    payload = {"rootId": root_id, "layout": layout}
+    detail_view_id = resolve_existing_view_id(
+        page,
+        DETAIL_VIEW_CANDIDATES,
+        "PRODUCTION_CONTROL_CHECKLIST.controller.Detail",
+    )
+    payload = {"dbKey": db_key, "layout": layout}
+    page.wait_for_selector(f"#{detail_view_id}", timeout=timeout)
     page.wait_for_function(
         """
-        ({ rootId, layout }) => {
+        ({ dbKey, layout }) => {
           const core = sap.ui.getCore();
           const registry = sap.ui.core && sap.ui.core.Element && sap.ui.core.Element.registry;
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
@@ -361,24 +405,24 @@ def wait_for_detail_ready(page, root_id: str, layout: str = "", timeout: int = 4
           const detailObjectPage = all.find((item) => item && item.getId && String(item.getId()).endsWith('detailObjectPage')) || null;
           const selected = detailView && detailView.getModel && detailView.getModel('selected');
           const detailState = detailView && detailView.getModel && detailView.getModel('state');
-          const selectedRoot = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
+          const hydratedDbKey = selected && selected.getProperty ? String(selected.getProperty('/root/DB_KEY') || selected.getProperty('/root/id') || '') : '';
           const routeName = state && state.getProperty ? String(state.getProperty('/currentRouteName') || '') : '';
           const currentLayout = state && state.getProperty ? String(state.getProperty('/layout') || '') : '';
-          const selectedId = state && state.getProperty ? String(state.getProperty('/selectedId') || '') : '';
-          const activeObjectId = state && state.getProperty ? String(state.getProperty('/activeObjectId') || '') : '';
+          const selectedStateDbKey = state && state.getProperty ? String(state.getProperty('/selectedId') || '') : '';
+          const activeDbKey = state && state.getProperty ? String(state.getProperty('/activeObjectId') || '') : '';
           const detailMode = detailState && detailState.getProperty ? String(detailState.getProperty('/workflow/detail/editMode') || '') : '';
           const domReady = !!(detailView && detailView.getDomRef && detailView.getDomRef());
           const layoutOk = !layout || currentLayout === layout || currentLayout === 'TwoColumnsMidExpanded';
-          const createRouteOk = String(rootId || '') === '__CREATE'
-            ? (selectedId === '__CREATE' || activeObjectId === '__CREATE' || detailMode === 'CREATE')
-            : selectedRoot === String(rootId || '');
+          const detailDbKeyMatches = String(dbKey || '') === '__CREATE'
+            ? (selectedStateDbKey === '__CREATE' || activeDbKey === '__CREATE' || detailMode === 'CREATE')
+            : hydratedDbKey === String(dbKey || '') || selectedStateDbKey === String(dbKey || '');
           return !!state
             && !!detailView
             && !!detailObjectPage
             && domReady
             && routeName === 'detail'
             && layoutOk
-            && createRouteOk;
+            && detailDbKeyMatches;
         }
         """,
         arg=payload,
@@ -398,7 +442,7 @@ def invoke_controller_method(page, controller_name: str, method_name: str, *args
           const all = registry && registry.all ? Object.keys(registry.all()).map((key) => registry.get(key)).filter(Boolean) : Object.values(core.mElements || {});
           const app = core.byId('checklist_app_comp---app');
           const appState = app && app.getModel && app.getModel('state');
-          const activeRootId = appState && appState.getProperty
+          const activeDbKey = appState && appState.getProperty
             ? String(appState.getProperty('/activeObjectId') || appState.getProperty('/selectedId') || '')
             : '';
           const candidates = all.filter((item) => item
@@ -410,8 +454,8 @@ def invoke_controller_method(page, controller_name: str, method_name: str, *args
             && item.getController().getMetadata().getName() === controllerName);
           const view = candidates.find((item) => {
             const selected = item && item.getModel && item.getModel('selected');
-            const rootId = selected && selected.getProperty ? String(selected.getProperty('/root/id') || '') : '';
-            return !!(item && item.getDomRef && item.getDomRef()) && (!!activeRootId ? rootId === activeRootId : true);
+            const dbKey = selected && selected.getProperty ? String(selected.getProperty('/root/DB_KEY') || selected.getProperty('/root/id') || '') : '';
+            return !!(item && item.getDomRef && item.getDomRef()) && (!!activeDbKey ? dbKey === activeDbKey : true);
           }) || candidates.find((item) => !!(item && item.getDomRef && item.getDomRef())) || candidates[0] || null;
           const controller = view && view.getController ? view.getController() : null;
           if (!controller || typeof controller[methodName] !== 'function') {
@@ -441,7 +485,7 @@ def get_tail_search_row(page) -> dict[str, Any]:
           const data = ctx && ctx.getObject ? ctx.getObject() : {};
           const dom = last && last.getDomRef ? last.getDomRef() : null;
           const tableDom = table && table.getDomRef ? table.getDomRef() : null;
-          const scrollHost = tableDom && tableDom.querySelector ? tableDom.querySelector('.sapMListTblCnt') : null;
+            const scrollHost = tableDom && tableDom.querySelector ? tableDom.querySelector('[data-sap-ui-scroll-container], .searchResultsScrollHost') : null;
           if (scrollHost) {
             scrollHost.scrollLeft = scrollHost.scrollWidth;
             scrollHost.scrollTop = scrollHost.scrollHeight;

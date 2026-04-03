@@ -19,7 +19,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
     "sap/m/ViewSettingsDialog",
-    "sap/m/ViewSettingsItem"
+    "sap/m/ViewSettingsItem",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsFormatRuntime"
 ], function (
     BaseController,
     SearchActionBehavior,
@@ -41,7 +42,8 @@ sap.ui.define([
     ReadinessTelemetryRuntime,
     ReadinessTelemetryContracts,
     ViewSettingsDialog,
-    ViewSettingsItem
+    ViewSettingsItem,
+    AnalyticsFormatRuntime
 ) {
     "use strict";
 
@@ -380,6 +382,12 @@ sap.ui.define([
         },
         formatSearchSelectionSummary: function (iSelectionCount, sSelectedRowDisplayId) {
             return formatSearchSelectionSummary(this, iSelectionCount, sSelectedRowDisplayId);
+        },
+        formatAnalyticsSourceText: function (sSelectedSource) {
+            return AnalyticsFormatRuntime.formatSourceText(sSelectedSource, resolveBundleText.bind(null, this));
+        },
+        formatAnalyticsSourceContext: function (sSelectedSource) {
+            return AnalyticsFormatRuntime.formatSourceContext(sSelectedSource, resolveBundleText.bind(null, this));
         },
         formatSelectionSummaryState: function () { return UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION; },
         formatLoadErrorType: function () { return UiSemanticConstants.MESSAGE_TYPE.ERROR; },

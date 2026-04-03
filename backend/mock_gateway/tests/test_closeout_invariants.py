@@ -135,6 +135,30 @@ def test_productive_frontend_uses_canonical_constant_modules_without_contract_wr
             assert marker not in text, f"contract wrapper import leaked into active frontend path: {path}"
 
 
+def test_attachment_repo_runtime_has_no_transitional_upload_boundary():
+    attachment_gateway_runtime = _read(APP_ROOT / "service" / "features" / "detail" / "runtime" / "AttachmentGatewayRuntime.js")
+    attachment_upload_runtime = _read(APP_ROOT / "service" / "features" / "detail" / "runtime" / "AttachmentUploadRuntime.js")
+
+    assert not (APP_ROOT / "infra" / "adapters" / "shared" / "AttachmentRepoRuntime.js").exists()
+    assert "ENTITY_SETS.ATTACHMENT" in attachment_gateway_runtime
+    assert "X-Parent-Key" in attachment_gateway_runtime
+    assert "uploadPendingAttachments" in attachment_upload_runtime
+    assert "attachmentLoad" in attachment_upload_runtime
+    assert ("Content" + "Base64") not in attachment_upload_runtime
+
+
+def test_final_cleanup_target_files_no_longer_embed_raw_i18n_literals_or_legacy_root_aliases():
+    analytics_export_runtime = _read(APP_ROOT / "controller" / "analytics" / "AnalyticsExportRuntime.js")
+    analytics_controller = _read(APP_ROOT / "controller" / "Analytics.controller.js")
+    smoke_pack = _read(REPO_ROOT / "scripts" / "gateway-only-smoke-pack.py")
+
+    assert '"nothingToExport"' not in analytics_export_runtime
+    assert '"searchExportSuccess"' not in analytics_export_runtime
+    assert '"exportFailed"' not in analytics_export_runtime
+    assert "_resolveAnalyticsMessage" in analytics_controller
+    assert '.get("RootKey")' not in smoke_pack
+
+
 def test_productive_frontend_has_no_app_constants_god_object_imports():
     forbidden_markers = [
         "PRODUCTION_CONTROL_CHECKLIST/constants/AppConstants",
@@ -233,9 +257,10 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     assert 'clearByTabSessionId: clearByTabSessionId,' in cache_text
     assert 'cleanupStaleSessions: cleanupStaleSessions,' in cache_text
     assert 'StatePaths.UI_BUSY_GLOBAL' not in listener_runtime
-    assert "buildGroupedDependencies" in bootstrap_source
-    assert "flattenDependencyGroups" in bootstrap_source
-    assert "attachManagerRuntime" in bootstrap_source
+    assert "createBootstrapDeps" in bootstrap_source
+    assert "initializeModelsStage" in bootstrap_source
+    assert "initializeRuntimeServicesStage" in bootstrap_source
+    assert "attachLifecycleStage" in bootstrap_source
     assert 'getBackendMode: function () { return BackendModeContracts.MODES.REAL; }' in bootstrap_source
     assert 'BackendModeContracts.PATHS.BACKEND_MODE' in bootstrap_source
     assert "PollingManager" in bootstrap_source

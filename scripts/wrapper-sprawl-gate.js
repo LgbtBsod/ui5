@@ -60,6 +60,18 @@ bannedFiles.forEach((relativePath) => {
   }
 });
 
+[
+  "app/Component.js",
+  "app/service/framework/ComponentBootstrap.js",
+  "app/service/runtime/component/ComponentLifecycleRuntime.js",
+  "app/infra/adapters/ODataChecklistRepoAdapter.js"
+].forEach((relativePath) => {
+  const fullPath = path.join(ROOT, relativePath);
+  if (!fs.existsSync(fullPath)) {
+    issues.push(`${relativePath} missing; bootstrap/runtime ownership map is incomplete`);
+  }
+});
+
 scanDirs.forEach((dir) => {
   walk(dir, detectThinWrapper);
 });

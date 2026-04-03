@@ -37,16 +37,16 @@ sap.ui.define([
         return parseMs(oEntry && oEntry.AggChangedOn);
     }
 
-    function readAggChangedOnAdapter(sRootId) {
-        var sNormalizedRootId = ODataKeyNormalizer.normalizeBinaryKey(sRootId);
-        return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.LAST_CHANGE_SET, sNormalizedRootId, {
+    function readAggChangedOnAdapter(sDbKey) {
+        var sNormalizedDbKey = ODataKeyNormalizer.normalizeBinaryKey(sDbKey);
+        return GatewayClient.rawRead(ODataAdapterUtils.buildEntityPath(GatewayContractConstants.ENTITY_SETS.LAST_CHANGE_SET, sNormalizedDbKey, {
             name: "DB_KEY",
             type: ODataKeyContracts.TYPES.DB_KEY
         })).then(function (oRes) {
             return readAggChangedOn(oRes);
         }).catch(function () {
             return GatewayClient.rawRead("/" + GatewayContractConstants.ENTITY_SETS.LAST_CHANGE_SET, {
-                "$filter": ODataAdapterUtils.buildEqFilter("DB_KEY", sNormalizedRootId, ODataKeyContracts.TYPES.DB_KEY),
+                "$filter": ODataAdapterUtils.buildEqFilter("DB_KEY", sNormalizedDbKey, ODataKeyContracts.TYPES.DB_KEY),
                 "$top": 1
             }).then(function (oRes) {
                 return readAggChangedOn(oRes);

@@ -6,12 +6,20 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/NullishPick",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchMaxResults",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/WorkflowTelemetry",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts"
-], function (Result, Effects, SpreadsheetExport, ChecklistIdentity, NullishPick, SearchMaxResults, WorkflowTelemetry, SearchRuntimeConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
+], function (Result, Effects, SpreadsheetExport, ChecklistIdentity, NullishPick, SearchMaxResults, WorkflowTelemetry, SearchRuntimeConstants, MessageCodeConstants) {
     "use strict";
 
     var SEARCH_MODE = SearchRuntimeConstants.SEARCH_MODE;
     var SEARCH_SEGMENTS = SearchRuntimeConstants.SEARCH_SEGMENTS;
+    var TECHNICAL_CODES = Object.freeze({
+        FILTER_STATE_UNSUPPORTED: MessageCodeConstants.TECHNICAL.EXPORT_FILTER_STATE_UNSUPPORTED,
+        HANDLER_MISSING: MessageCodeConstants.TECHNICAL.EXPORT_HANDLER_MISSING,
+        LIMIT_EXCEEDED: MessageCodeConstants.TECHNICAL.EXPORT_LIMIT_EXCEEDED,
+        NO_EXPORT_DATA: MessageCodeConstants.TECHNICAL.EXPORT_NO_DATA,
+        EXPORT_FAILED: MessageCodeConstants.TECHNICAL.EXPORT_FAILED
+    });
 
     function ExportSearchUseCase() {
         return {
@@ -157,7 +165,7 @@ function pick(v, fallback) {
         var mState = (oStateModel && oStateModel.getData && oStateModel.getData()) || {};
         var iExportLimit = SearchMaxResults.resolveExportLimit(mState);
         if (!oSmart || typeof oSmart.getBoundRows !== "function") {
-            return Promise.reject(new Error("EXPORT_FILTER_STATE_UNSUPPORTED"));
+            return Promise.reject(new Error(TECHNICAL_CODES.FILTER_STATE_UNSUPPORTED));
         }
         return Promise.resolve(oSmart.getBoundRows(iExportLimit)).then(function (aRows) {
             return Array.isArray(aRows) ? aRows : [];
@@ -179,10 +187,10 @@ function pick(v, fallback) {
         ) || {};
 
         if (!oRepo || typeof oRepo.exportSearchResults !== "function") {
-            return Promise.reject(new Error("EXPORT_HANDLER_MISSING"));
+            return Promise.reject(new Error(TECHNICAL_CODES.HANDLER_MISSING));
         }
         if (aSelectedIds.length > iExportLimit) {
-            return Promise.reject(new Error("EXPORT_LIMIT_EXCEEDED"));
+            return Promise.reject(new Error(TECHNICAL_CODES.LIMIT_EXCEEDED));
         }
 
         oRequest = {
@@ -218,7 +226,7 @@ function pick(v, fallback) {
             var aSelectedIds = ChecklistIdentity.normalizeChecklistIds(mInput && mInput.selectedRowIds);
             var sMode = aSelectedIds.length ? "selected" : "all";
             if (!aNormalized.length) {
-                return Result.fail({ code: "NO_EXPORT_DATA" }, [Effects.toast("nothingToExport", "warning")]);
+                return Result.fail({ code: TECHNICAL_CODES.NO_EXPORT_DATA }, [Effects.toast("nothingToExport", "warning")]);
             }
             return SpreadsheetExport.download("checklist_" + sEntity, aNormalized).then(function () {
                 emitExportTelemetry(mCtx, sMode === "selected" ? "export.selected.completed" : "export.all.completed", {
@@ -233,7 +241,7 @@ function pick(v, fallback) {
             });
         }).catch(function (oError) {
             var sCode = String((oError && (oError.code || oError.message)) || "").trim().toUpperCase();
-            var sMessageCode = sCode === "EXPORT_LIMIT_EXCEEDED" ? "EXPORT_LIMIT_EXCEEDED" : "EXPORT_FAILED";
+            var sMessageCode = sCode === TECHNICAL_CODES.LIMIT_EXCEEDED ? TECHNICAL_CODES.LIMIT_EXCEEDED : TECHNICAL_CODES.EXPORT_FAILED;
             emitExportTelemetry(mCtx, sCode === "EXPORT_LIMIT_EXCEEDED" ? "export.limit.exceeded" : "export.failed", {
                 entity: sEntity,
                 code: sMessageCode

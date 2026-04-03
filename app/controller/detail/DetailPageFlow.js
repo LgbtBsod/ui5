@@ -42,12 +42,21 @@ sap.ui.define([
         ReadinessTelemetryRuntime.markControllerStage(oController, ReadinessTelemetryContracts.STAGES.DETAIL_READY, mDetails);
     }
 
+    function shouldSuppressMatchFailureBanner(oController, oError) {
+        var oAccessState = ControllerViewStateRuntime.get(oController, "/accessState", {}) || {};
+        var sErrorCode = String((oError && oError.code) || (oError && oError.error && oError.error.code) || "").trim();
+        return !!oAccessState.denied
+            || sErrorCode === DETAIL_CODES.NO_VIEW_PERMISSION
+            || sErrorCode === DETAIL_CODES.PERMISSION_CHECK_FAILED;
+    }
+
     function handleMatchFailure(oController, oError) {
         oDetailEditSessionRuntime.clearAnalyticsReturnRestore(oController);
         ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false);
         ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
         clearDeferredRowBusy(oController);
-        if (oController && typeof oController.showI18nError === TYPE_FUNCTION) {
+        if (!shouldSuppressMatchFailureBanner(oController, oError)
+            && oController && typeof oController.showI18nError === TYPE_FUNCTION) {
             oController.showI18nError("unexpectedError");
         }
         return { ok: false, error: oError };
@@ -70,9 +79,9 @@ sap.ui.define([
         oController._iLocationVhTableSyncTimer = SchedulingRuntime.clearTimer(oController._iLocationVhTableSyncTimer);
     }
 
-    function sameActiveRoot(oController, sRootId) {
-        var sActiveRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
-        return !!sRootId && sActiveRootId === sRootId;
+    function sameActiveDbKey(oController, sDbKey) {
+        var sActiveDbKey = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        return !!sDbKey && sActiveDbKey === sDbKey;
     }
 
     function clearDeferredRowBusy(oController) {
@@ -82,9 +91,9 @@ sap.ui.define([
         ControllerViewStateRuntime.setMany(oController, mBusyPatch);
     }
 
-    function writeDeferredRows(oController, sRootId, oRows) {
+    function writeDeferredRows(oController, sDbKey, oRows) {
         var oDetailModel;
-        if (!sameActiveRoot(oController, sRootId)) {
+        if (!sameActiveDbKey(oController, sDbKey)) {
             return false;
         }
         oDetailModel = getModel(oController, ModelContracts.MODELS.DETAIL);
@@ -101,9 +110,9 @@ sap.ui.define([
         return true;
     }
 
-    function scheduleDeferredRowHydration(oController, sRootId, mHooks) {
+    function scheduleDeferredRowHydration(oController, sDbKey, mHooks) {
         var fnBuildContext = mHooks && mHooks.buildCommandContext;
-        if (!sRootId || typeof fnBuildContext !== TYPE_FUNCTION) {
+        if (!sDbKey || typeof fnBuildContext !== TYPE_FUNCTION) {
             clearDeferredRowBusy(oController);
             return Promise.resolve(null);
         }
@@ -114,8 +123,8 @@ sap.ui.define([
                 clearDeferredRowBusy(oController);
                 return;
             }
-            Promise.resolve(oRepo.loadDetailRows({ rootId: sRootId })).then(function (oRows) {
-                if (!writeDeferredRows(oController, sRootId, oRows || {})) {
+            Promise.resolve(oRepo.loadDetailRows({ dbKey: sDbKey })).then(function (oRows) {
+                if (!writeDeferredRows(oController, sDbKey, oRows || {})) {
                     clearDeferredRowBusy(oController);
                 }
             }).catch(function () {
@@ -162,7 +171,7 @@ sap.ui.define([
         });
 
         if (sApplyMode === "layoutOnly") {
-            markDetailReady(oController, { mode: "layoutOnly", rootId: mContext.sId });
+            markDetailReady(oController, { mode: "layoutOnly", dbKey: mContext.sId });
             return;
         }
 
@@ -178,7 +187,7 @@ sap.ui.define([
                         isCreateMode: true,
                         hasPersistedObject: false
                     });
-                    markDetailReady(oController, { mode: "create", rootId: mContext.sId });
+                    markDetailReady(oController, { mode: "create", dbKey: mContext.sId });
                 }
                 return oResult;
             }).catch(function (oError) {
@@ -189,7 +198,7 @@ sap.ui.define([
         if (mContext.sPostOpenHydratedRootId && mContext.sPostOpenHydratedRootId === mContext.sId && mContext.sSelectedRootId === mContext.sId) {
             ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "");
             ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
-            markDetailReady(oController, { mode: "hydratedReturn", rootId: mContext.sId });
+            markDetailReady(oController, { mode: "hydratedReturn", dbKey: mContext.sId });
             oDetailEditSessionRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
                 enterEdit: function (mInput) {
                     return runDetailCommand(oController, "enterEdit", mInput);
@@ -200,7 +209,7 @@ sap.ui.define([
         }
 
         ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, mContext.sId);
-        return runDetailCommand(oController, "open", { id: mContext.sId, rootId: mContext.sId }).then(function (oResult) {
+        return runDetailCommand(oController, "open", { id: mContext.sId, dbKey: mContext.sId }).then(function (oResult) {
             var oAccessState;
             if (oResult && oResult.ok === false) {
                 if (!oResult.error || oResult.error.code !== DETAIL_CODES.NO_VIEW_PERMISSION) {
@@ -209,7 +218,7 @@ sap.ui.define([
                 }
                 oAccessState = ControllerViewStateRuntime.get(oController, "/accessState", {}) || {};
                 ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.DETAIL_ACCESS_GUARD, {
-                    rootId: String(oAccessState.rootId || mContext.sId || "").trim(),
+                    dbKey: String(oAccessState.dbKey || mContext.sId || "").trim(),
                     userId: String(oAccessState.userId || "").trim(),
                     canView: false,
                     canEdit: !!oAccessState.canEdit,
@@ -236,7 +245,7 @@ sap.ui.define([
                     ? scheduleDeferredRowHydration(oController, mContext.sId, mOptions)
                     : null
                 ).then(function () {
-                    markDetailReady(oController, { mode: "open", rootId: mContext.sId });
+                    markDetailReady(oController, { mode: "open", dbKey: mContext.sId });
                     return oResult;
                 });
             });

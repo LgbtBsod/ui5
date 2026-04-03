@@ -10,18 +10,18 @@ sap.ui.define([
     "use strict";
 
     function readActiveLockPayload(oStateModel) {
-        var sRootId = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
+        var sDbKey = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
         var sSessionGuid = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "") || "").trim();
         var sMode = LayoutStateRuntime.normalizeMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, ""), "");
         var sLockState = LayoutStateRuntime.normalizeState(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, ""), "");
-        if (!sRootId || !sSessionGuid || CreateSentinel.isCreateId(sRootId)) {
+        if (!sDbKey || !sSessionGuid || CreateSentinel.isCreateId(sDbKey)) {
             return null;
         }
         if (sMode !== WorkflowContracts.EDIT_MODES.EDIT || sLockState !== WorkflowContracts.LOCK_STATES.EDIT_LOCKED) {
             return null;
         }
         return {
-            DB_KEY: sRootId,
+            DB_KEY: sDbKey,
             SessionGuid: sSessionGuid
         };
     }

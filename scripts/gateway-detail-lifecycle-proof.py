@@ -504,7 +504,7 @@ def run_search_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
               controlValue: '',
               alreadyVisible: true,
               filterData: {},
-              rootKey: String((data && (data.Key || data.RootKey)) || '').trim()
+              dbKey: String((data && (data.Key || data.DB_KEY)) || '').trim()
             };
           }
           const searchView = all.find((item) => item
@@ -535,7 +535,7 @@ def run_search_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
               filterData: smartFilterBar && smartFilterBar.getFilterData ? smartFilterBar.getFilterData() : {},
               controlValue: control && control.getValue ? String(control.getValue() || '') : '',
               alreadyVisible: false,
-              rootKey: ''
+              dbKey: ''
             };
           });
         }
@@ -572,7 +572,7 @@ def open_search_row_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
           }
           return {
             domId: dom && dom.id ? String(dom.id) : '',
-            rootKey: String((data && (data.Key || data.RootKey)) || '').trim(),
+            dbKey: String((data && (data.Key || data.DB_KEY)) || '').trim(),
             checklistId: String((data && (data.Id || data.ChecklistId || data.checklist_id)) || '').trim(),
             rowCount: rows.length
           };
@@ -654,12 +654,12 @@ def open_search_row_by_checklist_id(page, checklist_id: str) -> dict[str, Any]:
                 || hash.indexOf(String(rootId || '')) >= 0;
             }
             """,
-            payload["rootKey"],
+            payload["dbKey"],
             timeout=12000
         )
     except Exception:
         payload["openMethod"] = "navigationIntentFallback"
-        navigate_to_detail(page, payload["rootKey"])
+        navigate_to_detail(page, payload["dbKey"])
     return payload
 
 
@@ -947,7 +947,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             wait_for_function(
                 page,
                 """
-                ({ rootId, checklistId }) => {
+                ({ dbKey, checklistId }) => {
                   const core = sap.ui.getCore();
                   const searchView = core.byId('checklist_app_comp---searchView');
                   const viewModel = searchView && searchView.getModel && searchView.getModel('view');
@@ -965,15 +965,15 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
                     const data = ctx && ctx.getObject ? ctx.getObject() : null;
                     const rowRootId = String((data && (data.Key || data.key || data.Uuid || data.id || data.ID || data.Id)) || '').trim();
                     const rowChecklistId = String((data && (data.Id || data.ChecklistId || data.checklist_id || data.Key || data.key)) || '').trim();
-                    return rowRootId === String(rootId || '').trim() || rowChecklistId === String(checklistId || '').trim();
+                    return rowRootId === String(dbKey || '').trim() || rowChecklistId === String(checklistId || '').trim();
                   });
                   return rowVisible
-                    && selectedRowId === String(rootId || '').trim()
+                    && selectedRowId === String(dbKey || '').trim()
                     && selectedRowDisplayId === String(checklistId || '').trim();
                 }
                 """,
                 {
-                    "rootId": create_saved_state["rootId"],
+                    "dbKey": create_saved_state["rootId"],
                     "checklistId": create_saved_state["checklistId"]
                 },
                 timeout=30000
@@ -982,13 +982,13 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
 
             step = "search.click_created_row"
             tail_payload = open_search_row_by_checklist_id(page, create_saved_state["checklistId"])
-            wait_for_detail(page, tail_payload["rootKey"])
+            wait_for_detail(page, tail_payload["dbKey"])
             tail_state = read_runtime_state(page)
             screenshots["openedFromSearchTail"] = take_step_screenshot(page, "opened-from-search-tail")
             ensure(
                 checks,
                 "search.click_created_row_opens_detail_via_selection_pipeline",
-                tail_state["rootId"] == tail_payload["rootKey"] and tail_state["checklistId"] == tail_payload["checklistId"],
+                tail_state["rootId"] == tail_payload["dbKey"] and tail_state["checklistId"] == tail_payload["checklistId"],
                 {"clicked": tail_payload, "state": tail_state}
             )
 
@@ -1070,7 +1070,7 @@ def run_browser_flow(existing_root_id: str) -> dict[str, Any]:
             "autoSave": summarize_requests(network, "AutoSave")
         },
         "screenshots": screenshots,
-        "createdRootId": create_root_id
+        "createdDbKey": create_root_id
     }
 
 
@@ -1086,9 +1086,9 @@ def main() -> int:
         token = fetch_csrf(opener)
         ensure(gateway_checks, "gateway.csrf", bool(token), {"tokenPresent": bool(token)})
         existing_seed = create_checklist(opener, token, "Lifecycle Existing Seed")
-        existing_root_id = str(existing_seed.get("RootKey") or existing_seed.get("Key") or "").strip().upper()
+        existing_root_id = str(existing_seed.get("DB_KEY") or existing_seed.get("Key") or "").strip().upper()
         created_roots.append(existing_root_id)
-        ensure(gateway_checks, "gateway.seed_existing_root", bool(existing_root_id), {"rootId": existing_root_id})
+        ensure(gateway_checks, "gateway.seed_existing_root", bool(existing_root_id), {"dbKey": existing_root_id})
         browser_report = run_browser_flow(existing_root_id)
         report = {
             "generatedAt": now_iso(),
@@ -1097,7 +1097,7 @@ def main() -> int:
             "status": "ok" if browser_report.get("ok") and all(item["ok"] for item in gateway_checks) else "failed",
             "createLifecycle": browser_report,
             "existingLifecycle": {
-                "seedRootId": existing_root_id,
+                "seedDbKey": existing_root_id,
                 "reopenAcquiredLock": next((item for item in browser_report.get("checks", []) if item.get("name") == "reopenAcquiredLock"), None)
             },
             "searchTailOpenLifecycle": {

@@ -3,12 +3,12 @@ sap.ui.define([
 ], function (Result) {
     "use strict";
 
-    function rootId(mInput) {
+    function requestedInputKey(mInput) {
         return String((mInput && (mInput.rootId || mInput.id)) || "").trim();
     }
 
     function dbKey(mInput) {
-        return String((mInput && (mInput.dbKey || mInput.DB_KEY)) || "").trim() || rootId(mInput);
+        return String((mInput && (mInput.dbKey || mInput.DB_KEY)) || "").trim() || requestedInputKey(mInput);
     }
 
     function text(vValue) {
@@ -40,7 +40,7 @@ sap.ui.define([
         dbKey: dbKey,
         fail: fail,
         ok: ok,
-        rootId: rootId,
+        requestedDbKey: requestedInputKey,
         text: text
     };
 });

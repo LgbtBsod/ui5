@@ -12,20 +12,26 @@ sap.ui.define([
             : null;
     }
 
+    function normalizeFallbackValue(sFallback) {
+        var sValue = String(sFallback || "").trim();
+        return sValue && !/\s/.test(sValue) ? sValue : "";
+    }
+
     function getText(oController, sTextKey, aArgs, sFallback) {
         var oBundle = resolveBundle(oController);
+        var sResolvedFallback = normalizeFallbackValue(sFallback);
         if (!sTextKey || !oBundle || typeof oBundle.getText !== "function") {
-            return String(sFallback || sTextKey || "");
+            return sResolvedFallback;
         }
         try {
-            return String(oBundle.getText(sTextKey, Array.isArray(aArgs) ? aArgs : []) || sFallback || sTextKey || "");
+            return String(oBundle.getText(sTextKey, Array.isArray(aArgs) ? aArgs : []) || sResolvedFallback || "");
         } catch (_bundleError) {
-            return String(sFallback || sTextKey || "");
+            return sResolvedFallback;
         }
     }
 
     function resolve(sTextKey, oController, aArgs, sFallback) {
-        return getText(oController, sTextKey, aArgs || [], sFallback || sTextKey);
+        return getText(oController, sTextKey, aArgs || [], sFallback);
     }
 
     return Object.freeze({

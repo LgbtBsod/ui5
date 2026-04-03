@@ -957,6 +957,7 @@ def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
     return {
         "__metadata": _entity_metadata("ChecklistSearch", "ChecklistSearchSet", root_key),
         "DB_KEY": root_key,
+        "Key": root_key,
         "Id": root.checklist_id or "",
         "DateCheck": date_only_to_odata(_datecheck_datetime(root).date()),
         "TimeCheck": root.time_check or "",
@@ -988,6 +989,7 @@ def _to_root(root: ChecklistRoot, db: Session | None = None) -> dict:
     return {
         "__metadata": _entity_metadata("ChecklistRoot", "ChecklistRootSet", s["DB_KEY"]),
         "DB_KEY": s["DB_KEY"],
+        "Key": s["Key"],
         "RequestId": s["RequestId"],
         "Id": s["Id"],
         "ChangedOn": s["ChangedOn"],
@@ -1008,20 +1010,29 @@ def _to_basic(root: ChecklistRoot) -> dict:
     return {
         "__metadata": _entity_metadata("ChecklistBasicInfo", "ChecklistBasicInfoSet", root_key),
         "DB_KEY": root_key,
+        "ChecklistId": root.checklist_id or "",
         "LocationKey": root.location_key or "",
         "LocationName": root.location_name or root.location_text or "",
         "LocationText": root.location_text or root.location_name or "",
         "Bukrs": root.bukrs or "",
         "ObserverPernr": root.observer_perner or "",
+        "ObserverName": root.observer_fullname or "",
         "ObserverFullname": root.observer_fullname or "",
         "ObserverPosition": root.observer_position or "",
         "ObserverOrgUnit": root.observer_orgunit or "",
         "ObservedPernr": root.observed_perner or "",
+        "ObservedName": root.observed_fullname or "",
         "ObservedFullname": root.observed_fullname or "",
         "ObservedPosition": root.observed_position or "",
         "ObservedOrgUnit": root.observed_orgunit or "",
         "Lpc": root.lpc or "",
+        "LpcText": root.lpc_text or root.lpc or "",
         "Profession": root.observed_position or "",
+        "ProfessionText": root.observed_position or "",
+        "ChecksNumber": "",
+        "ChecksNumberText": "",
+        "BarriersNumber": "",
+        "BarriersNumberText": "",
         "DateCheck": date_only_to_odata(_datecheck_datetime(root).date()),
         "TimeCheck": root.time_check or "",
         "TimeZone": root.time_zone or "",
@@ -1281,7 +1292,7 @@ def _normalize_filter_hex_keys(filter_expr: str | None, fields: tuple[str, ...] 
 
     out = str(filter_expr)
     for field in fields:
-        rx = re.compile(rf"\b{re.escape(field)}\b\s+(eq|ne)\s+'([0-9a-fA-F\-]{{32,36}})'", re.IGNORECASE)
+        rx = re.compile(rf"\b{re.escape(field)}\b\s+(eq|ne)\s+(?:binary)?'([0-9a-fA-F\-]{{32,36}})'", re.IGNORECASE)
 
         def _replace(match):
             op = match.group(1)

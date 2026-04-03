@@ -45,6 +45,70 @@ sap.ui.define([
         return fnGetText("analyticsSourceFilterLabel", []) + ": " + sResolvedSourceText;
     }
 
+    function formatSourceText(sSelectedSource, fnGetText) {
+        var sSourceKey = coerceText(sSelectedSource).toUpperCase();
+
+        if (sSourceKey === AnalyticsContracts.SOURCES.WEB) {
+            return fnGetText("analyticsSourceWeb", []);
+        }
+        if (sSourceKey === AnalyticsContracts.SOURCES.INTEGRATION) {
+            return fnGetText("analyticsSourceIntegration", []);
+        }
+        if (sSourceKey === AnalyticsContracts.SOURCES.ALL) {
+            return fnGetText("analyticsSourceAll", []);
+        }
+        return coerceText(sSelectedSource) || "-";
+    }
+
+    function formatMonthText(sMonthValue, fnGetText) {
+        var sKey = coerceText(sMonthValue).toUpperCase();
+        var mMonthTextKeys = {
+            JAN: "analyticsMonthShortJan",
+            FEB: "analyticsMonthShortFeb",
+            MAR: "analyticsMonthShortMar",
+            APR: "analyticsMonthShortApr",
+            MAY: "analyticsMonthShortMay",
+            JUN: "analyticsMonthShortJun",
+            JUL: "analyticsMonthShortJul",
+            AUG: "analyticsMonthShortAug",
+            SEP: "analyticsMonthShortSep",
+            OCT: "analyticsMonthShortOct",
+            NOV: "analyticsMonthShortNov",
+            DEC: "analyticsMonthShortDec",
+            "ЯНВ": "analyticsMonthShortJan",
+            "ФЕВ": "analyticsMonthShortFeb",
+            "МАР": "analyticsMonthShortMar",
+            "АПР": "analyticsMonthShortApr",
+            "МАЙ": "analyticsMonthShortMay",
+            "ИЮН": "analyticsMonthShortJun",
+            "ИЮЛ": "analyticsMonthShortJul",
+            "АВГ": "analyticsMonthShortAug",
+            "СЕН": "analyticsMonthShortSep",
+            "ОКТ": "analyticsMonthShortOct",
+            "НОЯ": "analyticsMonthShortNov",
+            "ДЕК": "analyticsMonthShortDec"
+        };
+        var sTextKey = mMonthTextKeys[sKey];
+
+        return sTextKey ? fnGetText(sTextKey, []) : coerceText(sMonthValue);
+    }
+
+    function localizeChartLabel(sLabel, fnGetText) {
+        var sNormalized = coerceText(sLabel).toUpperCase();
+        var sSourceText = formatSourceText(sNormalized, fnGetText);
+        var sMonthText = formatMonthText(sNormalized, fnGetText);
+
+        if (sNormalized === AnalyticsContracts.SOURCES.ALL
+            || sNormalized === AnalyticsContracts.SOURCES.WEB
+            || sNormalized === AnalyticsContracts.SOURCES.INTEGRATION) {
+            return sSourceText;
+        }
+        if (sMonthText && sMonthText !== sLabel) {
+            return sMonthText;
+        }
+        return coerceText(sLabel);
+    }
+
     function formatRefreshStatusState(oRefreshState) {
         var sNormalizedStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
         var bIsRunning = !!(oRefreshState && oRefreshState.isRunning);
@@ -62,14 +126,28 @@ sap.ui.define([
     }
 
     function formatRefreshStatusText(oRefreshState, fnGetText) {
-        var sStatus = coerceText(oRefreshState && oRefreshState.status);
+        var sStatus = coerceText(oRefreshState && oRefreshState.status).toUpperCase();
         var sMessage = coerceText(oRefreshState && (oRefreshState.lastMessage || oRefreshState.lastError));
 
-        if (sMessage) {
-            return sMessage;
-        }
         if (!sStatus) {
             return fnGetText("analyticsRefreshIdle", []);
+        }
+        if (sStatus === AnalyticsContracts.REFRESH_STATUS.REQUESTED) {
+            if (sMessage) {
+                return sMessage;
+            }
+            return fnGetText("analyticsRefreshQueued", []);
+        }
+        if (sStatus === AnalyticsContracts.REFRESH_STATUS.RUNNING) {
+            return sMessage
+                ? fnGetText("analyticsRefreshRunning", []) + ": " + sMessage
+                : fnGetText("analyticsRefreshRunning", []);
+        }
+        if (sStatus === AnalyticsContracts.REFRESH_STATUS.SUCCESS || sStatus === AnalyticsContracts.REFRESH_STATUS.READY) {
+            return fnGetText("analyticsRefreshIdle", []);
+        }
+        if (sMessage) {
+            return sMessage;
         }
         return sStatus;
     }
@@ -118,6 +196,9 @@ sap.ui.define([
         formatRefreshMessageVisible: formatRefreshMessageVisible,
         formatRefreshStatusState: formatRefreshStatusState,
         formatRefreshStatusText: formatRefreshStatusText,
-        formatSourceContext: formatSourceContext
+        formatSourceContext: formatSourceContext,
+        formatSourceText: formatSourceText,
+        formatMonthText: formatMonthText,
+        localizeChartLabel: localizeChartLabel
     };
 });

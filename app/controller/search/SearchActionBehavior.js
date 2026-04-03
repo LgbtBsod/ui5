@@ -17,6 +17,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
 ], function (
@@ -38,6 +39,7 @@ sap.ui.define([
     SearchContracts,
     CreateSentinel,
     UiControlIds,
+    MessageKeyConstants,
     StatePaths,
     ModelContracts
 ) {
@@ -47,6 +49,7 @@ sap.ui.define([
     var STATE_MODEL = ModelContracts.MODELS.STATE;
     var SEARCH_MODE = SearchContracts.SEARCH_MODE;
     var COMMANDS = SearchContracts.COMMANDS;
+    var SEARCH_MESSAGE_KEYS = MessageKeyConstants.SEARCH;
 
     function normalizeSearchCommandPayload(sMethod, mInput) {
         if (sMethod === COMMANDS.APPLY_REBIND_POLICY) {
@@ -60,14 +63,20 @@ sap.ui.define([
     function runSearchCommand(oController, sMethod, mInput) {
         var oFacade = oController && oController._facade;
         var oCtx = oController && oController._ctx ? oController._ctx() : {};
+        var fnApplyUseCaseEffects = oController && oController.applyUseCaseEffects;
 
         if (!oFacade || typeof oFacade[sMethod] !== "function") {
             return Promise.resolve(false);
         }
         return Promise.resolve(
             oFacade[sMethod].call(oFacade, normalizeSearchCommandPayload(sMethod, mInput || {}), oCtx)
-        ).then(function () {
-            return true;
+        ).then(function (oResult) {
+            if (typeof fnApplyUseCaseEffects === "function") {
+                return Promise.resolve(fnApplyUseCaseEffects.call(oController, oResult)).then(function () {
+                    return oResult;
+                });
+            }
+            return oResult;
         });
     }
 
@@ -148,7 +157,7 @@ sap.ui.define([
         return runSearchCommand(oController, "rebind", { source: SEARCH_SOURCES.SEARCH_RETRY }).finally(function () {
             SearchLoadRuntime.setLoadStatus(oController, { isLoading: false, isBusy: false, loadError: false });
         }).catch(function (oError) {
-            SearchLoadRuntime.applyLoadError(oController, String((oError && oError.message) || "searchOfflineMessage"));
+            SearchLoadRuntime.applyLoadError(oController, String((oError && (oError.code || oError.message)) || SEARCH_MESSAGE_KEYS.OFFLINE));
             return Promise.reject(oError);
         });
     }
@@ -251,7 +260,7 @@ sap.ui.define([
         }
         return selectRowWithScrollCapture(oController, {
             intent: SEARCH_SOURCES.OPEN,
-            rootId: sDbKey,
+            dbKey: sDbKey,
             source: SEARCH_SOURCES.TABLE_ITEM_PRESS
         });
     }

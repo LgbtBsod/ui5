@@ -21,15 +21,19 @@ sap.ui.define([
         };
     }
 
-function execute(mInput, mCtx) {
-        var sRootId = (mInput && mInput.rootId) || "";
+    function execute(mInput, mCtx) {
+        var sRequestedDbKey = (mInput && (mInput.dbKey || mInput.rootId)) || "";
         var oSnapshot = (mInput && mInput.snapshot) || null;
         var sEntityKind = (mInput && mInput.entityKind) || "detailSnapshot";
         var sLastChangeSet = String((mInput && mInput.lastChangeSet) || readSnapshotStamp(oSnapshot) || "").trim();
         var oCache = mCtx && mCtx.cache;
         var bPortLike = !!(BrowserCachePort && BrowserCachePort.prototype && typeof oCache.write === "function");
-        if (!sRootId || !oCache || !bPortLike) return Promise.resolve(Result.ok({ written: false }));
-        return Promise.resolve(oCache.write(sRootId, oSnapshot, {
+
+        if (!sRequestedDbKey || !oCache || !bPortLike) {
+            return Promise.resolve(Result.ok({ written: false }));
+        }
+
+        return Promise.resolve(oCache.write(sRequestedDbKey, oSnapshot, {
             entityKind: sEntityKind,
             lastChangeSet: sLastChangeSet,
             validatedAt: new Date().toISOString()

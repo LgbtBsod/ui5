@@ -25,7 +25,7 @@ sap.ui.define([
         return String((oUiState && oUiState.get(STATE_MODEL, StatePaths.SESSION_ID)) || "").trim();
     }
 
-    function resolveCopiedRootId(oSnapshot) {
+    function resolveCopiedDbKey(oSnapshot) {
         return String(
             (((oSnapshot || {}).root || {}).id) ||
             (((oSnapshot || {}).root || {}).Key) ||
@@ -46,13 +46,13 @@ sap.ui.define([
         var sIntent = String((mInput && mInput.intent) || "open");
         var oSmart = mCtx && mCtx.smartControls;
         var oRepo = mCtx && mCtx.repo;
-        var sRootId = String((mInput && mInput.rootId) || (oSmart && oSmart.getSelectedRowKey && oSmart.getSelectedRowKey()) || "").trim();
+        var sDbKey = String((mInput && (mInput.dbKey || mInput.DB_KEY || mInput.rootId)) || (oSmart && oSmart.getSelectedRowKey && oSmart.getSelectedRowKey()) || "").trim();
 
         if (sIntent === "create") {
             return Promise.resolve(Result.ok({ mode: "create" }, [Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: CreateSentinel.toRouteId() }, false)]));
         }
 
-        if (!sRootId) {
+        if (!sDbKey) {
             var sMissingKey = sIntent === "delete" ? DETAIL_VIEW_KEYS.NOTHING_TO_DELETE : SEARCH_MESSAGE_KEYS.NOTHING_TO_COPY;
             return Promise.resolve(Result.fail({ messageKey: sMissingKey, code: "NO_SELECTION" }, [Effects.toast(sMissingKey, "warning")]));
         }
@@ -62,7 +62,7 @@ sap.ui.define([
                 return Promise.resolve(Result.fail({ messageKey: DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, code: "DELETE_UNAVAILABLE" }));
             }
             return Promise.resolve(oRepo.checkChecklistPermission({
-                rootId: sRootId,
+                dbKey: sDbKey,
                 activity: ACCESS_OPERATIONS.DELETE
             })).then(function (oPermission) {
                 if (!oPermission || oPermission.canDelete !== true) {
@@ -70,11 +70,11 @@ sap.ui.define([
                         Effects.toast(DETAIL_MESSAGE_KEYS.DETAIL_DELETE_PERMISSION_DENIED, "warning")
                     ]);
                 }
-                return Promise.resolve(oRepo.deleteChecklist({ rootId: sRootId })).then(function () {
+                return Promise.resolve(oRepo.deleteChecklist({ dbKey: sDbKey })).then(function () {
                     if (oSmart && typeof oSmart.rebindSearchTable === "function") {
                         oSmart.rebindSearchTable();
                     }
-                    return Result.ok({ selectedRootId: sRootId, intent: sIntent }, SearchSelectionEffects.buildSelectionResetEffects().concat([
+                    return Result.ok({ selectedDbKey: sDbKey, intent: sIntent }, SearchSelectionEffects.buildSelectionResetEffects().concat([
                         Effects.toast(DETAIL_MESSAGE_KEYS.CHECKLIST_DELETED, "success")
                     ]));
                 });
@@ -91,28 +91,28 @@ sap.ui.define([
             if (!oRepo || typeof oRepo.copyChecklist !== "function") {
                 return Promise.resolve(Result.fail({ messageKey: DETAIL_VIEW_KEYS.GENERIC_OPERATION_FAILED, code: "COPY_UNAVAILABLE" }));
             }
-            return Promise.resolve(oRepo.copyChecklist({ rootId: sRootId, sessionGuid: sSessionGuid })).then(function (oCopyResult) {
+            return Promise.resolve(oRepo.copyChecklist({ dbKey: sDbKey, sessionGuid: sSessionGuid })).then(function (oCopyResult) {
                 var oSnapshot = (oCopyResult && oCopyResult.serverSnapshot) || {};
-                var sCopiedRootId = resolveCopiedRootId(oSnapshot);
-                if (!sCopiedRootId) {
+                var sCopiedDbKey = resolveCopiedDbKey(oSnapshot);
+                if (!sCopiedDbKey) {
                     return Result.fail({ messageKey: DETAIL_VIEW_KEYS.GENERIC_OPERATION_FAILED, code: "COPY_INVALID_RESPONSE" });
                 }
                 if (oSmart && typeof oSmart.rebindSearchTable === "function") {
                     oSmart.rebindSearchTable();
                 }
-                return Result.ok({ selectedRootId: sRootId, intent: sIntent }, DetailPostOpenRuntime.buildEditableDetailEffects(sCopiedRootId, {
+                return Result.ok({ selectedDbKey: sDbKey, intent: sIntent }, DetailPostOpenRuntime.buildEditableDetailEffects(sCopiedDbKey, {
                     snapshot: oSnapshot
                 }).concat([
                     Effects.toast(SEARCH_MESSAGE_KEYS.CHECKLIST_COPIED, "success"),
-                    Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sCopiedRootId }, false)
+                    Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sCopiedDbKey }, false)
                 ]));
             }).catch(function (oError) {
                 return Result.fail(oError);
             });
         }
 
-        return Promise.resolve(Result.ok({ selectedRootId: sRootId, intent: sIntent }, [
-            Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sRootId }, false)
+        return Promise.resolve(Result.ok({ selectedDbKey: sDbKey, intent: sIntent }, [
+            Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sDbKey }, false)
         ]));
     }
 

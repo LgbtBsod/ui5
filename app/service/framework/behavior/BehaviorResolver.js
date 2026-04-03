@@ -1,10 +1,20 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/BehaviorRegistry",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (BehaviorRegistry, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
+], function (BehaviorRegistry, JsRuntime, MessageCodeConstants) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
+    var TECHNICAL_CODES = MessageCodeConstants.TECHNICAL;
+
+    function createMissingHandlerError(sScope, sOperation) {
+        var oError = new Error(TECHNICAL_CODES.BEHAVIOR_HANDLER_MISSING);
+        oError.code = TECHNICAL_CODES.BEHAVIOR_HANDLER_MISSING;
+        oError.scope = String(sScope || "").trim();
+        oError.operation = String(sOperation || "").trim();
+        return oError;
+    }
 
     function appendUnique(aTarget, vValue) {
         if (Array.isArray(vValue)) {
@@ -72,7 +82,7 @@ sap.ui.define([
     function execute(sScope, sOperation, mContext, mDefaultHandlers) {
         var fnHandler = resolve(sScope, sOperation, mContext, mDefaultHandlers);
         if (typeof fnHandler !== TYPE_FUNCTION) {
-            return Promise.reject(new Error("No behavior handler registered for " + sScope + ":" + sOperation));
+            return Promise.reject(createMissingHandlerError(sScope, sOperation));
         }
         return Promise.resolve(fnHandler(mContext || {}));
     }
@@ -80,7 +90,7 @@ sap.ui.define([
     function executeSync(sScope, sOperation, mContext, mDefaultHandlers) {
         var fnHandler = resolve(sScope, sOperation, mContext, mDefaultHandlers);
         if (typeof fnHandler !== TYPE_FUNCTION) {
-            throw new Error("No behavior handler registered for " + sScope + ":" + sOperation);
+            throw createMissingHandlerError(sScope, sOperation);
         }
         return fnHandler(mContext || {});
     }

@@ -10,19 +10,24 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsViewStateReader",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/SpreadsheetExport",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants"
-], function (Fragment, ControllerViewStateRuntime, FeedbackDefaultHandlers, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, SpreadsheetExport, DebugLogger, FeedbackConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/FeedbackConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime"
+], function (Fragment, ControllerViewStateRuntime, FeedbackDefaultHandlers, AnalyticsContracts, DialogContracts, ReadinessTelemetryContracts, ReadinessTelemetryRuntime, AnalyticsExportRows, AnalyticsViewStateReader, SpreadsheetExport, DebugLogger, FeedbackConstants, MessageKeyConstants, MessageCodeConstants, ControllerTextRuntime) {
     "use strict";
 
     var PATHS = AnalyticsContracts.PATHS;
-    var ERROR_CODES = Object.freeze({
-        BUILD_ROWS_FAILED: "analytics_export_rows_unavailable",
-        EXPORT_FAILED: "analytics_export_failed"
+    var VIEW_MESSAGE_KEYS = MessageKeyConstants.VIEW;
+    var ANALYTICS_CONTEXT_TEXT_KEY = "analyticsTitle";
+    var TECHNICAL_CODES = Object.freeze({
+        BUILD_ROWS_FAILED: MessageCodeConstants.TECHNICAL.ANALYTICS_EXPORT_ROWS_UNAVAILABLE,
+        EXPORT_FAILED: MessageCodeConstants.TECHNICAL.ANALYTICS_EXPORT_FAILED
     });
 
     function getLoggerPayload(oError, sFallbackMessage) {
         return {
-            code: String((oError && oError.code) || sFallbackMessage || ERROR_CODES.EXPORT_FAILED),
+            code: String((oError && oError.code) || sFallbackMessage || TECHNICAL_CODES.EXPORT_FAILED),
             stack: String((oError && oError.stack) || "")
         };
     }
@@ -81,9 +86,12 @@ sap.ui.define([
             controller: oController,
             textKey: sTextKey,
             args: aArgs || [],
-            severity: sSeverity,
-            fallback: sTextKey
+            severity: sSeverity
         });
+    }
+
+    function analyticsContextLabel(oController) {
+        return ControllerTextRuntime.getText(oController, ANALYTICS_CONTEXT_TEXT_KEY, [], "") || "";
     }
 
     function exportAnalyticsReport(oController) {
@@ -94,43 +102,43 @@ sap.ui.define([
         try {
             aRows = AnalyticsExportRows.buildRows(oViewState, oBundle);
         } catch (oError) {
-            sErrorMessage = String((oError && oError.code) || ERROR_CODES.BUILD_ROWS_FAILED);
+            sErrorMessage = String((oError && oError.code) || TECHNICAL_CODES.BUILD_ROWS_FAILED);
             ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
             if (DebugLogger && typeof DebugLogger.error === "function") {
                 DebugLogger.error("AnalyticsExportRuntime", "build_rows_failed", getLoggerPayload(oError, sErrorMessage));
             }
-            showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
+            showToast(oController, VIEW_MESSAGE_KEYS.EXPORT_FAILED, [analyticsContextLabel(oController)], FeedbackConstants.SEVERITY.ERROR);
             return Promise.resolve(false);
         }
         if (!aRows.length) {
-            return showToast(oController, "nothingToExport", [], FeedbackConstants.SEVERITY.WARNING);
+            return showToast(oController, VIEW_MESSAGE_KEYS.EXPORT_EMPTY, [], FeedbackConstants.SEVERITY.WARNING);
         }
         try {
             return SpreadsheetExport.download(buildAnalyticsExportFileName(oController), aRows, {
                 workbookColumns: buildSpreadsheetColumns(aRows)
             }).then(function () {
-                showToast(oController, "searchExportSuccess", [], FeedbackConstants.SEVERITY.INFO);
+                showToast(oController, VIEW_MESSAGE_KEYS.EXPORT_SUCCESS, [], FeedbackConstants.SEVERITY.INFO);
                 return true;
             }).catch(function (oError) {
-                sErrorMessage = String((oError && oError.code) || ERROR_CODES.EXPORT_FAILED);
+                sErrorMessage = String((oError && oError.code) || TECHNICAL_CODES.EXPORT_FAILED);
                 ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
                 if (DebugLogger && typeof DebugLogger.error === "function") {
                     DebugLogger.error("AnalyticsExportRuntime", "export_failed", Object.assign({
                         export: getLoggerPayload(oError, sErrorMessage)
                     }, getSelectionLogContext(oController)));
                 }
-                showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
+                showToast(oController, VIEW_MESSAGE_KEYS.EXPORT_FAILED, [analyticsContextLabel(oController)], FeedbackConstants.SEVERITY.ERROR);
                 return false;
             });
         } catch (oError) {
-            sErrorMessage = String((oError && oError.code) || ERROR_CODES.EXPORT_FAILED);
+            sErrorMessage = String((oError && oError.code) || TECHNICAL_CODES.EXPORT_FAILED);
             ControllerViewStateRuntime.set(oController, PATHS.ERROR, sErrorMessage);
             if (DebugLogger && typeof DebugLogger.error === "function") {
                 DebugLogger.error("AnalyticsExportRuntime", "export_failed", Object.assign({
                     export: getLoggerPayload(oError, sErrorMessage)
                 }, getSelectionLogContext(oController)));
             }
-            showToast(oController, "exportFailed", ["analytics"], FeedbackConstants.SEVERITY.ERROR);
+            showToast(oController, VIEW_MESSAGE_KEYS.EXPORT_FAILED, [analyticsContextLabel(oController)], FeedbackConstants.SEVERITY.ERROR);
             return Promise.resolve(false);
         }
     }

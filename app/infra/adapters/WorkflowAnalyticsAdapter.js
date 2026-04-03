@@ -38,8 +38,8 @@ sap.ui.define([
             avgChecksRate: toNumber(firstDefined(o.avgChecksRate, o.AvgChecksRate)),
             avgBarriersRate: toNumber(firstDefined(o.avgBarriersRate, o.AvgBarriersRate)),
             refreshedAt: String(firstDefined(o.refreshedAt, o.RefreshedAt, "-")),
-            source: String(firstDefined(o.source, o.Source, "ALL")),
-            sourceText: String(firstDefined(o.sourceText, o.SourceText, o.source, o.Source, "All"))
+            source: String(firstDefined(o.source, o.Source, AnalyticsContracts.SOURCES.ALL)),
+            sourceText: String(firstDefined(o.sourceText, o.SourceText, o.source, o.Source, AnalyticsContracts.SOURCES.ALL))
         };
     }
 

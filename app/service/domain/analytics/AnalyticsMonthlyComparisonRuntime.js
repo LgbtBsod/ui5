@@ -3,7 +3,7 @@ sap.ui.define([
 ], function (AnalyticsChartValueRuntime) {
     "use strict";
 
-    var MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    var MONTH_LABELS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
     var METRIC_MAP = {
         TOTAL: ["selectedTotal", "compareTotal"],
         FAILED_CHECKS: ["selectedFailedChecks", "compareFailedChecks"],

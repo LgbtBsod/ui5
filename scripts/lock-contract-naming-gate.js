@@ -32,6 +32,10 @@ if (!/FunctionImport Name="CopyChecklist"[\s\S]*?<Parameter Name="DB_KEY" Type="
 if (/ObjectUuid/.test(lockAdapter)) {
   issues.push("app/infra/adapters/LockAdapter.js: frontend canonical lock surface must not use ObjectUuid");
 }
+const componentLockRuntime = read("app/service/runtime/component/ComponentLockEventsRuntime.js");
+if (/\bObjectUuid\b|\bobjectUuid\b/.test(componentLockRuntime)) {
+  issues.push("app/service/runtime/component/ComponentLockEventsRuntime.js: lock runtime must not consume ObjectUuid aliases");
+}
 if (/rootId/.test(lockAdapter) && !/dbKey \|\| mArgs\.DB_KEY \|\| mArgs\.rootId/.test(lockAdapter)) {
   issues.push("app/infra/adapters/LockAdapter.js: lock adapter must expose dbKey as canonical frontend key and keep rootId only as compatibility fallback");
 }
@@ -75,8 +79,8 @@ if (!/CopyChecklist[\s\S]*?iv_name = 'SessionGuid'\s+iv_edm_type = 'String'/.tes
 }
 
 const fallbackCount = (dpc.match(/ObjectUuid/g) || []).length;
-if (fallbackCount > 3) {
-  issues.push("backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap: ObjectUuid compatibility alias leaked beyond narrow lock boundary");
+if (fallbackCount > 0) {
+  issues.push("backend/sap_backend/src/zcl_zodata_dpc_ext.clas.abap: ObjectUuid compatibility alias must stay out of active DPC runtime and remain boundary-only");
 }
 
 if (issues.length) {

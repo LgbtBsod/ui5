@@ -80,7 +80,7 @@ sap.ui.define([
         };
 
         AttachmentGatewayRuntime.uploadPendingAttachments(oController, {
-            rootId: "001122",
+            dbKey: "001122",
             attachments: [{
                 file: {
                     name: "evidence.txt",
@@ -105,17 +105,19 @@ sap.ui.define([
             assert.strictEqual(bMultiple, false, "uploader is constrained to a single file");
             assert.strictEqual(bUploadCalled, true, "upload is triggered");
             assert.strictEqual(mHeaders["X-CSRF-Token"], "TOKEN-1", "csrf token is forwarded");
-            assert.strictEqual(mHeaders["X-DB-Key"], "001122", "root key is forwarded");
+            assert.strictEqual(mHeaders["X-DB-Key"], "001122", "db key is forwarded");
             assert.strictEqual(mHeaders["X-Parent-Key"], "001122", "parent key stays canonical");
+            assert.strictEqual(mHeaders["X-Folder-Key"], "001122", "folder key defaults to the canonical persisted owner");
             assert.strictEqual(mHeaders["X-Category-Key"], "GEN", "category header is forwarded");
             assert.strictEqual(mHeaders["X-Description"], "desc", "description header is forwarded");
             assert.strictEqual(mHeaders["X-File-Name"], "evidence.txt", "filename header is forwarded");
             assert.strictEqual(mHeaders.Slug, "evidence.txt", "slug carries the file name");
             assert.strictEqual(bCleared, true, "uploader is cleared after completion");
             done();
+        }).then(function (aUploadResult) {
+            assert.deepEqual(aUploadResult, [{ AttachmentKey: "ATT-1" }], "gateway upload resolves productive media response payload");
         }).catch(function (oError) {
             assert.ok(false, oError && oError.message || String(oError));
-            done();
-        });
+        }).finally(done);
     });
 });

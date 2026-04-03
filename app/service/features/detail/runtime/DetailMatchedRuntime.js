@@ -19,6 +19,7 @@ sap.ui.define([
     var DETAIL_MODEL = MODELS.DETAIL;
     var DETAIL_MODEL_PATHS = DetailUseCaseConstants.MODEL_PATHS;
     var APP_SOURCES = OperationSourceContracts.APP;
+    var VIEW_DEFAULTS = DetailUseCaseConstants.VIEW_DEFAULTS;
 
     function createMatchedStatePatch(sId, sRouteName, bCreate) {
         var mStatePatch = {};
@@ -49,9 +50,18 @@ sap.ui.define([
         mViewPatch[ViewPathContracts.ATTACHMENTS_LOADED] = false;
         mViewPatch[ViewPathContracts.SESSION_ATTACHMENTS] = [];
         mViewPatch["/attachmentBusy"] = false;
+        mViewPatch["/attachmentCategoryKey"] = VIEW_DEFAULTS.ATTACHMENT_CATEGORY_KEY;
         mViewPatch["/observerSuggestions"] = [];
         mViewPatch["/observedSuggestions"] = [];
+        mViewPatch["/observerInputValue"] = "";
+        mViewPatch["/observedInputValue"] = "";
         mViewPatch["/personSuggestHint"] = "";
+        mViewPatch["/locationVhBusy"] = false;
+        mViewPatch["/locationVhHint"] = "";
+        mViewPatch["/locationVhHasSelection"] = false;
+        mViewPatch["/locationVhSelection"] = null;
+        mViewPatch["/locationVhTree"] = [];
+        mViewPatch["/locationVhTreeSource"] = [];
         mViewPatch[ViewPathContracts.ACCESS_STATE] = mHooks.createAccessState(sId);
         return mViewPatch;
     }
@@ -69,8 +79,8 @@ sap.ui.define([
 
     function isLayoutOnlyTransition(mInput) {
         return !mInput.bCreate &&
-            mInput.sCurrentRootId === mInput.sId &&
-            mInput.sSelectedRootId === mInput.sId &&
+            mInput.sCurrentDbKey === mInput.sId &&
+            mInput.sSelectedDbKey === mInput.sId &&
             NavigationContracts.isDetailRoute(mInput.sCurrentRouteName) &&
             NavigationContracts.isDetailRoute(mInput.sRouteName);
     }
@@ -83,22 +93,22 @@ sap.ui.define([
         var bCreate = CreateSentinel.isCreateId(sId);
         var sRouteLayout = sLayoutArg === "midcolumnfullscreen" ? NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN : NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
         var sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-        var sCurrentRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
-        var sPostOpenHydratedRootId = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
+        var sCurrentDbKey = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        var sPostOpenHydratedDbKey = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
         var oDetailModel = oController.getModel(DETAIL_MODEL);
         var oDetailData = (oDetailModel && oDetailModel.getData && oDetailModel.getData()) || {};
-        var sSelectedRootId = String((oDetailData && oDetailData.current && oDetailData.current.root && oDetailData.current.root.id) || "").trim();
+        var sSelectedDbKey = String((oDetailData && oDetailData.current && oDetailData.current.root && oDetailData.current.root.id) || "").trim();
 
         return {
             bCreate: bCreate,
             oDetailModel: oDetailModel,
-            sCurrentRootId: sCurrentRootId,
+            sCurrentDbKey: sCurrentDbKey,
             sCurrentRouteName: sCurrentRouteName,
             sId: sId,
-            sPostOpenHydratedRootId: sPostOpenHydratedRootId,
+            sPostOpenHydratedDbKey: sPostOpenHydratedDbKey,
             sRouteLayout: sRouteLayout,
             sRouteName: sRouteName,
-            sSelectedRootId: sSelectedRootId
+            sSelectedDbKey: sSelectedDbKey
         };
     }
 
@@ -128,7 +138,7 @@ sap.ui.define([
             });
             ModelStateRuntime.writeOnModel(mContext.oDetailModel, DETAIL_MODEL_PATHS.ATTACHMENTS, []);
         }
-        return mHooks.openChecklist({ id: CreateSentinel.VALUE, rootId: CreateSentinel.VALUE });
+        return mHooks.openChecklist({ id: CreateSentinel.VALUE, dbKey: CreateSentinel.VALUE });
     }
 
     return {
