@@ -159,7 +159,7 @@ def _resolve_root_from_payload(payload: dict) -> str:
         return root_key
     full = payload.get("FullPayload") or payload
     root_block = full.get("root") if isinstance(full, dict) else {}
-    return _boundary_root_key(root_block, (root_block or {}).get("DB_KEY"), (root_block or {}).get("db_key"), (root_block or {}).get("pcct_uuid"))
+    return _boundary_root_key(root_block, (root_block or {}).get("DB_KEY"), (root_block or {}).get("db_key"))
 
 
 def _boundary_parent_key(payload: dict | None = None, *candidates) -> str:
@@ -1222,10 +1222,10 @@ def _build_lock_status_row(db: Session, root_uuid: str, session_guid: str = "") 
     if root_uuid == "__CREATE":
         return _row(bool(session_guid), "OWNED_BY_YOU" if session_guid else "FREE", CurrentUserService.resolve_uname(db=db) if session_guid else "", None)
 
-    active = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_uuid, LockEntry.is_killed.is_(False)).first()
+    active = db.query(LockEntry).filter(LockEntry.db_key == root_uuid, LockEntry.is_killed.is_(False)).first()
     if not active:
         own = db.query(LockEntry).filter(
-            LockEntry.pcct_uuid == root_uuid,
+            LockEntry.db_key == root_uuid,
             LockEntry.session_guid == session_guid,
         ).order_by(LockEntry.last_refresh_at.desc()).first() if session_guid else None
         if own:
@@ -1367,7 +1367,7 @@ def _save_request_root_key(payload: dict | None) -> str:
     root = _save_request_root(payload)
     return _boundary_root_key(
         root,
-        root.get("pcct_uuid"),
+        root.get("db_key"),
         body.get("DB_KEY"),
         body.get("db_key"),
     )

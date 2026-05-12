@@ -71,7 +71,7 @@ class LockService:
     @staticmethod
     def _create_active_lock(db: Session, db_key: str, session_guid: str, uname: str, current_time) -> LockEntry:
         lock = LockEntry(
-            pcct_uuid=db_key,
+            db_key=db_key,
             user_id=uname,
             session_guid=session_guid,
             locked_at=current_time,
@@ -80,7 +80,7 @@ class LockService:
         )
         db.add(lock)
         db.flush()
-        db.add(LockLog(pcct_uuid=db_key, user_id=uname, session_guid=session_guid, action="ACQUIRED"))
+        db.add(LockLog(db_key=db_key, user_id=uname, session_guid=session_guid, action="ACQUIRED"))
         db.commit()
         db.refresh(lock)
         return lock
@@ -91,7 +91,7 @@ class LockService:
         lock = (
             db.query(LockEntry)
             .filter(
-                LockEntry.pcct_uuid == db_key,
+                LockEntry.db_key == db_key,
                 LockEntry.is_killed.is_(False),
             )
             .first()
@@ -101,7 +101,7 @@ class LockService:
 
         if LockService._is_expired(lock, current_time):
             lock.is_killed = True
-            db.add(LockLog(pcct_uuid=db_key, user_id=lock.user_id, action="EXPIRED"))
+            db.add(LockLog(db_key=db_key, user_id=lock.user_id, action="EXPIRED"))
             db.commit()
             return None
         return lock
@@ -128,7 +128,7 @@ class LockService:
         if existing.session_guid == session_guid:
             existing.last_refresh_at = current_time
             existing.expires_at = current_time + LOCK_TTL
-            db.add(LockLog(pcct_uuid=db_key, user_id=uname, session_guid=session_guid, action="REFRESHED"))
+            db.add(LockLog(db_key=db_key, user_id=uname, session_guid=session_guid, action="REFRESHED"))
             db.commit()
             return LockService._with_server_state(
                 LockService._lock_payload(True, "LOCK_OK", existing.user_id, existing.session_guid, LockService._lock_expires_at(existing), False, True, True, "HEARTBEAT"),
@@ -141,7 +141,7 @@ class LockService:
             existing.killed_by = session_guid
 
             new_lock = LockEntry(
-                pcct_uuid=db_key,
+                db_key=db_key,
                 user_id=uname,
                 session_guid=session_guid,
                 locked_at=current_time,
@@ -149,7 +149,7 @@ class LockService:
                 expires_at=current_time + LOCK_TTL,
             )
             db.add(new_lock)
-            db.add(LockLog(pcct_uuid=db_key, user_id=uname, session_guid=session_guid, action="FORCE_TAKEOVER"))
+            db.add(LockLog(db_key=db_key, user_id=uname, session_guid=session_guid, action="FORCE_TAKEOVER"))
             db.commit()
             return LockService._with_server_state(
                 LockService._lock_payload(True, "LOCK_OK", uname, session_guid, LockService._lock_expires_at(new_lock), True, True, True, "ACQUIRED"),
@@ -203,7 +203,7 @@ class LockService:
         lock = (
             db.query(LockEntry)
             .filter(
-                LockEntry.pcct_uuid == db_key,
+                LockEntry.db_key == db_key,
                 LockEntry.session_guid == session_guid,
                 LockEntry.is_killed.is_(False),
             )
@@ -236,7 +236,7 @@ class LockService:
                 s_save_status = "E"
 
         lock.is_killed = True
-        db.add(LockLog(pcct_uuid=db_key, user_id=lock.user_id, session_guid=session_guid, action="RELEASE"))
+        db.add(LockLog(db_key=db_key, user_id=lock.user_id, session_guid=session_guid, action="RELEASE"))
         db.commit()
         return {
             "released": True,
@@ -271,7 +271,7 @@ class LockService:
 
         for lock in expired:
             lock.is_killed = True
-            db.add(LockLog(pcct_uuid=lock.pcct_uuid, user_id=lock.user_id, session_guid=lock.session_guid, action="CLEANUP_EXPIRED"))
+            db.add(LockLog(db_key=lock.db_key, user_id=lock.user_id, session_guid=lock.session_guid, action="CLEANUP_EXPIRED"))
 
         for lock in killed_old:
             db.delete(lock)
@@ -280,11 +280,11 @@ class LockService:
         return len(expired) + len(killed_old)
 
     @staticmethod
-    def validate_lock(db: Session, pcct_uuid: str, user_id: str) -> bool:
+    def validate_lock(db: Session, db_key: str, user_id: str) -> bool:
         lock = (
             db.query(LockEntry)
             .filter(
-                LockEntry.pcct_uuid == pcct_uuid,
+                LockEntry.db_key == db_key,
                 LockEntry.user_id == user_id,
                 LockEntry.is_killed.is_(False),
             )
@@ -302,8 +302,8 @@ class LockService:
         return True
 
     @staticmethod
-    def validate_session_lock(db: Session, pcct_uuid: str, session_guid: str) -> bool:
-        lock = LockService._active_lock(db, pcct_uuid)
+    def validate_session_lock(db: Session, db_key: str, session_guid: str) -> bool:
+        lock = LockService._active_lock(db, db_key)
         if not lock:
             raise ValueError("LOCK_MISSING")
         if str(lock.session_guid or "").strip() != str(session_guid or "").strip():

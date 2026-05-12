@@ -44,7 +44,7 @@ def test_acquire_handles_integrity_race(monkeypatch):
             calls["count"] += 1
             if calls["count"] == 1:
                 competing = LockEntry(
-                    pcct_uuid=db_key,
+                    db_key=db_key,
                     user_id="OTHER",
                     session_guid="OTHER-S",
                     locked_at=current_time,
@@ -116,7 +116,7 @@ def test_status_uses_last_refresh_at_for_expiry():
         _create_root(db, root_id)
         LockService.acquire(db, root_id, "S1", "USER1")
 
-        lock = db.query(LockEntry).filter(LockEntry.pcct_uuid == root_id).first()
+        lock = db.query(LockEntry).filter(LockEntry.db_key == root_id).first()
         lock.last_refresh_at = lock.last_refresh_at - LOCK_TTL - LOCK_TTL
         db.commit()
 

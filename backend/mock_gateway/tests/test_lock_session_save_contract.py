@@ -38,7 +38,7 @@ def test_save_changes_requires_active_session_lock_but_not_client_version():
         save_resp = client.post(
             f"{SERVICE_ROOT}/SaveChanges",
             json={
-                "root": {"pcct_uuid": root_key},
+                "root": {"db_key": root_key},
                 "checks": [],
                 "barriers": [],
                 "SessionGuid": "SAVE-S1"
@@ -72,7 +72,7 @@ def test_autosave_requires_active_session_lock_but_not_client_version():
         autosave_resp = client.post(
             f"{SERVICE_ROOT}/AutoSave",
             json={
-                "root": {"pcct_uuid": copied_key},
+                "root": {"db_key": copied_key},
                 "checks": [],
                 "barriers": [],
                 "SessionGuid": "AUTO-S1"

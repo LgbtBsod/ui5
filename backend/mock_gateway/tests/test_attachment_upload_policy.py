@@ -89,7 +89,7 @@ def test_save_changes_rejects_base64_attachment_payloads():
         payload = {
             "Payload": {
                 "root": {
-                    "pcct_uuid": root_key,
+                    "db_key": root_key,
                     "edit_mode": "U",
                 },
                 "checks": [],
