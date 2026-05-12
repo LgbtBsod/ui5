@@ -4,7 +4,7 @@ metadata:
 type: application
 framework:
   name: SAPUI5
-  version: "1.71.70"
+  version: "1.76.0"
   libraries:
     - name: sap.ui.core
     - name: sap.m
@@ -28,8 +28,8 @@ builder:
       - "/test/**"
 
 # B-02 STATUS: Version intentionally mismatched.
-# - Local tooling: 1.71.70 (npm channel maximum resolvable)
+# - Local tooling: 1.76.0 (oldest currently resolvable npm SAPUI5 metadata tag)
 # - Productive BASIS: confirm via /sap/public/bc/ui5_ui5/1/resources/sap-ui-version.json
-# - manifest.json minUI5Version: updated to 1.71.70 until BASIS version confirmed.
-# ACTION: Once BASIS SP level known, align both values. If BASIS < 1.71.55, run
+# - manifest.json minUI5Version: updated to 1.76.0 until BASIS version confirmed.
+# ACTION: Once BASIS SP level known, align both values. If BASIS < 1.76.0, run
 #   SmartFilterBar regression (persistencyKey bug fixed in 1.71.55).

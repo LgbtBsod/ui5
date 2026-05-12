@@ -237,6 +237,26 @@ sap.ui.define([
         });
     }
 
+    function initializeRuntimeServicesStage(oComponent, mBootstrapDeps, oModelBootstrap, mActionRuntimeOptions) {
+        return mBootstrapDeps.ComponentRuntimeSettingsRuntime.initializeRuntimeSettings(oComponent, {
+            stateModel: oModelBootstrap.models.stateModel,
+            envState: oModelBootstrap.models.envState,
+            masterDataModel: oModelBootstrap.models.masterDataModel,
+            settingsManager: mBootstrapDeps.SettingsManager,
+            gatewayBackendService: GatewayClient,
+            telemetryRuntime: TelemetryRuntime,
+            emitTelemetry: mActionRuntimeOptions.emitTelemetry
+        });
+    }
+
+    function attachLifecycleStage(oComponent, mBootstrapDeps, mActionRuntimeOptions, mRuntimeModels) {
+        return ComponentLifecycleRuntime.attachRuntime(
+            oComponent,
+            Object.assign({}, mBootstrapDeps, mActionRuntimeOptions),
+            mRuntimeModels
+        );
+    }
+
     function init(oComponent, aInitArgs) {
         var oBootstrap;
         var mBootstrapDeps;
@@ -265,20 +285,8 @@ sap.ui.define([
                 });
             }
         };
-        oRuntimeSettingsRuntime = mBootstrapDeps.ComponentRuntimeSettingsRuntime.initializeRuntimeSettings(oComponent, {
-            stateModel: oModelBootstrap.models.stateModel,
-            envState: oModelBootstrap.models.envState,
-            masterDataModel: oModelBootstrap.models.masterDataModel,
-            settingsManager: mBootstrapDeps.SettingsManager,
-            gatewayBackendService: GatewayClient,
-            telemetryRuntime: TelemetryRuntime,
-            emitTelemetry: mActionRuntimeOptions.emitTelemetry
-        });
-        oNavigationRuntime = ComponentLifecycleRuntime.attachRuntime(
-            oComponent,
-            Object.assign({}, mBootstrapDeps, mActionRuntimeOptions),
-            mRuntimeModels
-        );
+        oRuntimeSettingsRuntime = initializeRuntimeServicesStage(oComponent, mBootstrapDeps, oModelBootstrap, mActionRuntimeOptions);
+        oNavigationRuntime = attachLifecycleStage(oComponent, mBootstrapDeps, mActionRuntimeOptions, mRuntimeModels);
 
         return ComponentLifecycleRuntime.runBootSequence({
             component: oComponent,

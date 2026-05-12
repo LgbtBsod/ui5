@@ -72,7 +72,7 @@ sap.ui.define([
             }
         };
 
-        oUseCase.execute({ rootId: "CHK-1", delta: { client_version: 7, root: { pcct_uuid: "CHK-1" } } }, oCtx).then(function (oResult) {
+        oUseCase.execute({ rootId: "CHK-1", delta: { client_version: 7, root: { db_key: "CHK-1" } } }, oCtx).then(function (oResult) {
             var oDirtyEffect = (oResult.effects || []).filter(function (oEffect) {
                 return oEffect.type === "modelPatch" && oEffect.modelName === "state" && oEffect.path === StatePaths.WORKFLOW_DIRTY;
             })[0];

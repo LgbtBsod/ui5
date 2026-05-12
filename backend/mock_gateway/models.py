@@ -112,15 +112,15 @@ class LockEntry(Base):
     __tablename__ = "lock_entry"
     __table_args__ = (
         Index(
-            "ux_lock_entry_active_pcct_uuid",
-            "pcct_uuid",
+            "ux_lock_entry_active_db_key",
+            "db_key",
             unique=True,
             sqlite_where=text("is_killed = 0")
         ),
     )
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    pcct_uuid = Column(String, nullable=False)
+    db_key = Column(String, nullable=False)
     user_id = Column(String, nullable=False)
     session_guid = Column(String, nullable=True)
 
@@ -136,7 +136,7 @@ class LockLog(Base):
     __tablename__ = "lock_log"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    pcct_uuid = Column(String, nullable=False)
+    db_key = Column(String, nullable=False)
     user_id = Column(String)
     session_guid = Column(String, nullable=True)
     action = Column(String)

@@ -1,4 +1,4 @@
-﻿sap.ui.define([
+sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataChecklistSnapshotRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",

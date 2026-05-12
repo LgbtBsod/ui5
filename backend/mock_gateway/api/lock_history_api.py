@@ -17,7 +17,7 @@ def _apply_orderby(query, orderby: str | None):
     allowed = {
         "timestamp": LockLog.timestamp,
         "action": LockLog.action,
-        "pcct_uuid": LockLog.pcct_uuid,
+        "db_key": LockLog.db_key,
         "user_id": LockLog.user_id,
         "session_guid": LockLog.session_guid,
     }
@@ -58,7 +58,7 @@ def lock_logs(
             "results": [
                 {
                     "id": row.id,
-                    "pcct_uuid": row.pcct_uuid,
+                    "db_key": row.db_key,
                     "user_id": row.user_id,
                     "session_guid": row.session_guid,
                     "action": row.action,

@@ -183,7 +183,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
 
         missing_lock = client.post(
             f"{SERVICE_ROOT}/SaveChanges",
-            json={"root": {"pcct_uuid": created_key}, "checks": [], "barriers": [], "client_version": 1, "SessionGuid": "S2"},
+            json={"root": {"db_key": created_key}, "checks": [], "barriers": [], "client_version": 1, "SessionGuid": "S2"},
             headers={"X-CSRF-Token": token},
         )
         assert missing_lock.status_code == 409
@@ -196,7 +196,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         assert reacquire.status_code == 200 and reacquire.json().get("d", {}).get("Ok") is True
 
         save_payload = {
-            "root": {"pcct_uuid": created_key, "equipment": "Pump Local A2"},
+            "root": {"db_key": created_key, "equipment": "Pump Local A2"},
             "checks": [],
             "barriers": [],
             "attachments": [],
@@ -206,7 +206,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         saved = client.post(f"{SERVICE_ROOT}/SaveChanges", json=save_payload, headers={"X-CSRF-Token": token})
         assert saved.status_code == 200
         saved_body = saved.json().get("d", {})
-        assert saved_body.get("pcct_uuid") == created_key
+        assert saved_body.get("db_key") == created_key
         assert saved_body.get("version_number") == 2
         assert saved_body.get("changed_on")
         assert saved_body.get("code") == "LOCK_OK"
@@ -220,7 +220,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
 
         client_row_id = uuid.uuid4().hex.upper()
         autosave_payload = {
-            "root": {"pcct_uuid": created_key},
+            "root": {"db_key": created_key},
             "checks": [{
                 "client_row_id": client_row_id,
                 "edit_mode": "C",
@@ -236,7 +236,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         autosaved = client.post(f"{SERVICE_ROOT}/AutoSave", json=autosave_payload, headers={"X-CSRF-Token": token})
         assert autosaved.status_code == 200
         autosaved_body = autosaved.json().get("d", {})
-        assert autosaved_body.get("pcct_uuid") == created_key
+        assert autosaved_body.get("db_key") == created_key
         assert autosaved_body.get("version_number") == 3
         assert autosaved_body.get("changed_on")
         assert autosaved_body.get("code") == "LOCK_OK"
@@ -293,7 +293,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         copied_save = client.post(
             f"{SERVICE_ROOT}/SaveChanges",
             json={
-                "root": {"pcct_uuid": copied_key, "equipment": "Pump Local Copy"},
+                "root": {"db_key": copied_key, "equipment": "Pump Local Copy"},
                 "checks": [],
                 "barriers": [],
                 "client_version": 1,
@@ -303,7 +303,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         )
         assert copied_save.status_code == 200
         copied_save_body = copied_save.json().get("d", {})
-        assert copied_save_body.get("pcct_uuid") == copied_key
+        assert copied_save_body.get("db_key") == copied_key
         assert copied_save_body.get("version_number") == 2
         reopened_copy = client.get(f"{SERVICE_ROOT}/ChecklistRootSet({copied_key})")
         assert reopened_copy.status_code == 200
