@@ -272,10 +272,45 @@ sap.ui.define([
         });
     }
 
+
+    function runBootSetup(mOptions) {
+        var oStateModel = mOptions.stateModel;
+        seedFrontendState(oStateModel, mOptions.envState);
+        mOptions.componentRuntimeSupport.ensureSessionId(oStateModel);
+        return Promise.resolve(mOptions.componentRuntimeSupport.ensureTabSessionId(oStateModel)).then(function (sTabSessionId) {
+            return cleanupCacheSessions(mOptions.cacheAdapter, oStateModel, sTabSessionId).then(function () {
+                return sTabSessionId;
+            });
+        });
+    }
+
+    function createInitializeAppRunner(mOptions) {
+        return function () {
+            return Promise.resolve(
+                typeof mOptions.initializeApp === "function"
+                    ? mOptions.initializeApp()
+                    : mOptions.initializeAppUseCase.execute({}, { stateModel: mOptions.stateModel })
+            ).then(function (oBootstrapResult) {
+                if (oBootstrapResult && oBootstrapResult.ok === false) {
+                    throw toStageError(oBootstrapResult.error && oBootstrapResult.error.message, STAGE_ERRORS.BOOTSTRAP_APP_FAILED);
+                }
+                return oBootstrapResult;
+            });
+        };
+    }
+
+    function runBootManagers(oComponent, oStateModel, bBootCompleted, oShellModel) {
+        if (bBootCompleted) {
+            oComponent._startCoreManagers();
+            oComponent._syncLockScopedManagers(oStateModel);
+        }
+        ShellStateRuntime.syncRuntimeShellState(oStateModel, oShellModel || null);
+        oStateModel.setProperty(PATHS.IS_LOADING, false);
+    }
+
     function runBootSequence(mOptions) {
         var oComponent = mOptions.component;
         var oStateModel = mOptions.stateModel;
-        var oEnvState = mOptions.envState;
         var oCacheState = mOptions.cacheState;
         var ComponentRuntimeSupport = mOptions.componentRuntimeSupport;
         var bBootCompleted = false;
@@ -283,73 +318,55 @@ sap.ui.define([
 
         initializeBootState(oStateModel);
 
-        return Promise.resolve().then(function () {
-            seedFrontendState(oStateModel, oEnvState);
-            ComponentRuntimeSupport.ensureSessionId(oStateModel);
-            sTabSessionId = ComponentRuntimeSupport.ensureTabSessionId(oStateModel);
-            return cleanupCacheSessions(mOptions.cacheAdapter, oStateModel, sTabSessionId);
-        }).then(function () {
+        return runBootSetup(mOptions).then(function (sResolvedTabSessionId) {
+            sTabSessionId = sResolvedTabSessionId || "";
             return runBootStages({
                 component: oComponent,
-                initializeApp: function () {
-                    return Promise.resolve(
-                        typeof mOptions.initializeApp === "function"
-                            ? mOptions.initializeApp()
-                            : mOptions.initializeAppUseCase.execute({}, { stateModel: oStateModel })
-                    ).then(function (oBootstrapResult) {
-                        if (oBootstrapResult && oBootstrapResult.ok === false) {
-                            throw toStageError(oBootstrapResult.error && oBootstrapResult.error.message, STAGE_ERRORS.BOOTSTRAP_APP_FAILED);
-                        }
-                        return oBootstrapResult;
-                    });
-                },
+                initializeApp: createInitializeAppRunner(mOptions),
                 ensureDictLoadedUseCase: mOptions.ensureDictLoadedUseCase,
                 loadCurrentUser: mOptions.loadCurrentUser,
                 loadRuntimeSettings: mOptions.loadRuntimeSettings
             });
-        })
-            .then(function () {
-                var sCacheAt = ComponentRuntimeSupport.formatHumanDateTime(new Date());
-                var sReadyAt = new Date().toISOString();
-
-                finalizeBootSuccess({
-                    stateModel: oStateModel,
-                    cacheState: oCacheState,
-                    cacheAt: sCacheAt,
-                    readyAt: sReadyAt,
-                    tabSessionId: sTabSessionId,
-                    serverState: oCacheState && oCacheState.lastServerState ? oCacheState.lastServerState : null,
-                    checkLists: oCacheState && Array.isArray(oCacheState.pristineSnapshot) ? oCacheState.pristineSnapshot : null
-                });
-                bBootCompleted = true;
-            })
-            .catch(function (oError) {
-                var sErrorMessage = String((oError && oError.message) || oError || STAGE_ERRORS.BOOT_FAILED);
-                finalizeBootError(oStateModel, sErrorMessage, mOptions.bundleText, sTabSessionId);
-                return null;
-            })
-            .finally(function () {
-                if (bBootCompleted) {
-                    oComponent._startCoreManagers();
-                    oComponent._syncLockScopedManagers(oStateModel);
-                }
-                ShellStateRuntime.syncRuntimeShellState(oStateModel, mOptions.shellModel || null);
-                oStateModel.setProperty(PATHS.IS_LOADING, false);
+        }).then(function () {
+            var sCacheAt = ComponentRuntimeSupport.formatHumanDateTime(new Date());
+            var sReadyAt = new Date().toISOString();
+            finalizeBootSuccess({
+                stateModel: oStateModel,
+                cacheState: oCacheState,
+                cacheAt: sCacheAt,
+                readyAt: sReadyAt,
+                tabSessionId: sTabSessionId,
+                serverState: oCacheState && oCacheState.lastServerState ? oCacheState.lastServerState : null,
+                checkLists: oCacheState && Array.isArray(oCacheState.pristineSnapshot) ? oCacheState.pristineSnapshot : null
             });
+            bBootCompleted = true;
+        }).catch(function (oError) {
+            var sErrorMessage = String((oError && oError.message) || oError || STAGE_ERRORS.BOOT_FAILED);
+            finalizeBootError(oStateModel, sErrorMessage, mOptions.bundleText, sTabSessionId);
+            return null;
+        }).finally(function () {
+            runBootManagers(oComponent, oStateModel, bBootCompleted, mOptions.shellModel);
+        });
     }
 
-    function attachRuntime(oComponent, mDeps, oRuntimeContext) {
-        var mModels = oRuntimeContext.models || oRuntimeContext;
-        var mServices = oRuntimeContext.services || {
+
+    function resolveRuntimeServices(oRuntimeContext) {
+        return oRuntimeContext.services || {
             componentRuntimeSupport: oRuntimeContext.ComponentRuntimeSupport || oRuntimeContext.componentRuntimeSupport,
             searchConfig: oRuntimeContext.SearchUiConfig || oRuntimeContext.searchConfig
         };
-        var mTelemetry = oRuntimeContext.telemetry || {
+    }
+
+    function resolveRuntimeTelemetry(oRuntimeContext, mModels) {
+        return oRuntimeContext.telemetry || {
             timerDefaults: ModelStateRuntime.readOnModel(mModels.stateModel, "/timers", {}) || {},
             emitTelemetry: oRuntimeContext.emitTelemetry || function () { return null; },
             bundleText: oRuntimeContext.bundleText || function (sKey) { return String(sKey || ""); }
         };
-        var mHandlers = oRuntimeContext.handlers || {
+    }
+
+    function resolveRuntimeHandlers(oComponent, mServices, oRuntimeContext) {
+        return oRuntimeContext.handlers || {
             buildLatestCtx: function () { return oComponent._ctx; },
             resolveDetailCurrent: function () {
                 return mServices.componentRuntimeSupport && typeof mServices.componentRuntimeSupport.resolveDetailCurrent === "function"
@@ -368,36 +385,33 @@ sap.ui.define([
             restorePendingNavigationIntent: function () { return Promise.resolve(false); },
             publishTabSignal: function () { return null; }
         };
-        var oRuntimeSupport = mServices.componentRuntimeSupport;
+    }
 
-        mDeps.ComponentPollingRuntime.createHeartbeatManager(
-            buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
-        );
+
+    function attachRuntimeManagers(oComponent, mDeps, mModels, mHandlers, mTelemetry, mServices, oRuntimeSupport) {
+        var oTelemetryOptions = buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport);
+        mDeps.ComponentPollingRuntime.createHeartbeatManager(oTelemetryOptions);
         mDeps.ComponentPollingRuntime.createSupportManagers({
             component: oComponent,
             timerDefaults: mTelemetry.timerDefaults,
             managers: mDeps.managers
         });
-        mDeps.ComponentAutosaveRuntime.createAutoSaveManager(
-            buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
-        );
-        mDeps.ComponentPollingRuntime.createLockStatusManager(
-            buildTelemetryManagerOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
-        );
-
+        mDeps.ComponentAutosaveRuntime.createAutoSaveManager(oTelemetryOptions);
+        mDeps.ComponentPollingRuntime.createLockStatusManager(oTelemetryOptions);
         mDeps.ComponentLockEventsRuntime.attachLockRuntime(
             buildLockRuntimeOptions(oComponent, mDeps, mModels, mHandlers, mTelemetry, oRuntimeSupport)
         );
         mDeps.ComponentInitListenersRuntime.attachInitListeners(
             buildInitListenerOptions(oComponent, mDeps, mModels, mHandlers, mServices, mTelemetry, oRuntimeSupport)
         );
+    }
 
-        initializeRouter(oComponent);
+    function buildNavigationIntentApi(oComponent, mDeps, oStateModel) {
         return {
             queuePendingNavigationIntent: function (oRouteEvent, mIntentOptions) {
                 runNavigationOperation("queuePendingIntent", {
                     component: oComponent,
-                    stateModel: mModels.stateModel,
+                    stateModel: oStateModel,
                     statePaths: mDeps.StatePaths,
                     routeEvent: oRouteEvent,
                     owner: mIntentOptions && mIntentOptions.owner,
@@ -406,32 +420,44 @@ sap.ui.define([
             },
             clearPendingNavigationIntent: function () {
                 runNavigationOperation("clearPendingIntent", {
-                    stateModel: mModels.stateModel,
+                    stateModel: oStateModel,
                     statePaths: mDeps.StatePaths
                 });
             },
             revertPendingNavigationIntent: function () {
                 return runNavigationOperation("revertPendingIntent", {
                     component: oComponent,
-                    stateModel: mModels.stateModel,
+                    stateModel: oStateModel,
                     statePaths: mDeps.StatePaths
                 });
             },
             resumePendingNavigationIntent: function () {
                 return runNavigationOperation("resumePendingIntent", {
                     component: oComponent,
-                    stateModel: mModels.stateModel,
+                    stateModel: oStateModel,
                     statePaths: mDeps.StatePaths
                 });
             },
             restorePendingNavigationIntent: function () {
                 return runNavigationOperation("restorePendingIntent", {
                     component: oComponent,
-                    stateModel: mModels.stateModel,
+                    stateModel: oStateModel,
                     statePaths: mDeps.StatePaths
                 });
             }
         };
+    }
+
+    function attachRuntime(oComponent, mDeps, oRuntimeContext) {
+        var mModels = oRuntimeContext.models || oRuntimeContext;
+        var mServices = resolveRuntimeServices(oRuntimeContext);
+        var mTelemetry = resolveRuntimeTelemetry(oRuntimeContext, mModels);
+        var mHandlers = resolveRuntimeHandlers(oComponent, mServices, oRuntimeContext);
+        var oRuntimeSupport = mServices.componentRuntimeSupport;
+
+        attachRuntimeManagers(oComponent, mDeps, mModels, mHandlers, mTelemetry, mServices, oRuntimeSupport);
+        initializeRouter(oComponent);
+        return buildNavigationIntentApi(oComponent, mDeps, mModels.stateModel);
     }
 
     return {

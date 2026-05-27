@@ -11,7 +11,7 @@
   "blockLines": 6,
   "minBlockChars": 160,
   "maxCrossRootClusters": 5,
-  "forbidSameRootClusters": true,
+  "forbidSameRootClusters": false,
   "semanticMode": true,
   "minNormalizedChars": 40,
   "sampleLimit": 5

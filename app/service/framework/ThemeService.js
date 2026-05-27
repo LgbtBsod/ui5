@@ -5,14 +5,16 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ValueTokenParser",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeDomRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemeTokenRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
-], function (Core, Parameters, ThemeContracts, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ThemePhilosophy"
+], function (Core, Parameters, ThemeContracts, ValueTokenParser, ThemeDomRuntime, ThemeTokenRuntime, SchedulingRuntime, ThemePhilosophy) {
     "use strict";
 
     var SWITCH_CLASS = ThemeContracts.CLASSES.SWITCHING;
     var MOTION_DISABLED_CLASS = ThemeContracts.CLASSES.MOTION_DISABLED;
     var MOTION_ENABLED_CLASS = ThemeContracts.CLASSES.MOTION_ENABLED;
     var THEME_PROFILE_STORAGE_KEY = ThemeContracts.STORAGE_KEYS.PROFILE;
+    var BASE_THEME = ThemePhilosophy && ThemePhilosophy.BASE_THEME ? ThemePhilosophy.BASE_THEME : "sap_fiori_3";
     var DEFAULT_MODE = ThemeContracts.MODES.DEFAULT;
     var DEFAULT_ANIMATION_ENABLED = ThemeContracts.DEFAULTS.ANIMATION_ENABLED;
     var MODE_TO_THEME = {
@@ -103,7 +105,8 @@ sap.ui.define([
     }
 
     function themeForMode(sMode) {
-        return MODE_TO_THEME[normalizeMode(sMode)] || MODE_TO_THEME[DEFAULT_MODE];
+        var sResolved = MODE_TO_THEME[normalizeMode(sMode)] || MODE_TO_THEME[DEFAULT_MODE];
+        return sResolved || BASE_THEME;
     }
 
     function modeForTheme(sTheme) {
