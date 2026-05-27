@@ -51,7 +51,7 @@ sap.ui.define([
         var sCurrentTheme = Core && Core.getConfiguration && Core.getConfiguration() && Core.getConfiguration().getTheme
             ? String(Core.getConfiguration().getTheme() || "").toLowerCase()
             : "";
-        var bThemeTokensActive = sCurrentTheme.indexOf("sap_fiori_3") === 0 || sCurrentTheme.indexOf("sap_horizon") === 0;
+        var bThemeTokensActive = sCurrentTheme.indexOf("sap_fiori_3") === 0;
         var sBrand = Parameters.get("sapUiBrand") || Parameters.get("sapUiHighlight");
         var sBase = Parameters.get("sapBackgroundColor");
         var sText = Parameters.get("sapTextColor");

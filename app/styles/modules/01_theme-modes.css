@@ -190,3 +190,5 @@ body.chkAppRoot.appInvertedBlockScheme {
     scroll-behavior: auto;
   }
 }
+
+:root.light-mode { color-scheme: light; }
