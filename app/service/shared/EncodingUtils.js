@@ -16,19 +16,25 @@ sap.ui.define([
     }
 
     function base64ToHex(sBase64) {
-        var sBinary;
-        var aHex = [];
-        var i;
-        var sHex;
-
         if (!sBase64) {
             return "";
         }
 
-        sBinary = decodeBase64(String(sBase64));
-        for (i = 0; i < sBinary.length; i += 1) {
-            sHex = sBinary.charCodeAt(i).toString(16);
-            aHex.push(sHex.length >= 2 ? sHex : "0" + sHex);
+        var sBinary = decodeBase64(String(sBase64));
+        if (typeof Uint8Array === "undefined") {
+            // Legacy fallback: char-by-char hex with manual zero-pad
+            var aLegacy = [];
+            for (var i = 0; i < sBinary.length; i += 1) {
+                var sHex = sBinary.charCodeAt(i).toString(16);
+                aLegacy.push(sHex.length >= 2 ? sHex : "0" + sHex);
+            }
+            return aLegacy.join("");
+        }
+
+        var aBytes = Uint8Array.from(sBinary, function (sChar) { return sChar.charCodeAt(0); });
+        var aHex = [];
+        for (var j = 0; j < aBytes.length; j += 1) {
+            aHex.push(aBytes[j].toString(16).padStart(2, "0"));
         }
         return aHex.join("");
     }

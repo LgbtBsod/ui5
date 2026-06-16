@@ -3,16 +3,13 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/MemoryTelemetryBuffer",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/DebugTelemetryAdapter",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
-], function (ModelStateRuntime, TelemetryRuntime, MemoryTelemetryBuffer, DebugTelemetryAdapter, WorkflowContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/RandomId"
+], function (ModelStateRuntime, TelemetryRuntime, MemoryTelemetryBuffer, DebugTelemetryAdapter, WorkflowContracts, RandomId) {
     "use strict";
 
     function nextCorrelationId() {
-        return [
-            "tel",
-            Date.now().toString(36),
-            Math.random().toString(36).slice(2, 10)
-        ].join("-");
+        return RandomId.correlationId("tel");
     }
 
     function buildEvent(sEventName, mOptions) {

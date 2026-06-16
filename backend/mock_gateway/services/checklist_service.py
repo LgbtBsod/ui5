@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, SaveRequestLedger
 from services.lock_service import LockService
-from utils.etag import format_etag
+from utils.odata_etag import format_etag
 from utils.time import now_utc
 
 

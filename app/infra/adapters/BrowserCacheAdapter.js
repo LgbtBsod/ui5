@@ -38,9 +38,23 @@ sap.ui.define([
     }
 
     /* Этот блок создает fallback tabSessionId для изоляции кэша внутри текущей вкладки.
-     * Результат: записи разных вкладок не пересекаются. */
+     * Результат: записи разных вкладок не пересекаются.
+     * Заменяет прошлый Math.random()-fallback на криптостойкий crypto.getRandomValues
+     * с деградацией до Math.random для legacy-окружений. */
     function buildFallbackTabSessionId() {
-        return "T" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        var sRandom = "0000";
+        try {
+            if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+                var oBytes = new Uint8Array(16);
+                crypto.getRandomValues(oBytes);
+                sRandom = Array.prototype.map.call(oBytes, function (nByte) {
+                    return nByte.toString(16).padStart(2, "0");
+                }).join("");
+            }
+        } catch (_cryptoError) {
+            sRandom = Math.random().toString(36).slice(2);
+        }
+        return "T" + sRandom + Date.now().toString(36);
     }
 
     function normalizeEntityKind(sEntityKind) {
@@ -69,9 +83,13 @@ sap.ui.define([
     }
 
     /* Этот блок открывает IndexedDB и при необходимости пересоздает схему store/indexes.
-     * Результат: session cache всегда работает на ожидаемой версии структуры. */
+     * Результат: session cache всегда работает на ожидаемой версии структуры.
+     * Кэширует открытое соединение в _dbPromise; сбрасывает кэш при ошибке/закрытии,
+     * чтобы следующий вызов мог повторить попытку и не зависнуть на versionchange. */
+    var _dbPromise = null;
     function openDb() {
-        return new Promise(function (resolve, reject) {
+        if (_dbPromise) { return _dbPromise; }
+        _dbPromise = new Promise(function (resolve, reject) {
             if (typeof indexedDB === "undefined") {
                 reject(new Error("IndexedDB unavailable"));
                 return;
@@ -94,11 +112,18 @@ sap.ui.define([
             };
             req.onsuccess = function () { resolve(req.result); };
             req.onerror = function () { reject(req.error || new Error("indexeddb_open_failed")); };
+            req.onblocked = function () { reject(new Error("indexeddb_open_blocked")); };
+        }).catch(function (oError) {
+            _dbPromise = null;
+            throw oError;
         });
+        return _dbPromise;
     }
 
     /* Этот блок дает единый способ выполнить операцию внутри transaction/store.
-     * Результат: readwrite/readonly действия завершаются с контролируемым resolve/reject. */
+     * Результат: readwrite/readonly действия завершаются с контролируемым resolve/reject.
+     * Соединение закрывается на settle и кэш сбрасывается, чтобы не блокировать
+     * последующие versionchange-апгрейды схемы. */
     function withStore(mode, fn) {
         return openDb().then(function (db) {
             return new Promise(function (resolve, reject) {
@@ -138,7 +163,10 @@ sap.ui.define([
                     }
                     fail(oError);
                 });
-            }).then(function (vResult) { db.close(); return vResult; }, function (oError) { db.close(); throw oError; });
+            }).then(
+                function (vResult) { try { db.close(); } catch (e) { /* ignore */ } _dbPromise = null; return vResult; },
+                function (oError) { try { db.close(); } catch (e) { /* ignore */ } _dbPromise = null; throw oError; }
+            );
         });
     }
 

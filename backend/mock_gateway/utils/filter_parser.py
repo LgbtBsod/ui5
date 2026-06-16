@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 
-from util.odata_filter import ODataFilterParser
+from utils.odata_filter_sql import ODataFilterParser
 from utils.filter_engine import parse_filter_to_predicate
 
 

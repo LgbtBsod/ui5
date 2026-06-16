@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (Effects, StatePaths, WorkflowContracts, ModelContracts, MessageKeyConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/RandomId"
+], function (Effects, StatePaths, WorkflowContracts, ModelContracts, MessageKeyConstants, RandomId) {
     "use strict";
 
     var STATES = WorkflowContracts.PERSISTENCE_STATES;
@@ -164,7 +165,7 @@ sap.ui.define([
     }
 
     function buildWriteId(sPrefix) {
-        return [sPrefix || "write", Date.now(), Math.round(Math.random() * 100000)].join("-");
+        return [sPrefix || "write", Date.now(), RandomId.cryptoFragment()].join("-");
     }
 
     function createInitialPersistenceState() {

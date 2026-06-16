@@ -6,8 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, SearchMaxResults, OperationSourceContracts, SearchContracts, UiSemanticConstants, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/RandomId"
+], function (JSONModel, ComponentFormattingRuntime, ControllerViewStateRuntime, SearchMaxResults, OperationSourceContracts, SearchContracts, UiSemanticConstants, JsRuntime, RandomId) {
     "use strict";
 
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
@@ -81,7 +82,7 @@ sap.ui.define([
         try {
             sKey = window.sessionStorage.getItem("pcct_search_ui_session") || "";
             if (!sKey) {
-                sKey = "S" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+                sKey = "S" + RandomId.randomFragment() + Date.now().toString(36);
                 window.sessionStorage.setItem("pcct_search_ui_session", sKey);
             }
         } catch (e) {

@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from typing import Callable
 
 
-_TOKEN_RE = re.compile(r"substringof\(|contains\(|datetime'[^']*'|/Date\([^)]*\)/|'[^']*'|\(|\)|,|\b(?:eq|ne|ge|le|and|or|true|false)\b|[A-Za-z_][A-Za-z0-9_]*", re.IGNORECASE)
+_TOKEN_RE = re.compile(r"substringof\(|contains\(|startswith\(|datetime'[^']*'|/Date\([^)]*\)/|'[^']*'|\(|\)|,|\b(?:eq|ne|gt|lt|ge|le|and|or|not|true|false)\b|[A-Za-z_][A-Za-z0-9_]*", re.IGNORECASE)
 
 
 def _literal(token: str):
@@ -104,6 +104,8 @@ def parse_filter_to_predicate(filter_string: str | None, field_map: dict[str, st
                 lvn = _date_only(lv); rvn = _date_only(rv)
                 if op == "eq": return lvn == rvn
                 if op == "ne": return lvn != rvn
+                if op == "gt": return lvn > rvn
+                if op == "lt": return lvn < rvn
                 if op == "ge": return lvn >= rvn
                 if op == "le": return lvn <= rvn
                 return True
@@ -114,6 +116,8 @@ def parse_filter_to_predicate(filter_string: str | None, field_map: dict[str, st
             rvs = str(rv or "")
             if op == "eq": return lvs == rvs
             if op == "ne": return lvs != rvs
+            if op == "gt": return lvs > rvs
+            if op == "lt": return lvs < rvs
             if op == "ge": return lvs >= rvs
             if op == "le": return lvs <= rvs
             return True

@@ -3,8 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentListenerContracts, WorkflowContracts, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/RandomId"
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentListenerContracts, WorkflowContracts, ModelPathContracts, RandomId) {
     "use strict";
 
     var VALUES = ComponentListenerContracts.VALUES;
@@ -14,7 +15,7 @@ sap.ui.define([
         try {
             sTabId = window.sessionStorage.getItem("pcct_tab_id") || "";
             if (!sTabId) {
-                sTabId = "tab_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 10);
+                sTabId = "tab_" + Date.now().toString(36) + "_" + RandomId.randomFragment();
                 window.sessionStorage.setItem("pcct_tab_id", sTabId);
             }
         } catch (_e) {

@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
-], function (GatewayErrorNormalizer, GatewayContractConstants, MessageCodeConstants) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/RandomId"
+], function (GatewayErrorNormalizer, GatewayContractConstants, MessageCodeConstants, RandomId) {
     "use strict";
 
     var _oModel = null;
@@ -25,11 +26,7 @@ sap.ui.define([
     }
 
     function nextCorrelationId() {
-        return [
-            "req",
-            Date.now().toString(36),
-            Math.random().toString(36).slice(2, 10)
-        ].join("-");
+        return RandomId.correlationId("req");
     }
 
     function escapeRegExp(sValue) {

@@ -1,7 +1,8 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
-    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime"
-], function (StatePaths, ModelStateRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/RandomId"
+], function (StatePaths, ModelStateRuntime, RandomId) {
     "use strict";
 
     function ensureId(oStateModel, sPath, sStorageKey, sPrefix) {
@@ -14,7 +15,7 @@ sap.ui.define([
             ModelStateRuntime.writeOnModel(oStateModel, sPath, sStored);
             return sStored;
         }
-        var sNext = sPrefix + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        var sNext = sPrefix + RandomId.randomFragment() + Date.now().toString(36);
         ModelStateRuntime.writeOnModel(oStateModel, sPath, sNext);
         window.sessionStorage.setItem(sStorageKey, sNext);
         return sNext;

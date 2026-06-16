@@ -1,10 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DeepEqual",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/delta/DeltaContracts"
-], function (CloneUtil, DeltaContracts) {
+], function (CloneUtil, DeepEqual, DeltaContracts) {
   "use strict";
 
-  function eq(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+  function eq(a, b) { return DeepEqual.deepEqual(a, b); }
   function clone(v) { return CloneUtil.clone(v, null); }
 
   function isTechField(sKey) {

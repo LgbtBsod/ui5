@@ -5,7 +5,7 @@ from config import DEFAULT_PAGE_SIZE
 from database import get_db
 from models import ChecklistRoot
 from services.checklist_service import ChecklistService
-from util.expand_parser import ExpandParser
+from utils.expand_parser import ExpandParser
 from utils.filter_parser import FilterParser
 
 router = APIRouter(prefix="/checklist", tags=["Checklist"])

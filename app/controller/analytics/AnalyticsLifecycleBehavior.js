@@ -6,18 +6,19 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/analytics/runtime/AnalyticsBuilderRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
-], function (ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime, StatusChipClassRuntime, JsRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime"
+], function (ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime, StatusChipClassRuntime, JsRuntime, TimerRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
 
     function clearRefreshTimer(oController) {
-        if (oController._iAnalyticsRouteRefreshTimer) {
-            clearInterval(oController._iAnalyticsRouteRefreshTimer);
-            oController._iAnalyticsRouteRefreshTimer = null;
-        }
+        oController._iAnalyticsRouteRefreshTimer = TimerRuntime.clearTimer(
+            oController._iAnalyticsRouteRefreshTimer,
+            clearInterval
+        );
     }
 
     function getRouter(oController) {
@@ -67,17 +68,20 @@ sap.ui.define([
         var iIntervalMs = Number(oStateModel && oStateModel.getProperty("/timers/analyticsRefreshMs"))
             || Number((TimerDefaults.analyticsRefreshMs || {}).defaultValue)
             || 900000;
-        clearRefreshTimer(oController);
-        oController._iAnalyticsRouteRefreshTimer = setInterval(function () {
-            var oView = oController && typeof oController.getView === TYPE_FUNCTION && oController.getView();
-            if (!oController || oController.bIsDestroyed || (oView && oView.bIsDestroyed)) {
-                clearRefreshTimer(oController);
-                return;
-            }
-            if (typeof oController._loadAnalytics === TYPE_FUNCTION) {
-                oController._loadAnalytics("routeTimer");
-            }
-        }, iIntervalMs);
+        oController._iAnalyticsRouteRefreshTimer = TimerRuntime.restartInterval(
+            oController._iAnalyticsRouteRefreshTimer,
+            function () {
+                var oView = oController && typeof oController.getView === TYPE_FUNCTION && oController.getView();
+                if (!oController || oController.bIsDestroyed || (oView && oView.bIsDestroyed)) {
+                    clearRefreshTimer(oController);
+                    return;
+                }
+                if (typeof oController._loadAnalytics === TYPE_FUNCTION) {
+                    oController._loadAnalytics("routeTimer");
+                }
+            },
+            iIntervalMs
+        );
     }
 
     function onInit(oController, oFacade, sRefreshTaskKey) {

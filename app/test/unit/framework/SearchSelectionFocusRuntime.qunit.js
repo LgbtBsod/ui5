@@ -1,7 +1,6 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
-    "sap/ui/thirdparty/jquery"
-], function (SearchSelectionRuntime, jQuery) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime"
+], function (SearchSelectionRuntime) {
     "use strict";
 
     function attachFocusSpy(oNode) {
@@ -38,7 +37,7 @@ sap.ui.define([
 
     QUnit.module("SearchSelectionRuntime focus methods", {
         afterEach: function () {
-            jQuery("div[data-qunit-search-focus='true']").remove();
+            document.querySelectorAll("div[data-qunit-search-focus='true']").forEach(function (n) { n.remove(); });
         }
     });
 

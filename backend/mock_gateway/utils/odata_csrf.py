@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import uuid
+import secrets
 
 
 class CsrfStore:
@@ -8,8 +8,8 @@ class CsrfStore:
         self._tokens: dict[str, str] = {}
 
     def issue(self, session_id: str | None = None) -> tuple[str, str]:
-        sid = session_id or uuid.uuid4().hex
-        token = uuid.uuid4().hex
+        sid = session_id or secrets.token_urlsafe(32)
+        token = secrets.token_urlsafe(32)
         self._tokens[sid] = token
         return sid, token
 

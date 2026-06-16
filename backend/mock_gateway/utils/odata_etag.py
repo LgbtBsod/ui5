@@ -8,6 +8,13 @@ def etag_for_datetime(dt: datetime) -> str:
     return f'W/"{int(val.timestamp() * 1000)}"'
 
 
+def format_etag(timestamp: datetime | None) -> str | None:
+    """Backward-compatible alias: returns OData-standard W/"…" ETag or None."""
+    if timestamp is None:
+        return None
+    return etag_for_datetime(timestamp)
+
+
 def validate_if_match(if_match: str | None, current_etag: str) -> bool:
     if not if_match or if_match == "*":
         return True

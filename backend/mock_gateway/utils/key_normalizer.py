@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import re
+import uuid
 
 from utils.odata_response import odata_error
 
@@ -10,6 +10,8 @@ def normalize_raw16_hex(value: str) -> str:
     if raw.lower().startswith("0x"):
         odata_error("VALIDATION_ERROR", "RAW16 key must not start with 0x", 400)
     compact = raw.replace("-", "")
-    if len(compact) != 32 or not re.fullmatch(r"[0-9a-fA-F]{32}", compact):
+    try:
+        uuid.UUID(hex=compact)
+    except (ValueError, AttributeError):
         odata_error("VALIDATION_ERROR", "RAW16 key must be 32 hex chars", 400)
     return compact.upper()
