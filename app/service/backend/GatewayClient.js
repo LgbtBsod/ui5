@@ -200,6 +200,9 @@ sap.ui.define([
                 ensureModel().read(sPath, {
                     urlParameters: mParams || {},
                     headers: mHeaders,
+                    groupId: mOptions && mOptions.groupId,
+                    filters: mOptions && mOptions.filters,
+                    sorters: mOptions && mOptions.sorters,
                     success: function (oData) { resolve(oData || {}); },
                     error: function (oError) { reject(oError); }
                 });

@@ -11,6 +11,7 @@
         "127.0.0.1": true,
         "localhost": true
     });
+    var oComponentContainer;
 
     /* Local host detection relaxes preload only for developer workstations. */
     function isDevHost() {
@@ -51,13 +52,17 @@
         sap.ui.require([
             "sap/ui/core/ComponentContainer"
         ], function (ComponentContainer) {
-            new ComponentContainer({
+            if (oComponentContainer) {
+                return;
+            }
+            oComponentContainer = new ComponentContainer({
                 name: "PRODUCTION_CONTROL_CHECKLIST",
                 manifest: true,
                 settings: { id: "checklist_app_comp" },
                 async: true,
                 height: "100%"
-            }).placeAt("ui5_container");
+            });
+            oComponentContainer.placeAt("ui5_container");
         });
     }
 
@@ -102,7 +107,16 @@
         document.head.appendChild(oScript);
     }
 
+    function destroyComponentContainer() {
+        window.removeEventListener("pagehide", destroyComponentContainer);
+        if (oComponentContainer && typeof oComponentContainer.destroy === "function") {
+            oComponentContainer.destroy();
+        }
+        oComponentContainer = null;
+    }
+
     ensureStoredThemeProfile();
+    window.addEventListener("pagehide", destroyComponentContainer);
 
     if (window.sap && sap.ui && sap.ui.require) {
         attachInit();

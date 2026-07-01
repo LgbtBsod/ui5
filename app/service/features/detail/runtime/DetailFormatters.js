@@ -1,11 +1,11 @@
 sap.ui.define([
-    "sap/ui/core/format/DateFormat",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DateTimeUtils",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ControllerTextRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
-], function (DateFormat, ControllerTextRuntime, CreateSentinel, WorkflowContracts, MessageKeyConstants, UiSemanticConstants) {
+], function (DateTimeUtils, ControllerTextRuntime, CreateSentinel, WorkflowContracts, MessageKeyConstants, UiSemanticConstants) {
     "use strict";
 
     var CHECKLIST_STATUSES = WorkflowContracts.CHECKLIST_STATUSES;
@@ -44,12 +44,6 @@ sap.ui.define([
         conflict: UiSemanticConstants.OBJECT_STATUS_STATE.ERROR,
         idle: UiSemanticConstants.OBJECT_STATUS_STATE.INFORMATION
     };
-    var oDateFormatter = DateFormat.getDateInstance({
-        pattern: "dd.MM.yyyy"
-    });
-    var oTimeFormatter = DateFormat.getTimeInstance({
-        pattern: "HH:mm"
-    });
     LOCK_ACTIVE_STATES[WorkflowContracts.LOCK_STATES.EDIT_LOCKED] = true;
     LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.ACQUIRING_LOCK] = true;
     LOCK_TRANSITION_STATES[WorkflowContracts.LOCK_STATES.IDLE_TIMEOUT_GRACE] = true;
@@ -74,7 +68,9 @@ sap.ui.define([
         ) || 0;
     }
 
-{"text": "    function formatHumanDate(vValue) {\n        // Use SAPUI5's built-in date parsing via parseDate\n        var oDate = oDateFormatter.parse(vValue);\n        return oDate ? oDateFormatter.format(oDate) : \"\";\n    }"}
+    function formatHumanDate(vValue) {
+        return DateTimeUtils.formatHumanDate(vValue);
+    }
 
     function formatDateTimeCardValue(oController, sDate, sTime, sTimezone) {
         var sHumanDate = formatHumanDate(sDate) || "-";
@@ -88,9 +84,7 @@ sap.ui.define([
     }
 
     function formatAutosaveTime(vValue) {
-        // Use SAPUI5's built-in time parsing via parseTime() - replaces custom parseDateLike()
-        var oDate = oTimeFormatter.parse(vValue);
-        return oDate ? oTimeFormatter.format(oDate) : (vValue || "-");
+        return DateTimeUtils.formatHumanTime(vValue) || (vValue || "-");
     }
 
     return {

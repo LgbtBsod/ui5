@@ -37,6 +37,17 @@
         applyState();
     }
 
+    function dispose() {
+        document.removeEventListener("DOMContentLoaded", bootstrap);
+        window.removeEventListener("pagehide", dispose);
+        if (window.Ui5Bg) {
+            delete window.Ui5Bg.onResizeEnd;
+            delete window.Ui5Bg.onResizeStart;
+            delete window.Ui5Bg.setThemeState;
+            delete window.Ui5Bg.applyState;
+        }
+    }
+
     window.Ui5Bg = window.Ui5Bg || {};
     window.Ui5Bg.onResizeEnd = applyState;
     window.Ui5Bg.onResizeStart = function () {};
@@ -48,4 +59,5 @@
     } else {
         bootstrap();
     }
+    window.addEventListener("pagehide", dispose);
 }());
