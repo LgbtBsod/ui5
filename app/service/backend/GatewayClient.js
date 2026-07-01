@@ -2,8 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayErrorNormalizer",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/RandomId"
-], function (GatewayErrorNormalizer, GatewayContractConstants, MessageCodeConstants, RandomId) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/RandomId",
+    "sap/ui/model/odata/OperationMode"
+], function (GatewayErrorNormalizer, GatewayContractConstants, MessageCodeConstants, RandomId, OperationMode) {
     "use strict";
 
     var _oModel = null;
@@ -11,6 +12,7 @@ sap.ui.define([
     var mResponseGuardTokens = {};
     var REQUEST = GatewayContractConstants.REQUEST;
     var TECHNICAL_CODES = MessageCodeConstants.TECHNICAL;
+    var mCorrelationIdCounter = 0;
 
     function createModelError() {
         var oError = new Error(TECHNICAL_CODES.GATEWAY_MODEL_NOT_INITIALIZED);
@@ -26,59 +28,25 @@ sap.ui.define([
     }
 
     function nextCorrelationId() {
-        return RandomId.correlationId("req");
+        mCorrelationIdCounter += 1;
+        return RandomId.correlationId("req") + "-" + mCorrelationIdCounter;
     }
-
-    function escapeRegExp(sValue) {
-        return String(sValue || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    }
-
-    function exactPattern(sValue) {
-        return new RegExp("^" + escapeRegExp(sValue) + "$", "i");
-    }
-
-    function disallowedPathPattern(sTail) {
-        return new RegExp("^\\/+" + sTail + "(?:$|[/?(])", "i");
-    }
-
-    var DIRECT_FUNCTION_BODY_ALLOWLIST = [
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.SAVE_CHANGES),
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.AUTO_SAVE),
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.CREATE_CHECKLIST),
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.COPY_CHECKLIST),
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.REPORT_EXPORT),
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_ACQUIRE),
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_HEARTBEAT),
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.LOCK_RELEASE)
-    ];
-
-    var DIRECT_FUNCTION_QUERY_ALLOWLIST = [
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.ANALYTICS_REFRESH_TRIGGER)
-    ];
-
-    var DIRECT_GET_FUNCTION_ALLOWLIST = [
-        exactPattern(GatewayContractConstants.FUNCTION_IMPORTS.GET_HIERARCHY)
-    ];
-
-    var FORBIDDEN_PATH_PATTERNS = [
-        /^\/actions\//i,
-        /^\/lock\//i,
-        /^\/config\/frontend(?:$|[/?])/i,
-    ].concat((GatewayContractConstants.DISALLOWED_PATHS || []).map(disallowedPathPattern));
 
     function normalizePath(sPath) {
         var sNormalized = String(sPath || "");
         return sNormalized.charAt(0) === "/" ? sNormalized : ("/" + sNormalized);
     }
 
-    function allowlisted(sValue, aAllowed) {
-        return (aAllowed || []).some(function (oPattern) {
-            return oPattern.test(sValue);
-        });
-    }
-
     function assertCanonicalPath(sPath) {
-        FORBIDDEN_PATH_PATTERNS.forEach(function (oPattern) {
+        var FORBIDDEN_PATH_PATTERNS = [
+            /^\/actions\//i,
+            /^\/lock\//i,
+            /^\/config\/frontend(?:$|[/?])/i
+        ].concat((GatewayContractConstants.DISALLOWED_PATHS || []).map(function(sTail) {
+            return new RegExp("^\\/+" + sTail + "(?:$|[/?(])", "i");
+        }));
+
+        FORBIDDEN_PATH_PATTERNS.forEach(function(oPattern) {
             if (oPattern.test(sPath)) {
                 throw new Error(TECHNICAL_CODES.FORBIDDEN_NON_CANONICAL_ODATA_PATH);
             }
@@ -91,7 +59,16 @@ sap.ui.define([
         if (!sResolved) {
             throw new Error(TECHNICAL_CODES.FUNCTION_IMPORT_NAME_REQUIRED);
         }
-        if (FORBIDDEN_PATH_PATTERNS.some(function (oPattern) { return oPattern.test("/" + sResolved); })) {
+        
+        var FORBIDDEN_PATH_PATTERNS = [
+            /^\/actions\//i,
+            /^\/lock\//i,
+            /^\/config\/frontend(?:$|[/?])/i
+        ].concat((GatewayContractConstants.DISALLOWED_PATHS || []).map(function(sTail) {
+            return new RegExp("^\\/+" + sTail + "(?:$|[/?(])", "i");
+        }));
+
+        if (FORBIDDEN_PATH_PATTERNS.some(function(oPattern) { return oPattern.test("/" + sResolved); })) {
             throw new Error(TECHNICAL_CODES.FORBIDDEN_NON_CANONICAL_FUNCTION_IMPORT);
         }
         return sResolved;
@@ -195,6 +172,7 @@ sap.ui.define([
             _oModel = null;
             _sServiceUrl = "";
             mResponseGuardTokens = {};
+            mCorrelationIdCounter = 0;
         },
         hasModel: function () {
             return !!_oModel;
@@ -214,7 +192,7 @@ sap.ui.define([
             return mHeaders;
         },
         readEntity: function (entitySet, key, mParams, mOptions) {
-            return this.rawRead("/" + entitySet + "(" + key + ")", mParams || {}, mOptions || {});
+            return this.rawRead("/" + entitySet + "(" + encodeURIComponent(key) + ")", mParams || {}, mOptions || {});
         },
         rawRead: function (path, mParams, mOptions) {
             var sPath = assertCanonicalPath(normalizePath(path));
@@ -253,17 +231,17 @@ sap.ui.define([
                 return Promise.reject(new Error(TECHNICAL_CODES.SYNCHRONOUS_FUNCTION_IMPORTS_UNSUPPORTED));
             }
             return executeMutatingRequest(REQUEST.POST_FUNCTION, function (resolve, reject, mHeaders) {
-                if (allowlisted(sFunctionName, DIRECT_FUNCTION_QUERY_ALLOWLIST)) {
-                    ensureModel().callFunction("/" + sFunctionName, {
-                        method: REQUEST.POST,
-                        urlParameters: oPayload || {},
-                        headers: mHeaders,
-                        success: function (oData) { resolve(oData || {}); },
-                        error: function (oError) { reject(oError); }
-                    });
-                    return;
-                }
-                if (allowlisted(sFunctionName, DIRECT_FUNCTION_BODY_ALLOWLIST)) {
+                if (GatewayContractConstants.ALLOWED_FUNCTION_IMPORTS.indexOf(sFunctionName) !== -1) {
+                    if (GatewayContractConstants.FUNCTION_IMPORTS_WITH_QUERY_PARAMS.indexOf(sFunctionName) !== -1) {
+                        ensureModel().callFunction("/" + sFunctionName, {
+                            method: REQUEST.POST,
+                            urlParameters: oPayload || {},
+                            headers: mHeaders,
+                            success: function (oData) { resolve(oData || {}); },
+                            error: function (oError) { reject(oError); }
+                        });
+                        return;
+                    }
                     ensureModel().create("/" + sFunctionName, oPayload || {}, {
                         headers: mHeaders,
                         success: function (oData) { resolve(oData || {}); },
@@ -276,7 +254,7 @@ sap.ui.define([
         },
         callGetFunctionImport: function (name, mParams, mOptions) {
             var sFunctionName = assertAllowedFunctionName(name);
-            if (!allowlisted(sFunctionName, DIRECT_GET_FUNCTION_ALLOWLIST)) {
+            if (GatewayContractConstants.ALLOWED_GET_FUNCTION_IMPORTS.indexOf(sFunctionName) === -1) {
                 return Promise.reject(new Error(TECHNICAL_CODES.UNSUPPORTED_GET_FUNCTION_IMPORT));
             }
             return executeReadRequest(REQUEST.GET_FUNCTION, mOptions, function (resolve, reject, mHeaders) {

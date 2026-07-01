@@ -19,7 +19,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
     "sap/m/ViewSettingsDialog",
-    "sap/m/ViewSettingsItem,\n    \"PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime\"",
+    "sap/m/ViewSettingsItem",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsFormatRuntime"
 ], function (
     BaseController,
@@ -136,25 +136,6 @@ sap.ui.define([
         oLocationControl.data("locationSuggestBound", true);
     }
 
-    function updateLocationSuggestions(oControl, aItems) {
-        if (!oControl || typeof oControl.destroySuggestionItems !== TYPE_FUNCTION || typeof oControl.addSuggestionItem !== TYPE_FUNCTION) {
-            return;
-        }
-        oControl.destroySuggestionItems();
-        (aItems || []).slice(0, 24).forEach(function (oItem) {
-            var sCode = String((oItem && (oItem.location_code || oItem.location_id)) || "").trim();
-            var sName = String((oItem && oItem.location_name) || "").trim();
-            if (!sCode && !sName) {
-                return;
-            }
-            oControl.addSuggestionItem(new Item({
-                key: sCode,
-                text: sCode,
-                additionalText: sName
-            }));
-        });
-    }
-
     function runLocationSuggest(oController, oEvent) {
         var sValue = String(oEvent && oEvent.getParameter && (oEvent.getParameter("suggestValue") || oEvent.getParameter("value")) || "").trim();
         var oControl = oEvent && oEvent.getSource && oEvent.getSource();
@@ -170,18 +151,33 @@ sap.ui.define([
             }
             iRequestVersion = Number(oController._iLocationSuggestRequestVersion || 0) + 1;
             oController._iLocationSuggestRequestVersion = iRequestVersion;
+            
             if (sNeedle && Array.isArray(oController._aLocationSuggestCache) && oController._aLocationSuggestCache.length && oController._sLocationSuggestNeedle && sNeedle.indexOf(oController._sLocationSuggestNeedle) === 0) {
-                updateLocationSuggestions(oControl, oController._aLocationSuggestCache.filter(function (oItem) {
+                oControl.destroySuggestionItems();
+                (oController._aLocationSuggestCache.filter(function (oItem) {
                     var sCode = String((oItem && (oItem.location_code || oItem.location_id)) || "").toLowerCase();
                     var sName = String((oItem && oItem.location_name) || "").toLowerCase();
                     return sCode.indexOf(sNeedle) >= 0 || sName.indexOf(sNeedle) >= 0;
-                }));
+                })).slice(0, 24).forEach(function (oItem) {
+                    var sCode = String((oItem && (oItem.location_code || oItem.location_id)) || "").trim();
+                    var sName = String((oItem && oItem.location_name) || "").trim();
+                    if (!sCode && !sName) {
+                        return;
+                    }
+                    oControl.addSuggestionItem(new Item({
+                        key: sCode,
+                        text: sCode,
+                        additionalText: sName
+                    }));
+                });
                 return;
             }
+            
             if (!oLookup || typeof oLookup.search !== TYPE_FUNCTION) {
-                updateLocationSuggestions(oControl, []);
+                oControl.destroySuggestionItems();
                 return;
             }
+            
             Promise.resolve(oLookup.search({ query: sValue, limit: 50 }))
                 .then(function (oFound) {
                     var aItems;
@@ -191,13 +187,25 @@ sap.ui.define([
                     aItems = (oFound && oFound.items) || [];
                     oController._aLocationSuggestCache = aItems;
                     oController._sLocationSuggestNeedle = sNeedle;
-                    updateLocationSuggestions(oControl, aItems);
+                    oControl.destroySuggestionItems();
+                    aItems.slice(0, 24).forEach(function (oItem) {
+                        var sCode = String((oItem && (oItem.location_code || oItem.location_id)) || "").trim();
+                        var sName = String((oItem && oItem.location_name) || "").trim();
+                        if (!sCode && !sName) {
+                            return;
+                        }
+                        oControl.addSuggestionItem(new Item({
+                            key: sCode,
+                            text: sCode,
+                            additionalText: sName
+                        }));
+                    });
                 })
                 .catch(function () {
                     if (oController._iLocationSuggestRequestVersion !== iRequestVersion) {
                         return;
                     }
-                    updateLocationSuggestions(oControl, []);
+                    oControl.destroySuggestionItems();
                 });
         }, 180);
     }
@@ -333,7 +341,18 @@ sap.ui.define([
         },
         onInit: function () { SearchLifecycleBehavior.onInit(this); },
         onAfterRendering: function () { SearchLifecycleBehavior.onAfterRendering(this); },
-        onExit: function () { SearchLifecycleBehavior.onExit(this); },
+        onExit: function () {
+            SearchLifecycleBehavior.onExit(this);
+            
+            if (this._oSearchSortDialog) {
+                this._oSearchSortDialog.destroy();
+                this._oSearchSortDialog = null;
+            }
+            if (this._oSearchGroupDialog) {
+                this._oSearchGroupDialog.destroy();
+                this._oSearchGroupDialog = null;
+            }
+        },
         _onSearchMatched: function () {
             SearchLifecycleBehavior.onSearchMatched(this, applyAnalyticsDrilldownIntent.bind(null, this));
         },

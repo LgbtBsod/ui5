@@ -17,6 +17,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/FocusRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
+    "sap/ui/model/odata/OperationMode",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime"
 ], function (
     BaseController,
@@ -37,6 +38,7 @@ sap.ui.define([
     ControllerViewStateRuntime,
     FocusRuntime,
     SchedulingRuntime,
+    OperationMode,
     JsRuntime
 ) {
     "use strict";
@@ -90,10 +92,15 @@ sap.ui.define([
             oController._fnAdaptiveViewportSync = syncAdaptiveDetailViewport.bind(null, oController);
         }
         unbindAdaptiveDetailViewport(oController);
+        
         if (typeof ResizeObserver === TYPE_FUNCTION) {
+            if (oController._oAdaptiveViewportResizeObserver) {
+                oController._oAdaptiveViewportResizeObserver.disconnect();
+            }
             oController._oAdaptiveViewportResizeObserver = new ResizeObserver(oController._fnAdaptiveViewportSync);
             oController._oAdaptiveViewportResizeObserver.observe(oDom);
         }
+        
         window.addEventListener("resize", oController._fnAdaptiveViewportSync, true);
         syncAdaptiveDetailViewport(oController);
     }
@@ -101,11 +108,30 @@ sap.ui.define([
     function unbindAdaptiveDetailViewport(oController) {
         if (oController._oAdaptiveViewportResizeObserver && typeof oController._oAdaptiveViewportResizeObserver.disconnect === TYPE_FUNCTION) {
             oController._oAdaptiveViewportResizeObserver.disconnect();
+            oController._oAdaptiveViewportResizeObserver = null;
         }
         if (oController._fnAdaptiveViewportSync) {
             window.removeEventListener("resize", oController._fnAdaptiveViewportSync, true);
+            oController._fnAdaptiveViewportSync = null;
         }
-        oController._oAdaptiveViewportResizeObserver = null;
+    }
+
+    function bindViewportPinnedControlRail(oController) {
+        var oStickyHost = (oController.byId && (oController.byId("detailControlPinnedDock") || oController.byId("detailControlStickyHost"))) || null;
+        var oHostDom = oStickyHost && oStickyHost.getDomRef && oStickyHost.getDomRef();
+        if (!oHostDom) {
+            return;
+        }
+        oHostDom.style.removeProperty("height");
+        oHostDom.style.removeProperty("--detail-rail-height");
+    }
+
+    function unbindViewportPinnedControlRail(oController) {
+        var oSwitch = oController.byId && oController.byId("detailEditSwitch");
+        if (oSwitch && oSwitch.removeEventDelegate && oController._oDetailEditSwitchDelegate) {
+            oSwitch.removeEventDelegate(oController._oDetailEditSwitchDelegate, oController);
+            oController._oDetailEditSwitchDelegate = null;
+        }
     }
 
     return BaseController.extend("PRODUCTION_CONTROL_CHECKLIST.controller.Detail", Object.assign(
@@ -197,13 +223,7 @@ sap.ui.define([
             },
             _clearViewportPinnedControlRailRetry: function () {},
             _scheduleViewportPinnedControlRailBind: function () {
-                var oStickyHost = (this.byId && (this.byId("detailControlPinnedDock") || this.byId("detailControlStickyHost"))) || null;
-                var oHostDom = oStickyHost && oStickyHost.getDomRef && oStickyHost.getDomRef();
-                if (!oHostDom) {
-                    return;
-                }
-                oHostDom.style.removeProperty("height");
-                oHostDom.style.removeProperty("--detail-rail-height");
+                bindViewportPinnedControlRail(this);
             },
             _bindDetailEditSwitchKeyboardFallback: function () {
                 var oSwitch = this.byId && this.byId("detailEditSwitch");
@@ -219,10 +239,7 @@ sap.ui.define([
                 oSwitch.addEventDelegate(this._oDetailEditSwitchDelegate, this);
             },
             _unbindViewportPinnedControlRail: function () {
-                var oSwitch = this.byId && this.byId("detailEditSwitch");
-                if (oSwitch && oSwitch.removeEventDelegate && this._oDetailEditSwitchDelegate) {
-                    oSwitch.removeEventDelegate(this._oDetailEditSwitchDelegate, this);
-                }
+                unbindViewportPinnedControlRail(this);
             },
             _bindViewportPinnedControlRail: function () {
                 this._scheduleViewportPinnedControlRailBind();
@@ -331,6 +348,11 @@ sap.ui.define([
                     ));
                 }
                 DetailValidationSummaryRuntime.onDetailModelChanged(this, oEvent, STATE_PATHS);
+            },
+            onExit: function () {
+                unbindAdaptiveDetailViewport(this);
+                unbindViewportPinnedControlRail(this);
+                BaseController.prototype.onExit.apply(this, arguments);
             }
         },
         {
