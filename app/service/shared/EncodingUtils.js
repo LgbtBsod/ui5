@@ -25,18 +25,15 @@ sap.ui.define([
             // Legacy fallback: char-by-char hex with manual zero-pad
             var aLegacy = [];
             for (var i = 0; i < sBinary.length; i += 1) {
-                var sHex = sBinary.charCodeAt(i).toString(16);
-                aLegacy.push(sHex.length >= 2 ? sHex : "0" + sHex);
+                aLegacy.push(sBinary.charCodeAt(i).toString(16).padStart(2, "0"));
             }
             return aLegacy.join("");
         }
 
-        var aBytes = Uint8Array.from(sBinary, function (sChar) { return sChar.charCodeAt(0); });
-        var aHex = [];
-        for (var j = 0; j < aBytes.length; j += 1) {
-            aHex.push(aBytes[j].toString(16).padStart(2, "0"));
-        }
-        return aHex.join("");
+        // Native path: convert each byte to a 2-digit hex pair.
+        return Array.prototype.map.call(sBinary, function (sChar) {
+            return sChar.charCodeAt(0).toString(16).padStart(2, "0");
+        }).join("");
     }
 
     return Object.freeze({

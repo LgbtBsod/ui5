@@ -6,7 +6,6 @@ CLASS zcl_zodata_lock_manager DEFINITION
   PUBLIC SECTION.
     INTERFACES zif_zodata_lock_manager.
 
-  PROTECTED SECTION.
   PRIVATE SECTION.
     DATA mo_contract TYPE REF TO zcl_zodata_contract_service.
 
@@ -50,7 +49,6 @@ CLASS zcl_zodata_lock_manager DEFINITION
         !iv_session_guid TYPE string OPTIONAL
       RETURNING
         VALUE(rv_code)   TYPE string.
-
     METHODS call_lock_fm
       IMPORTING
         !iv_mode TYPE c
@@ -80,22 +78,16 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD resolve_status_code.
-    IF is_snapshot-lock_session IS INITIAL.
-      rv_code = zif_zodata_message_codes=>lock_missing.
-      RETURN.
-    ENDIF.
+    DATA(lv_code) = COND string(
+      WHEN is_snapshot-lock_session IS INITIAL
+        THEN zif_zodata_message_codes=>lock_missing
+      WHEN is_snapshot-lock_expires_at IS INITIAL OR is_snapshot-lock_expires_at <= iv_now
+        THEN zif_zodata_message_codes=>lock_expired
+      WHEN iv_session_guid IS INITIAL OR is_snapshot-lock_session = iv_session_guid
+        THEN zif_zodata_message_codes=>lock_ok
+      ELSE zif_zodata_message_codes=>lock_not_owned_by_session ).
 
-    IF is_snapshot-lock_expires_at IS INITIAL OR is_snapshot-lock_expires_at <= iv_now.
-      rv_code = zif_zodata_message_codes=>lock_expired.
-      RETURN.
-    ENDIF.
-
-    IF iv_session_guid IS INITIAL OR is_snapshot-lock_session = iv_session_guid.
-      rv_code = zif_zodata_message_codes=>lock_ok.
-      RETURN.
-    ENDIF.
-
-    rv_code = zif_zodata_message_codes=>lock_not_owned_by_session.
+    rv_code = lv_code.
   ENDMETHOD.
 
   METHOD resolve_status_action.
@@ -143,30 +135,23 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
 
   METHOD resolve_lock_failure_code.
     DATA(ls_snapshot) = read_lock_snapshot( is_key ).
-    DATA lv_now TYPE timestampl.
+    DATA(lv_now) = cl_abap_tstmp=>get_current( ).
 
-    GET TIME STAMP FIELD lv_now.
-
-    CASE iv_mode.
-      WHEN 'S' OR 'V'.
-        rv_code = resolve_status_code(
-          is_snapshot     = ls_snapshot
-          iv_session_guid = iv_session_guid
-          iv_now          = lv_now ).
-      WHEN 'H' OR 'R'.
-        rv_code = COND string(
-          WHEN resolve_status_code(
-                 is_snapshot     = ls_snapshot
-                 iv_session_guid = iv_session_guid
-                 iv_now          = lv_now ) = zif_zodata_message_codes=>lock_expired
-          THEN zif_zodata_message_codes=>lock_expired
-          ELSE zif_zodata_message_codes=>lock_not_owned_by_session ).
-      WHEN OTHERS.
-        rv_code = zif_zodata_message_codes=>technical_error.
-    ENDCASE.
+    rv_code = COND string(
+      WHEN iv_mode = 'S' OR iv_mode = 'V'
+        THEN resolve_status_code( is_snapshot = ls_snapshot iv_session_guid = iv_session_guid iv_now = lv_now )
+      WHEN iv_mode = 'H' OR iv_mode = 'R'
+        THEN COND string(
+          WHEN resolve_status_code( is_snapshot = ls_snapshot iv_session_guid = iv_session_guid iv_now = lv_now ) = zif_zodata_message_codes=>lock_expired
+            THEN zif_zodata_message_codes=>lock_expired
+          ELSE zif_zodata_message_codes=>lock_not_owned_by_session )
+      ELSE zif_zodata_message_codes=>technical_error ).
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~acquire.
+    DATA(lv_now) = cl_abap_tstmp=>get_current( ).
+    DATA(lv_expires) = cl_abap_tstmp=>add( tstmp = lv_now secs = zif_zodata_contract_constants=>c_lock_ttl_seconds ).
+
     call_lock_fm(
       EXPORTING
         iv_mode           = 'A'
@@ -175,12 +160,7 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
         iv_owner          = is_owner-uname
         iv_tab_session_id = is_owner-tab_session_id
         iv_force_takeover = iv_force_takeover ).
-    DATA lv_now TYPE timestampl.
-    DATA lv_expires TYPE timestampl.
-    GET TIME STAMP FIELD lv_now.
-    lv_expires = cl_abap_tstmp=>add(
-      tstmp = lv_now
-      secs  = zif_zodata_contract_constants=>c_lock_ttl_seconds ).
+
     mo_contract->fill_lock_acquire_result(
       EXPORTING
         iv_ok                  = abap_true
@@ -198,17 +178,15 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~heartbeat.
+    DATA(lv_now) = cl_abap_tstmp=>get_current( ).
+    DATA(lv_expires) = cl_abap_tstmp=>add( tstmp = lv_now secs = zif_zodata_contract_constants=>c_lock_ttl_seconds ).
+
     call_lock_fm(
       EXPORTING
         iv_mode         = 'H'
         is_key          = is_key
         iv_session_guid = iv_session_guid ).
-    DATA lv_now TYPE timestampl.
-    DATA lv_expires TYPE timestampl.
-    GET TIME STAMP FIELD lv_now.
-    lv_expires = cl_abap_tstmp=>add(
-      tstmp = lv_now
-      secs  = zif_zodata_contract_constants=>c_lock_ttl_seconds ).
+
     mo_contract->fill_lock_heartbeat_result(
       EXPORTING
         iv_ok                  = abap_true
@@ -232,12 +210,9 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~status.
-    DATA ls_snapshot TYPE ty_lock_snapshot.
-    DATA lv_now TYPE timestampl.
+    DATA(ls_snapshot) = read_lock_snapshot( is_key ).
+    DATA(lv_now) = cl_abap_tstmp=>get_current( ).
 
-    GET TIME STAMP FIELD lv_now.
-
-    ls_snapshot = read_lock_snapshot( is_key ).
     fill_status_result(
       EXPORTING
         is_key          = is_key
@@ -249,7 +224,6 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~ensure_session_lock.
-    DATA ls_dummy TYPE string.
     call_lock_fm(
       EXPORTING
         iv_mode         = 'V'
@@ -277,8 +251,8 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD call_lock_fm.
-    DATA lv_error_code TYPE string.
-    DATA lv_error_text TYPE string.
+    DATA(lv_error_code) = SPACE.
+    DATA(lv_error_text) = SPACE.
 
     ensure_contract( ).
 
@@ -307,7 +281,6 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
           iv_code = lv_error_code
           iv_msg  = lv_error_text.
     ENDIF.
-
   ENDMETHOD.
 
 ENDCLASS.

@@ -214,15 +214,15 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   METHOD createchecklist_create_entity.
     DATA ls_req TYPE zstr_pcct_savechanges_rq.
     DATA ls_resp TYPE zstr_pcct_savechanges_rs.
-    AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
-      ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_create
-      ID 'BUKRS' FIELD '*'.
-    IF sy-subrc <> 0.
-      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_no_create_auth ) iv_code = zif_zodata_message_codes=>no_create_auth ).
-    ENDIF.
     ensure_deps( ).
     ls_req = read_save_request( io_data_provider ).
     ls_req-root-edit_mode = 'C'.
+    AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist
+      ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_create
+      ID 'BUKRS' FIELD ls_req-root-bukrs.
+    IF sy-subrc <> 0.
+      raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_no_create_auth ) iv_code = zif_zodata_message_codes=>no_create_auth ).
+    ENDIF.
     TRY.
         ls_resp = mo_save_service->execute_save(
           is_request        = ls_req

@@ -147,7 +147,7 @@ sap.ui.define([
                 return;
             }
             sHash = WorkspaceRouteNavigation.buildDetailHash(oController, sId);
-            sUrl = window.location.origin + window.location.pathname + "#" + sHash;
+            sUrl = new URL("#" + sHash, window.location.href).href;
             ClipboardRuntime.writeText(sUrl).then(function (bCopied) {
                 mHooks.showToast(bCopied ? "detailLinkCopied" : "detailLinkCopyFailed");
             });

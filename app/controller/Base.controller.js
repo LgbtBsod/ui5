@@ -5,10 +5,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ThemeMixin",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/LockAdapter",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/CtxRuntimeFactory",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/EncodingUtils"
-], function (Controller, RouterMixin, EffectMixin, ThemeMixin, LockAdapter, CtxRuntimeFactory, ModelContracts, JsRuntime, EncodingUtils) {
+], function (Controller, RouterMixin, EffectMixin, ThemeMixin, LockAdapter, CtxRuntimeFactory, ControllerStateRuntime, ModelContracts, JsRuntime, EncodingUtils) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -103,6 +104,31 @@ sap.ui.define([
         },
         base64ToHex: function (sBase64) {
             return EncodingUtils.base64ToHex(sBase64);
+        },
+        /**
+         * Destroys all models and cleans up resources to prevent memory leaks.
+         * Call this method in onExit() lifecycle method.
+         */
+        destroy: function () {
+            try {
+                ControllerStateRuntime.destroyAllModels(this);
+            } catch (e) {
+                // Silent fail to prevent errors during destruction
+            }
+        },
+        /**
+         * Lifecycle method called when controller is destroyed.
+         * Override in subclasses if additional cleanup is needed.
+         */
+        onExit: function () {
+            this.destroy();
+        },
+        /**
+         * Lifecycle method called before rendering.
+         * Override in subclasses if additional cleanup is needed.
+         */
+        onBeforeRendering: function () {
+            // Base implementation - override in subclasses if needed
         }
     }));
 });

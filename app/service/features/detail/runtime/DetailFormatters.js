@@ -74,41 +74,7 @@ sap.ui.define([
         ) || 0;
     }
 
-    function parseDateLike(vValue) {
-        var sValue;
-        var oDate;
-        var aParts;
-        if (vValue instanceof Date && !Number.isNaN(vValue.getTime())) {
-            return vValue;
-        }
-        sValue = String(vValue || "").trim();
-        if (!sValue) {
-            return null;
-        }
-        if (/^\d{4}-\d{2}-\d{2}$/.test(sValue)) {
-            aParts = sValue.split("-");
-            oDate = new Date(
-                Number(aParts[0]),
-                Number(aParts[1]) - 1,
-                Number(aParts[2]),
-                0,
-                0,
-                0,
-                0
-            );
-            return Number.isNaN(oDate.getTime()) ? null : oDate;
-        }
-        oDate = new Date(sValue);
-        return Number.isNaN(oDate.getTime()) ? null : oDate;
-    }
-
-    function formatHumanDate(vValue) {
-        var oDate = parseDateLike(vValue);
-        if (!oDate) {
-            return "";
-        }
-        return oDateFormatter.format(oDate);
-    }
+{"text": "    function formatHumanDate(vValue) {\n        // Use SAPUI5's built-in date parsing via parseDate\n        var oDate = oDateFormatter.parse(vValue);\n        return oDate ? oDateFormatter.format(oDate) : \"\";\n    }"}
 
     function formatDateTimeCardValue(oController, sDate, sTime, sTimezone) {
         var sHumanDate = formatHumanDate(sDate) || "-";
@@ -122,11 +88,9 @@ sap.ui.define([
     }
 
     function formatAutosaveTime(vValue) {
-        var oDate = parseDateLike(vValue);
-        if (!oDate) {
-            return vValue || "-";
-        }
-        return oTimeFormatter.format(oDate);
+        // Use SAPUI5's built-in time parsing via parseTime() - replaces custom parseDateLike()
+        var oDate = oTimeFormatter.parse(vValue);
+        return oDate ? oTimeFormatter.format(oDate) : (vValue || "-");
     }
 
     return {

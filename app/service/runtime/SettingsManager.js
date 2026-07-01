@@ -11,7 +11,7 @@ sap.ui.define([
     var _loadedAt = 0;
     var _loadingPromise = null;
     var _runtimeCache = {};
-    var _subscribers = [];
+    var _subscribers = new Set();
     var _summaryLogged = false;
 
     function _safeError(oError) {
@@ -37,7 +37,6 @@ sap.ui.define([
             try { fn(oRuntime || {}, mMeta || {}); } catch (e) { /* noop */ }
         });
     }
-
     function _isTtlExpired() {
         if (!_loaded || !_loadedAt) {
             return true;
@@ -57,15 +56,12 @@ sap.ui.define([
 
     return {
         subscribe: function (fnHandler) {
-            if (typeof fnHandler === "function" && _subscribers.indexOf(fnHandler) === -1) {
-                _subscribers.push(fnHandler);
+            if (typeof fnHandler === "function") {
+                _subscribers.add(fnHandler);
             }
 
             return function unsubscribe() {
-                var iIndex = _subscribers.indexOf(fnHandler);
-                if (iIndex > -1) {
-                    _subscribers.splice(iIndex, 1);
-                }
+                _subscribers.delete(fnHandler);
             };
         },
 

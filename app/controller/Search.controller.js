@@ -19,7 +19,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ReadinessTelemetryRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/RuntimeOrchestrationContracts",
     "sap/m/ViewSettingsDialog",
-    "sap/m/ViewSettingsItem",
+    "sap/m/ViewSettingsItem,\n    \"PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime\"",
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsFormatRuntime"
 ], function (
     BaseController,

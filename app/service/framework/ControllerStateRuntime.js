@@ -49,6 +49,45 @@ sap.ui.define([
         return ModelStateRuntime.withFlag(oController, VIEW_MODEL, sPath, fnWork, vBegin, vEnd);
     }
 
+    /**
+     * Destroys the view model and cleans up all associated resources to prevent memory leaks.
+     * Call this method in the controller's onBeforeRendering or onExit lifecycle methods.
+     * @param {sap.ui.core.mvc.Controller} oController - The controller instance
+     */
+    function destroy(oController) {
+        var oModel = resolveViewStateModel(oController);
+        if (oModel) {
+            // Unbind all bindings to prevent memory leaks
+            oModel.destroyBindings();
+            // Destroy the model to release all resources
+            oModel.destroy();
+            // Remove the model from controller
+            oController.removeModel(VIEW_MODEL);
+        }
+    }
+
+    /**
+     * Destroys all models associated with the controller to ensure complete cleanup.
+     * @param {sap.ui.core.mvc.Controller} oController - The controller instance
+     */
+    function destroyAllModels(oController) {
+        if (!oController || typeof oController.getModel !== "function") {
+            return;
+        }
+
+        var aModelNames = oController.getModelNames();
+        if (aModelNames && aModelNames.length > 0) {
+            for (var i = 0; i < aModelNames.length; i++) {
+                var sModelName = aModelNames[i];
+                var oModel = oController.getModel(sModelName);
+                if (oModel && typeof oModel.destroy === "function") {
+                    oModel.destroyBindings();
+                    oModel.destroy();
+                }
+            }
+        }
+    }
+
     return Object.freeze({
         initModel: initModel,
         get: get,
@@ -57,6 +96,8 @@ sap.ui.define([
         replace: replace,
         setFlag: setFlag,
         withFlag: withFlag,
+        destroy: destroy,
+        destroyAllModels: destroyAllModels,
         viewState: function (oController) {
             return resolveViewStateModel(oController);
         }

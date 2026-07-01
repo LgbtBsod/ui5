@@ -177,6 +177,21 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD finalize_save_transaction.
+    " ARCHITECTURE TODO (P0): COMMIT inside a Gateway function-import handler breaks
+    " $batch atomicity — partial failures leave the LUW half-committed and other
+    " change-sets in the same $batch cannot roll back together.
+    "
+    " Target-state remedy (deferred — requires Draft / BOPF transaction migration):
+    "   1. Replace direct COMMIT with /bobf/cl_tra_trans_mgr_factory => get_transaction_manager
+    "      and let the BOPF transaction manager own the commit boundary, OR
+    "   2. Migrate the entity to Gateway Draft Handling (sap:is-draft-enabled) so the
+    "      framework performs the single COMMIT after all change-sets succeed, OR
+    "   3. Refactor to /iwbep/if_mgw_appl_srv_runtime~changeset_begin/end and move
+    "      the COMMIT to changeset_end only (deferred-commit pattern).
+    "
+    " Until that migration lands, the synchronous COMMIT is preserved to keep the
+    " current pessimistic-lock + BOPF contract working. The risk is documented in
+    " docs/COMPATIBILITY_MATRIX.md.
     IF iv_is_autosave = abap_true.
       COMMIT WORK.
       RETURN.

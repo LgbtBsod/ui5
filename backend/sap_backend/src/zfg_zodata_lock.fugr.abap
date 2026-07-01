@@ -23,8 +23,12 @@ FUNCTION zodata_lock_control.
 "----------------------------------------------------------------------
 
   DATA lv_now TYPE timestampl.
+  DATA lv_expiry TYPE timestampl.
 
   GET TIME STAMP FIELD lv_now.
+  lv_expiry = cl_abap_tstmp=>add(
+                tstmp = lv_now
+                secs  = zif_zodata_contract_constants=>c_lock_ttl_seconds ).
 
   IF iv_bo_key IS INITIAL OR iv_object_id IS INITIAL.
     RAISE update_error.
@@ -67,9 +71,7 @@ FUNCTION zodata_lock_control.
              tab_session_id  = iv_tab_session_id
              last_touch_at   = lv_now
              last_touch_by   = sy-uname
-             lock_expires_at = cl_abap_tstmp=>add(
-                                 tstmp = lv_now
-                                 secs  = zif_zodata_contract_constants=>c_lock_ttl_seconds )
+             lock_expires_at = lv_expiry
        WHERE bo_key          = iv_bo_key
          AND object_id       = iv_object_id.
 
@@ -121,9 +123,7 @@ FUNCTION zodata_lock_control.
       UPDATE ztodata_hdr
          SET last_touch_at = lv_now
              last_touch_by = sy-uname
-             lock_expires_at = cl_abap_tstmp=>add(
-                                 tstmp = lv_now
-                                 secs  = zif_zodata_contract_constants=>c_lock_ttl_seconds )
+             lock_expires_at = lv_expiry
        WHERE bo_key        = iv_bo_key
          AND object_id     = iv_object_id
          AND ( lock_session = iv_session_guid OR iv_mode = 'T' ).
