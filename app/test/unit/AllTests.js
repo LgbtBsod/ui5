@@ -7,6 +7,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/ShellLayoutRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/StatusChipClassRuntime.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailRowBindingRuntime.qunit",
+    "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DateTimeUtils.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailRowEntityConfig.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailAttachmentViewState.qunit",
     "PRODUCTION_CONTROL_CHECKLIST/test/unit/framework/DetailViewStateFactory.qunit",

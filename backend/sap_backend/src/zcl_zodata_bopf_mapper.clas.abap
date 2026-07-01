@@ -55,6 +55,12 @@ CLASS zcl_zodata_bopf_mapper DEFINITION
         zcx_zodata_error.
 
     " ── Internal allocation helper ─────────────────────────────
+    METHODS assert_ddic_type_allowed
+      IMPORTING
+        iv_ddic_type           TYPE string
+      RAISING
+        zcx_zodata_error.
+
     METHODS create_internal_ref
       IMPORTING
         iv_ddic_type           TYPE string
@@ -413,14 +419,46 @@ CLASS zcl_zodata_bopf_mapper IMPLEMENTATION.
     ro_cache = mo_rtti_cache.
   ENDMETHOD.
 
+  METHOD assert_ddic_type_allowed.
+    DATA(lv_ddic_type) = iv_ddic_type.
+    TRANSLATE lv_ddic_type TO UPPER CASE.
+
+    READ TABLE mt_node_config TRANSPORTING NO FIELDS
+      WITH KEY int_struct_type = lv_ddic_type.
+    IF sy-subrc = 0.
+      RETURN.
+    ENDIF.
+
+    RAISE EXCEPTION TYPE zcx_zodata_error
+      EXPORTING iv_code = 'TECHNICAL_ERROR'
+                iv_msg  = |BOPF mapper: DDIC type '{ iv_ddic_type }' is not registered in the node allowlist.|.
+  ENDMETHOD.
+
   METHOD create_internal_ref.
+    DATA lo_descr TYPE REF TO cl_abap_typedescr.
+
+    assert_ddic_type_allowed( iv_ddic_type ).
+
     TRY.
-        DATA(lo_descr) = cl_abap_typedescr=>describe_by_name( iv_ddic_type ).
-        CREATE DATA ro_ref TYPE (iv_ddic_type).
-      CATCH cx_sy_create_data_error cx_root INTO DATA(lx).
+        lo_descr = cl_abap_typedescr=>describe_by_name( iv_ddic_type ).
+      CATCH cx_root INTO DATA(lx_describe).
         RAISE EXCEPTION TYPE zcx_zodata_error
           EXPORTING iv_code = 'TECHNICAL_ERROR'
-                    iv_msg  = |create_internal_ref: cannot create instance of '{ iv_ddic_type }'. { lx->get_text( ) }|.
+                    iv_msg  = |create_internal_ref: DDIC type '{ iv_ddic_type }' cannot be described. { lx_describe->get_text( ) }|.
+    ENDTRY.
+
+    IF lo_descr->kind <> cl_abap_typedescr=>kind_struct.
+      RAISE EXCEPTION TYPE zcx_zodata_error
+        EXPORTING iv_code = 'TECHNICAL_ERROR'
+                  iv_msg  = |BOPF mapper: DDIC type '{ iv_ddic_type }' is not a structure.|.
+    ENDIF.
+
+    TRY.
+        CREATE DATA ro_ref TYPE (iv_ddic_type).
+      CATCH cx_sy_create_data_error INTO DATA(lx_create).
+        RAISE EXCEPTION TYPE zcx_zodata_error
+          EXPORTING iv_code = 'TECHNICAL_ERROR'
+                    iv_msg  = |create_internal_ref: cannot create instance of '{ iv_ddic_type }'. { lx_create->get_text( ) }|.
     ENDTRY.
   ENDMETHOD.
 

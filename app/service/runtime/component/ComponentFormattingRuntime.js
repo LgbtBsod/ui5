@@ -1,18 +1,10 @@
 sap.ui.define([
-    "sap/ui/core/format/DateFormat"
-], function (DateFormat) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DateTimeUtils"
+], function (DateTimeUtils) {
     "use strict";
 
-    var oDateTimeFormatter = DateFormat.getDateTimeInstance({
-        pattern: "dd.MM.yyyy, HH:mm"
-    });
-
     function formatHumanDateTime(vDate) {
-        var oDate = vDate instanceof Date ? vDate : new Date(vDate || Date.now());
-        if (Number.isNaN(oDate.getTime())) {
-            oDate = new Date();
-        }
-        return oDateTimeFormatter.format(oDate);
+        return DateTimeUtils.formatHumanDateTime(vDate, new Date());
     }
 
     function eventPayload(oEvent) {

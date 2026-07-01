@@ -11,6 +11,7 @@ sap.ui.define([
 
     /* Chunked detail loading keeps initial open light while checks and barriers load in bounded pages. */
     var DETAIL_ROW_CHUNK_SIZE = 20;
+    var DETAIL_READ_GROUP_ID = "detailRead";
 
     /* Filter helpers stay centralized on ODataAdapterUtils so string and binary predicates use one typed formatting seam. */
     /* String lookup is limited to human-readable checklist identifiers before canonical DB_KEY resolution. */
@@ -58,13 +59,13 @@ sap.ui.define([
             type: ODataEntityContracts.TYPES.DB_KEY
         }), {
             "$select": ODataEntityContracts.SELECTS.CHECKLIST_ROOT
-        });
+        }, { groupId: DETAIL_READ_GROUP_ID });
         // ChecklistBasicInfoSet is a separate CDS-backed read model.
         // Keep it independent from ChecklistRootSet and read it via its own entity set.
         var pBasic = GatewayClient.rawRead("/" + oBasicFilter.entitySet, {
             "$filter": buildDetailFilter(oBasicFilter, sDbKey),
             "$select": ODataEntityContracts.SELECTS.CHECKLIST_BASIC_INFO
-        });
+        }, { groupId: DETAIL_READ_GROUP_ID });
         var pRows = bIncludeChildren ? loadDetailRows({
             dbKey: sDbKey,
             includeChecks: true,
@@ -88,7 +89,7 @@ sap.ui.define([
                 "$select": sSelect,
                 "$top": DETAIL_ROW_CHUNK_SIZE,
                 "$skip": iSkip
-            }).then(function (oResponse) {
+            }, { groupId: DETAIL_READ_GROUP_ID }).then(function (oResponse) {
                 var aChunk = ODataAdapterUtils.asArray(oResponse).map(fnMapRow);
                 aRows = aRows.concat(aChunk);
                 if (aChunk.length < DETAIL_ROW_CHUNK_SIZE) {

@@ -1,8 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ChecklistSnapshotMapper",
-    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BrowserLocaleUtils"
-], function (ODataAdapterUtils, ChecklistSnapshotMapper, BrowserLocaleUtils) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/BrowserLocaleUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/service/shared/DateTimeUtils"
+], function (ODataAdapterUtils, ChecklistSnapshotMapper, BrowserLocaleUtils, DateTimeUtils) {
     "use strict";
 
     function firstRow(vData) {
@@ -12,45 +13,8 @@ sap.ui.define([
         return oUnwrapped || {};
     }
 
-    function pad2(iValue) {
-        var s = String(iValue);
-        return s.length >= 2 ? s : "0" + s;
-    }
-
-    function formatUtcDate(oDate) {
-        if (!(oDate instanceof Date) || Number.isNaN(oDate.getTime())) {
-            return "";
-        }
-        return [
-            oDate.getUTCFullYear(),
-            pad2(oDate.getUTCMonth() + 1),
-            pad2(oDate.getUTCDate())
-        ].join("-");
-    }
-
     function toYmd(vDateCheck) {
-        var s;
-        var m;
-        var oDate;
-        if (vDateCheck instanceof Date) {
-            return formatUtcDate(vDateCheck);
-        }
-        if (typeof vDateCheck === "number" && Number.isFinite(vDateCheck)) {
-            return formatUtcDate(new Date(vDateCheck));
-        }
-        s = String(vDateCheck || "").trim();
-        if (!s) {
-            return "";
-        }
-        m = /\/(?:Date\()?([0-9]{10,13})/.exec(s);
-        if (m) {
-            return formatUtcDate(new Date(Number(m[1])));
-        }
-        if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
-            return s.slice(0, 10);
-        }
-        oDate = new Date(s);
-        return formatUtcDate(oDate);
+        return DateTimeUtils.formatYmdUtc(vDateCheck);
     }
 
     function mapBasic(oBasic) {
