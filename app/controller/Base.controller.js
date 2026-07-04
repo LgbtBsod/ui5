@@ -1,5 +1,6 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
+    "sap/base/Log",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/RouterMixin",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/EffectMixin",
     "PRODUCTION_CONTROL_CHECKLIST/controller/base/ThemeMixin",
@@ -9,7 +10,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/EncodingUtils"
-], function (Controller, RouterMixin, EffectMixin, ThemeMixin, LockAdapter, CtxRuntimeFactory, ControllerStateRuntime, ModelContracts, JsRuntime, EncodingUtils) {
+], function (Controller, Log, RouterMixin, EffectMixin, ThemeMixin, LockAdapter, CtxRuntimeFactory, ControllerStateRuntime, ModelContracts, JsRuntime, EncodingUtils) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -110,10 +111,11 @@ sap.ui.define([
          * Call this method in onExit() lifecycle method.
          */
         destroy: function () {
+            this._removeThemeSyncListener();
             try {
                 ControllerStateRuntime.destroyAllModels(this);
             } catch (e) {
-                // Silent fail to prevent errors during destruction
+                Log.error("Controller model cleanup failed: " + e.message, this.getMetadata().getName());
             }
         },
         /**

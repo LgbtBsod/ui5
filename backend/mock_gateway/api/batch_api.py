@@ -102,7 +102,7 @@ async def _execute_operation(request: Request, op: BatchOperation) -> httpx.Resp
         return await client.request(method, target_path, headers=headers, content=content)
 
 
-@router.post("/$batch")
+@router.post(f"{SERVICE_ROOT}/$batch")
 async def batch(request: Request):
     boundary = extract_boundary(request.headers.get("content-type"))
     operations = parse_batch_request((await request.body()).decode("utf-8"), boundary)

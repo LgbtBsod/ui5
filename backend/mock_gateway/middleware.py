@@ -60,7 +60,13 @@ async def setup_csrf_middleware(app, csrf_store):
         token = request.headers.get("X-CSRF-Token")
         is_fetch = str(token).lower() == "fetch"
 
-        b_is_batch = path.endswith("/$batch")
+        # Both $batch entry points carry their own sub-operations, each with its own
+        # method - CSRF for those is enforced by batch_api._enforce_batch_csrf() (which
+        # only requires a token when the batch actually contains a write), not here.
+        # This used to check only path.endswith("/$batch"), silently missing "/$batch/json"
+        # and rejecting every batch_json call - including pure-read batches - with a
+        # blanket CSRF_TOKEN_MISSING before the request ever reached batch_api.py.
+        b_is_batch = path.endswith("/$batch") or path.endswith("/$batch/json")
         if request.method in {"POST", "PUT", "PATCH", "MERGE", "DELETE"} and not is_fetch and not b_is_batch:
             if not csrf_store.validate(session_id, token):
                 return odata_error_response(403, "CSRF_TOKEN_MISSING", "CSRF token validation failed")

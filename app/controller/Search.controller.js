@@ -136,6 +136,27 @@ sap.ui.define([
         oLocationControl.data("locationSuggestBound", true);
     }
 
+    /* Парный detach к bindLocationSuggest — без него suggest/suggestionItemSelected
+     * остаются подписаны на уничтоженный контроллер до пересоздания контрола. */
+    function unbindLocationSuggest(oController) {
+        var oSmartFilterBar = oController.byId("smartFilterBar");
+        var oLocationControl;
+        if (!oSmartFilterBar || typeof oSmartFilterBar.getControlByKey !== TYPE_FUNCTION) {
+            return;
+        }
+        oLocationControl = oSmartFilterBar.getControlByKey("LocationKey");
+        if (!oLocationControl || !oLocationControl.data("locationSuggestBound")) {
+            return;
+        }
+        if (typeof oLocationControl.detachSuggest === TYPE_FUNCTION) {
+            oLocationControl.detachSuggest(oController.onLocationKeySuggest, oController);
+        }
+        if (typeof oLocationControl.detachSuggestionItemSelected === TYPE_FUNCTION) {
+            oLocationControl.detachSuggestionItemSelected(oController.onLocationKeySuggestionSelected, oController);
+        }
+        oLocationControl.data("locationSuggestBound", null);
+    }
+
     function runLocationSuggest(oController, oEvent) {
         var sValue = String(oEvent && oEvent.getParameter && (oEvent.getParameter("suggestValue") || oEvent.getParameter("value")) || "").trim();
         var oControl = oEvent && oEvent.getSource && oEvent.getSource();
@@ -343,7 +364,8 @@ sap.ui.define([
         onAfterRendering: function () { SearchLifecycleBehavior.onAfterRendering(this); },
         onExit: function () {
             SearchLifecycleBehavior.onExit(this);
-            
+            unbindLocationSuggest(this);
+
             if (this._oSearchSortDialog) {
                 this._oSearchSortDialog.destroy();
                 this._oSearchSortDialog = null;

@@ -26,7 +26,11 @@ def is_client_disconnect_error(exc: BaseException) -> bool:
     return False
 
 BACKEND_BASE = os.environ.get("UI5_BACKEND_BASE", "http://127.0.0.1:8000")
-UI5_RESOURCES_BASE = os.environ.get("UI5_RESOURCES_BASE", "https://ui5.sap.com/1.71.70").rstrip("/")
+# Must match the framework.version pinned in ui5.yaml (1.71.74) - an older patch (e.g.
+# 1.71.70, the previous default here) doesn't necessarily ship every module the app
+# references. sap/viz/ui5/api/env/Format.js is 404 on 1.71.70's CDN but present on
+# 1.71.74, so every sap.viz-based chart silently failed to load with the stale default.
+UI5_RESOURCES_BASE = os.environ.get("UI5_RESOURCES_BASE", "https://ui5.sap.com/1.71.74").rstrip("/")
 PROXY_PREFIXES = ("/sap/",)
 UI5_PROXY_PREFIXES = ("/resources/", "/test-resources/")
 UI5_CACHE_ROOT = Path(os.environ.get("UI5_RESOURCE_CACHE_DIR", Path(__file__).resolve().parents[1] / ".ui5-resource-cache"))
@@ -135,13 +139,26 @@ class ODataStaticRequestHandler(http.server.SimpleHTTPRequestHandler):
                     return ("success", resp, payload)
             except urllib.error.HTTPError as err:
                 payload = err.read() if err.fp is not None else b""
-                if err.code >= 500:
+                # UI5 resource URLs are immutable/versioned - if we've ever successfully
+                # cached this exact path, a later error (4xx included, not just 5xx) is
+                # almost certainly the CDN edge network still propagating the release
+                # rather than the resource genuinely not existing. Observed in practice:
+                # ui5.sap.com intermittently 404s a just-published path from some edge
+                # nodes for a short window after a version's rollout, then 200s moments
+                # later for the identical URL - previously only 5xx fell back to cache,
+                # so this class of transient 404 broke every sap.viz-based chart at
+                # random until the retry happened to hit a warmed edge.
+                if is_ui5_proxy and cache_path is not None and self._serve_cached_ui5_payload(cache_path, head_only=self.command == "HEAD"):
+                    return ("cached", None, None)
+                # No warm cache yet (e.g. first hit after a fresh checkout/cache-clear) -
+                # retry a UI5-proxy error the same as a 5xx instead of failing on attempt
+                # one, since a 404 here is equally likely to be the CDN edge propagation
+                # gap described above rather than a real missing resource.
+                if err.code >= 500 or is_ui5_proxy:
                     last_exc = err
                     if attempt < PROXY_RETRY_COUNT:
                         time.sleep(PROXY_RETRY_DELAY_MS / 1000.0)
                         continue
-                    if is_ui5_proxy and cache_path is not None and self._serve_cached_ui5_payload(cache_path, head_only=self.command == "HEAD"):
-                        return ("cached", None, None)
                 return ("http_error", err, payload)
             except Exception as exc:  # noqa: BLE001
                 last_exc = exc

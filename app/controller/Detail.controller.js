@@ -221,7 +221,6 @@ sap.ui.define([
             _syncAdaptiveDetailViewport: function () {
                 syncAdaptiveDetailViewport(this);
             },
-            _clearViewportPinnedControlRailRetry: function () {},
             _scheduleViewportPinnedControlRailBind: function () {
                 bindViewportPinnedControlRail(this);
             },

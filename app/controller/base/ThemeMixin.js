@@ -36,6 +36,18 @@ sap.ui.define([
         }
     }
 
+    /* Парный detach к ensureThemeSyncListener: без него Core (синглтон) держит
+     * замыкание на уничтоженный контроллер до конца жизни приложения. */
+    function removeThemeSyncListener(oController) {
+        if (!oController._fnThemeChangedHandler) {
+            return;
+        }
+        if (Core && typeof Core.detachThemeChanged === "function") {
+            Core.detachThemeChanged(oController._fnThemeChangedHandler);
+        }
+        oController._fnThemeChangedHandler = null;
+    }
+
     /* Этот блок применяет канонический утренний режим и при необходимости сохраняет профиль.
      * Результат: приложение всегда рендерится в поддерживаемом productive-виде. */
     function applyMorningMode(oController, oClickXY, mOptions) {
@@ -87,6 +99,9 @@ sap.ui.define([
         },
         _ensureThemeSyncListener: function () {
             ensureThemeSyncListener(this);
+        },
+        _removeThemeSyncListener: function () {
+            removeThemeSyncListener(this);
         },
         _applyTheme: function (sTheme) {
             var oProfile = readThemeProfile();

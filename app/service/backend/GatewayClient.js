@@ -37,16 +37,20 @@ sap.ui.define([
         return sNormalized.charAt(0) === "/" ? sNormalized : ("/" + sNormalized);
     }
 
-    function assertCanonicalPath(sPath) {
-        var FORBIDDEN_PATH_PATTERNS = [
+    /* SSOT: единственное место, где перечислены запрещённые канонические пути.
+     * Ранее список дублировался в assertCanonicalPath и assertAllowedFunctionName. */
+    function buildForbiddenPathPatterns() {
+        return [
             /^\/actions\//i,
             /^\/lock\//i,
             /^\/config\/frontend(?:$|[/?])/i
-        ].concat((GatewayContractConstants.DISALLOWED_PATHS || []).map(function(sTail) {
+        ].concat((GatewayContractConstants.DISALLOWED_PATHS || []).map(function (sTail) {
             return new RegExp("^\\/+" + sTail + "(?:$|[/?(])", "i");
         }));
+    }
 
-        FORBIDDEN_PATH_PATTERNS.forEach(function(oPattern) {
+    function assertCanonicalPath(sPath) {
+        buildForbiddenPathPatterns().forEach(function (oPattern) {
             if (oPattern.test(sPath)) {
                 throw new Error(TECHNICAL_CODES.FORBIDDEN_NON_CANONICAL_ODATA_PATH);
             }
@@ -59,16 +63,7 @@ sap.ui.define([
         if (!sResolved) {
             throw new Error(TECHNICAL_CODES.FUNCTION_IMPORT_NAME_REQUIRED);
         }
-        
-        var FORBIDDEN_PATH_PATTERNS = [
-            /^\/actions\//i,
-            /^\/lock\//i,
-            /^\/config\/frontend(?:$|[/?])/i
-        ].concat((GatewayContractConstants.DISALLOWED_PATHS || []).map(function(sTail) {
-            return new RegExp("^\\/+" + sTail + "(?:$|[/?(])", "i");
-        }));
-
-        if (FORBIDDEN_PATH_PATTERNS.some(function(oPattern) { return oPattern.test("/" + sResolved); })) {
+        if (buildForbiddenPathPatterns().some(function (oPattern) { return oPattern.test("/" + sResolved); })) {
             throw new Error(TECHNICAL_CODES.FORBIDDEN_NON_CANONICAL_FUNCTION_IMPORT);
         }
         return sResolved;

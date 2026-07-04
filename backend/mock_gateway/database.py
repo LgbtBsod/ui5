@@ -17,6 +17,17 @@ if engine.dialect.name == "sqlite":
     @event.listens_for(engine, "connect")
     def _sqlite_disable_pysqlite_transaction_handling(dbapi_connection, connection_record):
         dbapi_connection.isolation_level = None
+        # SQLite is single-writer: two connections (e.g. the periodic analytics refresh
+        # job and a concurrent request) committing at the same moment otherwise raise
+        # "database is locked" immediately. Worse, since isolation_level=None hands
+        # transaction control to us, a commit that fails this way leaves the SQLite-level
+        # transaction still open on that pooled connection - the next checkout's explicit
+        # BEGIN (below) then fails with "cannot start a transaction within a transaction",
+        # poisoning that connection for every future request that happens to reuse it.
+        # A busy_timeout makes SQLite retry internally for up to 30s instead of failing
+        # immediately, which is orders of magnitude longer than any transaction in this
+        # app takes - eliminating the lock error (and the corruption it causes) in practice.
+        dbapi_connection.execute("PRAGMA busy_timeout = 30000")
 
     @event.listens_for(engine, "begin")
     def _sqlite_emit_explicit_begin(conn):
