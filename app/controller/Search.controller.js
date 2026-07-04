@@ -12,6 +12,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchViewStateRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchFormatters",
     "sap/ui/core/Item",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
@@ -35,6 +36,7 @@ sap.ui.define([
     SearchContracts,
     UiSemanticConstants,
     SearchViewStateRuntime,
+    SearchFormatters,
     Item,
     JsRuntime,
     SchedulingRuntime,
@@ -51,7 +53,6 @@ sap.ui.define([
     var SEARCH_SOURCES = OperationSourceContracts.SEARCH;
     var STATE_MODEL = MODELS.STATE;
     var PATHS = SearchToolbarContracts.PATHS;
-    var SEARCH_MODE = SearchContracts.SEARCH_MODE;
     var TOKENS = ModelContracts.TOKENS;
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var SEARCH_MESSAGE_KEYS = MessageKeyConstants.SEARCH;
@@ -64,46 +65,8 @@ sap.ui.define([
         return String(oBundle.getText(sKey) || "");
     }
 
-    function formatSearchModeChipText(oController, sMode) {
-        var sNorm = String(sMode || "").toUpperCase() === SEARCH_MODE.LOOSE ? SEARCH_MODE.LOOSE : SEARCH_MODE.EXACT;
-        var sLabel = resolveBundleText(oController, SearchContracts.SEARCH_MODE_LABEL);
-        var sModeText = sNorm === SEARCH_MODE.LOOSE
-            ? resolveBundleText(oController, SearchContracts.SEARCH_MODE_LOOSE)
-            : resolveBundleText(oController, SearchContracts.SEARCH_MODE_EXACT);
-        return sLabel + ": " + sModeText;
-    }
-
-    function formatWorkflowStageText(oController, sStage) {
-        return SearchViewStateRuntime.formatWorkflowStageText(
-            oController && oController.getResourceBundle && oController.getResourceBundle(),
-            sStage
-        );
-    }
-
-    function formatWorkflowStageState(sStage) {
-        return SearchViewStateRuntime.formatWorkflowStageState(sStage);
-    }
-
-    function formatSearchResultsCompactText(oController, iResultCount, bHasRows) {
-        var iSafeCount = Math.max(0, Number(iResultCount || 0));
-        var sResultsLabel = resolveBundleText(oController, SearchContracts.RESULTS_LABEL);
-        if (!bHasRows || !iSafeCount) {
-            return sResultsLabel;
-        }
-        return sResultsLabel + ": " + iSafeCount;
-    }
-
-    function formatSearchSelectionSummary(oController, iSelectionCount, sSelectedRowDisplayId) {
-        var iSafeCount = Math.max(0, Number(iSelectionCount || 0));
-        var sPrimaryId = String(sSelectedRowDisplayId || "").trim();
-        if (!iSafeCount) {
-            return resolveBundleText(oController, SearchContracts.SEARCH_SELECTION_NONE);
-        }
-        if (iSafeCount === 1 && sPrimaryId) {
-            return resolveBundleText(oController, SearchContracts.SEARCH_SELECTION_PRIMARY_PREFIX) + ": " + sPrimaryId;
-        }
-        return iSafeCount + " " + resolveBundleText(oController, SearchContracts.SEARCH_SELECTION_UNITS);
-    }
+    /* Форматтеры чипов/сводок вынесены в SearchFormatters.js (та же MVC-конвенция,
+     * что и DetailFormatters.js для Detail-контроллера) — см. audit Fragile Spots. */
 
     function applyAnalyticsDrilldownIntent(oController) {
         return SearchLifecycleBehavior.applyAnalyticsDrilldownIntent(oController, {
@@ -417,12 +380,12 @@ sap.ui.define([
         onMaxRowsChange: function (oEvent) { SearchSmartTableBehavior.onMaxRowsChange(this, oEvent); },
         onBackendTopChange: function (oEvent) { SearchSmartTableBehavior.onBackendTopChange(this, oEvent); },
         onSearchModeToggle: function (oEvent) { SearchSmartTableBehavior.onSearchModeToggle(this, oEvent); },
-        formatSearchModeChipText: function (sMode) { return formatSearchModeChipText(this, sMode); },
+        formatSearchModeChipText: function (sMode) { return SearchFormatters.formatSearchModeChipText(this, sMode); },
         formatSearchResultsCompactText: function (iResultCount, bHasRows) {
-            return formatSearchResultsCompactText(this, iResultCount, bHasRows);
+            return SearchFormatters.formatSearchResultsCompactText(this, iResultCount, bHasRows);
         },
         formatSearchSelectionSummary: function (iSelectionCount, sSelectedRowDisplayId) {
-            return formatSearchSelectionSummary(this, iSelectionCount, sSelectedRowDisplayId);
+            return SearchFormatters.formatSearchSelectionSummary(this, iSelectionCount, sSelectedRowDisplayId);
         },
         formatAnalyticsSourceText: function (sSelectedSource) {
             return AnalyticsFormatRuntime.formatSourceText(sSelectedSource, resolveBundleText.bind(null, this));
@@ -449,8 +412,8 @@ sap.ui.define([
         onOpenWorkflowAnalytics: function (oEvent) {
             return SearchActionBehavior.onOpenWorkflowAnalytics(this, oEvent);
         },
-        formatWorkflowStageText: function (sStage) { return formatWorkflowStageText(this, sStage); },
-        formatWorkflowStageState: function (sStage) { return formatWorkflowStageState(sStage); },
+        formatWorkflowStageText: function (sStage) { return SearchFormatters.formatWorkflowStageText(this, sStage); },
+        formatWorkflowStageState: function (sStage) { return SearchFormatters.formatWorkflowStageState(sStage); },
         onSearchTableSelectionChange: function (oEvent) {
             SearchActionBehavior.onTableSelectionChange(this, oEvent);
         },

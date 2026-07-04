@@ -1,8 +1,8 @@
 sap.ui.define([
     "sap/ui/base/EventProvider",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
-], function (EventProvider, TimerRuntime, RuntimeEventContracts) {
+], function (EventProvider, SchedulingRuntime, RuntimeEventContracts) {
     "use strict";
 
     return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.ActivityMonitor", {
@@ -34,7 +34,7 @@ sap.ui.define([
             }
             this._iLastActivityAt = iNow;
             this.fireEvent(RuntimeEventContracts.ACTIVITY, { at: new Date().toISOString() });
-            this._iTimer = TimerRuntime.restartTimeout(this._iTimer, function () {
+            this._iTimer = SchedulingRuntime.restartTimer(this._iTimer, function () {
                 this.fireEvent(RuntimeEventContracts.IDLE_TIMEOUT);
             }.bind(this), this._iIdleMs);
         },
@@ -51,7 +51,7 @@ sap.ui.define([
             }
         },
         stop: function () {
-            this._iTimer = TimerRuntime.clearTimer(this._iTimer, clearTimeout);
+            this._iTimer = SchedulingRuntime.clearTimer(this._iTimer, clearTimeout);
             this._iLastActivityAt = 0;
 
             this._aEvents.forEach(function (sEvt) {

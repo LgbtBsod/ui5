@@ -7,15 +7,15 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/controller/analytics/AnalyticsRefreshRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/StatusChipClassRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime"
-], function (ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime, StatusChipClassRuntime, JsRuntime, TimerRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
+], function (ControllerViewStateRuntime, NavigationContracts, ModelContracts, TimerDefaults, AnalyticsBuilderRuntime, AnalyticsRefreshRuntime, StatusChipClassRuntime, JsRuntime, SchedulingRuntime) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
     var METHODS = JsRuntime.METHODS;
 
     function clearRefreshTimer(oController) {
-        oController._iAnalyticsRouteRefreshTimer = TimerRuntime.clearTimer(
+        oController._iAnalyticsRouteRefreshTimer = SchedulingRuntime.clearTimer(
             oController._iAnalyticsRouteRefreshTimer,
             clearInterval
         );
@@ -68,7 +68,7 @@ sap.ui.define([
         var iIntervalMs = Number(oStateModel && oStateModel.getProperty("/timers/analyticsRefreshMs"))
             || Number((TimerDefaults.analyticsRefreshMs || {}).defaultValue)
             || 900000;
-        oController._iAnalyticsRouteRefreshTimer = TimerRuntime.restartInterval(
+        oController._iAnalyticsRouteRefreshTimer = SchedulingRuntime.restartInterval(
             oController._iAnalyticsRouteRefreshTimer,
             function () {
                 var oView = oController && typeof oController.getView === TYPE_FUNCTION && oController.getView();

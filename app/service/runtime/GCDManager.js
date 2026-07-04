@@ -1,8 +1,8 @@
 sap.ui.define([
     "sap/ui/base/EventProvider",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
-], function (EventProvider, TimerRuntime, RuntimeEventContracts) {
+], function (EventProvider, SchedulingRuntime, RuntimeEventContracts) {
     "use strict";
 
     return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.GCDManager", {
@@ -19,10 +19,10 @@ sap.ui.define([
         },
 
         resetOnFullSave: function () {
-            if (!TimerRuntime.isValidDelay(this._iIntervalMs, 1000)) {
+            if (!SchedulingRuntime.isValidDelay(this._iIntervalMs, 1000)) {
                 return;
             }
-            this._iTimer = TimerRuntime.restartTimeout(this._iTimer, function () {
+            this._iTimer = SchedulingRuntime.restartTimer(this._iTimer, function () {
                 this.fireEvent(RuntimeEventContracts.GCD_EXPIRED);
             }.bind(this), this._iIntervalMs);
         },
@@ -30,7 +30,7 @@ sap.ui.define([
 
         setIntervalMs: function (iIntervalMs) {
             var iNext = Number(iIntervalMs);
-            if (!TimerRuntime.isValidDelay(iNext, 1000)) {
+            if (!SchedulingRuntime.isValidDelay(iNext, 1000)) {
                 return;
             }
             this._iIntervalMs = iNext;
@@ -40,7 +40,7 @@ sap.ui.define([
         },
         stop: function () {
             this._bRunning = false;
-            this._iTimer = TimerRuntime.clearTimer(this._iTimer, clearTimeout);
+            this._iTimer = SchedulingRuntime.clearTimer(this._iTimer, clearTimeout);
         },
         isRunning: function () {
             return this._bRunning;

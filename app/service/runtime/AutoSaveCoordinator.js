@@ -1,9 +1,9 @@
 sap.ui.define([
   "sap/ui/base/EventProvider",
-  "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime",
+  "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
   "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
   "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
-], function (EventProvider, TimerRuntime, DebugLogger, RuntimeEventContracts) {
+], function (EventProvider, SchedulingRuntime, DebugLogger, RuntimeEventContracts) {
   "use strict";
 
   return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.AutoSaveCoordinator", {
@@ -28,15 +28,15 @@ sap.ui.define([
       }
       this.stop();
       this._bRunning = true;
-      this._iIntervalTimer = TimerRuntime.restartInterval(this._iIntervalTimer, function () {
+      this._iIntervalTimer = SchedulingRuntime.restartInterval(this._iIntervalTimer, function () {
         this._runIfNeeded();
       }.bind(this), this._iIntervalMs);
     },
 
     stop: function () {
       this._bRunning = false;
-      this._iDebounceTimer = TimerRuntime.clearTimer(this._iDebounceTimer, clearTimeout);
-      this._iIntervalTimer = TimerRuntime.clearTimer(this._iIntervalTimer, clearInterval);
+      this._iDebounceTimer = SchedulingRuntime.clearTimer(this._iDebounceTimer, clearTimeout);
+      this._iIntervalTimer = SchedulingRuntime.clearTimer(this._iIntervalTimer, clearInterval);
     },
 
 
@@ -60,7 +60,7 @@ sap.ui.define([
       if (!Number.isFinite(this._iDebounceMs) || this._iDebounceMs < 100) {
         return;
       }
-      this._iDebounceTimer = TimerRuntime.restartTimeout(this._iDebounceTimer, function () {
+      this._iDebounceTimer = SchedulingRuntime.restartTimer(this._iDebounceTimer, function () {
         this._runIfNeeded();
       }.bind(this), this._iDebounceMs);
     },

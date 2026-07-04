@@ -5,9 +5,9 @@ sap.ui.define([
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
-    function clearTimer(iTimerId) {
+    function clearTimer(iTimerId, fnClear) {
         if (iTimerId) {
-            window.clearTimeout(iTimerId);
+            (typeof fnClear === TYPE_FUNCTION ? fnClear : window.clearTimeout)(iTimerId);
         }
         return 0;
     }
@@ -19,6 +19,21 @@ sap.ui.define([
                 fnWork();
             }
         }, Number(iDelayMs) || 0);
+    }
+
+    function restartInterval(iTimerId, fnWork, iDelayMs) {
+        clearTimer(iTimerId, window.clearInterval);
+        return window.setInterval(function () {
+            if (typeof fnWork === TYPE_FUNCTION) {
+                fnWork();
+            }
+        }, Number(iDelayMs) || 0);
+    }
+
+    function isValidDelay(iDelayMs, iMinMs) {
+        var iValue = Number(iDelayMs);
+        var iMin = Number(iMinMs || 0);
+        return Number.isFinite(iValue) && iValue >= iMin;
     }
 
     function clearFrame(iFrameId) {
@@ -75,6 +90,8 @@ sap.ui.define([
     return {
         clearTimer: clearTimer,
         restartTimer: restartTimer,
+        restartInterval: restartInterval,
+        isValidDelay: isValidDelay,
         clearFrame: clearFrame,
         requestFrameOnce: requestFrameOnce,
         restartFrame: restartFrame,

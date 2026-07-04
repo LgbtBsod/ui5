@@ -1,7 +1,7 @@
 sap.ui.define([
     "sap/ui/base/EventProvider",
-    "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime"
-], function (EventProvider, TimerRuntime) {
+    "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime"
+], function (EventProvider, SchedulingRuntime) {
     "use strict";
 
     function normalizeInterval(mOptions) {
@@ -38,12 +38,12 @@ sap.ui.define([
             },
 
             start: function () {
-                if (!TimerRuntime.isValidDelay(this._iIntervalMs, 1000)) {
+                if (!SchedulingRuntime.isValidDelay(this._iIntervalMs, 1000)) {
                     return;
                 }
                 this.stop();
                 this._bRunning = true;
-                this._iTimer = TimerRuntime.restartInterval(this._iTimer, function () {
+                this._iTimer = SchedulingRuntime.restartInterval(this._iTimer, function () {
                     Promise.resolve(this._fnRun()).then(function (oResult) {
                         this.fireEvent(this._sEventName, oResult || {});
                     }.bind(this)).catch(function (oError) {
@@ -54,12 +54,12 @@ sap.ui.define([
 
             stop: function () {
                 this._bRunning = false;
-                this._iTimer = TimerRuntime.clearTimer(this._iTimer, clearInterval);
+                this._iTimer = SchedulingRuntime.clearTimer(this._iTimer, clearInterval);
             },
 
             setIntervalMs: function (iIntervalMs) {
                 var iNext = Number(iIntervalMs);
-                if (!TimerRuntime.isValidDelay(iNext, 1000)) {
+                if (!SchedulingRuntime.isValidDelay(iNext, 1000)) {
                     return;
                 }
                 this._iIntervalMs = iNext;

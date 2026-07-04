@@ -1,8 +1,8 @@
 sap.ui.define([
   "sap/ui/base/EventProvider",
-  "PRODUCTION_CONTROL_CHECKLIST/service/runtime/shared/TimerRuntime",
+  "PRODUCTION_CONTROL_CHECKLIST/service/framework/SchedulingRuntime",
   "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
-], function (EventProvider, TimerRuntime, RuntimeEventContracts) {
+], function (EventProvider, SchedulingRuntime, RuntimeEventContracts) {
   "use strict";
 
   return EventProvider.extend("PRODUCTION_CONTROL_CHECKLIST.service.runtime.ConnectivityCoordinator", {
@@ -23,7 +23,7 @@ sap.ui.define([
     stop: function () {
       window.removeEventListener("online", this._fnOnline);
       window.removeEventListener("offline", this._fnOffline);
-      this._iGraceTimer = TimerRuntime.clearTimer(this._iGraceTimer, clearTimeout);
+      this._iGraceTimer = SchedulingRuntime.clearTimer(this._iGraceTimer, clearTimeout);
     },
 
 
@@ -41,13 +41,13 @@ sap.ui.define([
       }
       var sGraceUntil = new Date(Date.now() + this._iGraceMs).toISOString();
       this.fireEvent(RuntimeEventContracts.STATE, { online: false, isGrace: true, graceExpiresAt: sGraceUntil });
-      this._iGraceTimer = TimerRuntime.restartTimeout(this._iGraceTimer, function () {
+      this._iGraceTimer = SchedulingRuntime.restartTimer(this._iGraceTimer, function () {
         this.fireEvent(RuntimeEventContracts.GRACE_EXPIRED, { online: false });
       }.bind(this), this._iGraceMs);
     },
 
     _onOnline: function () {
-      this._iGraceTimer = TimerRuntime.clearTimer(this._iGraceTimer, clearTimeout);
+      this._iGraceTimer = SchedulingRuntime.clearTimer(this._iGraceTimer, clearTimeout);
       this.fireEvent(RuntimeEventContracts.STATE, { online: true, isGrace: false, graceExpiresAt: null });
     }
   });
