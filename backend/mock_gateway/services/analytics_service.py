@@ -2,12 +2,13 @@ import json
 import logging
 import uuid
 from collections import Counter, defaultdict
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session, selectinload
 
 from models import AnalyticsBreakdown, AnalyticsRefreshState, AnalyticsSnapshot, ChecklistRoot
-from utils.time import now_utc
+from utils.time import now_utc, as_utc as _as_utc
 
 logger = logging.getLogger("gateway.analytics")
 
@@ -27,12 +28,166 @@ def _iso_z(value) -> str:
     return o_dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def _as_utc(value):
-    if value is None:
-        return None
-    if getattr(value, "tzinfo", None) is None:
-        return value.replace(tzinfo=timezone.utc)
-    return value.astimezone(timezone.utc)
+@dataclass
+class _DashboardAccumulators:
+    """Per-refresh working state for _compute_dashboard_from_roots.
+
+    One instance is built, fed one root at a time via accumulate_root(), then
+    drained into the summary dict / chart rows. Splitting this out of
+    AnalyticsService keeps the counter bookkeeping (14 Counters + 1 defaultdict)
+    separate from the summary-shape and chart-assembly concerns, which stayed on
+    AnalyticsService itself (new_summary/finalize_summary/build_charts).
+    """
+
+    totals_by_month: defaultdict = field(default_factory=lambda: defaultdict(lambda: {
+        "TOTAL": 0, "FAILED_CHECKS": 0, "FAILED_BARRIERS": 0,
+        "FAILED_CHECKLISTS": 0, "FAILED_BARRIER_CHECKLISTS": 0,
+    }))
+    failed_checks_by_profession: Counter = field(default_factory=Counter)
+    failed_barriers_by_profession: Counter = field(default_factory=Counter)
+    failed_checks_by_lpc: Counter = field(default_factory=Counter)
+    failed_barriers_by_lpc: Counter = field(default_factory=Counter)
+    failed_checks_by_location: Counter = field(default_factory=Counter)
+    failed_barriers_by_location: Counter = field(default_factory=Counter)
+    failed_checks_by_bukrs: Counter = field(default_factory=Counter)
+    failed_barriers_by_bukrs: Counter = field(default_factory=Counter)
+    failed_checks_by_orgunit: Counter = field(default_factory=Counter)
+    failed_barriers_by_orgunit: Counter = field(default_factory=Counter)
+    total_barriers_by_number: Counter = field(default_factory=Counter)
+    failed_barriers_by_number: Counter = field(default_factory=Counter)
+    total_by_source: Counter = field(default_factory=Counter)
+    failed_checks_by_source: Counter = field(default_factory=Counter)
+    failed_barriers_by_source: Counter = field(default_factory=Counter)
+    totals_all_years: Counter = field(default_factory=Counter)
+    total_checks: int = 0
+    success_checks: int = 0
+    total_barriers: int = 0
+    success_barriers: int = 0
+
+    @staticmethod
+    def new_summary(selected_year: int, source_key: str) -> dict:
+        return {
+            "selectedYear": selected_year,
+            "previousYear": selected_year - 1,
+            "source": source_key,
+            "sourceText": AnalyticsService._source_text(source_key),
+            "total": 0,
+            "monthly": 0,
+            "failedChecks": 0,
+            "failedBarriers": 0,
+            "failedChecklistCount": 0,
+            "failedBarrierChecklistCount": 0,
+            "closedCount": 0,
+            "registeredCount": 0,
+            "avgChecksRate": 0,
+            "avgBarriersRate": 0,
+            "healthy": 0,
+            "refreshedAt": _iso_z(now_utc()),
+            "availableYears": [],
+        }
+
+    def accumulate_root(self, root: ChecklistRoot, selected_year: int, summary: dict) -> None:
+        root_year, root_month = AnalyticsService._resolve_root_date(root)
+        source_bucket = AnalyticsService._root_source(root)
+        self.totals_all_years[root_year] += 1
+
+        failed_checks = sum(1 for c in (root.checks or []) if str(c.status or "").upper() in {"FAILED", "FAIL"})
+        successful_checks = len(root.checks or []) - failed_checks
+
+        failed_barriers = 0
+        successful_barriers = 0
+        for barrier in list(root.barriers or []):
+            barrier_key = str(int(barrier.position or 0)) if barrier.position else "UNKNOWN"
+            barrier_label = ("#" + barrier_key) if barrier_key != "UNKNOWN" else "Unknown barrier"
+            self.total_barriers_by_number[barrier_label] += 1
+            if bool(barrier.is_active):
+                successful_barriers += 1
+                continue
+            failed_barriers += 1
+            self.failed_barriers_by_number[barrier_label] += 1
+
+        month_bucket = self.totals_by_month[(root_year, root_month)]
+        month_bucket["TOTAL"] += 1
+        month_bucket["FAILED_CHECKS"] += failed_checks
+        month_bucket["FAILED_BARRIERS"] += failed_barriers
+        if failed_checks > 0:
+            month_bucket["FAILED_CHECKLISTS"] += 1
+        if failed_barriers > 0:
+            month_bucket["FAILED_BARRIER_CHECKLISTS"] += 1
+        self.total_by_source[source_bucket] += 1
+        self.failed_checks_by_source[source_bucket] += failed_checks
+        self.failed_barriers_by_source[source_bucket] += failed_barriers
+
+        if root_year != selected_year:
+            return
+
+        profession = AnalyticsService._normalize_text(root.observed_position, "Unknown profession")
+        lpc = AnalyticsService._normalize_text(root.lpc_text or root.lpc, "Unknown LPC")
+        location = AnalyticsService._optional_text(root.location_text or root.location_name or root.location_key)
+        bukrs = AnalyticsService._optional_text(root.bukrs)
+        observer_orgunit = AnalyticsService._optional_text(root.observer_orgunit)
+        status = str(root.status or "").upper()
+
+        summary["total"] += 1
+        summary["failedChecks"] += failed_checks
+        summary["failedBarriers"] += failed_barriers
+        if failed_checks > 0:
+            summary["failedChecklistCount"] += 1
+            self.failed_checks_by_profession[profession] += failed_checks
+            self.failed_checks_by_lpc[lpc] += failed_checks
+            if location:
+                self.failed_checks_by_location[location] += failed_checks
+            if bukrs:
+                self.failed_checks_by_bukrs[bukrs] += failed_checks
+            if observer_orgunit:
+                self.failed_checks_by_orgunit[observer_orgunit] += failed_checks
+        if failed_barriers > 0:
+            summary["failedBarrierChecklistCount"] += 1
+            self.failed_barriers_by_profession[profession] += failed_barriers
+            self.failed_barriers_by_lpc[lpc] += failed_barriers
+            if location:
+                self.failed_barriers_by_location[location] += failed_barriers
+            if bukrs:
+                self.failed_barriers_by_bukrs[bukrs] += failed_barriers
+            if observer_orgunit:
+                self.failed_barriers_by_orgunit[observer_orgunit] += failed_barriers
+        if status in {"DONE", "CLOSED"}:
+            summary["closedCount"] += 1
+        if status in {"SUBMITTED", "REGISTERED"}:
+            summary["registeredCount"] += 1
+
+        self.total_checks += len(root.checks or [])
+        self.success_checks += successful_checks
+        self.total_barriers += len(root.barriers or [])
+        self.success_barriers += successful_barriers
+
+    def finalize_summary(self, summary: dict, selected_year: int) -> None:
+        summary["monthly"] = self.totals_by_month[(selected_year, now_utc().month)]["TOTAL"] if selected_year == AnalyticsService._current_year() else 0
+        summary["avgChecksRate"] = round((self.success_checks / self.total_checks) * 100, 2) if self.total_checks else 0
+        summary["avgBarriersRate"] = round((self.success_barriers / self.total_barriers) * 100, 2) if self.total_barriers else 0
+        summary["healthy"] = max(summary["total"] - summary["failedChecklistCount"] - summary["failedBarrierChecklistCount"], 0)
+        summary["availableYears"] = [{"key": str(year_value), "text": str(year_value)} for year_value in sorted(self.totals_all_years.keys(), reverse=True)] or [{"key": str(selected_year), "text": str(selected_year)}]
+        summary["availableYearsJson"] = json.dumps(summary["availableYears"], ensure_ascii=False)
+
+    def build_charts(self, selected_year: int) -> list[dict]:
+        return (
+            AnalyticsService._monthly_rows(self.totals_by_month, selected_year)
+            + AnalyticsService._breakdown_rows("PROFESSION", "FAILED_CHECKS", self.failed_checks_by_profession)
+            + AnalyticsService._breakdown_rows("PROFESSION", "FAILED_BARRIERS", self.failed_barriers_by_profession)
+            + AnalyticsService._breakdown_rows("LPC", "FAILED_CHECKS", self.failed_checks_by_lpc)
+            + AnalyticsService._breakdown_rows("LPC", "FAILED_BARRIERS", self.failed_barriers_by_lpc)
+            + AnalyticsService._breakdown_rows("LOCATION", "FAILED_CHECKS", self.failed_checks_by_location)
+            + AnalyticsService._breakdown_rows("LOCATION", "FAILED_BARRIERS", self.failed_barriers_by_location)
+            + AnalyticsService._breakdown_rows("BUKRS", "FAILED_CHECKS", self.failed_checks_by_bukrs)
+            + AnalyticsService._breakdown_rows("BUKRS", "FAILED_BARRIERS", self.failed_barriers_by_bukrs)
+            + AnalyticsService._breakdown_rows("ORGUNIT", "FAILED_CHECKS", self.failed_checks_by_orgunit)
+            + AnalyticsService._breakdown_rows("ORGUNIT", "FAILED_BARRIERS", self.failed_barriers_by_orgunit)
+            + AnalyticsService._breakdown_rows("BARRIER_NUMBER", "TOTAL", self.total_barriers_by_number)
+            + AnalyticsService._breakdown_rows("BARRIER_NUMBER", "FAILED_BARRIERS", self.failed_barriers_by_number)
+            + AnalyticsService._breakdown_rows("SOURCE", "TOTAL", self.total_by_source)
+            + AnalyticsService._breakdown_rows("SOURCE", "FAILED_CHECKS", self.failed_checks_by_source)
+            + AnalyticsService._breakdown_rows("SOURCE", "FAILED_BARRIERS", self.failed_barriers_by_source)
+        )
 
 
 class AnalyticsService:
@@ -171,166 +326,16 @@ class AnalyticsService:
     @staticmethod
     def _compute_dashboard_from_roots(roots: list[ChecklistRoot], year: int | None = None, source: str | None = None) -> dict:
         selected_year = AnalyticsService._normalize_year(year)
-        previous_year = selected_year - 1
         source_key = AnalyticsService._normalize_source(source)
         filtered_roots = [root for root in (roots or []) if AnalyticsService._matches_source(root, source_key)]
 
-        totals_by_month = defaultdict(lambda: {
-            "TOTAL": 0,
-            "FAILED_CHECKS": 0,
-            "FAILED_BARRIERS": 0,
-            "FAILED_CHECKLISTS": 0,
-            "FAILED_BARRIER_CHECKLISTS": 0,
-        })
-        failed_checks_by_profession = Counter()
-        failed_barriers_by_profession = Counter()
-        failed_checks_by_lpc = Counter()
-        failed_barriers_by_lpc = Counter()
-        failed_checks_by_location = Counter()
-        failed_barriers_by_location = Counter()
-        failed_checks_by_bukrs = Counter()
-        failed_barriers_by_bukrs = Counter()
-        failed_checks_by_orgunit = Counter()
-        failed_barriers_by_orgunit = Counter()
-        total_barriers_by_number = Counter()
-        failed_barriers_by_number = Counter()
-        total_by_source = Counter()
-        failed_checks_by_source = Counter()
-        failed_barriers_by_source = Counter()
-        totals_all_years = Counter()
-
-        summary = {
-            "selectedYear": selected_year,
-            "previousYear": previous_year,
-            "source": source_key,
-            "sourceText": AnalyticsService._source_text(source_key),
-            "total": 0,
-            "monthly": 0,
-            "failedChecks": 0,
-            "failedBarriers": 0,
-            "failedChecklistCount": 0,
-            "failedBarrierChecklistCount": 0,
-            "closedCount": 0,
-            "registeredCount": 0,
-            "avgChecksRate": 0,
-            "avgBarriersRate": 0,
-            "healthy": 0,
-            "refreshedAt": _iso_z(now_utc()),
-            "availableYears": [],
-        }
-
-        total_checks = 0
-        success_checks = 0
-        total_barriers = 0
-        success_barriers = 0
-
+        acc = _DashboardAccumulators()
+        summary = acc.new_summary(selected_year, source_key)
         for root in filtered_roots:
-            root_year, root_month = AnalyticsService._resolve_root_date(root)
-            source_bucket = AnalyticsService._root_source(root)
-            totals_all_years[root_year] += 1
+            acc.accumulate_root(root, selected_year, summary)
 
-            failed_checks = 0
-            successful_checks = 0
-            failed_barriers = 0
-            successful_barriers = 0
-
-            for check in list(root.checks or []):
-                if str(check.status or "").upper() in {"FAILED", "FAIL"}:
-                    failed_checks += 1
-                else:
-                    successful_checks += 1
-
-            for barrier in list(root.barriers or []):
-                barrier_key = str(int(barrier.position or 0)) if barrier.position else "UNKNOWN"
-                barrier_label = ("#" + barrier_key) if barrier_key != "UNKNOWN" else "Unknown barrier"
-                total_barriers_by_number[barrier_label] += 1
-                if bool(barrier.is_active):
-                    successful_barriers += 1
-                    continue
-                failed_barriers += 1
-                failed_barriers_by_number[barrier_label] += 1
-
-            totals_by_month[(root_year, root_month)]["TOTAL"] += 1
-            totals_by_month[(root_year, root_month)]["FAILED_CHECKS"] += failed_checks
-            totals_by_month[(root_year, root_month)]["FAILED_BARRIERS"] += failed_barriers
-            if failed_checks > 0:
-                totals_by_month[(root_year, root_month)]["FAILED_CHECKLISTS"] += 1
-            if failed_barriers > 0:
-                totals_by_month[(root_year, root_month)]["FAILED_BARRIER_CHECKLISTS"] += 1
-            total_by_source[source_bucket] += 1
-            failed_checks_by_source[source_bucket] += failed_checks
-            failed_barriers_by_source[source_bucket] += failed_barriers
-
-            if root_year != selected_year:
-                continue
-
-            profession = AnalyticsService._normalize_text(root.observed_position, "Unknown profession")
-            lpc = AnalyticsService._normalize_text(root.lpc_text or root.lpc, "Unknown LPC")
-            location = AnalyticsService._optional_text(root.location_text or root.location_name or root.location_key)
-            bukrs = AnalyticsService._optional_text(root.bukrs)
-            observer_orgunit = AnalyticsService._optional_text(root.observer_orgunit)
-            status = str(root.status or "").upper()
-
-            summary["total"] += 1
-            summary["failedChecks"] += failed_checks
-            summary["failedBarriers"] += failed_barriers
-            if failed_checks > 0:
-                summary["failedChecklistCount"] += 1
-                failed_checks_by_profession[profession] += failed_checks
-                failed_checks_by_lpc[lpc] += failed_checks
-                if location:
-                    failed_checks_by_location[location] += failed_checks
-                if bukrs:
-                    failed_checks_by_bukrs[bukrs] += failed_checks
-                if observer_orgunit:
-                    failed_checks_by_orgunit[observer_orgunit] += failed_checks
-            if failed_barriers > 0:
-                summary["failedBarrierChecklistCount"] += 1
-                failed_barriers_by_profession[profession] += failed_barriers
-                failed_barriers_by_lpc[lpc] += failed_barriers
-                if location:
-                    failed_barriers_by_location[location] += failed_barriers
-                if bukrs:
-                    failed_barriers_by_bukrs[bukrs] += failed_barriers
-                if observer_orgunit:
-                    failed_barriers_by_orgunit[observer_orgunit] += failed_barriers
-            if status in {"DONE", "CLOSED"}:
-                summary["closedCount"] += 1
-            if status in {"SUBMITTED", "REGISTERED"}:
-                summary["registeredCount"] += 1
-
-            total_checks += len(root.checks or [])
-            success_checks += successful_checks
-            total_barriers += len(root.barriers or [])
-            success_barriers += successful_barriers
-
-        summary["monthly"] = totals_by_month[(selected_year, now_utc().month)]["TOTAL"] if selected_year == AnalyticsService._current_year() else 0
-        summary["avgChecksRate"] = round((success_checks / total_checks) * 100, 2) if total_checks else 0
-        summary["avgBarriersRate"] = round((success_barriers / total_barriers) * 100, 2) if total_barriers else 0
-        summary["healthy"] = max(summary["total"] - summary["failedChecklistCount"] - summary["failedBarrierChecklistCount"], 0)
-        summary["availableYears"] = [{"key": str(year_value), "text": str(year_value)} for year_value in sorted(totals_all_years.keys(), reverse=True)] or [{"key": str(selected_year), "text": str(selected_year)}]
-        summary["availableYearsJson"] = json.dumps(summary["availableYears"], ensure_ascii=False)
-
-        charts = (
-            AnalyticsService._monthly_rows(totals_by_month, selected_year)
-            + AnalyticsService._breakdown_rows("PROFESSION", "FAILED_CHECKS", failed_checks_by_profession)
-            + AnalyticsService._breakdown_rows("PROFESSION", "FAILED_BARRIERS", failed_barriers_by_profession)
-            + AnalyticsService._breakdown_rows("LPC", "FAILED_CHECKS", failed_checks_by_lpc)
-            + AnalyticsService._breakdown_rows("LPC", "FAILED_BARRIERS", failed_barriers_by_lpc)
-            + AnalyticsService._breakdown_rows("LOCATION", "FAILED_CHECKS", failed_checks_by_location)
-            + AnalyticsService._breakdown_rows("LOCATION", "FAILED_BARRIERS", failed_barriers_by_location)
-            + AnalyticsService._breakdown_rows("BUKRS", "FAILED_CHECKS", failed_checks_by_bukrs)
-            + AnalyticsService._breakdown_rows("BUKRS", "FAILED_BARRIERS", failed_barriers_by_bukrs)
-            + AnalyticsService._breakdown_rows("ORGUNIT", "FAILED_CHECKS", failed_checks_by_orgunit)
-            + AnalyticsService._breakdown_rows("ORGUNIT", "FAILED_BARRIERS", failed_barriers_by_orgunit)
-            + AnalyticsService._breakdown_rows("BARRIER_NUMBER", "TOTAL", total_barriers_by_number)
-            + AnalyticsService._breakdown_rows("BARRIER_NUMBER", "FAILED_BARRIERS", failed_barriers_by_number)
-            + AnalyticsService._breakdown_rows("SOURCE", "TOTAL", total_by_source)
-            + AnalyticsService._breakdown_rows("SOURCE", "FAILED_CHECKS", failed_checks_by_source)
-            + AnalyticsService._breakdown_rows("SOURCE", "FAILED_BARRIERS", failed_barriers_by_source)
-        )
-
-        return dict(summary, charts=charts)
+        acc.finalize_summary(summary, selected_year)
+        return dict(summary, charts=acc.build_charts(selected_year))
 
     @staticmethod
     def _ensure_refresh_state(db: Session, task_key: str | None = None) -> AnalyticsRefreshState:

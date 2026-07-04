@@ -601,7 +601,7 @@ def test_active_frontend_mutations_use_hybrid_aggregate_function_import_contract
     mutation_runtime = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistMutationRuntime.js")
     gateway_client = _read(APP_ROOT / "service" / "backend" / "GatewayClient.js")
     assert not (APP_ROOT / "infra" / "odata" / "GatewayODataClient.js").exists()
-    canonical_api = _read(BACKEND_ROOT / "api" / "gateway_canonical_api.py")
+    canonical_api = _read(BACKEND_ROOT / "api" / "gateway_save_api.py")
 
     assert "FUNCTION_IMPORTS.SAVE_CHANGES" in mutation_runtime
     assert "FUNCTION_IMPORTS.AUTO_SAVE" in mutation_runtime

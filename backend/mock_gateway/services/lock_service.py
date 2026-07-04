@@ -1,18 +1,9 @@
-from datetime import timezone
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from config import LOCK_KILLED_RETENTION, LOCK_TTL
 from models import ChecklistRoot, LockEntry, LockLog
-from utils.time import now_utc
-
-
-def _as_utc(dt):
-    if dt is None:
-        return None
-    if dt.tzinfo is None:
-        return dt.replace(tzinfo=timezone.utc)
-    return dt.astimezone(timezone.utc)
+from utils.time import now_utc, as_utc as _as_utc
 
 
 class LockService:

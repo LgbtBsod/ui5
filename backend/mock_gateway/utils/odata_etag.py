@@ -20,13 +20,6 @@ def etag_for_datetime(dt: datetime, version_number: int | None = None) -> str:
     return f'W/"{ms}"'
 
 
-def format_etag(timestamp: datetime | None, version_number: int | None = None) -> str | None:
-    """Backward-compatible alias: returns OData-standard W/"…" ETag or None."""
-    if timestamp is None:
-        return None
-    return etag_for_datetime(timestamp, version_number)
-
-
 def validate_if_match(if_match: str | None, current_etag: str) -> bool:
     # Only a genuinely absent header or the explicit "*" wildcard skip the check.
     # An empty string is neither - previously `not if_match` treated "" the same as

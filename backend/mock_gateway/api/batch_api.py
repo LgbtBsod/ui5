@@ -4,6 +4,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
+from config import MAX_BATCH_OPERATIONS
 from database import SessionLocal, use_shared_session
 from utils.odata import SERVICE_ROOT
 from utils.odata_batch import (
@@ -18,6 +19,16 @@ router = APIRouter(tags=["Batch"])
 
 
 _WRITE_METHODS = {"POST", "PUT", "PATCH", "MERGE", "DELETE"}
+
+
+def _count_operations(operations: list[BatchOperation | list[BatchOperation]]) -> int:
+    return sum(len(item) if isinstance(item, list) else 1 for item in operations)
+
+
+def _enforce_batch_size(operations: list[BatchOperation | list[BatchOperation]]) -> None:
+    count = _count_operations(operations)
+    if count > MAX_BATCH_OPERATIONS:
+        raise HTTPException(status_code=400, detail=f"BATCH_TOO_LARGE: {count} operations exceeds limit of {MAX_BATCH_OPERATIONS}")
 
 
 def _has_write_operations(operations: list[BatchOperation | list[BatchOperation]]) -> bool:
@@ -48,6 +59,11 @@ def _enforce_batch_csrf(request: Request, operations: list[BatchOperation | list
 def _sanitize_operation_path(path: str) -> str:
     if not path:
         return path
+    # Some SAPUI5/browser combinations percent-encode a literal comma using a Cyrillic
+    # "с"/"С" (U+0441/U+0421, visually identical to Latin "c"/"C") instead of Latin - almost
+    # certainly a client-side keyboard-layout/encoding quirk rather than anything malicious.
+    # Normalize both so a batch path with an OData key list like Key1,Key2 doesn't get
+    # split incorrectly by parse_qsl() below.
     path = path.replace("%2с", "%2c").replace("%2С", "%2C")
     parsed = urlsplit(path)
     query_items = parse_qsl(parsed.query, keep_blank_values=True)
@@ -90,6 +106,7 @@ async def _execute_operation(request: Request, op: BatchOperation) -> httpx.Resp
 async def batch(request: Request):
     boundary = extract_boundary(request.headers.get("content-type"))
     operations = parse_batch_request((await request.body()).decode("utf-8"), boundary)
+    _enforce_batch_size(operations)
     _enforce_batch_csrf(request, operations)
 
     response_parts: list[str] = []
@@ -173,6 +190,7 @@ async def batch_json(request: Request):
         )
         for op in calls
     ]
+    _enforce_batch_size(operations)
     _enforce_batch_csrf(request, operations)
 
     results = []

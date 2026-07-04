@@ -2,17 +2,21 @@ import json
 from datetime import date
 import uuid
 
+from sqlalchemy.exc import IntegrityError
+
 from models import AppUserProfile, DictionaryItem, Location, Person, RuntimeUserContext
 
 
 _DICTIONARY_ENTRIES = {
+    # Must match exactly the vocabulary _normalize_status_input()/_STATUS_TRANSITIONS
+    # (api/gateway_validators.py, api/gateway_canonical_api.py) actually accept. This
+    # domain used to list SUBMITTED/DONE/REJECTED too, implying more lifecycle states
+    # than the app logic supports - reference data promising a status transition that
+    # SetChecklistStatus would then reject with "Unsupported status".
     "STATUS": [
         ("DRAFT", "Черновик"),
-        ("SUBMITTED", "На регистрации"),
         ("REGISTERED", "Зарегистрирован"),
-        ("DONE", "Завершен"),
         ("CLOSED", "Закрыт"),
-        ("REJECTED", "Отклонен"),
     ],
     "LPC": [
         ("LPC-01", "ЛПК 01"),
@@ -223,7 +227,12 @@ def seed_runtime_user_context(db) -> None:
         if not str(row.uname or "").strip():
             row.uname = "operator"
         return
-    db.add(RuntimeUserContext(
-        key="CURRENT",
-        uname="operator"
-    ))
+    # SAVEPOINT (not a plain flush) so a concurrent insert race on this fixed "CURRENT"
+    # primary key can be rolled back in isolation, without discarding the dictionary/
+    # persons/locations/profiles inserts seed_reference_data() already queued earlier in
+    # this same session ahead of its single closing db.commit().
+    try:
+        with db.begin_nested():
+            db.add(RuntimeUserContext(key="CURRENT", uname="operator"))
+    except IntegrityError:
+        pass

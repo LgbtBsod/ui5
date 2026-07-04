@@ -47,6 +47,10 @@ LOCK_KILLED_RETENTION = timedelta(seconds=3600)
 DEFAULT_PAGE_SIZE = 50
 MAX_PAGE_SIZE = int(os.getenv("PCCT_MAX_PAGE_SIZE", "1000"))
 MAX_SUGGEST_RESULTS = 20
+# Each $batch operation spins up its own in-process ASGI sub-request (and, inside a
+# changeset, a SAVEPOINT); with no cap a single request body could fan out into an
+# unbounded number of these - a resource-exhaustion vector unique to $batch.
+MAX_BATCH_OPERATIONS = int(os.getenv("PCCT_MAX_BATCH_OPERATIONS", "100"))
 
 RATE_LIMIT_REQUESTS_PER_WINDOW = int(os.getenv("PCCT_RATE_LIMIT_REQUESTS", "100"))
 RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("PCCT_RATE_LIMIT_WINDOW_SECONDS", "60"))
@@ -65,3 +69,16 @@ ALLOW_MOCK_USER_HEADER = IS_LOCAL_PROFILE and _env_flag("PCCT_ALLOW_MOCK_USER_HE
 AUTO_MUTATE_SCHEMA_ON_STARTUP = IS_LOCAL_PROFILE and _env_flag("PCCT_AUTO_MUTATE_SCHEMA", True)
 AUTO_SEED_STARTUP_DATA = IS_LOCAL_PROFILE and _env_flag("PCCT_AUTO_SEED_STARTUP_DATA", True)
 LOG_REQUEST_BODIES = _env_flag("PCCT_LOG_REQUEST_BODIES", False)
+
+# Show a one-time local GUI login prompt at real server startup to set the mock "current
+# user" (see bootstrap.prompt_and_store_login / services.current_user_service), instead of
+# silently defaulting to a fixed "operator" identity.
+#
+# This flag only covers the explicit opt-out (PCCT_PROMPT_LOGIN_ON_STARTUP=0); the pytest
+# detection deliberately does NOT live here. config.py is imported once at process start,
+# often before pytest has set PYTEST_CURRENT_TEST (that's set per-test, not at collection
+# time), so baking "not running under pytest" into a module-level constant here would freeze
+# a stale True and still pop a blocking GUI dialog during automated test runs, hanging the
+# whole suite. bootstrap.prompt_and_store_login() re-checks "pytest" in sys.modules at call
+# time instead, which is reliable regardless of import ordering.
+PROMPT_LOGIN_ON_STARTUP_ENABLED = _env_flag("PCCT_PROMPT_LOGIN_ON_STARTUP", True)

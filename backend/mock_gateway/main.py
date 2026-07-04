@@ -9,7 +9,13 @@ from fastapi.responses import JSONResponse, Response
 
 from api.analytics_api import router as analytics_router
 from api.batch_api import router as batch_router
-from api.gateway_canonical_api import router as gateway_canonical_router
+from api.gateway_root_api import router as gateway_root_router
+from api.gateway_detail_api import router as gateway_detail_router
+from api.gateway_reference_api import router as gateway_reference_router
+from api.gateway_user_api import router as gateway_user_router
+from api.gateway_lock_api import router as gateway_lock_router
+from api.gateway_save_api import router as gateway_save_router
+from api.gateway_attachment_api import router as gateway_attachment_router
 from api.capabilities_api import router as capabilities_router
 import bootstrap
 from bootstrap import bootstrap_schema, seed_checklist_roots_if_needed as _seed_checklist_roots_if_needed
@@ -103,7 +109,13 @@ asyncio.run(setup_odata_headers_middleware(app))
 asyncio.run(setup_logging_middleware(app, LOG_REQUEST_BODIES))
 asyncio.run(setup_error_envelope_middleware(app))
 
-app.include_router(gateway_canonical_router)
+app.include_router(gateway_reference_router)
+app.include_router(gateway_root_router)
+app.include_router(gateway_detail_router)
+app.include_router(gateway_user_router)
+app.include_router(gateway_lock_router)
+app.include_router(gateway_save_router)
+app.include_router(gateway_attachment_router)
 app.include_router(analytics_router)
 app.include_router(batch_router)
 app.include_router(capabilities_router)

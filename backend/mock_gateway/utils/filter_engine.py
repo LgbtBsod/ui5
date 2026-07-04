@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Callable
 
-from utils.filter_ast import BoolOp, Comparison, FuncCall, Not, parse_filter_ast, _TOKEN_RE
+from utils.filter_ast import BoolOp, Comparison, FuncCall, Not, parse_filter_ast
 from utils.filter_errors import FilterSyntaxError
 
 
@@ -106,7 +106,3 @@ def parse_filter_to_predicate(filter_string: str | None, field_map: dict[str, st
         raise
     except Exception as exc:
         raise FilterSyntaxError(f"Could not compile $filter expression: {filter_string!r}") from exc
-
-
-def debug_explain(filter_string: str) -> str:
-    return f"TOKENS={_TOKEN_RE.findall(filter_string or '')}"

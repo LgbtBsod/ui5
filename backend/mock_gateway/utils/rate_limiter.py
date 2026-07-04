@@ -86,18 +86,6 @@ class RateLimiter:
             self.client_requests.clear()
 
 
-class RateLimitExceeded(Exception):
-    """Raised when client exceeds rate limit."""
-
-    def __init__(self, client_ip: str, limit: int, window_seconds: int):
-        self.client_ip = client_ip
-        self.limit = limit
-        self.window_seconds = window_seconds
-        super().__init__(
-            f"Rate limit exceeded for {client_ip}: {limit} requests per {window_seconds}s"
-        )
-
-
 def extract_client_ip(request, trusted_proxies: frozenset[str] = frozenset()) -> str:
     """
     Extract client IP from FastAPI request.

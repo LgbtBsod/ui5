@@ -1,4 +1,3 @@
-from sqlalchemy import func
 import json
 import shutil
 import uuid
@@ -7,29 +6,9 @@ from sqlalchemy.orm import Session
 
 from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, SaveRequestLedger
 from services.lock_service import LockService
-from utils.odata_etag import format_etag
 from utils.time import now_utc
-
-
-BASIC_FIELD_MAP = {
-    "date": "date",
-    "equipment": "equipment",
-    "BUKRS": "bukrs",
-    "LPC_TEXT": "lpc_text",
-    "OBSERVER_FULLNAME": "observer_fullname",
-    "OBSERVER_PERNER": "observer_perner",
-    "OBSERVER_POSITION": "observer_position",
-    "OBSERVER_ORGUNIT": "observer_orgunit",
-    "OBSERVER_INTEGRATION_NAME": "observer_integration_name",
-    "OBSERVED_FULLNAME": "observed_fullname",
-    "OBSERVED_PERNER": "observed_perner",
-    "OBSERVED_POSITION": "observed_position",
-    "OBSERVED_ORGUNIT": "observed_orgunit",
-    "OBSERVED_INTEGRATION_NAME": "observed_integration_name",
-    "LOCATION_KEY": "location_key",
-    "LOCATION_NAME": "location_name",
-    "LOCATION_TEXT": "location_text",
-}
+from api.gateway_validators import _pick_text, _pick_first_present
+from api.gateway_mutations import _apply_save_root
 
 
 _BUKRS_BY_ORGUNIT = {
@@ -97,33 +76,6 @@ class ChecklistService:
             ))
 
     @staticmethod
-    def calculate_etag(db: Session, root_id: str):
-        root_date = db.query(ChecklistRoot.changed_on).filter(ChecklistRoot.id == root_id).scalar()
-        barrier_date = db.query(func.max(ChecklistBarrier.changed_on)).filter(ChecklistBarrier.root_id == root_id).scalar()
-        check_date = db.query(func.max(ChecklistCheck.changed_on)).filter(ChecklistCheck.root_id == root_id).scalar()
-
-        dates = [d for d in (root_date, barrier_date, check_date) if d is not None]
-        return max(dates) if dates else None
-
-    @staticmethod
-    def get_etag_value(db: Session, root_id: str) -> str | None:
-        return format_etag(ChecklistService.calculate_etag(db, root_id))
-
-    @staticmethod
-    def create(db: Session, checklist_id: str, lpc: str, user_id: str):
-        root = ChecklistRoot(
-            checklist_id=checklist_id,
-            lpc=lpc,
-            integration_flag=False,
-            created_by=user_id,
-            changed_by=user_id,
-        )
-        db.add(root)
-        db.commit()
-        db.refresh(root)
-        return root
-
-    @staticmethod
     def get(db: Session, root_id: str, expand: bool = False):
         root = db.query(ChecklistRoot).filter(
             ChecklistRoot.id == root_id,
@@ -174,95 +126,6 @@ class ChecklistService:
         return result
 
     @staticmethod
-    def list_checks(db: Session, root_id: str, top: int = 50, skip: int = 0):
-        query = db.query(ChecklistCheck).filter(ChecklistCheck.root_id == root_id).order_by(ChecklistCheck.position.asc())
-        total = query.count()
-        rows = query.offset(skip).limit(top).all()
-        return {
-            "value": [
-                {"id": row.id, "text": row.text, "status": row.status, "position": row.position}
-                for row in rows
-            ],
-            "count": total,
-        }
-
-    @staticmethod
-    def list_barriers(db: Session, root_id: str, top: int = 50, skip: int = 0):
-        query = db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).order_by(ChecklistBarrier.position.asc())
-        total = query.count()
-        rows = query.offset(skip).limit(top).all()
-        return {
-            "value": [
-                {
-                    "id": row.id,
-                    "description": row.description,
-                    "is_active": row.is_active,
-                    "position": row.position,
-                }
-                for row in rows
-            ],
-            "count": total,
-        }
-
-
-    @staticmethod
-    def update_with_etag(db: Session, root_id: str, user_id: str, data: dict, if_match: str):
-        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id, ChecklistRoot.is_deleted.isnot(True)).first()
-        if not root:
-            raise ValueError("NOT_FOUND")
-
-        if if_match is None:
-            raise ValueError("PRECONDITION_REQUIRED")
-
-        current_etag = ChecklistService.get_etag_value(db, root_id)
-        if current_etag != if_match:
-            raise ValueError("ETAG_MISMATCH")
-
-        return ChecklistService.autosave(db, root_id, user_id, data, force=data.get("force", False))
-
-    @staticmethod
-    def autosave(db: Session, root_id: str, user_id: str, data: dict, force: bool = False):
-        LockService.validate_lock(db, root_id, user_id)
-
-        root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_id).first()
-        if not root:
-            raise ValueError("NOT_FOUND")
-
-        if "lpc" in data and not lpc_allows_barriers(data["lpc"]):
-            existing_barriers = db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).all()
-            if existing_barriers:
-                if not force:
-                    raise ValueError("CONFIRM_DOWNGRADE_REQUIRED")
-                for barrier in existing_barriers:
-                    db.delete(barrier)
-
-        for field in ("lpc", "status"):
-            if field in data:
-                setattr(root, field, data[field])
-
-        basic_payload = data.get("basic") if isinstance(data, dict) else None
-        if isinstance(basic_payload, dict):
-            for incoming_key, model_field in BASIC_FIELD_MAP.items():
-                if incoming_key in basic_payload:
-                    setattr(root, model_field, basic_payload.get(incoming_key) or "")
-            root.bukrs = resolve_bukrs_from_observer(
-                root.observer_perner,
-                root.observer_orgunit,
-                root.bukrs,
-            )
-
-        for incoming_key, model_field in BASIC_FIELD_MAP.items():
-            if incoming_key in data:
-                setattr(root, model_field, data.get(incoming_key) or "")
-
-        root.changed_by = user_id
-        root.changed_on = now_utc()
-        db.commit()
-        db.refresh(root)
-        return root
-
-
-    @staticmethod
     def save_via_import(db: Session, root_id: str, user_id: str, payload: dict, is_autosave: bool = False, force: bool = False, request_guid: str | None = None, session_guid: str | None = None):
         operation = "AUTOSAVE" if is_autosave else "SAVE"
         if request_guid:
@@ -295,14 +158,21 @@ class ChecklistService:
         checks_payload = data.get("checks") if isinstance(data, dict) else None
         barriers_payload = data.get("barriers") if isinstance(data, dict) else None
 
-        s_lpc = data.get("lpc") or basic_payload.get("LPC_KEY") or root.lpc
+        s_lpc = data.get("lpc") or (basic_payload or {}).get("Lpc") or root.lpc
         if s_lpc:
             root.lpc = s_lpc
 
         if isinstance(basic_payload, dict):
-            for incoming_key, model_field in BASIC_FIELD_MAP.items():
-                if incoming_key in basic_payload:
-                    setattr(root, model_field, basic_payload.get(incoming_key) or "")
+            # Delegate to the same root-field mapping used by the canonical SaveChanges/
+            # AutoSave path (api.gateway_mutations._apply_save_root) instead of the
+            # independent BASIC_FIELD_MAP this used to carry - this fallback ("release
+            # with force-save") payload speaks the same OData-ish field names as every
+            # other save entry point now, not a second, divergent SAP-uppercase dialect.
+            _apply_save_root(root, basic_payload, db)
+            if _pick_first_present(basic_payload, "observer_integration_name", "ObserverIntegrationName") is not None:
+                root.observer_integration_name = _pick_text(basic_payload, "observer_integration_name", "ObserverIntegrationName")
+            if _pick_first_present(basic_payload, "observed_integration_name", "ObservedIntegrationName") is not None:
+                root.observed_integration_name = _pick_text(basic_payload, "observed_integration_name", "ObservedIntegrationName")
             root.bukrs = resolve_bukrs_from_observer(
                 root.observer_perner,
                 root.observer_orgunit,
@@ -354,90 +224,6 @@ class ChecklistService:
             db.commit()
 
         return result
-
-    @staticmethod
-    def add_barrier(db: Session, root_id: str, user_id: str, description: str, position: int):
-        LockService.validate_lock(db, root_id, user_id)
-
-        root = db.query(ChecklistRoot).filter(
-            ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.isnot(True),
-        ).first()
-        if not root:
-            raise ValueError("NOT_FOUND")
-        if not lpc_allows_barriers(root.lpc):
-            raise ValueError("BARRIERS_NOT_ALLOWED_FOR_LPC")
-
-        barrier = ChecklistBarrier(root_id=root_id, description=description, position=position)
-        db.add(barrier)
-
-        root.changed_on = now_utc()
-        root.changed_by = user_id
-        db.commit()
-        db.refresh(barrier)
-        return barrier
-
-
-
-    @staticmethod
-    def replace_rows(db: Session, root_id: str, user_id: str, section: str, rows: list[dict]):
-        LockService.validate_lock(db, root_id, user_id)
-
-        root = db.query(ChecklistRoot).filter(
-            ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.isnot(True),
-        ).first()
-        if not root:
-            raise ValueError("NOT_FOUND")
-
-        if section == "checks":
-            db.query(ChecklistCheck).filter(ChecklistCheck.root_id == root_id).delete()
-            for i, row in enumerate(rows or []):
-                db.add(
-                    ChecklistCheck(
-                        root_id=root_id,
-                        text=row.get("text") or "",
-                        status="DONE" if row.get("result") else "PENDING",
-                        position=i,
-                    )
-                )
-        elif section == "barriers":
-            if not lpc_allows_barriers(root.lpc):
-                raise ValueError("BARRIERS_NOT_ALLOWED_FOR_LPC")
-            db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).delete()
-            for i, row in enumerate(rows or []):
-                db.add(
-                    ChecklistBarrier(
-                        root_id=root_id,
-                        description=row.get("text") or row.get("description") or "",
-                        is_active=bool(row.get("result", row.get("is_active", True))),
-                        position=i,
-                    )
-                )
-        else:
-            raise ValueError("UNSUPPORTED_SECTION")
-
-        root.changed_by = user_id
-        root.changed_on = now_utc()
-        db.commit()
-        return ChecklistService.get(db, root_id, expand=True)
-
-    @staticmethod
-    def delete(db: Session, root_id: str, user_id: str):
-        LockService.validate_lock(db, root_id, user_id)
-
-        root = db.query(ChecklistRoot).filter(
-            ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.isnot(True),
-        ).first()
-        if not root:
-            raise ValueError("NOT_FOUND")
-
-        root.is_deleted = True
-        root.changed_by = user_id
-        root.changed_on = now_utc()
-        db.commit()
-        return {"status": "DELETED", "id": root_id}
 
     @staticmethod
     def copy(db: Session, root_id: str, user_id: str):

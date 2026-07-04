@@ -9,12 +9,20 @@ from utils.key_normalizer import hex_to_storage_key
 
 _OPERATORS = {"eq": "__eq__", "ne": "__ne__", "gt": "__gt__", "lt": "__lt__", "ge": "__ge__", "le": "__le__"}
 
-# SQLAlchemy attribute names that store RAW16-derived entity keys as canonical dashed
-# UUID strings (see models.py). $filter literals compared against these columns arrive
-# from the frontend as hex32 (per the BINTOHEX wire convention) and must be normalized
-# the same way BoundaryResolver.resolve_key normalizes path-segment keys - otherwise
-# `$filter=PARENT_KEY eq 'HEX32...'` would silently never match any row.
-_KEY_COLUMNS = {"id", "root_id"}
+
+def _is_key_like_column(col: InstrumentedAttribute) -> bool:
+    """True for any primary-key or foreign-key column, detected via SQLAlchemy's own
+    schema introspection rather than a hardcoded column-name allowlist (previously
+    {"id", "root_id"}) - so a future model's differently-named PK/FK doesn't silently
+    fall outside RAW16 hex32 -> stored-UUID normalization just because nobody remembered
+    to add its name here. Safe to apply broadly: hex_to_storage_key() is a no-op passthrough
+    for any value that isn't itself hex32-shaped, so this can't misfire on a genuine
+    non-UUID primary key (e.g. AppUserProfile.uname)."""
+    try:
+        column = col.property.columns[0]
+    except (AttributeError, IndexError):
+        return False
+    return bool(column.primary_key or column.foreign_keys)
 
 
 class ODataFilterParser:
@@ -60,7 +68,7 @@ class ODataFilterParser:
             if col is None:
                 raise FilterSyntaxError(f"Unknown field {node.field!r}")
             value = node.value
-            if isinstance(value, str) and getattr(col, "key", None) in _KEY_COLUMNS:
+            if isinstance(value, str) and _is_key_like_column(col):
                 value = hex_to_storage_key(value)
             return getattr(col, _OPERATORS[node.op])(value)
         raise FilterSyntaxError(f"Unsupported $filter AST node: {node!r}")

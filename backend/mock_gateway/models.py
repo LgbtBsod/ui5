@@ -302,7 +302,11 @@ class FrontendRuntimeSettings(Base):
     __tablename__ = "frontend_runtime_settings"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    environment = Column(String, nullable=False, default="default")
+    # unique: bootstrap.ensure_runtime_settings_row() relies on this to detect - via
+    # IntegrityError - a concurrent insert race for what's meant to be a singleton row
+    # per environment. Without it, two racing callers that both see no existing row would
+    # both succeed in inserting, silently producing duplicate settings rows.
+    environment = Column(String, nullable=False, default="default", unique=True)
     heartbeat_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["heartbeat_ms"])
     lock_status_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["lock_status_ms"])
     gcd_ms = Column(INTEGER, default=FRONTEND_TIMER_PROFILE["gcd_ms"])

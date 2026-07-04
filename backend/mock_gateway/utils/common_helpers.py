@@ -1,24 +1,12 @@
 """
 Common helper functions shared across multiple modules.
-Single source of truth for: date parsing, dict lookups, policy loading.
+Single source of truth for: date parsing, policy loading.
 """
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
-from models import DictionaryItem
 from repo.settings_repo import SettingsRepo
 from services.settings_service import SettingsService
-
-
-def get_dict_text(db: Session, domain: str, key: str) -> str:
-    """Get text value from dictionary by domain and key."""
-    if db is None:
-        return ""
-    row = db.query(DictionaryItem).filter(
-        DictionaryItem.domain == domain,
-        DictionaryItem.key == str(key or "")
-    ).first()
-    return row.text if row else ""
 
 
 def load_upload_policy(db: Session) -> dict:
@@ -38,9 +26,18 @@ def parse_date_ymd(value) -> str:
         return ""
     raw = str(value)
     if raw.startswith("/Date(") and raw.endswith(")/"):
+        # Search for the timezone-offset separator starting at index 1, not 0: a naive
+        # `.split("-")[0]` would treat a legitimately negative (pre-1970) ms value's own
+        # leading "-" as that separator and parse an empty string, silently discarding any
+        # date before 1970 instead of returning it.
+        body = raw[6:-2]
+        sign_pos = max(body.find("+", 1), body.find("-", 1))
+        ms_part = body if sign_pos < 0 else body[:sign_pos]
         try:
-            ms = int(raw[6:-2].split("+")[0].split("-")[0])
-            dt = datetime.fromtimestamp(ms / 1000, tz=timezone.utc)
+            ms = int(ms_part)
+            # timedelta-from-epoch (not datetime.fromtimestamp) so pre-1970 values don't
+            # crash with OSError on Windows, where the C runtime rejects negative time_t.
+            dt = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(milliseconds=ms)
             return dt.strftime("%Y-%m-%d")
         except ValueError:
             return ""

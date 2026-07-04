@@ -3,6 +3,7 @@ Payload validation and normalization: input sanitization, schema verification.
 """
 from sqlalchemy.orm import Session
 from models import ChecklistRoot
+from utils.common_helpers import parse_date_ymd
 
 
 def _normalize_status_input(status: str | None) -> str:
@@ -144,21 +145,8 @@ def _normalize_child_rows(items, number_field: str) -> list[dict]:
 
 
 def _date_ymd_from_any(value) -> str:
-    """Extract YYYY-MM-DD from various date formats."""
-    if not value:
-        return ""
-    raw = str(value)
-    if raw.startswith("/Date("):
-        try:
-            ms = int(raw[6:-2].split("+")[0].split("-")[0])
-            from datetime import datetime, timezone
-            dt = datetime.fromtimestamp(ms / 1000, tz=timezone.utc)
-            return dt.strftime("%Y-%m-%d")
-        except Exception:
-            return ""
-    if raw.lower().startswith("datetime'") and raw.endswith("'"):
-        raw = raw[9:-1]
-    return raw.split("T", 1)[0][:10] if raw else ""
+    """Wrapper for parse_date_ymd (backwards compatibility)."""
+    return parse_date_ymd(value)
 
 
 def _next_checklist_id(db: Session) -> str:

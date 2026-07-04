@@ -1,11 +1,13 @@
 import json
 import logging
 import random
+import sys
 import uuid
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import inspect, text
+from sqlalchemy.exc import IntegrityError
 
-from config import APP_PROFILE, AUTO_MUTATE_SCHEMA_ON_STARTUP, AUTO_SEED_STARTUP_DATA, FRONTEND_TIMER_PROFILE
+from config import APP_PROFILE, AUTO_MUTATE_SCHEMA_ON_STARTUP, AUTO_SEED_STARTUP_DATA, FRONTEND_TIMER_PROFILE, PROMPT_LOGIN_ON_STARTUP_ENABLED
 from database import Base, SessionLocal, engine
 from models import (
     AnalyticsBreakdown,
@@ -24,10 +26,70 @@ from services.settings_service import DEFAULT_REQUIRED_FIELDS, DEFAULT_UPLOAD_PO
 logger = logging.getLogger("gateway")
 
 
+def _prompt_login_gui() -> str | None:
+    """Blocking local Tk dialog asking for a username. Returns None (never raises) if a
+    display isn't available, tkinter isn't installed, or the user cancels - callers must
+    treat that as "keep whatever current user is already configured"."""
+    try:
+        import tkinter as tk
+        from tkinter import simpledialog
+    except Exception:
+        logger.info("No GUI toolkit available; skipping startup login prompt")
+        return None
+    try:
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        uname = simpledialog.askstring(
+            "SAP Gateway Simulator",
+            "Enter your username (used as the current user for this mock session):",
+            parent=root,
+        )
+        root.destroy()
+        return str(uname or "").strip() or None
+    except Exception:
+        logger.exception("Startup login prompt failed; keeping existing current user")
+        return None
+
+
+def prompt_and_store_login() -> None:
+    """Ask for a username once via a GUI dialog and persist it as RuntimeUserContext.CURRENT,
+    which services.current_user_service.resolve_uname() already reads as its final fallback.
+    A no-op under pytest, when explicitly disabled, or if a current user is already
+    configured from a previous run.
+
+    The pytest check is done here (call time, via sys.modules) rather than as a frozen
+    config.py constant: config.py is imported once at process start, commonly before
+    pytest has set PYTEST_CURRENT_TEST (which is set per-test, not at collection time), so
+    a constant computed then would still be True during actual test runs, hanging every
+    test that boots the app on this blocking GUI dialog. "pytest" being importable is
+    stable regardless of import ordering.
+    """
+    if not PROMPT_LOGIN_ON_STARTUP_ENABLED or "pytest" in sys.modules:
+        return
+    db = SessionLocal()
+    try:
+        row = db.get(RuntimeUserContext, "CURRENT")
+        if row and str(row.uname or "").strip():
+            return
+        uname = _prompt_login_gui()
+        if not uname:
+            return
+        if row:
+            row.uname = uname
+        else:
+            db.add(RuntimeUserContext(key="CURRENT", uname=uname))
+        db.commit()
+        logger.info("Startup login: current user set to %r", uname)
+    finally:
+        db.close()
+
+
 def bootstrap_schema() -> None:
     """Create all tables and ensure schema compatibility."""
     Base.metadata.create_all(bind=engine)
     ensure_schema_compatibility()
+    prompt_and_store_login()
 
 
 def ensure_schema_compatibility() -> None:
@@ -73,7 +135,15 @@ def ensure_required_tables(bind=None) -> None:
 
 
 def ensure_runtime_settings_row(db) -> FrontendRuntimeSettings:
-    """Ensure frontend runtime settings row exists."""
+    """Ensure frontend runtime settings row exists.
+
+    Read-then-insert has a TOCTOU gap under concurrent startup/requests: two callers can
+    both see no row and both try to insert. There's no unique constraint stopping a second
+    row (FrontendRuntimeSettings.id is a random UUID, not a natural singleton key), so a
+    naive version of this would silently create duplicates and different callers would
+    non-deterministically read whichever "first()" row wins. Re-query on IntegrityError to
+    fall back to whatever row actually landed, rather than crashing or duplicating silently.
+    """
     settings_row = db.query(FrontendRuntimeSettings).first()
     if settings_row:
         return settings_row
@@ -84,7 +154,14 @@ def ensure_runtime_settings_row(db) -> FrontendRuntimeSettings:
         **FRONTEND_TIMER_PROFILE
     )
     db.add(settings_row)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        settings_row = db.query(FrontendRuntimeSettings).first()
+        if settings_row is None:
+            raise
+        return settings_row
     db.refresh(settings_row)
     return settings_row
 
