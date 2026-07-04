@@ -12,26 +12,9 @@ from main import app  # noqa: E402
 from services import current_user_service  # noqa: E402
 from utils.odata import ODATA_NS, SERVICE_ROOT  # noqa: E402
 
-
-def _csrf(client: TestClient):
-    resp = client.get(f"{SERVICE_ROOT}/", headers={"X-CSRF-Token": "Fetch"})
-    return resp.headers.get("X-CSRF-Token")
-
-
-def _sample_root(client: TestClient):
-    payload = client.get(f"{SERVICE_ROOT}/ChecklistSearchSet", params={"$top": 1}).json()
-    rows = payload.get("d", {}).get("results", [])
-    assert rows
-    row = rows[0]
-    assert row.get("DB_KEY")
-    assert row.get("Key") == row.get("DB_KEY")
-    return row["DB_KEY"]
-
-
 def _as_user(user_name: str) -> dict:
     current_user_service.ALLOW_MOCK_USER_HEADER = True
     return {"X-Mock-User": user_name}
-
 
 def test_gateway_canonical_contract_and_metadata():
     with TestClient(app) as client:
@@ -87,7 +70,6 @@ def test_gateway_canonical_contract_and_metadata():
         assert create_permission_body.get("CreateOperation") == "01"
         assert create_permission_body.get("CanCreate") is True
         assert create_permission_body.get("GrantedOperations") == "01"
-
 
 def test_create_draft_lock_imports_are_benign_for_local_runtime():
     with TestClient(app) as client:
@@ -346,7 +328,6 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         for name in ["AutosaveChecklist", "UpdateChecklist", "LockStatus", "LockControl"]:
             assert f'FunctionImport Name="{name}"' not in metadata
 
-
 def test_legacy_alias_paths_are_not_exposed():
     with TestClient(app) as client:
         token = _csrf(client)
@@ -363,7 +344,6 @@ def test_legacy_alias_paths_are_not_exposed():
             resp = client.get(path)
             assert resp.status_code == 404
 
-
 def test_error_payload_uses_errordetails():
     with TestClient(app) as client:
         token = _csrf(client)
@@ -374,7 +354,6 @@ def test_error_payload_uses_errordetails():
             assert "innererror" in payload["error"]
             assert "errordetails" in payload["error"]["innererror"]
 
-
 def test_odata_unknown_path_is_wrapped_with_standard_odata_error():
     with TestClient(app) as client:
         resp = client.get(f"{SERVICE_ROOT}/DefinitelyMissingSet")
@@ -384,14 +363,12 @@ def test_odata_unknown_path_is_wrapped_with_standard_odata_error():
         assert "code" in payload["error"]
         assert payload["error"]["code"] == "NOT_FOUND"
 
-
 def test_ui5_flex_settings_endpoint_exists():
     with TestClient(app) as client:
         resp = client.get("/sap/bc/lrep/flex/settings")
         assert resp.status_code == 200
         payload = resp.json()
         assert payload.get("isProductiveSystem") is False
-
 
 def test_checklist_search_exposes_rate_totals_for_column_visibility():
     with TestClient(app) as client:
@@ -407,7 +384,6 @@ def test_checklist_search_exposes_rate_totals_for_column_visibility():
         assert "ChecksTotal" in row
         assert "BarriersTotal" in row
 
-
 def test_checklist_search_preserves_metadata_under_select():
     with TestClient(app) as client:
         payload = client.get(
@@ -420,7 +396,6 @@ def test_checklist_search_preserves_metadata_under_select():
         assert "__metadata" in row
         assert row["__metadata"]["type"] == ODATA_NS + ".ChecklistSearch"
         assert row["Key"]
-
 
 def test_workflow_analytics_exposes_summary_and_breakdowns():
     with TestClient(app) as client:
@@ -443,7 +418,6 @@ def test_workflow_analytics_exposes_summary_and_breakdowns():
         missing_filter = client.get(f"{SERVICE_ROOT}/WorkflowAnalyticsBreakdownSet")
         assert missing_filter.status_code == 400
 
-
 def test_search_fetch_scope_and_export_scope_stay_separate():
     with TestClient(app) as client:
         token = _csrf(client)
@@ -465,7 +439,6 @@ def test_search_fetch_scope_and_export_scope_stay_separate():
         export_rows = export_all.json().get("d", {}).get("results", [])
         assert len(export_rows) > len(limited_rows)
 
-
 def test_dictionary_item_set_is_reference_data_only_and_runtime_settings_hold_policy_payloads():
     with TestClient(app) as client:
         payload = client.get(
@@ -483,7 +456,6 @@ def test_dictionary_item_set_is_reference_data_only_and_runtime_settings_hold_po
         assert runtime_payload.get("RequiredFieldsJson")
         assert runtime_payload.get("FrontendVariablesJson")
         assert runtime_payload.get("UploadPolicyJson")
-
 
 def test_checklist_permission_set_supports_view_edit_delete_deny_patterns():
     with TestClient(app) as client:
@@ -517,7 +489,6 @@ def test_checklist_permission_set_supports_view_edit_delete_deny_patterns():
         assert no_delete.get("CanDelete") is False
         assert no_delete.get("ReasonCode") == "NO_DELETE_AUTH"
 
-
 def test_last_change_entity_supports_binary_root_key_literal():
     with TestClient(app) as client:
         root_key = _sample_root(client)
@@ -527,7 +498,6 @@ def test_last_change_entity_supports_binary_root_key_literal():
         payload = response.json().get("d", {})
         assert payload.get("DB_KEY") == root_key
         assert payload.get("AggChangedOn")
-
 
 def test_odata_x_http_method_override_delete_is_supported():
     with TestClient(app) as client:

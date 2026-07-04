@@ -11,19 +11,6 @@ if ROOT not in sys.path:
 from main import app  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
 
-
-def _csrf(client: TestClient):
-    resp = client.get(f"{SERVICE_ROOT}/", headers={"X-CSRF-Token": "Fetch"})
-    return resp.headers.get("X-CSRF-Token")
-
-
-def _sample_root(client: TestClient):
-    payload = client.get(f"{SERVICE_ROOT}/ChecklistSearchSet", params={"$top": 1}).json()
-    rows = payload.get("d", {}).get("results", [])
-    assert rows
-    return rows[0]["DB_KEY"]
-
-
 def _attachment_headers(root_key: str, file_name: str, mime_type: str, category_key: str = "GEN"):
     return {
         "X-DB-Key": root_key,
@@ -35,7 +22,6 @@ def _attachment_headers(root_key: str, file_name: str, mime_type: str, category_
         "Slug": file_name,
         "Content-Type": mime_type,
     }
-
 
 def test_attachment_create_accepts_media_upload_under_10mb():
     with TestClient(app) as client:
@@ -61,7 +47,6 @@ def test_attachment_create_accepts_media_upload_under_10mb():
             assert loaded_body.get("DocumentHandle") == attachment_key
             assert loaded_body.get("DownloadUrl")
 
-
 def test_attachment_create_rejects_media_upload_over_10mb():
     with TestClient(app) as client:
         token = _csrf(client)
@@ -73,7 +58,6 @@ def test_attachment_create_rejects_media_upload_over_10mb():
             headers=dict(_attachment_headers(root_key, "large-sample.wav", "audio/wav"), **{"X-CSRF-Token": token}),
         )
         assert resp.status_code == 413
-
 
 def test_save_changes_rejects_base64_attachment_payloads():
     with TestClient(app) as client:

@@ -11,25 +11,16 @@ if ROOT not in sys.path:
 from main import app  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
 
-
 REPO_ROOT = Path(__file__).resolve().parents[3]
 APP_ROOT = REPO_ROOT / "app"
 BACKEND_ROOT = REPO_ROOT / "backend" / "mock_gateway"
 
-
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
-
-
-def _csrf(client: TestClient) -> str:
-    resp = client.get(f"{SERVICE_ROOT}/", headers={"X-CSRF-Token": "Fetch"})
-    return str(resp.headers.get("X-CSRF-Token") or "")
-
 
 def _search_rows(client: TestClient, top: int = 1, skip: int = 0) -> list[dict]:
     payload = client.get(f"{SERVICE_ROOT}/ChecklistSearchSet", params={"$top": top, "$skip": skip}).json()
     return payload.get("d", {}).get("results", [])
-
 
 def test_legacy_modules_are_removed_from_active_repo_surface():
     removed_paths = [
@@ -71,7 +62,6 @@ def test_legacy_modules_are_removed_from_active_repo_surface():
     for path in removed_paths:
         assert not path.exists(), f"legacy surface still present: {path}"
 
-
 def test_active_frontend_code_has_no_forbidden_runtime_patterns():
     checked_suffixes = {".js", ".xml", ".html", ".json"}
     forbidden_patterns = {
@@ -109,7 +99,6 @@ def test_active_frontend_code_has_no_forbidden_runtime_patterns():
         for label, pattern in forbidden_patterns.items():
             assert pattern not in text, f"{label} leaked into active frontend path: {path}"
 
-
 def test_productive_frontend_uses_canonical_constant_modules_without_contract_wrappers():
     wrapper_import_markers = [
         "PRODUCTION_CONTROL_CHECKLIST/contracts/AnalyticsContracts",
@@ -134,7 +123,6 @@ def test_productive_frontend_uses_canonical_constant_modules_without_contract_wr
         for marker in wrapper_import_markers:
             assert marker not in text, f"contract wrapper import leaked into active frontend path: {path}"
 
-
 def test_attachment_repo_runtime_has_no_transitional_upload_boundary():
     attachment_gateway_runtime = _read(APP_ROOT / "service" / "features" / "detail" / "runtime" / "AttachmentGatewayRuntime.js")
     attachment_upload_runtime = _read(APP_ROOT / "service" / "features" / "detail" / "runtime" / "AttachmentUploadRuntime.js")
@@ -146,7 +134,6 @@ def test_attachment_repo_runtime_has_no_transitional_upload_boundary():
     assert "attachmentLoad" in attachment_upload_runtime
     assert ("Content" + "Base64") not in attachment_upload_runtime
 
-
 def test_final_cleanup_target_files_no_longer_embed_raw_i18n_literals_or_legacy_root_aliases():
     analytics_export_runtime = _read(APP_ROOT / "controller" / "analytics" / "AnalyticsExportRuntime.js")
     analytics_controller = _read(APP_ROOT / "controller" / "Analytics.controller.js")
@@ -157,7 +144,6 @@ def test_final_cleanup_target_files_no_longer_embed_raw_i18n_literals_or_legacy_
     assert '"exportFailed"' not in analytics_export_runtime
     assert "_resolveAnalyticsMessage" in analytics_controller
     assert '.get("RootKey")' not in smoke_pack
-
 
 def test_productive_frontend_has_no_app_constants_god_object_imports():
     forbidden_markers = [
@@ -173,7 +159,6 @@ def test_productive_frontend_has_no_app_constants_god_object_imports():
         text = _read(path)
         for marker in forbidden_markers:
             assert marker not in text, f"AppConstants aggregator import leaked into repo path: {path}"
-
 
 def test_manifest_and_model_constants_expose_only_current_global_model_surface():
     manifest = _read(APP_ROOT / "manifest.json")
@@ -216,7 +201,6 @@ def test_manifest_and_model_constants_expose_only_current_global_model_surface()
     assert 'createEnvModel' not in model_factory
     assert 'createHierarchyModel' not in model_factory
     assert 'layout="{= ${shell>/layout} || \'OneColumn\' }"' in app_view
-
 
 def test_boot_and_runtime_source_lock_strict_success_path():
     bootstrap_source = _read(APP_ROOT / "service" / "framework" / "ComponentBootstrap.js")
@@ -272,7 +256,6 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     for path in removed_framework_aliases:
         assert not path.exists(), f"alias-only framework file still present: {path}"
 
-
 def test_component_runtime_uses_canonical_model_paths_and_backend_mode_contracts():
     telemetry_runtime = _read(APP_ROOT / "service" / "framework" / "TelemetryRuntime.js")
     autosave_runtime = _read(APP_ROOT / "service" / "runtime" / "component" / "ComponentAutosaveRuntime.js")
@@ -297,7 +280,6 @@ def test_component_runtime_uses_canonical_model_paths_and_backend_mode_contracts
     assert "ModelPathContracts.BACKEND_MODE" in shell_state_runtime
     assert "BackendModeContracts.MODES.REAL" in diagnostics_usecase
     assert "BackendModeContracts.CAPABILITY.READY" in startup_capability_usecase
-
 
 def test_route_runtime_is_manifest_first_without_route_sync_shadow_layer():
     route_mode = _read(APP_ROOT / "infra" / "navigation" / "RouteModeCoordinator.js")
@@ -324,7 +306,6 @@ def test_route_runtime_is_manifest_first_without_route_sync_shadow_layer():
     assert "ctx.envState" in apply_runtime_settings
     assert "ctx.envModel" not in apply_runtime_settings
 
-
 def test_controller_model_access_is_explicit_without_generic_named_fallback_surface():
     app_controller = _read(APP_ROOT / "controller" / "App.controller.js")
 
@@ -336,7 +317,6 @@ def test_controller_model_access_is_explicit_without_generic_named_fallback_surf
     assert "_getStateModel: function () { return resolveControllerModel(this, MODELS.STATE, true); }" in app_controller
     assert "_getShellModel: function () { return resolveControllerModel(this, MODELS.SHELL, true); }" in app_controller
     assert "_getDefaultModel: function () { return resolveControllerModel(this, undefined, true); }" in app_controller
-
 
 def test_lock_and_persistence_message_keys_are_centralized_in_constants():
     detail_persistence = _read(APP_ROOT / "service" / "domain" / "detail" / "DetailPersistenceRuntime.js")
@@ -356,7 +336,6 @@ def test_lock_and_persistence_message_keys_are_centralized_in_constants():
     message_codes = _read(APP_ROOT / "constants" / "MessageCodeConstants.js")
     assert 'LOCK_LOST: "lockLostMessage"' in message_keys
     assert 'PERSISTENCE_IDLE: "persistenceIdle"' in _read(APP_ROOT / "constants" / "MessageKeyConstants.js")
-
 
 def test_backend_contract_service_is_typed_for_non_lock_responses():
     contract_service = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_contract_service.clas.abap")
@@ -396,7 +375,6 @@ def test_backend_contract_service_is_typed_for_non_lock_responses():
     assert "CALL FUNCTION 'Z_PCCT_MPL_TREE_GET'" in mpl_service
     assert "CALL FUNCTION 'Z_PCCT_MPL_TREE_GET'" not in dpc_ext
 
-
 def test_detail_search_and_shell_message_keys_live_only_in_dedicated_constant_modules():
     detail_formatters = _read(APP_ROOT / "service" / "features" / "detail" / "runtime" / "DetailFormatters.js")
     assert not (APP_ROOT / "controller" / "search" / "SearchFormatterBehavior.js").exists()
@@ -418,7 +396,6 @@ def test_detail_search_and_shell_message_keys_live_only_in_dedicated_constant_mo
     assert '"searchOpenUsesFirstHint"' not in ui_decision_defaults
     assert '"shellContextRefreshed"' not in ui_decision_defaults
 
-
 def test_productive_runtime_has_no_raw_active_or_selected_id_paths_outside_canonical_contracts():
     allowed_suffixes = {
         str(APP_ROOT / "service" / "domain" / "shared" / "ModelPathContracts.js"),
@@ -437,7 +414,6 @@ def test_productive_runtime_has_no_raw_active_or_selected_id_paths_outside_canon
         assert 'StatePaths.ACTIVE_OBJECT_ID || "/activeObjectId"' not in text, f'activeObjectId fallback leaked: {path}'
         assert 'ModelPathContracts.ACTIVE_OBJECT_ID || "/activeObjectId"' not in text, f'activeObjectId fallback leaked: {path}'
 
-
 def test_open_detail_source_checks_permission_before_cache_and_backend_load():
     source = _read(APP_ROOT / "service" / "domain" / "detail" / "usecases" / "OpenDetailUseCase.js")
 
@@ -447,7 +423,6 @@ def test_open_detail_source_checks_permission_before_cache_and_backend_load():
     backend_idx = non_create_branch.index("oRepo.loadDetailSnapshot")
 
     assert permission_idx < cache_idx < backend_idx
-
 
 def test_export_source_separates_selected_and_all_found_contracts():
     source = _read(APP_ROOT / "service" / "domain" / "search" / "usecases" / "ExportSearchUseCase.js")
@@ -459,7 +434,6 @@ def test_export_source_separates_selected_and_all_found_contracts():
     assert 'SearchMaxResults.resolveExportLimit(mState)' in source
     assert 'filterLocationKey:' in source
 
-
 def test_create_permission_contract_is_current_identity_only():
     source = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistPermissionRuntime.js")
     key_contracts = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataEntityContracts.js")
@@ -470,7 +444,6 @@ def test_create_permission_contract_is_current_identity_only():
     assert "Productive create-permission seam rules:" in readme
     assert "response entity identity also stays `DB_KEY='CURRENT'`" in readme
     assert "normalizePermissionResponse()" in readme
-
 
 def test_local_validation_guide_matches_real_repo_assets():
     guide_path = REPO_ROOT / "docs" / "LOCAL_VALIDATION.md"
@@ -486,7 +459,6 @@ def test_local_validation_guide_matches_real_repo_assets():
     assert "evergreen Microsoft Edge" in guide
     assert "Create a new checklist and complete the first save." in guide
     assert "Architectural baseline" in guide
-
 
 def test_final_audit_docs_reflect_current_production_baseline():
     audit_md = _read(REPO_ROOT / "docs" / "artifacts" / "product-audit-current.md")
@@ -504,7 +476,6 @@ def test_final_audit_docs_reflect_current_production_baseline():
     assert "selectedId and activeObjectId are not consumed as uncontrolled parallel truths" not in audit_md
     assert '"status": "baseline_ready"' in audit_json
     assert "constants/contracts cleanup, `UseCase` migration, and CSS patch decoupling are complete" in audit_md
-
 
 def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     delta_contracts = _read(APP_ROOT / "service" / "shared" / "delta" / "DeltaContracts.js")
@@ -562,7 +533,6 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     assert "mo_save_service->execute_save(" in abap_dpc
     assert "validate_save_request( is_request )" in _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_save_service.clas.abap")
 
-
 def test_abap_gateway_cleanup_uses_service_owned_runtime_read_and_save_seams():
     dpc_ext = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_dpc_ext.clas.abap")
     save_service = _read(REPO_ROOT / "backend" / "sap_backend" / "src" / "zcl_zodata_save_service.clas.abap")
@@ -607,7 +577,6 @@ def test_abap_gateway_cleanup_uses_service_owned_runtime_read_and_save_seams():
     assert "c_cache_tolerance_ms" not in contract_constants
     assert "c_environment_production" not in contract_constants
 
-
 def test_abap_runtime_settings_source_has_cds_design_examples():
     ddls_runtime = REPO_ROOT / "backend" / "sap_backend" / "src" / "zc_pcct_runtime_settings.ddls.asddls"
     ddls_vars = REPO_ROOT / "backend" / "sap_backend" / "src" / "zc_pcct_frontend_variables.ddls.asddls"
@@ -626,7 +595,6 @@ def test_abap_runtime_settings_source_has_cds_design_examples():
     assert "ZC_PCCT_RequiredFields" in runtime_service
     assert "ZC_PCCT_UploadPolicy" in runtime_service
     assert "ZC_PCCT_PermissionRules" in runtime_service
-
 
 def test_active_frontend_mutations_use_hybrid_aggregate_function_import_contract():
     mutation_runtime = _read(APP_ROOT / "infra" / "adapters" / "shared" / "ODataChecklistMutationRuntime.js")
@@ -648,7 +616,6 @@ def test_active_frontend_mutations_use_hybrid_aggregate_function_import_contract
     assert '@router.post(f"{SERVICE_ROOT}/CreateChecklist")' in canonical_api
     assert '@router.post(f"{SERVICE_ROOT}/CopyChecklist")' in canonical_api
 
-
 def test_start_local_env_supports_python_fallback_and_external_gateway_mode():
     source = _read(REPO_ROOT / "scripts" / "start-local-env.ps1")
 
@@ -657,7 +624,6 @@ def test_start_local_env_supports_python_fallback_and_external_gateway_mode():
     assert "python on PATH" in source
     assert "FastAPI and uvicorn" in source
     assert "-GatewayBaseUrl" in source or "GatewayBaseUrl" in source
-
 
 def test_telemetry_uses_canonical_lock_state_vocabulary():
     telemetry_runtime = _read(APP_ROOT / "service" / "framework" / "TelemetryRuntime.js")
@@ -670,7 +636,6 @@ def test_telemetry_uses_canonical_lock_state_vocabulary():
     assert "lockOperationState:" not in workflow_telemetry
     assert "lockState" in lock_gate
 
-
 def test_search_request_window_supports_legacy_search_max_results_shape():
     source = _read(APP_ROOT / "service" / "features" / "search" / "runtime" / "SearchViewStateRuntime.js")
     util_source = _read(APP_ROOT / "service" / "features" / "search" / "contracts" / "SearchMaxResults.js")
@@ -678,7 +643,6 @@ def test_search_request_window_supports_legacy_search_max_results_shape():
     assert 'typeof SearchMaxResults.resolveGrowingPageSize === "function"' in source
     assert 'typeof SearchMaxResults.resolveMaxResults === "function"' in source
     assert 'resolveGrowingPageSize: resolveGrowingPageSize,' in util_source
-
 
 def test_sticky_runtime_is_route_scoped_without_global_body_observer():
     legacy_path = APP_ROOT / "search-toolbar-sticky-runtime.js"
@@ -693,7 +657,6 @@ def test_sticky_runtime_is_route_scoped_without_global_body_observer():
     assert 'oScrollHost.addEventListener("scroll", oController._fnSearchScrollSync, { passive: true });' in runtime_source
     assert 'oObserver.disconnect();' in runtime_source
 
-
 def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():
     state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
     workflow_schema = _read(APP_ROOT / "model" / "schema" / "workflowSchema.js")
@@ -702,7 +665,6 @@ def test_detail_meta_bucket_is_explicit_and_synced_from_canonical_state():
     assert 'DETAIL_META: "/detailMeta",' in state_paths
     assert 'detailMeta:' in workflow_schema
     assert 'ModelStateRuntime.writeOnModel(oStateModel, StatePaths.DETAIL_META, {' in listener_runtime
-
 
 def test_standardized_telemetry_event_names_cover_permission_cache_lock_and_analytics_flows():
     permission_source = _read(APP_ROOT / "service" / "domain" / "detail" / "DetailAuthorizationRuntime.js")
@@ -725,14 +687,12 @@ def test_standardized_telemetry_event_names_cover_permission_cache_lock_and_anal
     assert 'analytics.dashboard.loaded' in dashboard_analytics_source
     assert 'analytics.dashboard.error' in dashboard_analytics_source
 
-
 def test_detail_save_runtime_preserves_partial_basic_snapshots_after_backend_save():
     source = _read(APP_ROOT / "service" / "domain" / "detail" / "DetailSaveRuntime.js")
 
     assert "var mMergedFields = Object.assign({}, oBaseBasic, oCurrentBasic);" in source
     assert "Object.keys(mMergedFields).forEach(function (sField) {" in source
     assert "if (isFilled(oCurrentBasic[sField])) {" in source
-
 
 def test_patch_css_prefers_semantic_host_classes_over_broad_renderer_selectors():
     patch_css = _read(APP_ROOT / "styles" / "modules" / "90_ui5_overrides.css")
@@ -752,7 +712,6 @@ def test_patch_css_prefers_semantic_host_classes_over_broad_renderer_selectors()
     assert ".flatEditorTable .sapMListTblCnt" in patch_css
     assert "function resolveShellHeaderHostDom" in shell_dom_runtime
 
-
 def test_expanded_rows_dialog_is_shared_across_checks_and_barriers_and_smoke_ids_are_current():
     detail_behavior = _read(APP_ROOT / "controller" / "detail" / "DetailChecklistBehavior.js")
     effect_dialog_runtime = _read(APP_ROOT / "service" / "framework" / "execution" / "EffectDialogRuntime.js")
@@ -771,7 +730,6 @@ def test_expanded_rows_dialog_is_shared_across_checks_and_barriers_and_smoke_ids
     assert 'dialogSelector": "[id$=\'expandedRowsDialog\']"' in interaction_smoke
     assert 'DETAIL_VIEW_ID = "checklist_app_comp---detailView"' in manual_p1p2
     assert 'SEARCH_VIEW_ID = "checklist_app_comp---searchView"' in manual_p1p2
-
 
 def test_report_export_respects_selected_and_all_found_contracts():
     with TestClient(app) as client:

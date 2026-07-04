@@ -13,15 +13,12 @@ from main import app  # noqa: E402
 from models import ChecklistRoot  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
 
-
 def setup_function():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
 
-
 def teardown_function():
     Base.metadata.drop_all(bind=engine)
-
 
 def _create_root(root_id: str):
     with SessionLocal() as db:
@@ -35,12 +32,6 @@ def _create_root(root_id: str):
         )
         db.add(root)
         db.commit()
-
-
-def _csrf(client: TestClient):
-    resp = client.get(f"{SERVICE_ROOT}/", headers={"X-CSRF-Token": "Fetch"})
-    return resp.headers.get("X-CSRF-Token")
-
 
 def test_lock_heartbeat_wrong_session_returns_locked_by_other_not_expired():
     root_id = str(uuid.uuid4())
@@ -67,7 +58,6 @@ def test_lock_heartbeat_wrong_session_returns_locked_by_other_not_expired():
         assert body.get("Action") == "FAILED"
         assert body.get("OwnerSession") == "S1"
 
-
 def test_lock_release_wrong_session_does_not_report_free():
     root_id = str(uuid.uuid4())
     _create_root(root_id)
@@ -93,7 +83,6 @@ def test_lock_release_wrong_session_does_not_report_free():
         assert body.get("ReasonCode") == "LOCKED_BY_OTHER"
         assert body.get("Action") == "FAILED"
         assert body.get("OwnerSession") == "S1"
-
 
 def test_copy_checklist_uses_canonical_db_key_query_parameter():
     root_id = str(uuid.uuid4())

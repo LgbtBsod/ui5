@@ -54,7 +54,7 @@ CLASS zcl_zodata_contract_service DEFINITION
 
     METHODS fill_save_response
       IMPORTING
-        iv_pcct_uuid      TYPE sysuuid_x16
+        iv_key      TYPE sysuuid_x16
         iv_changed_on     TYPE timestampl
         iv_version_number TYPE int4
         iv_is_autosave    TYPE abap_bool
@@ -189,7 +189,7 @@ CLASS zcl_zodata_contract_service IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD fill_save_response.
-    cs_result-pcct_uuid = iv_pcct_uuid.
+    cs_result-pcct_uuid = iv_key.
     cs_result-changed_on = iv_changed_on.
     cs_result-version_number = iv_version_number.
     cs_result-is_autosave = iv_is_autosave.

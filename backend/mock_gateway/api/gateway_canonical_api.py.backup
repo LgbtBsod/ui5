@@ -35,16 +35,11 @@ from services.settings_service import DEFAULT_FRONTEND_VARIABLES, SettingsServic
 from gateway_operations import (
     _validate_attachment_upload, _persist_attachment_media, _apply_attachment_metadata,
     _apply_save_attachments, _apply_root_payload, _replace_detail_rows,
-    _normalize_attachment_key, _normalize_attachment_category_key, _normalize_attachment_payload_rows,
-    _normalize_upload_list, _resolve_upload_mime, _load_upload_policy, _dict_text
-)
-from gateway_validators import (
-    _pick_text, _pick_bool, _coerce_int, _date_ymd_from_any
+    _normalize_attachment_key, _normalize_attachment_category_key, _normalize_attachment_payload_rows
 )
 from gateway_helpers import (
     PayloadExtractor, DateParser, BoundaryResolver, ODataSerializer, FilterMatcher, DictionaryCache, Aggregator
 )
-from utils.common_helpers import parse_date_ymd, parse_date_ms
 
 router = APIRouter(tags=["GatewayCanonical"])
 
@@ -109,13 +104,29 @@ def _reject_expand(expand: str | None):
 
 
 def _entity_key(key_expr: str) -> str:
-    """Wrapper for BoundaryResolver.resolve_key for backwards compatibility."""
-    return BoundaryResolver.resolve_key(key_expr)
+    cleaned = str(key_expr or "").strip()
+    for prefix in ("Key=", "DB_KEY=", "PARENT_KEY=", "AttachmentKey=", "FolderKey="):
+        if cleaned.startswith(prefix):
+            cleaned = cleaned.split("=", 1)[1].strip()
+    cleaned = cleaned.strip("'")
+    return cleaned
 
 
 def _boundary_root_key(payload: dict | None = None, *candidates) -> str:
-    """Wrapper for BoundaryResolver.resolve_root_key for backwards compatibility."""
-    return BoundaryResolver.resolve_root_key(payload, *candidates)
+    body = payload if isinstance(payload, dict) else {}
+    values = list(candidates) + [
+        body.get("DB_KEY"),
+        body.get("db_key"),
+    ]
+    for value in values:
+        raw = str(value or "").strip()
+        if not raw:
+            continue
+        if raw == "__CREATE":
+            return raw
+        if raw:
+            return raw
+    return ""
 
 
 def _resolve_root_from_payload(payload: dict) -> str:
@@ -128,8 +139,19 @@ def _resolve_root_from_payload(payload: dict) -> str:
 
 
 def _boundary_parent_key(payload: dict | None = None, *candidates) -> str:
-    """Wrapper for BoundaryResolver.resolve_parent_key for backwards compatibility."""
-    return BoundaryResolver.resolve_parent_key(payload, *candidates)
+    body = payload if isinstance(payload, dict) else {}
+    values = list(candidates) + [
+        body.get("PARENT_KEY"),
+        body.get("parent_key"),
+        body.get("ParentKey"),
+    ]
+    for value in values:
+        raw = str(value or "").strip()
+        if not raw:
+            continue
+        if raw:
+            return raw
+    return ""
 
 
 def _datecheck_datetime(root: ChecklistRoot) -> datetime:
@@ -145,6 +167,19 @@ def _datecheck_datetime(root: ChecklistRoot) -> datetime:
     return datetime(changed.year, changed.month, changed.day, tzinfo=timezone.utc)
 
 
+def _dict_text(db: Session, domain: str, key: str) -> str:
+    row = db.query(DictionaryItem).filter(DictionaryItem.domain == domain, DictionaryItem.key == str(key or "")).first()
+    return row.text if row else ""
+
+
+def _load_upload_policy(db: Session) -> dict:
+    payload = SettingsService.load_global(SettingsRepo(db))
+    raw = payload.get("UploadPolicyJson") or "{}"
+    try:
+        parsed = json.loads(raw)
+    except (json.JSONDecodeError, ValueError, TypeError):
+        parsed = {}
+    return parsed if isinstance(parsed, dict) else {}
 
 
 def _dictionary_config_rows(db: Session) -> list[dict]:
@@ -169,6 +204,18 @@ def _dictionary_config_rows(db: Session) -> list[dict]:
     return rows
 
 
+def _normalize_upload_list(values) -> list[str]:
+    return [str(value or "").strip().lower() for value in (values or []) if str(value or "").strip()]
+
+
+def _resolve_upload_mime(file_name: str, content_type: str) -> str:
+    raw_content_type = str(content_type or "").split(";", 1)[0].strip().lower()
+    guessed, _encoding = mimetypes.guess_type(str(file_name or ""))
+    if raw_content_type and raw_content_type != "application/octet-stream":
+        return raw_content_type
+    if guessed:
+        return str(guessed).lower()
+    return raw_content_type or "application/octet-stream"
 
 
 
@@ -185,14 +232,48 @@ def _decode_slug(value: str | None) -> str:
 
 
 
+def _date_ymd_from_any(value) -> str:
+    if value is None:
+        return ""
+    raw = str(value)
+    if raw.startswith("/Date(") and raw.endswith(")/"):
+        try:
+            ms = int(raw[6:-2].split("+")[0].split("-")[0])
+            dt = datetime.fromtimestamp(ms / 1000, tz=timezone.utc)
+            return dt.strftime("%Y-%m-%d")
+        except ValueError:
+            return ""
+    if raw.lower().startswith("datetime'") and raw.endswith("'"):
+        raw = raw[9:-1]
+    if "T" in raw:
+        raw = raw.split("T", 1)[0]
+    return raw[:10]
+
 
 
 
 
 
 def _date_ms_from_any(value) -> int:
-    """Wrapper for parse_date_ms (backwards compatibility)."""
-    return parse_date_ms(value)
+    if value is None:
+        return 0
+    raw = str(value)
+    if raw.startswith('/Date(') and raw.endswith(')/'):
+        body = raw[6:-2]
+        sign_pos = max(body.find('+', 1), body.find('-', 1))
+        ms_part = body if sign_pos < 0 else body[:sign_pos]
+        try:
+            return int(ms_part)
+        except ValueError:
+            return 0
+    if raw.lower().startswith("datetime'") and raw.endswith("'"):
+        raw = raw[9:-1]
+    try:
+        dt = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+        dt = dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+        return int(dt.astimezone(timezone.utc).timestamp() * 1000)
+    except (ValueError, TypeError, AttributeError):
+        return 0
 
 
 def _export_pick_text(value) -> str:
@@ -347,32 +428,29 @@ def _to_attachment(entry: AttachmentEntry, db: Session | None = None) -> dict:
         item = db.query(DictionaryItem).filter(DictionaryItem.domain == "ATF_CAT", DictionaryItem.key == category_key).first()
         if item and item.text:
             category_text = str(item.text)
-    return ODataSerializer.build_entity(
-        "Attachment",
-        "AttachmentSet",
-        entry_key,
-        {
-            "AttachmentKey": entry_key,
-            "DB_KEY": entry_key,
-            "PARENT_KEY": _hex(entry.root_id),
-            "FolderKey": str(entry.folder_key or ""),
-            "CategoryKey": category_key,
-            "CategoryText": category_text,
-            "Type": category_key,
-            "FileName": str(entry.file_name or ""),
-            "Name": str(entry.file_name or ""),
-            "MimeType": str(entry.mime_type or "application/octet-stream"),
-            "Description": "",
-            "FileSize": int(entry.file_size or 0),
-            "FileSizeContent": int(entry.file_size or 0),
-            "DownloadUrl": f"{SERVICE_ROOT}/AttachmentSet(AttachmentKey='{entry_key}')/$value",
-            "DocumentHandle": entry_key,
-            "ScanStatus": "OK",
-            "ScannedOn": format_datetime(entry.changed_on),
-            "CreatedOn": format_datetime(entry.created_on),
-            "ChangedOn": format_datetime(entry.changed_on),
-        }
-    )
+    payload = {
+        "__metadata": _entity_metadata("Attachment", "AttachmentSet", entry_key),
+        "AttachmentKey": entry_key,
+        "DB_KEY": entry_key,
+        "PARENT_KEY": _hex(entry.root_id),
+        "FolderKey": str(entry.folder_key or ""),
+        "CategoryKey": category_key,
+        "CategoryText": category_text,
+        "Type": category_key,
+        "FileName": str(entry.file_name or ""),
+        "Name": str(entry.file_name or ""),
+        "MimeType": str(entry.mime_type or "application/octet-stream"),
+        "Description": "",
+        "FileSize": int(entry.file_size or 0),
+        "FileSizeContent": int(entry.file_size or 0),
+        "DownloadUrl": f"{SERVICE_ROOT}/AttachmentSet(AttachmentKey='{entry_key}')/$value",
+        "DocumentHandle": entry_key,
+        "ScanStatus": "OK",
+        "ScannedOn": format_datetime(entry.changed_on),
+        "CreatedOn": format_datetime(entry.created_on),
+        "ChangedOn": format_datetime(entry.changed_on),
+    }
+    return payload
 def _rate(items, pred) -> float:
     if not items:
         return 100.0
@@ -397,23 +475,19 @@ def _person_full_name(person: Person) -> str:
 
 
 def _to_person_vh(person: Person) -> dict:
-    return ODataSerializer.build_entity(
-        "PersonVH",
-        "PersonVHSet",
-        str(person.perner or ""),
-        {
-            "Pernr": str(person.perner or ""),
-            "FirstName": str(person.first_name or ""),
-            "LastName": str(person.last_name or ""),
-            "MiddleName": str(person.middle_name or ""),
-            "Position": str(person.position or ""),
-            "OrgUnit": str(person.org_unit or ""),
-            "IntegrationName": str(person.integration_name or ""),
-            "Begda": date_only_to_odata(person.begda) if getattr(person, "begda", None) else None,
-            "Endda": date_only_to_odata(person.endda) if getattr(person, "endda", None) else None,
-            "ChangedOn": format_datetime(person.changed_on),
-        }
-    )
+    return {
+        "__metadata": _entity_metadata("PersonVH", "PersonVHSet", str(person.perner or "")),
+        "Pernr": str(person.perner or ""),
+        "FirstName": str(person.first_name or ""),
+        "LastName": str(person.last_name or ""),
+        "MiddleName": str(person.middle_name or ""),
+        "Position": str(person.position or ""),
+        "OrgUnit": str(person.org_unit or ""),
+        "IntegrationName": str(person.integration_name or ""),
+        "Begda": date_only_to_odata(person.begda) if getattr(person, "begda", None) else None,
+        "Endda": date_only_to_odata(person.endda) if getattr(person, "endda", None) else None,
+        "ChangedOn": format_datetime(person.changed_on),
+    }
 
 
 def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
@@ -422,154 +496,134 @@ def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
     root_key = _hex(root.id)
     profession_text = _dict_text(db, "PROFESSION", profession) if db else ""
     lpc_text = _dict_text(db, "LPC", lpc) if db else ""
-    return ODataSerializer.build_entity(
-        "ChecklistSearch",
-        "ChecklistSearchSet",
-        root_key,
-        {
-            "DB_KEY": root_key,
-            "Key": root_key,
-            "Id": root.checklist_id or "",
-            "DateCheck": date_only_to_odata(_datecheck_datetime(root).date()),
-            "TimeCheck": root.time_check or "",
-            "TimeZone": root.time_zone or "",
-            "LocationKey": root.location_key or "",
-            "Bukrs": root.bukrs or "",
-            "Lpc": lpc,
-            "LpcText": lpc_text or lpc,
-            "Profession": profession,
-            "ProfessionText": profession_text or profession,
-            "EquipName": root.equipment or "",
-            "Status": _status_external(root.status),
-            "IntegrationFlag": bool(root.integration_flag),
-            "SourceKey": "INTEGRATION" if bool(root.integration_flag) else "WEB",
-            "ChangedOn": format_datetime(root.changed_on),
-            "CreatedOn": format_datetime(root.created_on),
-            "RequestId": root.checklist_id or "",
-            "HasFailedChecks": any((c.status or "").upper() == "FAIL" for c in root.checks),
-            "HasFailedBarriers": any(not bool(b.is_active) for b in root.barriers),
-            "SuccessChecksRate": _rate(root.checks, lambda c: (c.status or "").upper() != "FAIL"),
-            "SuccessBarriersRate": _rate(root.barriers, lambda b: bool(b.is_active)),
-            "ChecksTotal": len(root.checks or []),
-            "BarriersTotal": len(root.barriers or []),
-        }
-    )
+    return {
+        "__metadata": _entity_metadata("ChecklistSearch", "ChecklistSearchSet", root_key),
+        "DB_KEY": root_key,
+        "Key": root_key,
+        "Id": root.checklist_id or "",
+        "DateCheck": date_only_to_odata(_datecheck_datetime(root).date()),
+        "TimeCheck": root.time_check or "",
+        "TimeZone": root.time_zone or "",
+        "LocationKey": root.location_key or "",
+        "Bukrs": root.bukrs or "",
+        "Lpc": lpc,
+        "LpcText": lpc_text or lpc,
+        "Profession": profession,
+        "ProfessionText": profession_text or profession,
+        "EquipName": root.equipment or "",
+        "Status": _status_external(root.status),
+        "IntegrationFlag": bool(root.integration_flag),
+        "SourceKey": "INTEGRATION" if bool(root.integration_flag) else "WEB",
+        "ChangedOn": format_datetime(root.changed_on),
+        "CreatedOn": format_datetime(root.created_on),
+        "RequestId": root.checklist_id or "",
+        "HasFailedChecks": any((c.status or "").upper() == "FAIL" for c in root.checks),
+        "HasFailedBarriers": any(not bool(b.is_active) for b in root.barriers),
+        "SuccessChecksRate": _rate(root.checks, lambda c: (c.status or "").upper() != "FAIL"),
+        "SuccessBarriersRate": _rate(root.barriers, lambda b: bool(b.is_active)),
+        "ChecksTotal": len(root.checks or []),
+        "BarriersTotal": len(root.barriers or []),
+    }
 
 
 def _to_root(root: ChecklistRoot, db: Session | None = None) -> dict:
     s = _to_search(root, db=db)
-    return ODataSerializer.build_entity(
-        "ChecklistRoot",
-        "ChecklistRootSet",
-        s["DB_KEY"],
-        {
-            "DB_KEY": s["DB_KEY"],
-            "Key": s["Key"],
-            "RequestId": s["RequestId"],
-            "Id": s["Id"],
-            "ChangedOn": s["ChangedOn"],
-            "CreatedOn": s["CreatedOn"],
-            "VersionNumber": int(root.version_number or 0),
-            "Status": s["Status"],
-            "HasFailedChecks": s["HasFailedChecks"],
-            "HasFailedBarriers": s["HasFailedBarriers"],
-            "SuccessChecksRate": s["SuccessChecksRate"],
-            "SuccessBarriersRate": s["SuccessBarriersRate"],
-            "ChecksTotal": s["ChecksTotal"],
-            "BarriersTotal": s["BarriersTotal"],
-        }
-    )
+    return {
+        "__metadata": _entity_metadata("ChecklistRoot", "ChecklistRootSet", s["DB_KEY"]),
+        "DB_KEY": s["DB_KEY"],
+        "Key": s["Key"],
+        "RequestId": s["RequestId"],
+        "Id": s["Id"],
+        "ChangedOn": s["ChangedOn"],
+        "CreatedOn": s["CreatedOn"],
+        "VersionNumber": int(root.version_number or 0),
+        "Status": s["Status"],
+        "HasFailedChecks": s["HasFailedChecks"],
+        "HasFailedBarriers": s["HasFailedBarriers"],
+        "SuccessChecksRate": s["SuccessChecksRate"],
+        "SuccessBarriersRate": s["SuccessBarriersRate"],
+        "ChecksTotal": s["ChecksTotal"],
+        "BarriersTotal": s["BarriersTotal"],
+    }
 
 
 def _to_basic(root: ChecklistRoot) -> dict:
     root_key = _hex(root.id)
-    return ODataSerializer.build_entity(
-        "ChecklistBasicInfo",
-        "ChecklistBasicInfoSet",
-        root_key,
-        {
-            "DB_KEY": root_key,
-            "ChecklistId": root.checklist_id or "",
-            "LocationKey": root.location_key or "",
-            "LocationName": root.location_name or root.location_text or "",
-            "LocationText": root.location_text or root.location_name or "",
-            "Bukrs": root.bukrs or "",
-            "ObserverPernr": root.observer_perner or "",
-            "ObserverName": root.observer_fullname or "",
-            "ObserverFullname": root.observer_fullname or "",
-            "ObserverPosition": root.observer_position or "",
-            "ObserverOrgUnit": root.observer_orgunit or "",
-            "ObservedPernr": root.observed_perner or "",
-            "ObservedName": root.observed_fullname or "",
-            "ObservedFullname": root.observed_fullname or "",
-            "ObservedPosition": root.observed_position or "",
-            "ObservedOrgUnit": root.observed_orgunit or "",
-            "Lpc": root.lpc or "",
-            "LpcText": root.lpc_text or root.lpc or "",
-            "Profession": root.observed_position or "",
-            "ProfessionText": root.observed_position or "",
-            "ChecksNumber": "",
-            "ChecksNumberText": "",
-            "BarriersNumber": "",
-            "BarriersNumberText": "",
-            "DateCheck": date_only_to_odata(_datecheck_datetime(root).date()),
-            "TimeCheck": root.time_check or "",
-            "TimeZone": root.time_zone or "",
-            "EquipName": root.equipment or "",
-        }
-    )
+    return {
+        "__metadata": _entity_metadata("ChecklistBasicInfo", "ChecklistBasicInfoSet", root_key),
+        "DB_KEY": root_key,
+        "ChecklistId": root.checklist_id or "",
+        "LocationKey": root.location_key or "",
+        "LocationName": root.location_name or root.location_text or "",
+        "LocationText": root.location_text or root.location_name or "",
+        "Bukrs": root.bukrs or "",
+        "ObserverPernr": root.observer_perner or "",
+        "ObserverName": root.observer_fullname or "",
+        "ObserverFullname": root.observer_fullname or "",
+        "ObserverPosition": root.observer_position or "",
+        "ObserverOrgUnit": root.observer_orgunit or "",
+        "ObservedPernr": root.observed_perner or "",
+        "ObservedName": root.observed_fullname or "",
+        "ObservedFullname": root.observed_fullname or "",
+        "ObservedPosition": root.observed_position or "",
+        "ObservedOrgUnit": root.observed_orgunit or "",
+        "Lpc": root.lpc or "",
+        "LpcText": root.lpc_text or root.lpc or "",
+        "Profession": root.observed_position or "",
+        "ProfessionText": root.observed_position or "",
+        "ChecksNumber": "",
+        "ChecksNumberText": "",
+        "BarriersNumber": "",
+        "BarriersNumberText": "",
+        "DateCheck": date_only_to_odata(_datecheck_datetime(root).date()),
+        "TimeCheck": root.time_check or "",
+        "TimeZone": root.time_zone or "",
+        "EquipName": root.equipment or "",
+    }
 
 
 def _to_permission(root: ChecklistRoot, user_id: str | None, db: Session | None = None) -> dict:
     permission = AuthorizationService.checklist_permissions(root, user_id, db=db)
     root_key = _hex(root.id)
-    return ODataSerializer.build_entity(
-        "ChecklistPermission",
-        "ChecklistPermissionSet",
-        root_key,
-        {
-            "DB_KEY": root_key,
-            "UserId": str(permission.get("user_id") or ""),
-            "AuthObject": str(permission.get("auth_object") or ""),
-            "CreateOperation": str(permission.get("create_operation") or ""),
-            "ViewOperation": str(permission.get("view_operation") or ""),
-            "ChangeOperation": str(permission.get("change_operation") or ""),
-            "DeleteOperation": str(permission.get("delete_operation") or ""),
-            "GrantedOperations": ",".join(permission.get("granted_operations") or []),
-            "CanCreate": bool(permission.get("can_create")),
-            "CanView": bool(permission.get("can_view")),
-            "CanEdit": bool(permission.get("can_edit")),
-            "CanDelete": bool(permission.get("can_delete")),
-            "ReasonCode": str(permission.get("reason_code") or ""),
-            "Message": str(permission.get("message") or ""),
-        }
-    )
+    return {
+        "__metadata": _entity_metadata("ChecklistPermission", "ChecklistPermissionSet", root_key),
+        "DB_KEY": root_key,
+        "UserId": str(permission.get("user_id") or ""),
+        "AuthObject": str(permission.get("auth_object") or ""),
+        "CreateOperation": str(permission.get("create_operation") or ""),
+        "ViewOperation": str(permission.get("view_operation") or ""),
+        "ChangeOperation": str(permission.get("change_operation") or ""),
+        "DeleteOperation": str(permission.get("delete_operation") or ""),
+        "GrantedOperations": ",".join(permission.get("granted_operations") or []),
+        "CanCreate": bool(permission.get("can_create")),
+        "CanView": bool(permission.get("can_view")),
+        "CanEdit": bool(permission.get("can_edit")),
+        "CanDelete": bool(permission.get("can_delete")),
+        "ReasonCode": str(permission.get("reason_code") or ""),
+        "Message": str(permission.get("message") or ""),
+    }
 
 
 def _to_create_permission(user_id: str | None, db: Session | None = None) -> dict:
     permission = AuthorizationService.create_permission(user_id, db=db)
     root_key = "CURRENT"
-    return ODataSerializer.build_entity(
-        "ChecklistPermission",
-        "ChecklistCreatePermissionSet",
-        root_key,
-        {
-            "DB_KEY": root_key,
-            "UserId": str(permission.get("user_id") or ""),
-            "AuthObject": str(permission.get("auth_object") or ""),
-            "CreateOperation": str(permission.get("create_operation") or ""),
-            "ViewOperation": str(permission.get("view_operation") or ""),
-            "ChangeOperation": str(permission.get("change_operation") or ""),
-            "DeleteOperation": str(permission.get("delete_operation") or ""),
-            "GrantedOperations": ",".join(permission.get("granted_operations") or []),
-            "CanCreate": bool(permission.get("can_create")),
-            "CanView": bool(permission.get("can_view")),
-            "CanEdit": bool(permission.get("can_edit")),
-            "CanDelete": bool(permission.get("can_delete")),
-            "ReasonCode": str(permission.get("reason_code") or ""),
-            "Message": str(permission.get("message") or ""),
-        }
-    )
+    return {
+        "__metadata": _entity_metadata("ChecklistPermission", "ChecklistCreatePermissionSet", root_key),
+        "DB_KEY": root_key,
+        "UserId": str(permission.get("user_id") or ""),
+        "AuthObject": str(permission.get("auth_object") or ""),
+        "CreateOperation": str(permission.get("create_operation") or ""),
+        "ViewOperation": str(permission.get("view_operation") or ""),
+        "ChangeOperation": str(permission.get("change_operation") or ""),
+        "DeleteOperation": str(permission.get("delete_operation") or ""),
+        "GrantedOperations": ",".join(permission.get("granted_operations") or []),
+        "CanCreate": bool(permission.get("can_create")),
+        "CanView": bool(permission.get("can_view")),
+        "CanEdit": bool(permission.get("can_edit")),
+        "CanDelete": bool(permission.get("can_delete")),
+        "ReasonCode": str(permission.get("reason_code") or ""),
+        "Message": str(permission.get("message") or ""),
+    }
 
 
 
@@ -618,57 +672,45 @@ def _to_current_user(profile: dict) -> dict:
     permissions = list(profile.get("permissions") or [])
     permission_codes = [str((permission or {}).get("code") or "") for permission in permissions]
     key = "CURRENT"
-    return ODataSerializer.build_entity(
-        "CurrentUser",
-        "CurrentUserSet",
-        key,
-        {
-            "Key": key,
-            "FullName": str(profile.get("full_name") or ""),
-            "PermissionsCsv": ",".join(permission_codes),
-            "PermissionRulesJson": json.dumps(permissions, ensure_ascii=False),
-            "CanView": "03" in permission_codes,
-            "CanEdit": "02" in permission_codes,
-            "CanDelete": "06" in permission_codes,
-            "SummaryText": _current_user_summary(profile),
-        }
-    )
+    return {
+        "__metadata": _entity_metadata("CurrentUser", "CurrentUserSet", key),
+        "Key": key,
+        "FullName": str(profile.get("full_name") or ""),
+        "PermissionsCsv": ",".join(permission_codes),
+        "PermissionRulesJson": json.dumps(permissions, ensure_ascii=False),
+        "CanView": "03" in permission_codes,
+        "CanEdit": "02" in permission_codes,
+        "CanDelete": "06" in permission_codes,
+        "SummaryText": _current_user_summary(profile),
+    }
 
 
 def _to_check(item: ChecklistCheck) -> dict:
     key = _hex(item.id)
-    return ODataSerializer.build_entity(
-        "ChecklistCheck",
-        "ChecklistCheckSet",
-        key,
-        {
-            "DB_KEY": key,
-            "PARENT_KEY": _hex(item.root_id),
-            "ChecksNum": int(item.position or 0),
-            "Text": item.text or "",
-            "Comment": item.comment or "",
-            "Result": (item.status or "").upper() != "FAIL",
-            "ChangedOn": format_datetime(item.changed_on),
-        }
-    )
+    return {
+        "__metadata": _entity_metadata("ChecklistCheck", "ChecklistCheckSet", key),
+        "DB_KEY": key,
+        "PARENT_KEY": _hex(item.root_id),
+        "ChecksNum": int(item.position or 0),
+        "Text": item.text or "",
+        "Comment": item.comment or "",
+        "Result": (item.status or "").upper() != "FAIL",
+        "ChangedOn": format_datetime(item.changed_on),
+    }
 
 
 def _to_barrier(item: ChecklistBarrier) -> dict:
     key = _hex(item.id)
-    return ODataSerializer.build_entity(
-        "ChecklistBarrier",
-        "ChecklistBarrierSet",
-        key,
-        {
-            "DB_KEY": key,
-            "PARENT_KEY": _hex(item.root_id),
-            "BarriersNum": int(item.position or 0),
-            "Text": item.description or "",
-            "Comment": item.comment or "",
-            "Result": bool(item.is_active),
-            "ChangedOn": format_datetime(item.changed_on),
-        }
-    )
+    return {
+        "__metadata": _entity_metadata("ChecklistBarrier", "ChecklistBarrierSet", key),
+        "DB_KEY": key,
+        "PARENT_KEY": _hex(item.root_id),
+        "BarriersNum": int(item.position or 0),
+        "Text": item.description or "",
+        "Comment": item.comment or "",
+        "Result": bool(item.is_active),
+        "ChangedOn": format_datetime(item.changed_on),
+    }
 
 
 def _agg_changed_on(root: ChecklistRoot):

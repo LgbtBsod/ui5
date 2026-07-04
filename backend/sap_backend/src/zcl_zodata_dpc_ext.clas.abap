@@ -174,7 +174,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
   METHOD execute_function_save.
     ensure_deps( ).
     DATA(ls_request) = read_save_request( io_data_provider ).
-    DATA(ls_root) = mo_read_service->read_root_row( ls_request-root-pcct_uuid ).
+    DATA(ls_root) = mo_read_service->read_root_row( ls_request-root-key ).
     rs_response = mo_save_service->execute_save(
       is_request        = ls_request
       iv_is_autosave    = iv_is_autosave
@@ -186,7 +186,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
 
   METHOD build_copy_request.
     ensure_deps( ).
-    DATA(ls_source_root) = mo_read_service->read_root_row( is_request-root-pcct_uuid ).
+    DATA(ls_source_root) = mo_read_service->read_root_row( is_request-root-key ).
     require_checklist_authority(
       iv_activity = zif_zodata_contract_constants=>c_op_create
       iv_bukrs    = ls_source_root-bukrs
@@ -195,8 +195,8 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     rs_request = mo_save_service->build_copy_request(
       is_request     = is_request
       is_source_root = ls_source_root
-      it_checks      = mo_read_service->read_check_rows( is_request-root-pcct_uuid )
-      it_barriers    = mo_read_service->read_barrier_rows( is_request-root-pcct_uuid ) ).
+      it_checks      = mo_read_service->read_check_rows( is_request-root-key )
+      it_barriers    = mo_read_service->read_barrier_rows( is_request-root-key ) ).
   ENDMETHOD.
 
   METHOD /iwbep/if_mgw_appl_srv_runtime~create_entity.
@@ -243,7 +243,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     DATA ls_root TYPE zcl_zodata_read_service=>ty_root_row.
     ensure_deps( ).
     ls_req = build_copy_request( read_save_request( io_data_provider ) ).
-    ls_root = mo_read_service->read_root_row( ls_req-root-pcct_uuid ).
+    ls_root = mo_read_service->read_root_row( ls_req-root-key ).
     TRY.
         ls_resp = mo_save_service->execute_save(
           is_request        = ls_req
@@ -493,7 +493,7 @@ CLASS zcl_zodata_dpc_ext IMPLEMENTATION.
     ensure_deps( ).
     lt_root = mo_read_service->read_root_rows( ).
     LOOP AT lt_root ASSIGNING FIELD-SYMBOL(<ls_root_permission_row>).
-      APPEND build_permission_row( <ls_root_permission_row>-pcct_uuid ) TO lt_result.
+      APPEND build_permission_row( <ls_root_permission_row>-key ) TO lt_result.
     ENDLOOP.
     copy_data_to_ref( EXPORTING is_data = lt_result CHANGING cr_data = er_entityset ).
   ENDMETHOD.

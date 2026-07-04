@@ -10,19 +10,6 @@ if ROOT not in sys.path:
 from main import app  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
 
-
-def _csrf(client: TestClient):
-    resp = client.get(f"{SERVICE_ROOT}/", headers={"X-CSRF-Token": "Fetch"})
-    return resp.headers.get("X-CSRF-Token")
-
-
-def _sample_root(client: TestClient):
-    payload = client.get(f"{SERVICE_ROOT}/ChecklistSearchSet", params={"$top": 1}).json()
-    rows = payload.get("d", {}).get("results", [])
-    assert rows
-    return rows[0]["DB_KEY"]
-
-
 def test_save_changes_requires_active_session_lock_but_not_client_version():
     with TestClient(app) as client:
         token = _csrf(client)
@@ -53,7 +40,6 @@ def test_save_changes_requires_active_session_lock_but_not_client_version():
         assert body.get("server_now")
         assert body.get("request_id")
         assert int(body.get("version_number") or 0) >= 1
-
 
 def test_autosave_requires_active_session_lock_but_not_client_version():
     with TestClient(app) as client:

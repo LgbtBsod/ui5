@@ -35,7 +35,7 @@ FUNCTION zodata_lock_control.
   ENDIF.
 
   CASE iv_mode.
-    WHEN 'A'. " acquire: persist owner/session/expiry and make lock visible across requests
+    WHEN zcl_zodata_lock_constants=>cv_mode-acquire. " persist owner/session/expiry
       IF iv_force_takeover = abap_true.
         UPDATE ztodata_hdr
            SET lock_owner      = ''
@@ -80,7 +80,7 @@ FUNCTION zodata_lock_control.
       ENDIF.
       COMMIT WORK AND WAIT.
 
-    WHEN 'R'. " release: clear persisted owner/session/expiry once for the owning session
+    WHEN zcl_zodata_lock_constants=>cv_mode-release. " clear owner/session/expiry for owning session
       IF iv_session_guid IS INITIAL.
         RAISE update_error.
       ENDIF.
@@ -115,8 +115,8 @@ FUNCTION zodata_lock_control.
       ENDIF.
       COMMIT WORK AND WAIT.
 
-    WHEN 'H' OR 'T'. " heartbeat / technical touch: refresh persisted timestamps for active ownership
-      IF iv_mode = 'H' AND iv_session_guid IS INITIAL.
+    WHEN zcl_zodata_lock_constants=>cv_mode-heartbeat OR zcl_zodata_lock_constants=>cv_mode-touch. " refresh timestamps
+      IF iv_mode = zcl_zodata_lock_constants=>cv_mode-heartbeat AND iv_session_guid IS INITIAL.
         RAISE update_error.
       ENDIF.
 
@@ -126,13 +126,13 @@ FUNCTION zodata_lock_control.
              lock_expires_at = lv_expiry
        WHERE bo_key        = iv_bo_key
          AND object_id     = iv_object_id
-         AND ( lock_session = iv_session_guid OR iv_mode = 'T' ).
+         AND ( lock_session = iv_session_guid OR iv_mode = zcl_zodata_lock_constants=>cv_mode-touch ).
       IF sy-subrc <> 0.
         RAISE update_error.
       ENDIF.
       COMMIT WORK AND WAIT.
 
-    WHEN 'S' OR 'V'. " status / validate: read-only lock truth without mutating persistence
+    WHEN zcl_zodata_lock_constants=>cv_mode-status OR zcl_zodata_lock_constants=>cv_mode-validate. " read-only lock check
       " Canonical runtime truth must be checked against:
       " 1. lock row exists
       " 2. physical last_touch_at/lock_expires_at represent the last_refresh_at truth
@@ -153,7 +153,7 @@ FUNCTION zodata_lock_control.
         RAISE lock_error.
       ENDIF.
 
-      IF iv_mode = 'V' AND ls_lock_state-lock_session <> iv_session_guid.
+      IF iv_mode = zcl_zodata_lock_constants=>cv_mode-validate AND ls_lock_state-lock_session <> iv_session_guid.
         RAISE lock_error.
       ENDIF.
 

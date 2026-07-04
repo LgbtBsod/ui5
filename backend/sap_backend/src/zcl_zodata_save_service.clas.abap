@@ -117,7 +117,7 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
   ENDMETHOD.
 
   METHOD validate_save_request.
-    IF is_request-root-pcct_uuid IS INITIAL.
+    IF is_request-root-key IS INITIAL.
       raise_busi_exception( iv_text = zcl_zodata_message_texts=>get_text( zcl_zodata_message_texts=>c_key_save_root_required ) iv_code = zif_zodata_message_codes=>validation_error ).
     ENDIF.
     IF is_request-session_guid IS INITIAL.
@@ -161,7 +161,7 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
           EXPORTING
             is_key          = VALUE zif_zodata_lock_manager=>ty_key(
                                 bo_key    = zif_i_bo_c=>sc_bo_key
-                                object_id = is_request-root-pcct_uuid )
+                                object_id = is_request-root-key )
             iv_session_guid = is_request-session_guid
           CHANGING
             cs_result       = rs_lock_hb ).
@@ -252,7 +252,7 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
     IF lt_change IS INITIAL.
       mo_contract->fill_save_response(
         EXPORTING
-          iv_pcct_uuid      = is_request-root-pcct_uuid
+          iv_pcct_uuid      = is_request-root-key
           iv_changed_on     = COND #( WHEN iv_changed_on IS INITIAL THEN lv_effective_server_now ELSE iv_changed_on )
           iv_version_number = iv_version_number
           iv_is_autosave    = iv_is_autosave
@@ -276,7 +276,7 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
 
     mo_contract->fill_save_response(
       EXPORTING
-        iv_pcct_uuid      = is_request-root-pcct_uuid
+        iv_pcct_uuid      = is_request-root-key
         iv_changed_on     = COND #( WHEN iv_changed_on IS INITIAL THEN lv_effective_server_now ELSE iv_changed_on )
         iv_version_number = iv_version_number
         iv_is_autosave    = iv_is_autosave
@@ -299,7 +299,7 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
   METHOD build_copy_request.
     rs_request = is_request.
     rs_request-root = CORRESPONDING #( is_source_root ).
-    CLEAR: rs_request-root-pcct_uuid,
+    CLEAR: rs_request-root-key,
       rs_request-root-created_on,
       rs_request-root-created_by,
       rs_request-root-changed_on,
@@ -313,19 +313,19 @@ CLASS zcl_zodata_save_service IMPLEMENTATION.
     rs_request-barriers = CORRESPONDING #( it_barriers ).
     rs_request-root-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     LOOP AT rs_request-checks ASSIGNING FIELD-SYMBOL(<ls_copy_check>).
-      CLEAR <ls_copy_check>-key_uuid.
+      CLEAR <ls_copy_check>-key.
       <ls_copy_check>-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     ENDLOOP.
     LOOP AT rs_request-barriers ASSIGNING FIELD-SYMBOL(<ls_copy_barrier>).
-      CLEAR <ls_copy_barrier>-key_uuid.
+      CLEAR <ls_copy_barrier>-key.
       <ls_copy_barrier>-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     ENDLOOP.
     LOOP AT rs_request-participants ASSIGNING FIELD-SYMBOL(<ls_copy_participant>).
-      CLEAR <ls_copy_participant>-key_uuid.
+      CLEAR <ls_copy_participant>-key.
       <ls_copy_participant>-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     ENDLOOP.
     LOOP AT rs_request-attachments ASSIGNING FIELD-SYMBOL(<ls_copy_attachment>).
-      CLEAR <ls_copy_attachment>-key_uuid.
+      CLEAR <ls_copy_attachment>-key.
       <ls_copy_attachment>-edit_mode = zif_zodata_contract_constants=>c_edit_mode_create.
     ENDLOOP.
   ENDMETHOD.

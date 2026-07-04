@@ -37,8 +37,23 @@ CLASS zcl_zodata_frontend_context_svc DEFINITION
 
   PRIVATE SECTION.
     DATA mo_contract TYPE REF TO zcl_zodata_contract_service.
+    DATA mt_auth_cache TYPE HASHED TABLE OF BEGIN OF STRUCTURE
+      bukrs TYPE bukrs,
+      can_view TYPE abap_bool,
+      can_edit TYPE abap_bool,
+      can_delete TYPE abap_bool,
+      can_create TYPE abap_bool,
+    END OF STRUCTURE WITH UNIQUE KEY bukrs.
 
     METHODS ensure_contract.
+    METHODS read_cached_authority
+      IMPORTING
+        iv_bukrs TYPE bukrs
+      EXPORTING
+        ev_can_view TYPE abap_bool
+        ev_can_edit TYPE abap_bool
+        ev_can_delete TYPE abap_bool
+        ev_can_create TYPE abap_bool.
 ENDCLASS.
 
 CLASS zcl_zodata_frontend_context_svc IMPLEMENTATION.
@@ -63,14 +78,14 @@ CLASS zcl_zodata_frontend_context_svc IMPLEMENTATION.
     ensure_contract( ).
 
     IF iv_bukrs IS NOT INITIAL.
-      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_view ID 'BUKRS' FIELD iv_bukrs.
-      lv_can_view = xsdbool( sy-subrc = 0 ).
-      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_change ID 'BUKRS' FIELD iv_bukrs.
-      lv_can_edit = xsdbool( sy-subrc = 0 ).
-      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_delete ID 'BUKRS' FIELD iv_bukrs.
-      lv_can_delete = xsdbool( sy-subrc = 0 ).
-      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_create ID 'BUKRS' FIELD iv_bukrs.
-      lv_can_create = xsdbool( sy-subrc = 0 ).
+      read_cached_authority(
+        EXPORTING
+          iv_bukrs = iv_bukrs
+        IMPORTING
+          ev_can_view = lv_can_view
+          ev_can_edit = lv_can_edit
+          ev_can_delete = lv_can_delete
+          ev_can_create = lv_can_create ).
     ENDIF.
 
     IF lv_can_view = abap_false.
@@ -99,6 +114,27 @@ CLASS zcl_zodata_frontend_context_svc IMPLEMENTATION.
         iv_message     = lv_message
       CHANGING
         cs_result      = rs_result ).
+  ENDMETHOD.
+
+  METHOD read_cached_authority.
+    DATA ls_cache TYPE LINE OF REF TO zcl_zodata_frontend_context_svc=>mt_auth_cache.
+    READ TABLE mt_auth_cache INTO DATA(ls_cached) WITH TABLE KEY bukrs = iv_bukrs.
+    IF sy-subrc = 0.
+      ev_can_view = ls_cached-can_view.
+      ev_can_edit = ls_cached-can_edit.
+      ev_can_delete = ls_cached-can_delete.
+      ev_can_create = ls_cached-can_create.
+    ELSE.
+      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_view ID 'BUKRS' FIELD iv_bukrs.
+      ev_can_view = xsdbool( sy-subrc = 0 ).
+      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_change ID 'BUKRS' FIELD iv_bukrs.
+      ev_can_edit = xsdbool( sy-subrc = 0 ).
+      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_delete ID 'BUKRS' FIELD iv_bukrs.
+      ev_can_delete = xsdbool( sy-subrc = 0 ).
+      AUTHORITY-CHECK OBJECT zif_zodata_contract_constants=>c_auth_object_checklist ID 'ACTVT' FIELD zif_zodata_contract_constants=>c_op_create ID 'BUKRS' FIELD iv_bukrs.
+      ev_can_create = xsdbool( sy-subrc = 0 ).
+      INSERT VALUE #( bukrs = iv_bukrs can_view = ev_can_view can_edit = ev_can_edit can_delete = ev_can_delete can_create = ev_can_create ) INTO TABLE mt_auth_cache.
+    ENDIF.
   ENDMETHOD.
 
   METHOD build_current_user_result.

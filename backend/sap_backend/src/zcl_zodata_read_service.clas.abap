@@ -5,7 +5,7 @@ CLASS zcl_zodata_read_service DEFINITION
 
   PUBLIC SECTION.
     TYPES: BEGIN OF ty_root_row,
-      pcct_uuid TYPE sysuuid_x16,
+      key TYPE sysuuid_x16,
       checklist_id TYPE char20,
       lpc TYPE char10,
       lpc_text TYPE string,
@@ -43,7 +43,7 @@ CLASS zcl_zodata_read_service DEFINITION
     END OF ty_root_row,
     tt_root_row TYPE STANDARD TABLE OF ty_root_row WITH DEFAULT KEY,
     BEGIN OF ty_check_row,
-      key_uuid TYPE sysuuid_x16,
+      key TYPE sysuuid_x16,
       parent_key TYPE sysuuid_x16,
       checks_num TYPE int4,
       text TYPE string,
@@ -53,7 +53,7 @@ CLASS zcl_zodata_read_service DEFINITION
     END OF ty_check_row,
     tt_check_row TYPE STANDARD TABLE OF ty_check_row WITH DEFAULT KEY,
     BEGIN OF ty_barrier_row,
-      key_uuid TYPE sysuuid_x16,
+      key TYPE sysuuid_x16,
       parent_key TYPE sysuuid_x16,
       barriers_num TYPE int4,
       text TYPE string,
@@ -93,6 +93,7 @@ CLASS zcl_zodata_read_service DEFINITION
 
   PRIVATE SECTION.
     DATA mo_context TYPE REF TO /iwbep/if_mgw_conv_srv_runtime.
+    CONSTANTS cv_max_root_rows TYPE int4 VALUE 50000.
 
     METHODS build_db_key_not_found_text
       IMPORTING
@@ -114,18 +115,18 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
     DATA(ls_root) = VALUE ty_root_row( ).
     DATA lt_checks_agg TYPE HASHED TABLE OF
       BEGIN OF STRUCTURE
-        pcct_uuid TYPE sysuuid_x16,
+        key TYPE sysuuid_x16,
         total TYPE int4,
         success TYPE int4,
       END OF STRUCTURE
-      WITH UNIQUE KEY pcct_uuid.
+      WITH UNIQUE KEY key.
     DATA lt_barriers_agg TYPE HASHED TABLE OF
       BEGIN OF STRUCTURE
-        pcct_uuid TYPE sysuuid_x16,
+        key TYPE sysuuid_x16,
         total TYPE int4,
         success TYPE int4,
       END OF STRUCTURE
-      WITH UNIQUE KEY pcct_uuid.
+      WITH UNIQUE KEY key.
 
     " Single optimized query with LEFT JOIN and aggregations (Code-to-Data)
     SELECT SINGLE z~pcct_uuid, z~checklist_id, z~lpc, z~lpc_text, z~status, z~integration_flag,
@@ -165,7 +166,7 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
   METHOD read_root_rows.
     DATA lt_root_data TYPE STANDARD TABLE OF
       BEGIN OF STRUCTURE
-        pcct_uuid TYPE sysuuid_x16,
+        key TYPE sysuuid_x16,
         checklist_id TYPE char20,
         lpc TYPE char10,
         lpc_text TYPE string,
@@ -200,12 +201,18 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
 
     DATA lt_checks_agg TYPE HASHED TABLE OF
       BEGIN OF STRUCTURE
-        pcct_uuid TYPE sysuuid_x16,
+        key TYPE sysuuid_x16,
         total TYPE int4,
         success TYPE int4,
       END OF STRUCTURE
-      WITH UNIQUE KEY pcct_uuid.
-    DATA lt_barriers_agg TYPE HASHED TABLE OF\n      BEGIN OF STRUCTURE\n        pcct_uuid TYPE sysuuid_x16,\n        total TYPE int4,\n        success TYPE int4,\n      END OF STRUCTURE\n      WITH UNIQUE KEY pcct_uuid."}
+      WITH UNIQUE KEY key.
+    DATA lt_barriers_agg TYPE HASHED TABLE OF
+      BEGIN OF STRUCTURE
+        key TYPE sysuuid_x16,
+        total TYPE int4,
+        success TYPE int4,
+      END OF STRUCTURE
+      WITH UNIQUE KEY key.
 
     " Single optimized query with aggregations (Code-to-Data optimization)
     SELECT z~pcct_uuid, z~checklist_id, z~lpc, z~lpc_text, z~status, z~integration_flag,
@@ -230,11 +237,17 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
                z~created_on, z~created_by, z~version_number, z~lock_owner, z~lock_session,
                z~tab_session_id, z~lock_expires_at
       ORDER BY z~changed_on DESCENDING
-      UP TO @500 ROWS
+      UP TO @cv_max_root_rows ROWS
       INTO TABLE @lt_root_data.
 
     IF lt_root_data IS INITIAL.
       RETURN.
+    ENDIF.
+
+    IF sy-dbcnt >= cv_max_root_rows.
+      /ui5/cl_log=>write_warning(
+        iv_text = |Result set truncated at { cv_max_root_rows } rows|
+        iv_code = 'Z_QUERY_TRUNCATED' ).
     ENDIF.
 
     " Populate root table with aggregated data
@@ -244,14 +257,14 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
     ENDLOOP.
 
     " Aggregated checks and barriers in single queries (no loops)
-    SELECT pcct_uuid,
+    SELECT pcct_uuid AS key,
            COUNT( * ) AS total,
            SUM( CASE WHEN result = @abap_true THEN 1 ELSE 0 END ) AS success
       FROM zpcct_check
       GROUP BY pcct_uuid
       INTO TABLE @lt_checks_agg.
 
-    SELECT pcct_uuid,
+    SELECT pcct_uuid AS key,
            COUNT( * ) AS total,
            SUM( CASE WHEN result = @abap_true THEN 1 ELSE 0 END ) AS success
       FROM zpcct_barrier
@@ -260,7 +273,7 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
 
     " Apply aggregations using hash table lookups (O(1) complexity)
     LOOP AT rt_root ASSIGNING FIELD-SYMBOL(<ls_root>).
-      READ TABLE lt_checks_agg ASSIGNING FIELD-SYMBOL(<ls_checks_agg>) WITH TABLE KEY pcct_uuid = <ls_root>-pcct_uuid.
+      READ TABLE lt_checks_agg ASSIGNING FIELD-SYMBOL(<ls_checks_agg>) WITH TABLE KEY key = <ls_root>-key.
       IF sy-subrc = 0.
         <ls_root>-checks_total = <ls_checks_agg>-total.
         <ls_root>-checks_success = <ls_checks_agg>-success.
@@ -275,14 +288,14 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
 
   METHOD read_check_rows.
     IF iv_parent_key IS INITIAL.
-      SELECT check_uuid AS key_uuid, pcct_uuid AS parent_key, checks_num, check_text AS text,
+      SELECT check_uuid AS key, pcct_uuid AS parent_key, checks_num, check_text AS text,
              comment_text, result, changed_on
         FROM zpcct_check
         INTO CORRESPONDING FIELDS OF TABLE @rt_checks.
       RETURN.
     ENDIF.
 
-    SELECT check_uuid AS key_uuid, pcct_uuid AS parent_key, checks_num, check_text AS text,
+    SELECT check_uuid AS key, pcct_uuid AS parent_key, checks_num, check_text AS text,
            comment_text, result, changed_on
       FROM zpcct_check
       WHERE pcct_uuid = @iv_parent_key
@@ -291,14 +304,14 @@ CLASS zcl_zodata_read_service IMPLEMENTATION.
 
   METHOD read_barrier_rows.
     IF iv_parent_key IS INITIAL.
-      SELECT barrier_uuid AS key_uuid, pcct_uuid AS parent_key, barriers_num, barrier_text AS text,
+      SELECT barrier_uuid AS key, pcct_uuid AS parent_key, barriers_num, barrier_text AS text,
              comment_text, result, changed_on
         FROM zpcct_barrier
         INTO CORRESPONDING FIELDS OF TABLE @rt_barriers.
       RETURN.
     ENDIF.
 
-    SELECT barrier_uuid AS key_uuid, pcct_uuid AS parent_key, barriers_num, barrier_text AS text,
+    SELECT barrier_uuid AS key, pcct_uuid AS parent_key, barriers_num, barrier_text AS text,
            comment_text, result, changed_on
       FROM zpcct_barrier
       WHERE pcct_uuid = @iv_parent_key

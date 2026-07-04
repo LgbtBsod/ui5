@@ -1,3 +1,7 @@
+"! Canonical lock manager for Gateway runtime.
+"! Manages pessimistic row-level locking via persistent ztodata_hdr columns.
+"! Integrates with SAP Enqueue mechanism for consistency.
+"! TTL: 600 seconds. Session ownership required for heartbeat/status/release.
 CLASS zcl_zodata_lock_manager DEFINITION
   PUBLIC
   FINAL
@@ -154,7 +158,7 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
 
     call_lock_fm(
       EXPORTING
-        iv_mode           = 'A'
+        iv_mode           = zcl_zodata_lock_constants=>cv_mode-acquire
         is_key            = is_key
         iv_session_guid   = is_owner-session_guid
         iv_owner          = is_owner-uname
@@ -183,7 +187,7 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
 
     call_lock_fm(
       EXPORTING
-        iv_mode         = 'H'
+        iv_mode         = zcl_zodata_lock_constants=>cv_mode-heartbeat
         is_key          = is_key
         iv_session_guid = iv_session_guid ).
 
@@ -204,7 +208,7 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
   METHOD zif_zodata_lock_manager~release.
     call_lock_fm(
       EXPORTING
-        iv_mode         = 'R'
+        iv_mode         = zcl_zodata_lock_constants=>cv_mode-release
         is_key          = is_key
         iv_session_guid = iv_session_guid ).
   ENDMETHOD.
@@ -226,14 +230,14 @@ CLASS zcl_zodata_lock_manager IMPLEMENTATION.
   METHOD zif_zodata_lock_manager~ensure_session_lock.
     call_lock_fm(
       EXPORTING
-        iv_mode         = 'V'
+        iv_mode         = zcl_zodata_lock_constants=>cv_mode-validate
         is_key          = is_key
         iv_session_guid = iv_session_guid ).
   ENDMETHOD.
 
   METHOD zif_zodata_lock_manager~lock.
     call_lock_fm(
-      iv_mode = 'A'
+      iv_mode = zcl_zodata_lock_constants=>cv_mode-acquire
       is_key  = is_key ).
   ENDMETHOD.
 
