@@ -1,26 +1,10 @@
 from __future__ import annotations
 
-import re
 from datetime import datetime, timezone
 from typing import Callable
 
+from utils.filter_ast import BoolOp, Comparison, FuncCall, Not, parse_filter_ast, _TOKEN_RE
 from utils.filter_errors import FilterSyntaxError
-
-
-_TOKEN_RE = re.compile(r"substringof\(|contains\(|startswith\(|datetime'[^']*'|/Date\([^)]*\)/|'[^']*'|\(|\)|,|\b(?:eq|ne|gt|lt|ge|le|and|or|not|true|false)\b|[A-Za-z_][A-Za-z0-9_]*", re.IGNORECASE)
-
-
-def _literal(token: str):
-    low = token.lower()
-    if token.startswith("'") and token.endswith("'"):
-        return token[1:-1]
-    if low == "true":
-        return True
-    if low == "false":
-        return False
-    if low.startswith("datetime'"):
-        return token[9:-1]
-    return token
 
 
 def _date_only(v) -> str:
@@ -36,122 +20,92 @@ def _date_only(v) -> str:
     return raw.split("T", 1)[0][:10]
 
 
+def _numeric(value):
+    if isinstance(value, bool):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _compare(op: str, lv, rv) -> bool:
+    if op == "eq":
+        return lv == rv
+    if op == "ne":
+        return lv != rv
+    if op == "gt":
+        return lv > rv
+    if op == "lt":
+        return lv < rv
+    if op == "ge":
+        return lv >= rv
+    if op == "le":
+        return lv <= rv
+    raise FilterSyntaxError(f"Unsupported operator {op!r}")
+
+
+def _compile_comparison(node: Comparison, field_map: dict) -> Callable[[dict], bool]:
+    fld = field_map.get(node.field, node.field) if field_map else node.field
+    op, rv = node.op, node.value
+
+    def pred(row: dict) -> bool:
+        lv = row.get(fld)
+        if fld == "DateCheck":
+            return _compare(op, _date_only(lv), _date_only(rv))
+        if isinstance(rv, bool):
+            if op not in ("eq", "ne"):
+                raise FilterSyntaxError(f"Operator {op!r} is not valid for a boolean field")
+            return _compare(op, bool(lv), rv)
+        lv_num, rv_num = _numeric(lv), _numeric(rv)
+        if lv_num is not None and rv_num is not None:
+            return _compare(op, lv_num, rv_num)
+        return _compare(op, str(lv or ""), str(rv or ""))
+
+    return pred
+
+
+def _compile_func(node: FuncCall, field_map: dict) -> Callable[[dict], bool]:
+    fld = field_map.get(node.field, node.field) if field_map else node.field
+    needle = str(node.value).lower()
+
+    def pred(row: dict) -> bool:
+        haystack = str(row.get(fld, "") or "").lower()
+        if node.name == "startswith":
+            return haystack.startswith(needle)
+        return needle in haystack  # contains() / substringof()
+
+    return pred
+
+
+def _compile(node, field_map: dict) -> Callable[[dict], bool]:
+    if isinstance(node, BoolOp):
+        left = _compile(node.left, field_map)
+        right = _compile(node.right, field_map)
+        if node.op == "and":
+            return lambda row: bool(left(row) and right(row))
+        return lambda row: bool(left(row) or right(row))
+    if isinstance(node, Not):
+        operand = _compile(node.operand, field_map)
+        return lambda row: not operand(row)
+    if isinstance(node, FuncCall):
+        return _compile_func(node, field_map)
+    if isinstance(node, Comparison):
+        return _compile_comparison(node, field_map)
+    raise FilterSyntaxError(f"Unsupported $filter AST node: {node!r}")
+
+
 def parse_filter_to_predicate(filter_string: str | None, field_map: dict[str, str] | None = None) -> Callable[[dict], bool]:
+    """In-memory compiler for the shared $filter AST (see utils.filter_ast)."""
     if not filter_string:
         return lambda _row: True
-    tokens = _TOKEN_RE.findall(filter_string)
-    i = 0
-    fmap = field_map or {}
-
-    def field_name(name: str) -> str:
-        return fmap.get(name, name)
-
-    def parse_expr():
-        nonlocal i
-        node = parse_term()
-        while i < len(tokens) and tokens[i].lower() == "or":
-            i += 1
-            rhs = parse_term(); prev = node
-            node = lambda row, a=prev, b=rhs: bool(a(row) or b(row))
-        return node
-
-    def parse_term():
-        nonlocal i
-        node = parse_factor()
-        while i < len(tokens) and tokens[i].lower() == "and":
-            i += 1
-            rhs = parse_factor(); prev = node
-            node = lambda row, a=prev, b=rhs: bool(a(row) and b(row))
-        return node
-
-    def parse_factor():
-        nonlocal i
-        if i < len(tokens) and tokens[i] == "(":
-            i += 1
-            node = parse_expr()
-            if i < len(tokens) and tokens[i] == ")":
-                i += 1
-            return node
-        return parse_predicate()
-
-    def parse_predicate():
-        nonlocal i
-        tok = tokens[i]; low = tok.lower()
-        if low in {"substringof(", "contains("}:
-            i += 1
-            first = str(_literal(tokens[i])); i += 1
-            if i < len(tokens) and tokens[i] == ",":
-                i += 1
-            second = str(_literal(tokens[i])); i += 1
-            if i < len(tokens) and tokens[i] == ")":
-                i += 1
-            if low == "contains(":
-                fld = field_name(first)
-                needle = second
-            else:
-                fld = field_name(second)
-                needle = first
-            fn = lambda row, f=fld, n=needle.lower(): n in str(row.get(f, "")).lower()
-            return fn
-
-        fld = field_name(tok); i += 1
-        if i + 1 >= len(tokens):
-            raise FilterSyntaxError(f"Incomplete comparison for field {tok!r}")
-        op = tokens[i].lower(); i += 1
-        if op not in {"eq", "ne", "gt", "lt", "ge", "le"}:
-            raise FilterSyntaxError(f"Unsupported operator {op!r}")
-        rv = _literal(tokens[i]); i += 1
-
-        def _numeric(value):
-            if isinstance(value, bool):
-                return None
-            try:
-                return float(value)
-            except (TypeError, ValueError):
-                return None
-
-        def pred(row):
-            lv = row.get(fld)
-            if fld == "DateCheck":
-                lvn = _date_only(lv); rvn = _date_only(rv)
-                if op == "eq": return lvn == rvn
-                if op == "ne": return lvn != rvn
-                if op == "gt": return lvn > rvn
-                if op == "lt": return lvn < rvn
-                if op == "ge": return lvn >= rvn
-                if op == "le": return lvn <= rvn
-                return True
-            if isinstance(rv, bool):
-                lvb = bool(lv)
-                if op == "eq": return lvb == rv
-                if op == "ne": return lvb != rv
-                raise FilterSyntaxError(f"Operator {op!r} is not valid for a boolean field")
-            lv_num, rv_num = _numeric(lv), _numeric(rv)
-            if lv_num is not None and rv_num is not None:
-                if op == "eq": return lv_num == rv_num
-                if op == "ne": return lv_num != rv_num
-                if op == "gt": return lv_num > rv_num
-                if op == "lt": return lv_num < rv_num
-                if op == "ge": return lv_num >= rv_num
-                if op == "le": return lv_num <= rv_num
-            lvs = str(lv or "")
-            rvs = str(rv or "")
-            if op == "eq": return lvs == rvs
-            if op == "ne": return lvs != rvs
-            if op == "gt": return lvs > rvs
-            if op == "lt": return lvs < rvs
-            if op == "ge": return lvs >= rvs
-            if op == "le": return lvs <= rvs
-            return True
-
-        return pred
-
+    ast = parse_filter_ast(filter_string)
     try:
-        return parse_expr()
+        return _compile(ast, field_map or {})
     except FilterSyntaxError:
         raise
     except Exception as exc:
-        raise FilterSyntaxError(f"Could not parse $filter expression: {filter_string!r}") from exc
+        raise FilterSyntaxError(f"Could not compile $filter expression: {filter_string!r}") from exc
 
 
 def debug_explain(filter_string: str) -> str:

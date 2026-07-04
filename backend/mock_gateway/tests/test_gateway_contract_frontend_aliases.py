@@ -98,6 +98,15 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
         assert release.json().get("d", {}).get("Action") == "RELEASED"
         assert release.json().get("d", {}).get("ReasonCode") == "FREE"
 
+        # _sample_root() creates a bare root with no check/barrier rows (a real checklist
+        # starts empty - the mock doesn't inject synthetic content into a live create flow).
+        # Create one explicitly so the PARENT_KEY filter below has something real to find.
+        client.post(
+            f"{SERVICE_ROOT}/ChecklistCheckSet",
+            json={"DB_KEY": root_key, "PARENT_KEY": root_key, "Text": "Seeded check", "Result": True, "ChecksNum": 1},
+            headers={"X-CSRF-Token": token},
+        )
+
         checks = client.get(f"{SERVICE_ROOT}/ChecklistCheckSet", params={"$filter": f"PARENT_KEY eq '{root_key}'"})
         barriers = client.get(f"{SERVICE_ROOT}/ChecklistBarrierSet", params={"$filter": f"PARENT_KEY eq '{root_key}'"})
         assert checks.status_code == 200 and "d" in checks.json()
@@ -159,7 +168,7 @@ def test_create_draft_lock_imports_are_benign_for_local_runtime():
 
         status_update = client.post(
             f"{SERVICE_ROOT}/SetChecklistStatus",
-            json={"DB_KEY": created_key, "NewStatus": "SUBMITTED", "ClientAggChangedOn": created_payload.get("AggChangedOn")},
+            json={"DB_KEY": created_key, "NewStatus": "REGISTERED", "ClientAggChangedOn": created_payload.get("AggChangedOn")},
             headers={"X-CSRF-Token": token},
         )
         assert status_update.status_code == 200 and "d" in status_update.json()
@@ -441,6 +450,18 @@ def test_search_fetch_scope_and_export_scope_stay_separate():
         assert len(export_rows) > len(limited_rows)
 
 def test_dictionary_item_set_is_reference_data_only_and_runtime_settings_hold_policy_payloads():
+    # DictionaryItemSet is read-only reference data (no create route) normally populated by
+    # bootstrap seeding, which this test suite doesn't enable (AUTO_SEED_STARTUP_DATA is
+    # local-profile-only). Seed the one row this test needs directly, so it's self-contained
+    # instead of depending on implicit global startup state.
+    from datetime import date
+    from database import SessionLocal
+    from models import DictionaryItem
+    with SessionLocal() as db:
+        if not db.query(DictionaryItem).filter(DictionaryItem.domain == "LPC").first():
+            db.add(DictionaryItem(id=str(uuid.uuid4()), domain="LPC", key="L1", text="Line 1", begda=date(2000, 1, 1)))
+            db.commit()
+
     with TestClient(app) as client:
         payload = client.get(
             f"{SERVICE_ROOT}/DictionaryItemSet",

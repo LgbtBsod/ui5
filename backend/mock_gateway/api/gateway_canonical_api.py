@@ -2,7 +2,6 @@ import base64
 import uuid
 import re
 import json
-import mimetypes
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -15,11 +14,11 @@ from sqlalchemy.orm import Session
 
 from config import DEFAULT_PAGE_SIZE, LOCK_TTL, MAX_PAGE_SIZE
 from database import get_db
-from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryItem, FrontendRuntimeSettings, LockEntry, Person
+from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryItem, LockEntry, Person
 from services.authorization_service import AuthorizationService
 from services.hierarchy_service import HierarchyService
 from services.analytics_service import AnalyticsService
-from services.checklist_service import ChecklistService, resolve_bukrs_from_observer
+from services.checklist_service import ChecklistService
 from services.current_user_service import CurrentUserService
 from services.lock_service import LockService
 from services.metadata_cache import get_metadata, metadata_refreshed_at_iso
@@ -36,21 +35,16 @@ from utils.sap_message import build_sap_message
 from repo.settings_repo import SettingsRepo
 from services.settings_service import DEFAULT_FRONTEND_VARIABLES, SettingsService
 from api.gateway_operations import (
-    _validate_attachment_upload, _persist_attachment_media, _apply_attachment_metadata,
     _apply_save_attachments, _apply_root_payload, _replace_detail_rows,
-    _normalize_attachment_key, _normalize_attachment_category_key, _normalize_attachment_payload_rows,
-    _normalize_upload_list, _resolve_upload_mime, _dict_text,
-    _hex, _normalize_hex_key, _media_upload_payload
+    _dict_text, _hex, _normalize_hex_key, _media_upload_payload
 )
 from api.gateway_validators import (
     _pick_text, _pick_bool, _coerce_int, _date_ymd_from_any,
     _status_external, _pick_first_present, _normalize_basic_payload,
     _apply_basic_payload, _next_checklist_id, _normalize_status_input
 )
-from api.gateway_helpers import (
-    PayloadExtractor, DateParser, BoundaryResolver, ODataSerializer, FilterMatcher, DictionaryCache, Aggregator
-)
-from utils.common_helpers import parse_date_ymd, parse_date_ms
+from api.gateway_helpers import BoundaryResolver, ODataSerializer
+from utils.common_helpers import parse_date_ms
 
 router = APIRouter(tags=["GatewayCanonical"])
 
@@ -2095,20 +2089,28 @@ async def set_status(
             return _err(400, "VALIDATION_ERROR", "ClientAggChangedOn is required")
         return _err(409, "CONFLICT", "AggChangedOn mismatch")
 
-    new_status = _normalize_status_input(resolved_new_status)
-    if new_status not in {"DRAFT", "REGISTERED", "CLOSED"}:
+    # _normalize_status_input() accepts both external names and internal codes but always
+    # *returns* an internal code ("01"/"02"/"03") - and silently falls back to "01" (DRAFT)
+    # for anything unrecognized. Validate the raw input against the accepted vocabulary
+    # BEFORE normalizing, otherwise garbage input (or a stale/unsupported status name)
+    # would silently succeed as DRAFT instead of being rejected; and run the transition
+    # check (_validate_status_change / _STATUS_TRANSITIONS) against the external name,
+    # since that's what it - and root.status's external representation - are keyed on.
+    if str(resolved_new_status or "").strip().upper() not in {"DRAFT", "01", "REGISTERED", "02", "CLOSED", "03"}:
         return _err(400, "VALIDATION_ERROR", "Unsupported status")
+    internal_status = _normalize_status_input(resolved_new_status)
+    external_status = _status_external(internal_status)
     try:
-        _validate_status_change(root, new_status)
+        _validate_status_change(root, external_status)
     except ValueError:
         return _err(400, "VALIDATION_ERROR", "Invalid status transition")
-    root.status = new_status
+    root.status = internal_status
     root.changed_on = now_utc()
     db.commit()
     AnalyticsService.mark_dirty()
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
     response.headers["sap-message"] = build_sap_message("Status updated", "success", code="STATUS_SET")
-    return odata_entity({"DB_KEY": _hex(root.id), "Status": root.status, "AggChangedOn": format_datetime(_agg_changed_on(root)), "Message": "Status updated", "ReasonCode": "STATUS_SET"})
+    return odata_entity({"DB_KEY": _hex(root.id), "Status": _status_external(root.status), "AggChangedOn": format_datetime(_agg_changed_on(root)), "Message": "Status updated", "ReasonCode": "STATUS_SET"})
 
 
 @router.get(f"{SERVICE_ROOT}/GetHierarchy")

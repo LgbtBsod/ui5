@@ -3,10 +3,9 @@ Rate limiting: per-IP request throttling to prevent DDoS attacks.
 Complements CSRF protection (which covers token validity, not volume).
 """
 from collections import defaultdict, deque
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from threading import Lock
-from typing import Optional, Tuple
-import hashlib
+from typing import Tuple
 
 
 class RateLimiter:
@@ -35,7 +34,7 @@ class RateLimiter:
             return False, {"X-RateLimit-Error": "Invalid client IP"}
 
         with self._lock:
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             window_start = now - timedelta(seconds=self.window_seconds)
 
             # Get or create client bucket

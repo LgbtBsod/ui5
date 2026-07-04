@@ -2,18 +2,16 @@
 Business logic operations: save, update, delete, attachment handling.
 Data mutations, validation, persistence.
 """
-import base64
 import uuid
 from pathlib import Path
-from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryItem
 from utils.time import now_utc
-from utils.common_helpers import get_dict_text, load_upload_policy, parse_date_ymd
+from utils.common_helpers import load_upload_policy
 from api.gateway_validators import (
-    _normalize_status_input, _pick_text, _pick_bool, _pick_first_present, _coerce_int,
-    _normalize_child_rows, _date_ymd_from_any
+    _normalize_status_input, _pick_text, _pick_first_present, _coerce_int,
+    _normalize_child_rows
 )
 
 # Re-export _hex for internal use (single source of truth in gateway_serializers)

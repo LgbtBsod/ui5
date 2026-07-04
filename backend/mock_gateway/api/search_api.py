@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import Depends, Query
 from sqlalchemy.orm import Session
 
 from config import DEFAULT_PAGE_SIZE
@@ -6,7 +6,6 @@ from database import get_db
 from models import ChecklistRoot
 from utils.filter_parser import FilterParser
 
-router = APIRouter(tags=["SearchRows"])
 SEARCH_ROWS_MAX_TOP = max(DEFAULT_PAGE_SIZE, 200)
 
 
@@ -41,7 +40,6 @@ def _map_row(item: ChecklistRoot):
     }
 
 
-@router.get("/SearchRows")
 def search_rows(
     filter: str | None = Query(default=None, alias="$filter"),
     top: int = Query(default=DEFAULT_PAGE_SIZE, alias="$top"),
