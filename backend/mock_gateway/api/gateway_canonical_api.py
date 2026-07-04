@@ -3,15 +3,17 @@ import uuid
 import re
 import json
 import mimetypes
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Callable
 from urllib.parse import unquote
 
 from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
-from config import DEFAULT_PAGE_SIZE, LOCK_TTL
+from config import DEFAULT_PAGE_SIZE, LOCK_TTL, MAX_PAGE_SIZE
 from database import get_db
 from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryItem, FrontendRuntimeSettings, LockEntry, Person
 from services.authorization_service import AuthorizationService
@@ -23,6 +25,7 @@ from services.lock_service import LockService
 from services.metadata_cache import get_metadata, metadata_refreshed_at_iso
 from utils.filter_parser import FilterParser
 from utils.filter_engine import parse_filter_to_predicate
+from utils.filter_errors import FilterSyntaxError
 from utils.odata import SERVICE_ROOT, format_datetime, format_entity_etag, odata_error_response, odata_payload
 from utils.odata_datetime import date_only_to_odata
 from utils.odata_response import odata_collection, odata_entity
@@ -32,16 +35,19 @@ from utils.time import now_utc
 from utils.sap_message import build_sap_message
 from repo.settings_repo import SettingsRepo
 from services.settings_service import DEFAULT_FRONTEND_VARIABLES, SettingsService
-from gateway_operations import (
+from api.gateway_operations import (
     _validate_attachment_upload, _persist_attachment_media, _apply_attachment_metadata,
     _apply_save_attachments, _apply_root_payload, _replace_detail_rows,
     _normalize_attachment_key, _normalize_attachment_category_key, _normalize_attachment_payload_rows,
-    _normalize_upload_list, _resolve_upload_mime, _load_upload_policy, _dict_text
+    _normalize_upload_list, _resolve_upload_mime, _dict_text,
+    _hex, _normalize_hex_key, _media_upload_payload
 )
-from gateway_validators import (
-    _pick_text, _pick_bool, _coerce_int, _date_ymd_from_any
+from api.gateway_validators import (
+    _pick_text, _pick_bool, _coerce_int, _date_ymd_from_any,
+    _status_external, _pick_first_present, _normalize_basic_payload,
+    _apply_basic_payload, _next_checklist_id, _normalize_status_input
 )
-from gateway_helpers import (
+from api.gateway_helpers import (
     PayloadExtractor, DateParser, BoundaryResolver, ODataSerializer, FilterMatcher, DictionaryCache, Aggregator
 )
 from utils.common_helpers import parse_date_ymd, parse_date_ms
@@ -76,8 +82,74 @@ SEARCH_MAP = {
     "ChangedOn": "changed_on",
     "EquipName": "equipment",
 }
-CHECK_MAP = {"Key": "id", "ParentKey": "root_id", "ChecksNum": "position", "ChangedOn": "changed_on"}
-BARRIER_MAP = {"Key": "id", "ParentKey": "root_id", "BarriersNum": "position", "ChangedOn": "changed_on"}
+CHECK_MAP = {"Key": "id", "ParentKey": "root_id", "PARENT_KEY": "root_id", "ChecksNum": "position", "ChangedOn": "changed_on"}
+BARRIER_MAP = {"Key": "id", "ParentKey": "root_id", "PARENT_KEY": "root_id", "BarriersNum": "position", "ChangedOn": "changed_on"}
+
+
+@dataclass(frozen=True)
+class _DetailKind:
+    """Everything that distinguishes a ChecklistCheck row from a ChecklistBarrier row.
+
+    The three call sites that mutate check/barrier rows (SaveChanges/AutoSave batch
+    upsert, the legacy _apply_change single-record import, and the ChecklistCheckSet/
+    ChecklistBarrierSet REST routes) each used to carry an independent, hand-duplicated
+    copy of "Check has text/comment/status(PASS|FAIL)/position, Barrier has
+    description/comment/is_active/position". This is the single place that mapping lives;
+    the three call sites differ only in how they parse their own input into `to_kwargs`/
+    `apply_update`'s normalized dict, not in what a Check or Barrier row looks like.
+    """
+
+    model: type
+    entity_tag: str  # "CHECK" / "BARRIER", as used by the legacy _apply_change import
+    not_found_message: str
+    field_map: dict  # $filter/$orderby field map for the ChecklistCheckSet/BarrierSet REST list route
+    key_aliases: tuple[str, ...]  # batch-upsert row key field names, checked in order
+    text_aliases: tuple[str, ...]  # batch-upsert row text field names, checked in order
+    number_aliases: tuple[str, ...]  # batch-upsert row position field names, checked in order
+    number_field: str  # canonical PascalCase wire field name: "ChecksNum" / "BarriersNum"
+    to_kwargs: Callable[[dict], dict]
+    apply_update: Callable[[object, dict], None]
+    serialize: Callable[..., dict]
+
+
+def _check_kwargs(normalized: dict) -> dict:
+    return {
+        "text": normalized.get("text", ""),
+        "comment": normalized.get("comment", ""),
+        "status": "PASS" if normalized.get("result", True) else "FAIL",
+        "position": normalized.get("position", 0),
+    }
+
+
+def _apply_check_update(row: ChecklistCheck, normalized: dict) -> None:
+    if "text" in normalized:
+        row.text = normalized["text"]
+    if "comment" in normalized:
+        row.comment = normalized["comment"]
+    if "result" in normalized:
+        row.status = "PASS" if normalized["result"] else "FAIL"
+    if "position" in normalized:
+        row.position = normalized["position"]
+
+
+def _barrier_kwargs(normalized: dict) -> dict:
+    return {
+        "description": normalized.get("text", ""),
+        "comment": normalized.get("comment", ""),
+        "is_active": bool(normalized.get("result", True)),
+        "position": normalized.get("position", 0),
+    }
+
+
+def _apply_barrier_update(row: ChecklistBarrier, normalized: dict) -> None:
+    if "text" in normalized:
+        row.description = normalized["text"]
+    if "comment" in normalized:
+        row.comment = normalized["comment"]
+    if "result" in normalized:
+        row.is_active = bool(normalized["result"])
+    if "position" in normalized:
+        row.position = normalized["position"]
 PERSON_VH_MAP = {
     "Pernr": "perner",
     "FirstName": "first_name",
@@ -116,6 +188,22 @@ def _entity_key(key_expr: str) -> str:
 def _boundary_root_key(payload: dict | None = None, *candidates) -> str:
     """Wrapper for BoundaryResolver.resolve_root_key for backwards compatibility."""
     return BoundaryResolver.resolve_root_key(payload, *candidates)
+
+
+def _resolve_lock_root_id(payload: dict | None, root_id: str | None) -> str:
+    """Resolve DB_KEY for the Lock* function imports.
+
+    Unlike _boundary_root_key, this must NOT filter out the "__CREATE" sentinel:
+    lock_control() explicitly special-cases root_key == "__CREATE" (a not-yet-persisted
+    draft still needs to answer lock heartbeat/release calls as a benign no-op).
+    """
+    payload = payload if isinstance(payload, dict) else {}
+    for candidate in (root_id, payload.get("DB_KEY"), payload.get("db_key")):
+        if candidate:
+            raw = str(candidate).strip()
+            if raw:
+                return raw
+    return ""
 
 
 def _resolve_root_from_payload(payload: dict) -> str:
@@ -671,6 +759,34 @@ def _to_barrier(item: ChecklistBarrier) -> dict:
     )
 
 
+_CHECK_KIND = _DetailKind(
+    model=ChecklistCheck,
+    entity_tag="CHECK",
+    not_found_message="Check row not found",
+    field_map=CHECK_MAP,
+    key_aliases=("check_uuid", "Key", "key"),
+    text_aliases=("text", "Text"),
+    number_aliases=("checks_num", "ChecksNum", "position", "Position"),
+    number_field="ChecksNum",
+    to_kwargs=_check_kwargs,
+    apply_update=_apply_check_update,
+    serialize=_to_check,
+)
+_BARRIER_KIND = _DetailKind(
+    model=ChecklistBarrier,
+    entity_tag="BARRIER",
+    not_found_message="Barrier row not found",
+    field_map=BARRIER_MAP,
+    key_aliases=("barrier_uuid", "Key", "key"),
+    text_aliases=("text", "Text", "description", "Description"),
+    number_aliases=("barriers_num", "BarriersNum", "position", "Position"),
+    number_field="BarriersNum",
+    to_kwargs=_barrier_kwargs,
+    apply_update=_apply_barrier_update,
+    serialize=_to_barrier,
+)
+
+
 def _agg_changed_on(root: ChecklistRoot):
     points = [root.changed_on, root.created_on]
     points.extend([c.changed_on for c in (root.checks or []) if c.changed_on])
@@ -772,10 +888,8 @@ def _apply_order_filter(query, model, fmap, filter_expr, orderby, top, skip):
 
 
 
-def _if_match_check(if_match: str | None, agg: datetime):
-    if not if_match or if_match == "*":
-        return
-    if not validate_if_match(if_match, etag_for_datetime(agg)):
+def _if_match_check(if_match: str | None, agg: datetime, version_number: int | None = None):
+    if not validate_if_match(if_match, etag_for_datetime(agg, version_number)):
         raise ValueError("PRECONDITION_FAILED")
 
 
@@ -918,68 +1032,95 @@ def _apply_save_root(root: ChecklistRoot, root_payload: dict | None, db: Session
         root.observed_orgunit = _pick_text(data, "observed_orgunit", "ObservedOrgUnit")
 
 
-def _apply_save_checks(db: Session, root: ChecklistRoot, checks) -> None:
-    for item in checks if isinstance(checks, list) else []:
+def _normalize_detail_row_for_create(row: dict, kind: _DetailKind) -> dict:
+    return {
+        "text": _pick_text(row, *kind.text_aliases),
+        "comment": _pick_text(row, "comment", "Comment"),
+        "result": _pick_bool(row, "result", "Result", default=True),
+        "position": _coerce_int(_pick_first_present(row, *kind.number_aliases), 0),
+    }
+
+
+def _normalize_detail_row_for_update(row: dict, kind: _DetailKind) -> dict:
+    normalized = {}
+    if _pick_first_present(row, *kind.text_aliases) is not None:
+        normalized["text"] = _pick_text(row, *kind.text_aliases)
+    if _pick_first_present(row, "comment", "Comment") is not None:
+        normalized["comment"] = _pick_text(row, "comment", "Comment")
+    if _pick_first_present(row, "result", "Result") is not None:
+        normalized["result"] = _pick_bool(row, "result", "Result", default=True)
+    if _pick_first_present(row, *kind.number_aliases) is not None:
+        normalized["position"] = _coerce_int(_pick_first_present(row, *kind.number_aliases), 0)
+    return normalized
+
+
+def _apply_save_detail_rows(db: Session, root: ChecklistRoot, items, kind: _DetailKind) -> None:
+    """Shared upsert-by-list body for SaveChanges/AutoSave, parameterized over Check vs Barrier
+    (see _DetailKind for what actually differs between them)."""
+    for item in items if isinstance(items, list) else []:
         row = item if isinstance(item, dict) else {}
         mode = str(row.get("edit_mode") or row.get("EditMode") or "U").upper()
-        key = _entity_key(str(row.get("check_uuid") or row.get("Key") or row.get("key") or "")) if str(row.get("check_uuid") or row.get("Key") or row.get("key") or "").strip() else ""
+        raw_key = str(_pick_first_present(row, *kind.key_aliases) or "").strip()
+        key = _entity_key(raw_key) if raw_key else ""
         if mode == "C":
-            created = ChecklistCheck(
+            created = kind.model(
                 id=str(uuid.uuid4()),
                 root_id=root.id,
-                text=_pick_text(row, "text", "Text"),
-                comment=_pick_text(row, "comment", "Comment"),
-                status="PASS" if _pick_bool(row, "result", "Result", default=True) else "FAIL",
-                position=_coerce_int(_pick_first_present(row, "checks_num", "ChecksNum", "position", "Position"), 0),
-                changed_on=now_utc()
+                changed_on=now_utc(),
+                **kind.to_kwargs(_normalize_detail_row_for_create(row, kind)),
             )
             db.add(created)
         elif mode == "U" and key:
-            current = db.query(ChecklistCheck).filter(ChecklistCheck.id == key, ChecklistCheck.root_id == root.id).first()
+            current = db.query(kind.model).filter(kind.model.id == key, kind.model.root_id == root.id).first()
             if current:
-                if _pick_first_present(row, "text", "Text") is not None:
-                    current.text = _pick_text(row, "text", "Text")
-                if _pick_first_present(row, "comment", "Comment") is not None:
-                    current.comment = _pick_text(row, "comment", "Comment")
-                if _pick_first_present(row, "result", "Result") is not None:
-                    current.status = "PASS" if _pick_bool(row, "result", "Result", default=True) else "FAIL"
-                if _pick_first_present(row, "checks_num", "ChecksNum", "position", "Position") is not None:
-                    current.position = _coerce_int(_pick_first_present(row, "checks_num", "ChecksNum", "position", "Position"), current.position or 0)
+                kind.apply_update(current, _normalize_detail_row_for_update(row, kind))
                 current.changed_on = now_utc()
         elif mode == "D" and key:
-            db.query(ChecklistCheck).filter(ChecklistCheck.id == key, ChecklistCheck.root_id == root.id).delete()
+            db.query(kind.model).filter(kind.model.id == key, kind.model.root_id == root.id).delete()
 
 
-def _apply_save_barriers(db: Session, root: ChecklistRoot, barriers) -> None:
-    for item in barriers if isinstance(barriers, list) else []:
-        row = item if isinstance(item, dict) else {}
-        mode = str(row.get("edit_mode") or row.get("EditMode") or "U").upper()
-        key = _entity_key(str(row.get("barrier_uuid") or row.get("Key") or row.get("key") or "")) if str(row.get("barrier_uuid") or row.get("Key") or row.get("key") or "").strip() else ""
-        if mode == "C":
-            created = ChecklistBarrier(
-                id=str(uuid.uuid4()),
-                root_id=root.id,
-                description=_pick_text(row, "text", "Text", "description", "Description"),
-                comment=_pick_text(row, "comment", "Comment"),
-                is_active=_pick_bool(row, "result", "Result", default=True),
-                position=_coerce_int(_pick_first_present(row, "barriers_num", "BarriersNum", "position", "Position"), 0),
-                changed_on=now_utc()
-            )
-            db.add(created)
-        elif mode == "U" and key:
-            current = db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key, ChecklistBarrier.root_id == root.id).first()
-            if current:
-                if _pick_first_present(row, "text", "Text", "description", "Description") is not None:
-                    current.description = _pick_text(row, "text", "Text", "description", "Description")
-                if _pick_first_present(row, "comment", "Comment") is not None:
-                    current.comment = _pick_text(row, "comment", "Comment")
-                if _pick_first_present(row, "result", "Result") is not None:
-                    current.is_active = _pick_bool(row, "result", "Result", default=True)
-                if _pick_first_present(row, "barriers_num", "BarriersNum", "position", "Position") is not None:
-                    current.position = _coerce_int(_pick_first_present(row, "barriers_num", "BarriersNum", "position", "Position"), current.position or 0)
-                current.changed_on = now_utc()
-        elif mode == "D" and key:
-            db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key, ChecklistBarrier.root_id == root.id).delete()
+def _normalize_change_fields_for_create(fields: dict, kind: _DetailKind) -> dict:
+    return {
+        "text": fields.get("Text", ""),
+        "comment": fields.get("Comment", ""),
+        "result": fields.get("Result", True),
+        "position": int(fields.get(kind.number_field, 0)),
+    }
+
+
+def _normalize_change_fields_for_update(fields: dict) -> dict:
+    normalized = {}
+    if "Text" in fields:
+        normalized["text"] = fields["Text"]
+    if "Comment" in fields:
+        normalized["comment"] = fields["Comment"]
+    if "Result" in fields:
+        normalized["result"] = fields["Result"]
+    return normalized
+
+
+def _apply_change_detail(db: Session, root: ChecklistRoot, kind: _DetailKind, mode: str, key: str, fields: dict, change: dict, row_changed_on) -> dict | None:
+    """Shared body for the legacy _apply_change single-record import, parameterized
+    over Check vs Barrier (see _DetailKind)."""
+    if mode == "C":
+        created = kind.model(
+            id=str(uuid.uuid4()),
+            root_id=root.id,
+            changed_on=row_changed_on,
+            **kind.to_kwargs(_normalize_change_fields_for_create(fields, kind)),
+        )
+        db.add(created)
+        return {"Entity": kind.entity_tag, "ClientKey": change.get("Key") or "", "ServerKey": _hex(created.id)}
+    if mode == "U":
+        row = db.query(kind.model).filter(kind.model.id == key).first()
+        if row:
+            kind.apply_update(row, _normalize_change_fields_for_update(fields))
+            row.changed_on = row_changed_on
+        return None
+    if mode == "D":
+        db.query(kind.model).filter(kind.model.id == key).delete()
+        return None
+    return None
 
 
 def _apply_change(db: Session, root: ChecklistRoot, change: dict):
@@ -1008,55 +1149,9 @@ def _apply_change(db: Session, root: ChecklistRoot, change: dict):
             root.time_zone = str(fields.get("TimeZone") or "")
         root.changed_on = row_changed_on
     elif entity == "CHECK":
-        if mode == "C":
-            created = ChecklistCheck(
-                id=str(uuid.uuid4()),
-                root_id=root.id,
-                text=fields.get("Text", ""),
-                comment=fields.get("Comment", ""),
-                status="PASS" if fields.get("Result", True) else "FAIL",
-                position=int(fields.get("ChecksNum", 0)),
-                changed_on=row_changed_on
-            )
-            db.add(created)
-            updated_mapping = {"Entity": "CHECK", "ClientKey": change.get("Key") or "", "ServerKey": _hex(created.id)}
-        elif mode == "U":
-            row = db.query(ChecklistCheck).filter(ChecklistCheck.id == key).first()
-            if row:
-                if "Text" in fields:
-                    row.text = fields["Text"]
-                if "Comment" in fields:
-                    row.comment = fields["Comment"]
-                if "Result" in fields:
-                    row.status = "PASS" if fields["Result"] else "FAIL"
-                row.changed_on = row_changed_on
-        elif mode == "D":
-            db.query(ChecklistCheck).filter(ChecklistCheck.id == key).delete()
+        updated_mapping = _apply_change_detail(db, root, _CHECK_KIND, mode, key, fields, change, row_changed_on)
     elif entity == "BARRIER":
-        if mode == "C":
-            created = ChecklistBarrier(
-                id=str(uuid.uuid4()),
-                root_id=root.id,
-                description=fields.get("Text", ""),
-                comment=fields.get("Comment", ""),
-                is_active=bool(fields.get("Result", True)),
-                position=int(fields.get("BarriersNum", 0)),
-                changed_on=row_changed_on
-            )
-            db.add(created)
-            updated_mapping = {"Entity": "BARRIER", "ClientKey": change.get("Key") or "", "ServerKey": _hex(created.id)}
-        elif mode == "U":
-            row = db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).first()
-            if row:
-                if "Text" in fields:
-                    row.description = fields["Text"]
-                if "Comment" in fields:
-                    row.comment = fields["Comment"]
-                if "Result" in fields:
-                    row.is_active = bool(fields["Result"])
-                row.changed_on = row_changed_on
-        elif mode == "D":
-            db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).delete()
+        updated_mapping = _apply_change_detail(db, root, _BARRIER_KIND, mode, key, fields, change, row_changed_on)
 
     return updated_mapping
 
@@ -1072,8 +1167,11 @@ def _validate_status_change(root: ChecklistRoot, new_status: str):
 
 def _import_payload(root_id: str | None = None, session_guid: str | None = None, status: str | None = None, payload: dict | None = None) -> dict:
     body = payload or {}
+    # root_id is already fully resolved by the caller (may legitimately be the "__CREATE"
+    # sentinel for lock imports) - do not re-run it through _boundary_root_key, which would
+    # filter "__CREATE" back out to "".
     result = {
-        "DB_KEY": _boundary_root_key(body, root_id),
+        "DB_KEY": str(root_id or "").strip() or _boundary_root_key(body),
         "SessionGuid": body.get("SessionGuid") or body.get("session_guid") or session_guid,
         "Status": body.get("Status") or body.get("status") or status,
         "Changes": body.get("Changes") or [],
@@ -1170,7 +1268,7 @@ def checklist_root_entity(entity_key: str, response: Response, db: Session = Dep
     root, err = _load_root_or_error(db, entity_key)
     if err:
         return err
-    response.headers["ETag"] = format_entity_etag(_agg_changed_on(root))
+    response.headers["ETag"] = format_entity_etag(_agg_changed_on(root), root.version_number)
     return odata_entity(_to_root(root, db=db))
 
 
@@ -1253,63 +1351,77 @@ def checklist_basic_info_entity(entity_key: str, db: Session = Depends(get_db)):
     return odata_entity(_to_basic(root))
 
 
-@router.get(f"{SERVICE_ROOT}/ChecklistCheckSet")
-def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
-    if (err := _reject_expand(expand)):
-        return err
-    filter = re.sub(r"\bRootId\b", "PARENT_KEY", str(filter or ""), flags=re.IGNORECASE)
-    filter = re.sub(r"\bRootKey\b", "PARENT_KEY", str(filter or ""), flags=re.IGNORECASE)
-    rows, total = _apply_order_filter(db.query(ChecklistCheck), ChecklistCheck, CHECK_MAP, filter, None, top, skip)
-    return odata_payload([_to_check(c) for c in rows], total if inlinecount == "allpages" else None)
+def _normalize_rest_payload_for_create(payload: dict, kind: _DetailKind) -> dict:
+    return {
+        "text": str(payload.get("Text") or "").strip(),
+        "comment": str(payload.get("Comment") or "").strip(),
+        "result": bool(payload.get("Result")),
+        "position": int(payload.get(kind.number_field) or 0) or 1,
+    }
 
 
-@router.post(f"{SERVICE_ROOT}/ChecklistCheckSet")
-def checklist_check_create(payload: dict, db: Session = Depends(get_db)):
+def _normalize_rest_payload_for_update(payload: dict, kind: _DetailKind) -> dict:
+    # Result is always overwritten (falls back to False, not left untouched) to match
+    # the pre-existing REST PATCH contract: a PATCH without "Result" clears it to FAIL/inactive.
+    normalized = {"result": bool(payload.get("Result"))}
+    if payload.get("Text") is not None:
+        normalized["text"] = str(payload.get("Text") or "").strip()
+    if payload.get("Comment") is not None:
+        normalized["comment"] = str(payload.get("Comment") or "").strip()
+    if payload.get(kind.number_field) is not None:
+        normalized["position"] = int(payload.get(kind.number_field) or 0) or 1
+    return normalized
+
+
+def _detail_list(db: Session, kind: _DetailKind, filter_expr: str | None, top: int, skip: int, inlinecount: str | None):
+    """Shared GET-collection body for ChecklistCheckSet/ChecklistBarrierSet."""
+    filter_expr = re.sub(r"\bRootId\b", "PARENT_KEY", str(filter_expr or ""), flags=re.IGNORECASE)
+    filter_expr = re.sub(r"\bRootKey\b", "PARENT_KEY", filter_expr, flags=re.IGNORECASE)
+    rows, total = _apply_order_filter(db.query(kind.model), kind.model, kind.field_map, filter_expr, None, top, skip)
+    return odata_payload([kind.serialize(r) for r in rows], total if inlinecount == "allpages" else None)
+
+
+def _detail_create(db: Session, payload: dict, kind: _DetailKind):
+    """Shared POST body for ChecklistCheckSet/ChecklistBarrierSet."""
     root, err = _load_root_or_error(db, _boundary_parent_key(payload))
     if err:
         return err
-    check = ChecklistCheck(
+    row = kind.model(
         id=str(uuid.uuid4()),
         root_id=root.id,
-        text=str(payload.get("Text") or "").strip(),
-        comment=str(payload.get("Comment") or "").strip(),
-        status="PASS" if bool(payload.get("Result")) else "FAIL",
-        position=int(payload.get("ChecksNum") or 0) or 1,
         created_on=now_utc(),
         changed_on=now_utc(),
+        **kind.to_kwargs(_normalize_rest_payload_for_create(payload, kind)),
     )
-    db.add(check)
+    db.add(row)
     root.changed_on = now_utc()
     root.version_number = int(root.version_number or 0) + 1
     db.commit()
-    return odata_entity(_to_check(check))
+    return odata_entity(kind.serialize(row))
 
 
-@router.patch(f"{SERVICE_ROOT}/ChecklistCheckSet({{entity_key}})")
-def checklist_check_update(entity_key: str, payload: dict, db: Session = Depends(get_db)):
+def _detail_update(db: Session, entity_key: str, payload: dict, kind: _DetailKind):
+    """Shared PATCH body for ChecklistCheckSet({key})/ChecklistBarrierSet({key})."""
     key = _entity_key(entity_key)
-    row = db.query(ChecklistCheck).filter(ChecklistCheck.id == key).first()
+    row = db.query(kind.model).filter(kind.model.id == key).first()
     if not row:
-        return _err(404, "NOT_FOUND", "Check row not found")
-    row.text = str(payload.get("Text") or row.text or "").strip()
-    row.comment = str(payload.get("Comment") or row.comment or "").strip()
-    row.status = "PASS" if bool(payload.get("Result")) else "FAIL"
-    row.position = int(payload.get("ChecksNum") or row.position or 1)
+        return _err(404, "NOT_FOUND", kind.not_found_message)
+    kind.apply_update(row, _normalize_rest_payload_for_update(payload, kind))
     row.changed_on = now_utc()
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == row.root_id).first()
     if root:
         root.changed_on = now_utc()
         root.version_number = int(root.version_number or 0) + 1
     db.commit()
-    return odata_entity(_to_check(row))
+    return odata_entity(kind.serialize(row))
 
 
-@router.delete(f"{SERVICE_ROOT}/ChecklistCheckSet({{entity_key}})")
-def checklist_check_delete(entity_key: str, db: Session = Depends(get_db)):
+def _detail_delete(db: Session, entity_key: str, kind: _DetailKind):
+    """Shared DELETE body for ChecklistCheckSet({key})/ChecklistBarrierSet({key})."""
     key = _entity_key(entity_key)
-    row = db.query(ChecklistCheck).filter(ChecklistCheck.id == key).first()
+    row = db.query(kind.model).filter(kind.model.id == key).first()
     if not row:
-        return _err(404, "NOT_FOUND", "Check row not found")
+        return _err(404, "NOT_FOUND", kind.not_found_message)
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == row.root_id).first()
     db.delete(row)
     if root:
@@ -1317,72 +1429,50 @@ def checklist_check_delete(entity_key: str, db: Session = Depends(get_db)):
         root.version_number = int(root.version_number or 0) + 1
     db.commit()
     return Response(status_code=204)
+
+
+@router.get(f"{SERVICE_ROOT}/ChecklistCheckSet")
+def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
+    if (err := _reject_expand(expand)):
+        return err
+    return _detail_list(db, _CHECK_KIND, filter, top, skip, inlinecount)
+
+
+@router.post(f"{SERVICE_ROOT}/ChecklistCheckSet")
+def checklist_check_create(payload: dict, db: Session = Depends(get_db)):
+    return _detail_create(db, payload, _CHECK_KIND)
+
+
+@router.patch(f"{SERVICE_ROOT}/ChecklistCheckSet({{entity_key}})")
+def checklist_check_update(entity_key: str, payload: dict, db: Session = Depends(get_db)):
+    return _detail_update(db, entity_key, payload, _CHECK_KIND)
+
+
+@router.delete(f"{SERVICE_ROOT}/ChecklistCheckSet({{entity_key}})")
+def checklist_check_delete(entity_key: str, db: Session = Depends(get_db)):
+    return _detail_delete(db, entity_key, _CHECK_KIND)
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistBarrierSet")
 def checklist_barrier_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
     if (err := _reject_expand(expand)):
         return err
-    filter = re.sub(r"\bRootId\b", "PARENT_KEY", str(filter or ""), flags=re.IGNORECASE)
-    filter = re.sub(r"\bRootKey\b", "PARENT_KEY", str(filter or ""), flags=re.IGNORECASE)
-    rows, total = _apply_order_filter(db.query(ChecklistBarrier), ChecklistBarrier, BARRIER_MAP, filter, None, top, skip)
-    return odata_payload([_to_barrier(c) for c in rows], total if inlinecount == "allpages" else None)
+    return _detail_list(db, _BARRIER_KIND, filter, top, skip, inlinecount)
 
 
 @router.post(f"{SERVICE_ROOT}/ChecklistBarrierSet")
 def checklist_barrier_create(payload: dict, db: Session = Depends(get_db)):
-    root, err = _load_root_or_error(db, _boundary_parent_key(payload))
-    if err:
-        return err
-    row = ChecklistBarrier(
-        id=str(uuid.uuid4()),
-        root_id=root.id,
-        description=str(payload.get("Text") or "").strip(),
-        comment=str(payload.get("Comment") or "").strip(),
-        is_active=bool(payload.get("Result")),
-        position=int(payload.get("BarriersNum") or 0) or 1,
-        created_on=now_utc(),
-        changed_on=now_utc(),
-    )
-    db.add(row)
-    root.changed_on = now_utc()
-    root.version_number = int(root.version_number or 0) + 1
-    db.commit()
-    return odata_entity(_to_barrier(row))
+    return _detail_create(db, payload, _BARRIER_KIND)
 
 
 @router.patch(f"{SERVICE_ROOT}/ChecklistBarrierSet({{entity_key}})")
 def checklist_barrier_update(entity_key: str, payload: dict, db: Session = Depends(get_db)):
-    key = _entity_key(entity_key)
-    row = db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).first()
-    if not row:
-        return _err(404, "NOT_FOUND", "Barrier row not found")
-    row.description = str(payload.get("Text") or row.description or "").strip()
-    row.comment = str(payload.get("Comment") or row.comment or "").strip()
-    row.is_active = bool(payload.get("Result"))
-    row.position = int(payload.get("BarriersNum") or row.position or 1)
-    row.changed_on = now_utc()
-    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == row.root_id).first()
-    if root:
-        root.changed_on = now_utc()
-        root.version_number = int(root.version_number or 0) + 1
-    db.commit()
-    return odata_entity(_to_barrier(row))
+    return _detail_update(db, entity_key, payload, _BARRIER_KIND)
 
 
 @router.delete(f"{SERVICE_ROOT}/ChecklistBarrierSet({{entity_key}})")
 def checklist_barrier_delete(entity_key: str, db: Session = Depends(get_db)):
-    key = _entity_key(entity_key)
-    row = db.query(ChecklistBarrier).filter(ChecklistBarrier.id == key).first()
-    if not row:
-        return _err(404, "NOT_FOUND", "Barrier row not found")
-    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == row.root_id).first()
-    db.delete(row)
-    if root:
-        root.changed_on = now_utc()
-        root.version_number = int(root.version_number or 0) + 1
-    db.commit()
-    return Response(status_code=204)
+    return _detail_delete(db, entity_key, _BARRIER_KIND)
 
 
 @router.get(f"{SERVICE_ROOT}/DictionaryItemSet")
@@ -1396,14 +1486,32 @@ def dictionary_item_set(filter: str | None = Query(None, alias="$filter"), order
             "Text": text,
         }
 
-    rows = [_to_dict_row(r.domain, r.key, r.text) for r in db.query(DictionaryItem).order_by(asc(DictionaryItem.domain), asc(DictionaryItem.key)).all()]
-    rows.extend([_to_dict_row(r.get("Domain", ""), r.get("Key", ""), r.get("Text", "")) for r in _dictionary_config_rows(db)])
+    # Push $filter down to SQL for the DB-backed rows (this table can hold hundreds/thousands
+    # of reference codes) - only the small, config-derived synthetic rows below (bounded by
+    # config size, never grows with real data) are still filtered in Python, since they don't
+    # exist as DB rows at all and can't be pushed down.
+    query = db.query(DictionaryItem)
     if filter:
-        pred = parse_filter_to_predicate(filter, {"Domain": "Domain", "Key": "Key", "Text": "Text"})
-        rows = [row for row in rows if pred(row)]
+        try:
+            expr = FilterParser.parse(DictionaryItem, filter, field_map={"Domain": "domain", "Key": "key", "Text": "text"})
+        except FilterSyntaxError as exc:
+            return _err(400, "VALIDATION_ERROR", f"Unsupported $filter expression: {exc}")
+        if expr is not None:
+            query = query.filter(expr)
+    rows = [_to_dict_row(r.domain, r.key, r.text) for r in query.order_by(asc(DictionaryItem.domain), asc(DictionaryItem.key)).all()]
+
+    config_rows = [_to_dict_row(r.get("Domain", ""), r.get("Key", ""), r.get("Text", "")) for r in _dictionary_config_rows(db)]
+    if filter:
+        try:
+            pred = parse_filter_to_predicate(filter, {"Domain": "Domain", "Key": "Key", "Text": "Text"})
+        except FilterSyntaxError as exc:
+            return _err(400, "VALIDATION_ERROR", f"Unsupported $filter expression: {exc}")
+        config_rows = [row for row in config_rows if pred(row)]
+    rows.extend(config_rows)
     rows = _apply_orderby_rows(rows, orderby or "Domain asc,Key asc")
     total = len(rows)
-    paged = rows[int(skip or 0): int(skip or 0) + int(top or DEFAULT_PAGE_SIZE)]
+    bounded_top = min(int(top or DEFAULT_PAGE_SIZE), MAX_PAGE_SIZE)
+    paged = rows[int(skip or 0): int(skip or 0) + bounded_top]
     return odata_payload(paged, total if inlinecount == "allpages" else None)
 
 
@@ -1506,7 +1614,7 @@ def last_change_entity(entity_key: str, response: Response, db: Session = Depend
         return err
     agg = _agg_changed_on(root)
     root_key_hex = _hex(root.id)
-    response.headers["ETag"] = format_entity_etag(agg)
+    response.headers["ETag"] = format_entity_etag(agg, root.version_number)
     return odata_entity({
         "__metadata": _entity_metadata("LastChange", "LastChangeSet", root_key_hex),
         "DB_KEY": root_key_hex,
@@ -1719,7 +1827,7 @@ async def lock_acquire_function_import(request: Request, root_id: str | None = Q
         except (json.JSONDecodeError, ValueError):
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = _boundary_root_key(merged, root_id)
+    resolved_root_id = _resolve_lock_root_id(merged, root_id)
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "DB_KEY and SessionGuid are required")
@@ -1735,7 +1843,7 @@ async def lock_heartbeat_function_import(request: Request, root_id: str | None =
         except (json.JSONDecodeError, ValueError):
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = _boundary_root_key(merged, root_id)
+    resolved_root_id = _resolve_lock_root_id(merged, root_id)
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "DB_KEY and SessionGuid are required")
@@ -1751,7 +1859,7 @@ async def lock_release_function_import(request: Request, root_id: str | None = Q
         except (json.JSONDecodeError, ValueError):
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = _boundary_root_key(merged, root_id)
+    resolved_root_id = _resolve_lock_root_id(merged, root_id)
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     if not resolved_root_id or not resolved_session_guid:
         return _err(400, "VALIDATION_ERROR", "DB_KEY and SessionGuid are required")
@@ -1775,8 +1883,8 @@ def auto_save(payload: dict, response: Response, if_match: str | None = Header(N
         return _err(409, "LOCK_EXPIRED", "Lock expired")
 
     _apply_save_root(root, _save_request_root(payload), db)
-    _apply_save_checks(db, root, body.get("checks"))
-    _apply_save_barriers(db, root, body.get("barriers"))
+    _apply_save_detail_rows(db, root, body.get("checks"), _CHECK_KIND)
+    _apply_save_detail_rows(db, root, body.get("barriers"), _BARRIER_KIND)
     active_lock = LockService._active_lock(db, root.id)
     lock_refreshed_at = now_utc()
     if active_lock and str(active_lock.session_guid or "").strip() == str(session_guid or "").strip():
@@ -1913,8 +2021,8 @@ def save_changes(payload: dict, response: Response, if_match: str | None = Heade
         return _err(409, "LOCK_EXPIRED", "Lock expired")
 
     _apply_save_root(root, _save_request_root(payload), db)
-    _apply_save_checks(db, root, body.get("checks"))
-    _apply_save_barriers(db, root, body.get("barriers"))
+    _apply_save_detail_rows(db, root, body.get("checks"), _CHECK_KIND)
+    _apply_save_detail_rows(db, root, body.get("barriers"), _BARRIER_KIND)
     try:
         _apply_save_attachments(db, root, body.get("attachments"))
     except ValueError as ex:
@@ -1978,7 +2086,7 @@ async def set_status(
     if err:
         return err
     try:
-        _if_match_check(if_match, _agg_changed_on(root))
+        _if_match_check(if_match, _agg_changed_on(root), root.version_number)
         _optimistic_check(resolved_client_agg, root)
     except ValueError as ex:
         if str(ex) == "PRECONDITION_FAILED":
@@ -2063,6 +2171,11 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
             if _search_contract_matches(root, search_contract, db)
         ]
 
+    # Preload CHECK/BARRIER dictionary texts once instead of one query per row - the loop
+    # below can run over thousands of check/barrier rows for a single "all" export.
+    check_dict_texts = {item.key: item.text for item in db.query(DictionaryItem).filter(DictionaryItem.domain == "CHECK").all()}
+    barrier_dict_texts = {item.key: item.text for item in db.query(DictionaryItem).filter(DictionaryItem.domain == "BARRIER").all()}
+
     rows = []
     for root in roots:
         base = _to_search(root, db=db)
@@ -2093,12 +2206,12 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
 
         if entity == "check":
             for c in checks:
-                txt = db.query(DictionaryItem).filter(DictionaryItem.domain == "CHECK", DictionaryItem.key == str(c["ChecksNum"])).first()
+                key = str(c["ChecksNum"])
                 rows.append({
                     **base_row,
                     "ItemType": "CHECK",
                     "Num": c["ChecksNum"],
-                    "Text": txt.text if txt else c.get("Text", ""),
+                    "Text": check_dict_texts[key] if key in check_dict_texts else c.get("Text", ""),
                     "Comment": c["Comment"],
                     "Result": c["Result"]
                 })
@@ -2106,34 +2219,34 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
 
         if entity == "barrier":
             for b in barriers:
-                txt = db.query(DictionaryItem).filter(DictionaryItem.domain == "BARRIER", DictionaryItem.key == str(b["BarriersNum"])).first()
+                key = str(b["BarriersNum"])
                 rows.append({
                     **base_row,
                     "ItemType": "BARRIER",
                     "Num": b["BarriersNum"],
-                    "Text": txt.text if txt else b.get("Text", ""),
+                    "Text": barrier_dict_texts[key] if key in barrier_dict_texts else b.get("Text", ""),
                     "Comment": b["Comment"],
                     "Result": b["Result"]
                 })
             continue
 
         for c in checks:
-            txt = db.query(DictionaryItem).filter(DictionaryItem.domain == "CHECK", DictionaryItem.key == str(c["ChecksNum"])).first()
+            key = str(c["ChecksNum"])
             rows.append({
                 **base_row,
                 "ItemType": "CHECK", "Num": c["ChecksNum"],
-                "Text": txt.text if txt else c.get("Text", ""),
+                "Text": check_dict_texts[key] if key in check_dict_texts else c.get("Text", ""),
                 "Comment": c["Comment"], "Result": c["Result"]
             })
         for b in barriers:
-            txt = db.query(DictionaryItem).filter(DictionaryItem.domain == "BARRIER", DictionaryItem.key == str(b["BarriersNum"])).first()
+            key = str(b["BarriersNum"])
             rows.append({
                 "DB_KEY": base["DB_KEY"], "Id": base["Id"],
                 "Lpc": base.get("Lpc", ""), "LpcText": base.get("LpcText", ""),
                 "Profession": base.get("Profession", ""), "ProfessionText": base.get("ProfessionText", ""),
                 "DateCheck": base["DateCheck"],
                 "ItemType": "BARRIER", "Num": b["BarriersNum"],
-                "Text": txt.text if txt else b.get("Text", ""),
+                "Text": barrier_dict_texts[key] if key in barrier_dict_texts else b.get("Text", ""),
                 "Comment": b["Comment"], "Result": b["Result"]
             })
     if len(rows) > export_limit:

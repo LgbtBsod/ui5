@@ -45,9 +45,16 @@ def ensure_schema_compatibility() -> None:
         db.close()
 
 
-def ensure_required_tables() -> None:
-    """Create missing tables for analytics, settings, and runtime context."""
-    inspector = inspect(engine)
+def ensure_required_tables(bind=None) -> None:
+    """Create missing tables for analytics, settings, and runtime context.
+
+    Accepts an optional `bind` so callers (e.g. tests wiring up an isolated
+    in-memory database) can target a specific engine without mutating this
+    module's own `engine` global, which would leak across every other caller
+    for the rest of the process.
+    """
+    target = bind if bind is not None else engine
+    inspector = inspect(target)
     existing_tables = set(inspector.get_table_names())
     required_tables = {
         AnalyticsSnapshot.__tablename__: AnalyticsSnapshot.__table__,
@@ -61,7 +68,7 @@ def ensure_required_tables() -> None:
     if not missing_tables:
         return
     for table in missing_tables:
-        table.create(bind=engine, checkfirst=True)
+        table.create(bind=target, checkfirst=True)
         logger.info("Created missing table: %s", table.name)
 
 

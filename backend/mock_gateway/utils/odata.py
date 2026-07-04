@@ -27,7 +27,7 @@ def format_datetime(value: datetime | None) -> str | None:
 def format_entity_etag(changed_on: datetime | None, version_number: int | None = None) -> str | None:
     if changed_on is None:
         return None
-    return etag_for_datetime(changed_on)
+    return etag_for_datetime(changed_on, version_number)
 
 
 def odata_entity(payload: dict[str, Any]) -> dict[str, Any]:

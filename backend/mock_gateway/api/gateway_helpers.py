@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 import re
 from models import DictionaryItem
+from utils.key_normalizer import hex_to_storage_key
 
 
 # ============================================================================
@@ -134,7 +135,15 @@ class BoundaryResolver:
 
     @staticmethod
     def resolve_key(key_expr: str) -> str:
-        """Extract entity key from OData expression (Key=..., DB_KEY=..., etc.)."""
+        """Extract entity key from OData expression (Key=..., DB_KEY=..., etc.).
+
+        DB_KEY is serialized to clients as a 32-char hex string with no dashes
+        (see gateway_operations._hex), but ChecklistRoot.id/AttachmentEntry.id are
+        stored as canonical dashed UUID strings. Without normalizing back to the
+        dashed form here, every round-trip of a client-supplied DB_KEY into a
+        `ChecklistRoot.id == ...` lookup would silently miss (404) even for a key
+        that was just handed to that same client.
+        """
         cleaned = str(key_expr or "").strip()
 
         # Remove OData key= prefix
@@ -142,9 +151,13 @@ class BoundaryResolver:
             if cleaned.startswith(prefix):
                 cleaned = cleaned.split("=", 1)[1].strip()
 
-        # Remove quotes
-        cleaned = cleaned.strip("'")
-        return cleaned
+        # RAW16/Edm.Binary keys may arrive as the OData binary literal binary'HEX...'
+        # (SADL/CDS BINTOHEX convention referenced in README_ODATA.md); unwrap it before
+        # the generic quote-strip below, which would otherwise leave a stray "binary" prefix.
+        binary_literal = re.match(r"^binary'(.*)'$", cleaned, re.IGNORECASE)
+        cleaned = binary_literal.group(1) if binary_literal else cleaned.strip("'")
+
+        return hex_to_storage_key(cleaned)
 
     @staticmethod
     def resolve_root_key(payload: Dict | None = None, *candidates: str) -> str:
@@ -181,10 +194,11 @@ class ODataSerializer:
     @staticmethod
     def build_metadata(entity_type: str, entity_set: str, key_value: str) -> dict:
         """Build OData __metadata structure (reusable for all entity types)."""
-        from utils.odata import SERVICE_ROOT
+        from utils.odata import ODATA_NS, SERVICE_ROOT
+        safe_key = str(key_value or "").replace("'", "''")
         return {
-            "type": f"{SERVICE_ROOT.strip('/')}.{entity_type}",
-            "uri": f"{SERVICE_ROOT}{entity_set}('{key_value}')",
+            "type": f"{ODATA_NS}.{entity_type}",
+            "uri": f"{SERVICE_ROOT}/{entity_set}('{safe_key}')",
         }
 
     @staticmethod

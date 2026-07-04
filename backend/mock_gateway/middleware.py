@@ -70,7 +70,12 @@ async def setup_csrf_middleware(app, csrf_store):
         if is_fetch:
             sid, new_token = csrf_store.issue(session_id)
             response.headers["X-CSRF-Token"] = new_token
-            response.set_cookie("SAP_SESSIONID", sid, httponly=True, secure=True, samesite="lax")
+            # secure=True would make the browser silently drop this cookie on a plain-HTTP
+            # origin (e.g. local dev on http://localhost:8080), breaking the whole CSRF/lock
+            # flow with no visible error. Only require Secure when the request itself arrived over TLS.
+            response.set_cookie(
+                "SAP_SESSIONID", sid, httponly=True, secure=request.url.scheme == "https", samesite="lax"
+            )
         return response
 
 
@@ -148,16 +153,24 @@ async def setup_error_envelope_middleware(app):
 
         response = await call_next(request)
         if 400 <= response.status_code < 600:
-            body_bytes = response.body
+            # call_next always yields a streaming response, so the body must be drained
+            # from body_iterator (response.body does not exist on that type).
+            body_bytes = b"".join([chunk async for chunk in response.body_iterator])
             try:
                 body = json.loads(body_bytes.decode("utf-8"))
                 if isinstance(body, dict) and "error" not in body:
                     code = _map_status_to_code(response.status_code)
                     message = body.get("detail") or body.get("message") or "Request failed"
-                    wrapped = odata_error_response(response.status_code, code, message)
-                    return wrapped
+                    return odata_error_response(response.status_code, code, message)
             except Exception:
                 pass
+            passthrough_headers = {k: v for k, v in response.headers.items() if k.lower() != "content-length"}
+            return Response(
+                content=body_bytes,
+                status_code=response.status_code,
+                headers=passthrough_headers,
+                media_type=response.media_type,
+            )
         return response
 
 
@@ -165,12 +178,14 @@ def setup_rate_limit_middleware(app) -> None:
     """Configure per-IP rate limiting (DDoS protection complement to CSRF)."""
     from utils.rate_limiter import RateLimiter, extract_client_ip
     from fastapi import Response
+    from config import RATE_LIMIT_REQUESTS_PER_WINDOW, RATE_LIMIT_WINDOW_SECONDS, RATE_LIMIT_TRUSTED_PROXIES
 
-    limiter = RateLimiter(requests_per_window=100, window_seconds=60)
+    limiter = RateLimiter(requests_per_window=RATE_LIMIT_REQUESTS_PER_WINDOW, window_seconds=RATE_LIMIT_WINDOW_SECONDS)
+    app.state.rate_limiter = limiter
 
     @app.middleware("http")
     async def rate_limit_middleware(request: Request, call_next):
-        client_ip = extract_client_ip(request)
+        client_ip = extract_client_ip(request, RATE_LIMIT_TRUSTED_PROXIES)
         allowed, headers = limiter.is_allowed(client_ip)
 
         if not allowed:

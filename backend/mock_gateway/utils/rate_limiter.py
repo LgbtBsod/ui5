@@ -99,17 +99,18 @@ class RateLimitExceeded(Exception):
         )
 
 
-def extract_client_ip(request) -> str:
+def extract_client_ip(request, trusted_proxies: frozenset[str] = frozenset()) -> str:
     """
-    Extract client IP from FastAPI request, accounting for proxies.
+    Extract client IP from FastAPI request.
 
-    Checks (in order):
-    1. X-Forwarded-For header (behind proxy)
-    2. X-Real-IP header (alternative proxy header)
-    3. client.host (direct connection)
+    X-Forwarded-For / X-Real-IP are only trusted when the direct TCP peer
+    (request.client.host) is a known reverse proxy — otherwise a client could
+    forge these headers to evade per-IP rate limiting. With no trusted proxies
+    configured (the default), the direct peer IP is always used.
     """
-    if hasattr(request, "headers"):
-        # X-Forwarded-For can be comma-separated list (take first/leftmost)
+    direct_ip = request.client.host if hasattr(request, "client") and request.client else "unknown"
+
+    if direct_ip in trusted_proxies and hasattr(request, "headers"):
         forwarded = request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
         if forwarded:
             return forwarded
@@ -118,7 +119,4 @@ def extract_client_ip(request) -> str:
         if real_ip:
             return real_ip
 
-    if hasattr(request, "client") and request.client:
-        return request.client.host
-
-    return "unknown"
+    return direct_ip

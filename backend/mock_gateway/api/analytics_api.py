@@ -128,6 +128,7 @@ def process_analytics(year: int | None = None, source: str | None = None, db: Se
 
 
 @router.get("/SimpleAnalytical")
+@router.get(f"{SERVICE_ROOT}/SimpleAnalytical")
 def simple_analytical(year: int | None = None, source: str | None = None, db: Session = Depends(get_db)):
     payload = AnalyticsService.get_process_summary(db, year, source)
     logger.info("SimpleAnalytical payload year=%s source=%s", year, source)

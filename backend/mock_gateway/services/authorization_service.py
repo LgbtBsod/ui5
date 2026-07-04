@@ -38,6 +38,11 @@ def _granted_operations(can_view: bool, can_edit: bool, can_delete: bool) -> lis
 def _has_create_permission(db, user_id: str) -> bool:
     profile = CurrentUserService.resolve_profile(db, explicit_uname=user_id)
     permissions = list(profile.get("permissions") or [])
+    if not permissions:
+        # No AppUserProfile row configured for this user (e.g. AUTO_SEED_STARTUP_DATA=False
+        # in a hardened non-local profile): fall back to the same default-allow-unless-denied
+        # convention checklist_permissions() uses when no profile data is present.
+        return not _contains_marker(user_id, _EDIT_DENY_MARKERS) and not _contains_marker(user_id, _VIEW_DENY_MARKERS)
     return any(str((item or {}).get("code") or "").strip() == OPERATION_CREATE for item in permissions)
 
 

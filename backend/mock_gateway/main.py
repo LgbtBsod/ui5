@@ -3,7 +3,7 @@ import logging
 import os
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, Exception as FastAPIException
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
@@ -11,16 +11,50 @@ from api.analytics_api import router as analytics_router
 from api.batch_api import router as batch_router
 from api.gateway_canonical_api import router as gateway_canonical_router
 from api.capabilities_api import router as capabilities_router
-from bootstrap import bootstrap_schema, ensure_schema_compatibility
+import bootstrap
+from bootstrap import bootstrap_schema, seed_checklist_roots_if_needed as _seed_checklist_roots_if_needed
 from background_jobs import lock_cleanup_job, metadata_refresh_job, analytics_refresh_job
 from middleware import setup_csrf_middleware, setup_odata_headers_middleware, setup_logging_middleware, setup_error_envelope_middleware, setup_rate_limit_middleware
 from config import CORS_ALLOWED_ORIGINS, LOG_REQUEST_BODIES
+from database import engine, SessionLocal
+from models import ChecklistRoot, ChecklistCheck, ChecklistBarrier
 from services.metadata_cache import refresh_metadata
 from utils.odata import SERVICE_ROOT, odata_error_response
 from utils.odata_csrf import CsrfStore
+from utils.filter_errors import FilterSyntaxError
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gateway")
+
+
+def ensure_schema_compatibility() -> None:
+    """Explicitly ensure required tables/settings row exist, using this module's current
+    `engine`/`SessionLocal` globals (tests monkeypatch main.engine/main.SessionLocal to
+    point at an isolated database). Passes them through as explicit arguments rather than
+    assigning to bootstrap.engine/bootstrap.SessionLocal - mutating those module globals
+    would leak the test's throwaway engine into every other caller for the rest of the
+    process (bootstrap_schema() included), since monkeypatch only reverts what it directly
+    patched on `main`, not side effects this function makes on a third module.
+
+    Deliberately bypasses bootstrap.ensure_schema_compatibility()'s AUTO_MUTATE_SCHEMA_ON_STARTUP
+    gate: that flag exists to stop *automatic* mutation at real app startup in a hardened
+    non-local profile, not to block an explicit administrative call to this function
+    (nothing in the real startup path calls this - only bootstrap_schema() does, via
+    bootstrap's own gated internal function).
+    """
+    bootstrap.ensure_required_tables(bind=engine)
+    # Bind explicitly to `engine` (this module's current global, possibly monkeypatched)
+    # rather than calling the bare sessionmaker, which would otherwise silently target
+    # whatever engine SessionLocal was originally constructed with.
+    db = SessionLocal(bind=engine)
+    try:
+        bootstrap.ensure_runtime_settings_row(db)
+    finally:
+        db.close()
+
+
+def _ensure_runtime_settings_row(db):
+    return bootstrap.ensure_runtime_settings_row(db)
 
 
 @asynccontextmanager
@@ -33,7 +67,7 @@ async def lifespan(app: FastAPI):
     app.state.background_tasks = [
         asyncio.create_task(lock_cleanup_job()),
         asyncio.create_task(metadata_refresh_job()),
-        asyncio.create_task(analytics_refresh_job(bootstrap_schema, ensure_schema_compatibility)),
+        asyncio.create_task(analytics_refresh_job(bootstrap_schema, _ensure_runtime_settings_row)),
     ]
 
     yield
@@ -103,8 +137,18 @@ def component_preload_stub():
     return Response(content="/* mock preload stub enabled */", media_type="application/javascript")
 
 
+@app.exception_handler(FilterSyntaxError)
+async def odata_filter_syntax_error_handler(request: Request, exc: FilterSyntaxError):
+    """A malformed/unsupported $filter must fail closed (400), not fall through to
+    the catch-all handler (500) or, worse, silently match the whole table."""
+    if request.url.path.startswith(SERVICE_ROOT):
+        return odata_error_response(400, "VALIDATION_ERROR", f"Unsupported $filter expression: {exc}")
+    return JSONResponse(status_code=400, content={"detail": str(exc)})
+
+
 @app.exception_handler(Exception)
 async def odata_exception_handler(request: Request, exc: Exception):
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
     if request.url.path.startswith(SERVICE_ROOT):
-        return odata_error_response(500, "SYSTEM_ERROR", str(exc))
-    return JSONResponse(status_code=500, content={"detail": str(exc)})
+        return odata_error_response(500, "SYSTEM_ERROR", "An internal server error occurred")
+    return JSONResponse(status_code=500, content={"detail": "An internal server error occurred"})

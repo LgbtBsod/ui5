@@ -10,6 +10,7 @@ if ROOT not in sys.path:
 
 from main import app  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
+from conftest import _csrf, _sample_root  # noqa: E402
 
 def _attachment_headers(root_key: str, file_name: str, mime_type: str, category_key: str = "GEN"):
     return {

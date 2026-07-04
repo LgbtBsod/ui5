@@ -9,6 +9,7 @@ if ROOT not in sys.path:
 
 from main import app  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
+from conftest import _csrf, _sample_root  # noqa: E402
 
 def test_save_changes_requires_active_session_lock_but_not_client_version():
     with TestClient(app) as client:

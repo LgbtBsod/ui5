@@ -38,6 +38,12 @@ def _normalize_status_input(status: str | None) -> str:
     return mapping.get(str(status or "").strip(), "01")
 
 
+def _status_external(status: str | None) -> str:
+    """Map internal 2-digit status code to its external name. Inverse of _normalize_status_input."""
+    mapping = {"01": "DRAFT", "02": "REGISTERED", "03": "CLOSED"}
+    return mapping.get(str(status or "").strip(), "DRAFT")
+
+
 def _pick_text(payload: dict | None, *keys) -> str:
     """Extract first non-empty string from payload keys (fallback chain)."""
     if not payload or not isinstance(payload, dict):

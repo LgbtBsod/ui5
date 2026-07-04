@@ -12,6 +12,7 @@ from database import Base, SessionLocal, engine  # noqa: E402
 from main import app  # noqa: E402
 from models import ChecklistRoot  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
+from conftest import _csrf  # noqa: E402
 
 def setup_function():
     Base.metadata.drop_all(bind=engine)

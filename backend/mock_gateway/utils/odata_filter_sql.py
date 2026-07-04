@@ -1,11 +1,18 @@
-import logging
 import re
 from collections.abc import Mapping
 
 from sqlalchemy import and_, not_, or_
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
-logger = logging.getLogger("gateway.filter")
+from utils.filter_errors import FilterSyntaxError
+from utils.key_normalizer import hex_to_storage_key
+
+# SQLAlchemy attribute names that store RAW16-derived entity keys as canonical dashed
+# UUID strings (see models.py). $filter literals compared against these columns arrive
+# from the frontend as hex32 (per the BINTOHEX wire convention) and must be normalized
+# the same way BoundaryResolver.resolve_key normalizes path-segment keys - otherwise
+# `$filter=PARENT_KEY eq 'HEX32...'` would silently never match any row.
+_KEY_COLUMNS = {"id", "root_id"}
 
 
 class ODataFilterParser:
@@ -82,8 +89,9 @@ class ODataFilterParser:
                     value, field = first, second
                 col: InstrumentedAttribute = ODataFilterParser._resolve_column(model, str(field), field_map)
                 if col is None:
-                    return True
-                expr = col.ilike(f"%{value}%")
+                    raise FilterSyntaxError(f"Unknown field {field!r}")
+                escaped = str(value).replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+                expr = col.ilike(f"%{escaped}%", escape="\\")
                 if idx + 1 < len(tokens) and tokens[idx].lower() == "eq":
                     idx += 1
                     bool_val = lit(tokens[idx]); idx += 1
@@ -93,19 +101,23 @@ class ODataFilterParser:
             field = token
             idx += 1
             if idx >= len(tokens):
-                return True
+                raise FilterSyntaxError(f"Incomplete comparison for field {field!r}")
             op = tokens[idx].lower(); idx += 1
             if idx >= len(tokens):
-                return True
+                raise FilterSyntaxError(f"Missing comparison value for field {field!r}")
             value = lit(tokens[idx]); idx += 1
             col: InstrumentedAttribute = ODataFilterParser._resolve_column(model, field, field_map)
-            if col is None or op not in ODataFilterParser.OPERATORS:
-                return True
+            if col is None:
+                raise FilterSyntaxError(f"Unknown field {field!r}")
+            if op not in ODataFilterParser.OPERATORS:
+                raise FilterSyntaxError(f"Unsupported operator {op!r}")
+            if isinstance(value, str) and getattr(col, "key", None) in _KEY_COLUMNS:
+                value = hex_to_storage_key(value)
             return getattr(col, ODataFilterParser.OPERATORS[op])(value)
 
         try:
-            result = parse_expr()
-            return result
-        except Exception as exc:  # noqa: BLE001
-            logger.warning("Failed to parse filter %s: %s", filter_string, exc)
-            return None
+            return parse_expr()
+        except FilterSyntaxError:
+            raise
+        except Exception as exc:
+            raise FilterSyntaxError(f"Could not parse $filter expression: {filter_string!r}") from exc

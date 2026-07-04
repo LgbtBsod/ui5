@@ -4,6 +4,8 @@ import re
 from datetime import datetime, timezone
 from typing import Callable
 
+from utils.filter_errors import FilterSyntaxError
+
 
 _TOKEN_RE = re.compile(r"substringof\(|contains\(|startswith\(|datetime'[^']*'|/Date\([^)]*\)/|'[^']*'|\(|\)|,|\b(?:eq|ne|gt|lt|ge|le|and|or|not|true|false)\b|[A-Za-z_][A-Za-z0-9_]*", re.IGNORECASE)
 
@@ -94,9 +96,19 @@ def parse_filter_to_predicate(filter_string: str | None, field_map: dict[str, st
 
         fld = field_name(tok); i += 1
         if i + 1 >= len(tokens):
-            return lambda _row: True
+            raise FilterSyntaxError(f"Incomplete comparison for field {tok!r}")
         op = tokens[i].lower(); i += 1
+        if op not in {"eq", "ne", "gt", "lt", "ge", "le"}:
+            raise FilterSyntaxError(f"Unsupported operator {op!r}")
         rv = _literal(tokens[i]); i += 1
+
+        def _numeric(value):
+            if isinstance(value, bool):
+                return None
+            try:
+                return float(value)
+            except (TypeError, ValueError):
+                return None
 
         def pred(row):
             lv = row.get(fld)
@@ -111,7 +123,17 @@ def parse_filter_to_predicate(filter_string: str | None, field_map: dict[str, st
                 return True
             if isinstance(rv, bool):
                 lvb = bool(lv)
-                return {"eq": lvb == rv, "ne": lvb != rv}.get(op, True)
+                if op == "eq": return lvb == rv
+                if op == "ne": return lvb != rv
+                raise FilterSyntaxError(f"Operator {op!r} is not valid for a boolean field")
+            lv_num, rv_num = _numeric(lv), _numeric(rv)
+            if lv_num is not None and rv_num is not None:
+                if op == "eq": return lv_num == rv_num
+                if op == "ne": return lv_num != rv_num
+                if op == "gt": return lv_num > rv_num
+                if op == "lt": return lv_num < rv_num
+                if op == "ge": return lv_num >= rv_num
+                if op == "le": return lv_num <= rv_num
             lvs = str(lv or "")
             rvs = str(rv or "")
             if op == "eq": return lvs == rvs
@@ -126,8 +148,10 @@ def parse_filter_to_predicate(filter_string: str | None, field_map: dict[str, st
 
     try:
         return parse_expr()
-    except Exception:
-        return lambda _row: True
+    except FilterSyntaxError:
+        raise
+    except Exception as exc:
+        raise FilterSyntaxError(f"Could not parse $filter expression: {filter_string!r}") from exc
 
 
 def debug_explain(filter_string: str) -> str:

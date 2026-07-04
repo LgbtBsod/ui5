@@ -1,10 +1,11 @@
 from config import ALLOW_MOCK_USER_HEADER, APP_PROFILE, AUTO_MUTATE_SCHEMA_ON_STARTUP, AUTO_SEED_STARTUP_DATA
 from fastapi import APIRouter
+from utils.odata import SERVICE_ROOT
 
 router = APIRouter(tags=["Capabilities"])
 
 
-@router.get("/capabilities")
+@router.get(f"{SERVICE_ROOT}/capabilities")
 def capabilities():
     return {
         "contractVersion": "1.2.0",

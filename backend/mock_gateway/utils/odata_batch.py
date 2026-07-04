@@ -28,8 +28,12 @@ def normalize_linebreaks(payload: str) -> str:
 
 
 def parse_multipart(body: str, boundary: str) -> list[str]:
-    marker = f"--{boundary}"
-    chunks = normalize_linebreaks(body).split(marker)
+    # RFC 2046: a boundary delimiter is only significant at the start of a line (preceded
+    # by a line break, or the very start of the body). A bare substring split (the
+    # previous implementation) would corrupt parsing if a part's own content happened to
+    # contain the literal "--{boundary}" text anywhere - e.g. inside a JSON body value.
+    marker = re.compile(rf"(?:\A|\n)--{re.escape(boundary)}")
+    chunks = marker.split(normalize_linebreaks(body))
     parts = []
     for chunk in chunks:
         stripped = chunk.strip()

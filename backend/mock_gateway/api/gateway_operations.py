@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryItem
 from utils.time import now_utc
 from utils.common_helpers import get_dict_text, load_upload_policy, parse_date_ymd
-from gateway_validators import (
+from api.gateway_validators import (
     _normalize_status_input, _pick_text, _pick_bool, _pick_first_present, _coerce_int,
     _normalize_child_rows, _date_ymd_from_any
 )
@@ -21,16 +21,23 @@ def _hex(raw: str) -> str:
     """Convert UUID to 32-char hex string."""
     return str(raw or "").replace("-", "").upper()
 
+
+def _normalize_hex_key(value: str | None) -> str:
+    """Normalize a UUID/hex key to the canonical 32-char uppercase hex form produced by _hex().
+
+    Returns "" for empty input. Raises ValueError if a non-empty value is not a valid
+    UUID/hex key (32 hex chars once dashes are stripped).
+    """
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    cleaned = raw.replace("-", "").upper()
+    if len(cleaned) != 32 or any(c not in "0123456789ABCDEF" for c in cleaned):
+        raise ValueError(f"Invalid hex key: {value!r}")
+    return cleaned
+
 _UPLOAD_DIR = Path(__file__).resolve().parents[1] / "uploads"
 _UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
-
-def _load_upload_policy(db: Session) -> dict:
-    from services.settings_service import SettingsService
-    from repo.settings_repo import SettingsRepo
-    payload = SettingsService.load_global(SettingsRepo(db))
-    policy = payload.get("AttachmentUploadPolicyJson")
-    return policy if isinstance(policy, dict) else {}
 
 
 def _normalize_upload_list(value) -> list:
@@ -73,7 +80,7 @@ def _validate_attachment_upload(db: Session, file_name: str, content_type: str, 
         - 413 Payload Too Large (exceeds maxSizeMb)
         - 415 Unsupported Media Type (extension or MIME not allowed)
     """
-    policy = _load_upload_policy(db)
+    policy = load_upload_policy(db)
     allowed_mime = set(_normalize_upload_list(policy.get("allowedMime")))
     allowed_extensions = set(_normalize_upload_list(policy.get("allowedExtensions")))
     resolved_mime = _resolve_upload_mime(file_name, content_type)
@@ -142,6 +149,32 @@ def _normalize_attachment_payload_rows(items, root_hex: str) -> list[dict]:
     return normalized
 
 
+def _media_upload_payload(
+    *,
+    db_key: str,
+    parent_key: str,
+    folder_key: str,
+    category_key: str,
+    file_name: str,
+    mime_type: str,
+    description: str,
+    body: bytes,
+    attachment_key: str,
+) -> dict:
+    """Build an attachment payload row for a raw binary media-stream upload (X-* headers + body)."""
+    return {
+        "DB_KEY": db_key,
+        "PARENT_KEY": parent_key,
+        "FolderKey": folder_key,
+        "CategoryKey": category_key,
+        "FileName": file_name,
+        "MimeType": mime_type,
+        "Description": description,
+        "AttachmentKey": attachment_key,
+        "_media_content": body,
+    }
+
+
 def _persist_attachment_media(db: Session, root: ChecklistRoot, row: dict, media_content: bytes) -> AttachmentEntry:
     """
     Persist attachment file to disk and database.
@@ -171,7 +204,9 @@ def _persist_attachment_media(db: Session, root: ChecklistRoot, row: dict, media
         raise ValueError("INVALID_ATTACHMENT_PAYLOAD")
     resolved_mime_type, validation_error = _validate_attachment_upload(db, file_name, row.get("MimeType") or "", len(media_content))
     if validation_error:
-        raise RuntimeError(str(validation_error))
+        # Carry the already-built error Response through the exception (not str(), which would
+        # just stringify the object's repr and silently discard the real status/message).
+        raise RuntimeError(validation_error)
 
     attachment_id = _normalize_attachment_key(row.get("AttachmentKey") or "")
     file_path = _UPLOAD_DIR / attachment_id

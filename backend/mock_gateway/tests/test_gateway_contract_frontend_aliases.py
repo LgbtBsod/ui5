@@ -11,6 +11,7 @@ if ROOT not in sys.path:
 from main import app  # noqa: E402
 from services import current_user_service  # noqa: E402
 from utils.odata import ODATA_NS, SERVICE_ROOT  # noqa: E402
+from conftest import _csrf, _sample_root  # noqa: E402
 
 def _as_user(user_name: str) -> dict:
     current_user_service.ALLOW_MOCK_USER_HEADER = True

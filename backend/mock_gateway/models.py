@@ -11,6 +11,13 @@ from utils.time import now_utc
 
 class ChecklistRoot(Base):
     __tablename__ = "checklist_root"
+    __table_args__ = (
+        # Every list/search query filters on is_deleted, almost always combined with
+        # status and/or bukrs (ChecklistSearchSet, ChecklistRootSet, report_export).
+        # Without these, each of those queries is a full table scan.
+        Index("ix_checklist_root_is_deleted_status", "is_deleted", "status"),
+        Index("ix_checklist_root_bukrs", "bukrs"),
+    )
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     checklist_id = Column(String, nullable=False)
@@ -63,6 +70,7 @@ class ChecklistRoot(Base):
 
 class ChecklistCheck(Base):
     __tablename__ = "checklist_check"
+    __table_args__ = (Index("ix_checklist_check_root_id", "root_id"),)
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     root_id = Column(String, ForeignKey("checklist_root.id"), nullable=False)
@@ -79,6 +87,7 @@ class ChecklistCheck(Base):
 
 class ChecklistBarrier(Base):
     __tablename__ = "checklist_barrier"
+    __table_args__ = (Index("ix_checklist_barrier_root_id", "root_id"),)
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     root_id = Column(String, ForeignKey("checklist_root.id"), nullable=False)
@@ -95,6 +104,7 @@ class ChecklistBarrier(Base):
 
 class AttachmentEntry(Base):
     __tablename__ = "attachment_entry"
+    __table_args__ = (Index("ix_attachment_entry_root_id", "root_id"),)
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     root_id = Column(String, ForeignKey("checklist_root.id"), nullable=False)
@@ -111,12 +121,21 @@ class AttachmentEntry(Base):
 class LockEntry(Base):
     __tablename__ = "lock_entry"
     __table_args__ = (
+        # Partial unique index: at most one *active* (non-killed) lock per db_key.
+        # sqlite_where/postgresql_where are dialect-specific DDL options - SQLAlchemy
+        # only applies the one matching the engine actually in use, so this stays a
+        # correct partial index if DATABASE_URL is ever pointed at Postgres instead of
+        # the default SQLite file (config.py already allows an arbitrary DATABASE_URL).
         Index(
             "ux_lock_entry_active_db_key",
             "db_key",
             unique=True,
-            sqlite_where=text("is_killed = 0")
+            sqlite_where=text("is_killed = 0"),
+            postgresql_where=text("is_killed = false"),
         ),
+        # Plain (non-unique, non-partial) index for lookups that don't filter on
+        # is_killed and so can't use the partial index above (e.g. lock history/audit).
+        Index("ix_lock_entry_db_key", "db_key"),
     )
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))

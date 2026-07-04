@@ -10,6 +10,7 @@ if ROOT not in sys.path:
 
 from main import app  # noqa: E402
 from utils.odata import SERVICE_ROOT  # noqa: E402
+from conftest import _csrf, _sample_root  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 APP_ROOT = REPO_ROOT / "app"
