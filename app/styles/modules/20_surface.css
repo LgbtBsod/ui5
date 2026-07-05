@@ -48,7 +48,7 @@ body.chkAppRoot.platformCalmModern .chkStack {
 .chkApp .detailHeroCard::after,
 .chkApp .detailControlInlineCard::after,
 .chkApp .detailSectionCard::after,
-.chkApp .searchFilterCardDense::after,
+.chkApp .searchFilterSurface::after,
 .chkApp .searchResultsTable::after {
   display: none;
 }
@@ -260,7 +260,7 @@ body.chkAppRoot.appDark .chkApp .infoCardTile:hover::before {
   padding: clamp(0.85rem, 1.4vw, 1.2rem);
 }
 
-.appDensityCompact .chkApp .searchFilterCardDense,
+.appDensityCompact .chkApp .searchFilterSurface,
 .appDensityCompact .chkApp .searchResultsTable,
 .appDensityCompact .chkApp .detailHeroCard,
 .appDensityCompact .chkApp .detailSectionCard,
@@ -429,7 +429,7 @@ html.chkAppRoot.appThemeSwitching .chkApp .appSectionSurface,
 html.chkAppRoot.appThemeSwitching .chkApp .appInlineSurface,
 html.chkAppRoot.appThemeSwitching .chkApp .appMetricSurface,
 html.chkAppRoot.appThemeSwitching .chkApp .infoCardTile,
-html.chkAppRoot.appThemeSwitching .chkApp .searchFilterCardDense,
+html.chkAppRoot.appThemeSwitching .chkApp .searchFilterSurface,
 html.chkAppRoot.appThemeSwitching .chkApp .searchResultsTable,
 html.chkAppRoot.appThemeSwitching .chkApp .searchAnalyticsCard,
 html.chkAppRoot.appThemeSwitching .chkApp .searchStatusStripStack,

@@ -3,9 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/RandomId"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentListenerContracts, WorkflowContracts, ModelPathContracts, RandomId) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentListenerContracts, WorkflowContracts, StatePaths, RandomId) {
     "use strict";
 
     var VALUES = ComponentListenerContracts.VALUES;
@@ -54,7 +54,7 @@ sap.ui.define([
             var oPayload = oSignal || {};
             var sSignalType = String(oPayload.type || "").toUpperCase();
             var sSignalDbKey = String(oPayload.dbKey || oPayload.rootId || "").trim();
-            var sCurrentDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+            var sCurrentDbKey = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
             var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
             var sLockState = WorkflowContracts.normalizeLockState(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
             if (!sSignalType || oPayload.tabId === sThisTabId || !sSignalDbKey || !sCurrentDbKey || sSignalDbKey !== sCurrentDbKey) {

@@ -923,16 +923,18 @@ body.chkAppRoot.appDark .chkApp .detailEmptyStateAction .sapMBtnInner {
   align-self: flex-start;
 }
 
+/* color-mix() cannot blend a gradient (--theme-block-bg); layer the token directly
+ * as the second background image instead of trying to mix it. */
 body.chkAppRoot.appDark .chkApp .detailAccessDeniedScene {
   background:
     radial-gradient(circle at top left, rgba(130, 161, 208, 0.16), transparent 48%),
-    color-mix(in srgb, var(--theme-block-bg) 96%, transparent);
+    var(--theme-block-bg);
 }
 
 body.chkAppRoot.appLight .chkApp .detailAccessDeniedScene {
   background:
     radial-gradient(circle at top left, rgba(126, 167, 219, 0.18), transparent 48%),
-    color-mix(in srgb, var(--theme-block-bg) 96%, transparent);
+    var(--theme-block-bg);
 }
 
 @media (max-width: 1366px) {

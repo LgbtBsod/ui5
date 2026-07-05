@@ -3,7 +3,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/runtime/DetailEditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailMatchedRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
@@ -14,7 +13,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (DetailAccessViewState, DetailEditSessionRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ModelPathContracts, ViewPathContracts, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime, ModelContracts, DetailUseCaseConstants) {
+], function (DetailAccessViewState, DetailEditSessionRuntime, DetailInfoCardLayoutRuntime, DetailMatchedRuntime, ViewPathContracts, ControllerViewStateRuntime, ModelStateRuntime, ReadinessTelemetryRuntime, SchedulingRuntime, StatePaths, ReadinessTelemetryContracts, JsRuntime, ModelContracts, DetailUseCaseConstants) {
     "use strict";
 
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
@@ -80,7 +79,7 @@ sap.ui.define([
     }
 
     function sameActiveDbKey(oController, sDbKey) {
-        var sActiveDbKey = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        var sActiveDbKey = String(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
         return !!sDbKey && sActiveDbKey === sDbKey;
     }
 
@@ -196,7 +195,7 @@ sap.ui.define([
         }
 
         if (mContext.sPostOpenHydratedRootId && mContext.sPostOpenHydratedRootId === mContext.sId && mContext.sSelectedRootId === mContext.sId) {
-            ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "");
+            ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.POST_OPEN_HYDRATED_ROOT_ID, "");
             ControllerViewStateRuntime.set(oController, ViewPathContracts.DETAIL_SKELETON_BUSY, false);
             markDetailReady(oController, { mode: "hydratedReturn", dbKey: mContext.sId });
             oDetailEditSessionRuntime.restoreAnalyticsEditIfNeeded(oController, mContext.sId, {
@@ -208,7 +207,7 @@ sap.ui.define([
             return;
         }
 
-        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, mContext.sId);
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID, mContext.sId);
         return runDetailCommand(oController, "open", { id: mContext.sId, dbKey: mContext.sId }).then(function (oResult) {
             var oAccessState;
             if (oResult && oResult.ok === false) {

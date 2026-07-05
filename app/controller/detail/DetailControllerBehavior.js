@@ -13,8 +13,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts"
 ], function (
     ControllerResourceCleanup,
     DetailFacade,
@@ -30,8 +29,7 @@ sap.ui.define([
     NavigationContracts,
     ModelContracts,
     CreateSentinel,
-    WorkflowContracts,
-    ModelPathContracts
+    WorkflowContracts
 ) {
     "use strict";
 
@@ -42,46 +40,24 @@ sap.ui.define([
         return oController && oController.getModel ? oController.getModel(sName) : null;
     }
 
-    function getRouter(oController) {
-        return oController && oController.getRouter ? oController.getRouter() : null;
-    }
-
-    function getRouteRegistry(oController) {
-        oController._detailRouteRegistry = oController._detailRouteRegistry || [];
-        return oController._detailRouteRegistry;
-    }
-
     function attachRouteHandlers(oController, aRoutes) {
-        var oRouter = getRouter(oController);
-        if (!oRouter || !Array.isArray(aRoutes)) {
+        if (!Array.isArray(aRoutes) || typeof oController.attachRouteMatched !== "function") {
             return;
         }
         aRoutes.forEach(function (oRouteConfig) {
             var sName = String(oRouteConfig && oRouteConfig.name || "").trim();
             var fnHandler = oRouteConfig && oRouteConfig.handler;
-            var oRoute;
-            if (!sName || typeof fnHandler !== "function" || !oRouter.getRoute) {
+            if (!sName || typeof fnHandler !== "function") {
                 return;
             }
-            oRoute = oRouter.getRoute(sName);
-            if (!oRoute || !oRoute.attachPatternMatched) {
-                return;
-            }
-            oRoute.attachPatternMatched(fnHandler, oController);
-            getRouteRegistry(oController).push({
-                route: oRoute,
-                handler: fnHandler
-            });
+            oController.attachRouteMatched(sName, fnHandler);
         });
     }
 
     function detachRouteHandlers(oController) {
-        getRouteRegistry(oController).forEach(function (oEntry) {
-            if (oEntry.route && oEntry.route.detachPatternMatched) {
-                oEntry.route.detachPatternMatched(oEntry.handler, oController);
-            }
-        });
-        oController._detailRouteRegistry = [];
+        if (typeof oController.detachAllRouteMatched === "function") {
+            oController.detachAllRouteMatched();
+        }
     }
 
     function syncSemanticRegions(oController) {
@@ -108,7 +84,7 @@ sap.ui.define([
             return;
         }
         sMode = WorkflowContracts.normalizeEditMode(oStateModel.getProperty(StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
-        sActiveObjectId = String(oStateModel.getProperty(ModelPathContracts.ACTIVE_OBJECT_ID) || "").trim();
+        sActiveObjectId = String(oStateModel.getProperty(StatePaths.ACTIVE_OBJECT_ID) || "").trim();
         oViewModel.setProperty("/isEditMode", WorkflowContracts.isEditableMode(sMode));
         oViewModel.setProperty("/isCreateMode", sMode === WorkflowContracts.EDIT_MODES.CREATE);
         oViewModel.setProperty("/hasPersistedObject", !!sActiveObjectId && !CreateSentinel.isCreateId(sActiveObjectId));
@@ -143,7 +119,7 @@ sap.ui.define([
             if (sPath === StatePaths.WORKFLOW_DETAIL_EDIT_MODE) {
                 syncComputedEditFlags(oController);
             }
-            if (sPath !== StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sPath !== ModelPathContracts.ACTIVE_OBJECT_ID && sPath !== ModelPathContracts.SELECTED_ID) {
+            if (sPath !== StatePaths.WORKFLOW_DETAIL_EDIT_MODE && sPath !== StatePaths.ACTIVE_OBJECT_ID && sPath !== StatePaths.SELECTED_ID) {
                 return;
             }
             DetailAttachmentViewState.sync(oController);
@@ -173,6 +149,7 @@ sap.ui.define([
             this._fnDetailResizeSync = null;
             this._oAdaptiveViewportResizeObserver = null;
             this._fnAdaptiveViewportSync = null;
+            this._bDetailInitialRouteHandled = false;
             attachRouteHandlers(this, [
                 { name: NavigationContracts.ROUTES.DETAIL, handler: this._onDetailMatched },
                 { name: NavigationContracts.ROUTES.SEARCH, handler: this._onDetailRouteLeave },
@@ -191,12 +168,29 @@ sap.ui.define([
         },
 
         onAfterRendering: function () {
+            var oStateModel = getModel(this, MODELS.STATE);
+            var sCurrentRouteName = String(oStateModel && oStateModel.getProperty && oStateModel.getProperty(StatePaths.CURRENT_ROUTE_NAME) || "").trim();
+            var sActiveObjectId;
             this._scheduleAttachmentDropZoneBind();
             this._bindDetailEditSwitchKeyboardFallback();
             this._bindAdaptiveDetailViewport();
             this._bindViewportPinnedControlRail();
             syncSemanticRegions(this);
             StatusChipClassRuntime.syncView(this);
+            if (!this._bDetailInitialRouteHandled && NavigationContracts.isDetailRoute(sCurrentRouteName)) {
+                sActiveObjectId = String(oStateModel.getProperty(StatePaths.ACTIVE_OBJECT_ID) || "").trim();
+                this._onDetailMatched({
+                    getParameter: function (sName) {
+                        if (sName === "arguments") {
+                            return { id: sActiveObjectId };
+                        }
+                        if (sName === "name") {
+                            return sCurrentRouteName;
+                        }
+                        return null;
+                    }
+                });
+            }
         },
 
         onExit: function () {
@@ -221,7 +215,6 @@ sap.ui.define([
             this._fnAdaptiveViewportSync = null;
             this._oStateValidationModel = null;
             this._fnStateValidationChange = null;
-            this._detailRouteRegistry = null;
         },
 
         _onDetailRouteLeave: function () {
@@ -249,6 +242,7 @@ sap.ui.define([
         },
 
         _onDetailMatched: function (oEvent) {
+            this._bDetailInitialRouteHandled = true;
             return Promise.resolve(DetailPageFlow.onMatched(this, oEvent, {
                 applyLayoutState: this._applyLayoutState.bind(this),
                 buildCommandContext: function () {

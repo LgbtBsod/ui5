@@ -15,7 +15,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/ShellStateRuntime",
     "sap/ui/Device",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ActionContract",
@@ -51,7 +50,6 @@ sap.ui.define([
     ShellStateRuntime,
     Device,
     JsRuntime,
-    ModelPathContracts,
     StatePaths,
     ModelContracts,
     ActionContract,
@@ -206,9 +204,9 @@ sap.ui.define([
             });
         }
         if (oState) {
-            oModelPatch[ModelPathContracts.SELECTED_ID] = typeof ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, undefined) === "undefined"
+            oModelPatch[StatePaths.SELECTED_ID] = typeof ModelStateRuntime.readOnModel(oState, StatePaths.SELECTED_ID, undefined) === "undefined"
                 ? null
-                : ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, null);
+                : ModelStateRuntime.readOnModel(oState, StatePaths.SELECTED_ID, null);
             ModelStateRuntime.setManyOnModel(oState, oModelPatch);
             if (!oController._oRouteModeCoordinator) {
                 oController._oRouteModeCoordinator = new RouteModeCoordinator({
@@ -564,7 +562,7 @@ sap.ui.define([
             }
             this._oLayoutBinding = oShell.bindProperty(ModelContracts.MODEL_PATHS.SHELL_LAYOUT);
             this._oLayoutBinding.attachChange(this._fnLayoutSync);
-            this._oRouteNameBinding = oState.bindProperty(ModelPathContracts.CURRENT_ROUTE_NAME);
+            this._oRouteNameBinding = oState.bindProperty(StatePaths.CURRENT_ROUTE_NAME);
             this._oRouteNameBinding.attachChange(this._fnLayoutSync);
         },
 
@@ -588,7 +586,7 @@ sap.ui.define([
             }
             this._bStartupReadyMarked = true;
             ReadinessTelemetryRuntime.markControllerStage(this, ReadinessTelemetryContracts.STAGES.SHELL_READY, {
-                route: String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.CURRENT_ROUTE_NAME, "") || "").trim()
+                route: String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.CURRENT_ROUTE_NAME, "") || "").trim()
             });
             if (SchedulingRuntime.hasAnimationFrameSupport()) {
                 SchedulingRuntime.nextFrame(function () {
@@ -616,7 +614,7 @@ sap.ui.define([
                 this._oShellUserBinding.attachChange(this._fnShellStateChange);
                 this._oShellFrontendSourceBinding = oState.bindProperty("/frontendConfigSource");
                 this._oShellFrontendSourceBinding.attachChange(this._fnShellStateChange);
-                this._oShellSelectedIdBinding = oState.bindProperty(ModelPathContracts.SELECTED_ID);
+                this._oShellSelectedIdBinding = oState.bindProperty(StatePaths.SELECTED_ID);
                 this._oShellSelectedIdBinding.attachChange(this._fnShellStateChange);
                 this._oShellRouteBinding = oState.bindProperty("/currentRouteName");
                 this._oShellRouteBinding.attachChange(this._fnShellStateChange);

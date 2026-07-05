@@ -1,10 +1,12 @@
 sap.ui.define([
+    "sap/ui/core/routing/HashChanger",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/DebugLogger",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeRules",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteHashResolver",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (DebugLogger, RouteModeRules, ModelStateRuntime, NavigationContracts, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (HashChanger, DebugLogger, RouteModeRules, RouteHashResolver, ModelStateRuntime, NavigationContracts, StatePaths) {
     "use strict";
 
     function debugLog(sEvent, oPayload) {
@@ -25,15 +27,15 @@ sap.ui.define([
         }
         if (sRoute === NavigationContracts.ROUTES.ANALYTICS) {
             return normalizeId(
-                ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
+                ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "")
             );
         }
         if (NavigationContracts.isDetailRoute(sRoute) && sArgId) {
             return sArgId;
         }
         return normalizeId(
-            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") ||
-            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") ||
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "")
         );
     }
 
@@ -48,8 +50,8 @@ sap.ui.define([
             return sArgId;
         }
         return normalizeId(
-            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") ||
-            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") ||
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "")
         );
     }
 
@@ -66,25 +68,25 @@ sap.ui.define([
             return null;
         }
 
-        sPrevSelectedId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, ""));
-        sPrevActiveObjectId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, ""));
+        sPrevSelectedId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, ""));
+        sPrevActiveObjectId = normalizeId(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, ""));
         sPrevRouteName = String(
-            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH
         ).trim() || NavigationContracts.ROUTES.SEARCH;
         sNextSelectedId = resolveSelectedId(sRouteName, mArgs, oStateModel);
         sNextActiveObjectId = resolveActiveObjectId(sRouteName, mArgs, oStateModel);
         sNextRouteName = String(sRouteName || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
 
         if (sPrevSelectedId !== sNextSelectedId) {
-            ModelStateRuntime.writeOnModel(oStateModel, ModelPathContracts.SELECTED_ID, sNextSelectedId);
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.SELECTED_ID, sNextSelectedId);
             bChanged = true;
         }
         if (sPrevActiveObjectId !== sNextActiveObjectId) {
-            ModelStateRuntime.writeOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, sNextActiveObjectId);
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, sNextActiveObjectId);
             bChanged = true;
         }
         if (sPrevRouteName !== sNextRouteName) {
-            ModelStateRuntime.writeOnModel(oStateModel, ModelPathContracts.CURRENT_ROUTE_NAME, sNextRouteName);
+            ModelStateRuntime.writeOnModel(oStateModel, StatePaths.CURRENT_ROUTE_NAME, sNextRouteName);
             bChanged = true;
         }
 
@@ -99,21 +101,30 @@ sap.ui.define([
         this._oRouter = mDeps.router;
         this._oStateModel = mDeps.stateModel;
         this._fnRouteMatched = this._onAnyRouteMatched.bind(this);
+        this._fnHashChanged = this._onHashChanged.bind(this);
     }
 
     RouteModeCoordinator.prototype.start = function () {
         if (!this._oStateModel || !this._oRouter) {
             return;
         }
-        this._oRouter.attachRoutePatternMatched(this._fnRouteMatched);
+        this._oHashChanger = HashChanger.getInstance();
+        this._oHashChanger.attachEvent("hashChanged", this._fnHashChanged);
+        this._onHashChanged();
         debugLog("start");
     };
 
     RouteModeCoordinator.prototype.stop = function () {
-        if (this._oRouter) {
-            this._oRouter.detachRoutePatternMatched(this._fnRouteMatched);
+        if (this._oHashChanger) {
+            this._oHashChanger.detachEvent("hashChanged", this._fnHashChanged);
+            this._oHashChanger = null;
         }
         debugLog("stop");
+    };
+
+    RouteModeCoordinator.prototype._onHashChanged = function () {
+        var sHash = this._oHashChanger ? this._oHashChanger.getHash() : "";
+        this._onAnyRouteMatched(RouteHashResolver.buildRouteEvent(RouteHashResolver.resolveRouteFromHash(sHash)));
     };
 
     RouteModeCoordinator.prototype._onAnyRouteMatched = function (oEvent) {
@@ -126,7 +137,7 @@ sap.ui.define([
             debugLog("routeMatched", {
                 expectedLayout: sNextLayout,
                 route: sRouteName,
-                selectedId: ModelStateRuntime.readOnModel(this._oStateModel, ModelPathContracts.SELECTED_ID, null)
+                selectedId: ModelStateRuntime.readOnModel(this._oStateModel, StatePaths.SELECTED_ID, null)
             });
         }
     };

@@ -21,46 +21,24 @@ sap.ui.define([
         );
     }
 
-    function getRouter(oController) {
-        return oController && oController.getRouter ? oController.getRouter() : null;
-    }
-
-    function getRouteRegistry(oController) {
-        oController._analyticsRouteRegistry = oController._analyticsRouteRegistry || [];
-        return oController._analyticsRouteRegistry;
-    }
-
     function attachRouteHandlers(oController, aRoutes) {
-        var oRouter = getRouter(oController);
-        if (!oRouter || !Array.isArray(aRoutes)) {
+        if (!Array.isArray(aRoutes) || typeof oController.attachRouteMatched !== "function") {
             return;
         }
         aRoutes.forEach(function (oRouteConfig) {
             var sName = String(oRouteConfig && oRouteConfig.name || "").trim();
             var fnHandler = oRouteConfig && oRouteConfig.handler;
-            var oRoute;
-            if (!sName || typeof fnHandler !== "function" || !oRouter.getRoute) {
+            if (!sName || typeof fnHandler !== "function") {
                 return;
             }
-            oRoute = oRouter.getRoute(sName);
-            if (!oRoute || !oRoute.attachPatternMatched) {
-                return;
-            }
-            oRoute.attachPatternMatched(fnHandler, oController);
-            getRouteRegistry(oController).push({
-                route: oRoute,
-                handler: fnHandler
-            });
+            oController.attachRouteMatched(sName, fnHandler);
         });
     }
 
     function detachRouteHandlers(oController) {
-        getRouteRegistry(oController).forEach(function (oEntry) {
-            if (oEntry.route && oEntry.route.detachPatternMatched) {
-                oEntry.route.detachPatternMatched(oEntry.handler, oController);
-            }
-        });
-        oController._analyticsRouteRegistry = [];
+        if (typeof oController.detachAllRouteMatched === "function") {
+            oController.detachAllRouteMatched();
+        }
     }
 
     function startRefreshTimer(oController) {
@@ -133,7 +111,6 @@ sap.ui.define([
         oController._bAnalyticsInitialRouteHandled = null;
         oController._bAnalyticsRouteActive = null;
         oController._iAnalyticsRouteRefreshTimer = null;
-        oController._analyticsRouteRegistry = null;
     }
 
     function onRouteEnter(oController) {

@@ -6,7 +6,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchReturnRediscoveryRuntime",
@@ -14,7 +13,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, ModelPathContracts, NavigationContracts, WorkflowContracts, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
+], function (Result, Effects, DetailAuthorizationRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ViewPathContracts, NavigationContracts, WorkflowContracts, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -91,12 +90,12 @@ sap.ui.define([
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_STATE, WorkflowContracts.AUTOSAVE_STATES.IDLE),
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_AUTOSAVE_LAST_SAVED_AT, null),
                     Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false),
-                    Effects.modelPatch(STATE_MODEL, ModelPathContracts.LOCK_OPERATION_PENDING, false),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.LOCK_OPERATION_PENDING, false),
                     Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
                     Effects.modelPatch(SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN),
-                    Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, null),
-                    Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, null),
-                    Effects.modelPatch(STATE_MODEL, ModelPathContracts.SEARCH_RETURN_CONTEXT, SearchReturnRediscoveryRuntime.buildContext({
+                    Effects.modelPatch(STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID, null),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.SELECTED_ID, null),
+                    Effects.modelPatch(STATE_MODEL, StatePaths.SEARCH_RETURN_CONTEXT, SearchReturnRediscoveryRuntime.buildContext({
                         dbKey: sDbKey,
                         reason: DETAIL_REASONS.DETAIL_DELETE_COMPLETED,
                         mode: SearchReturnRediscoveryRuntime.MODES.DELETE,

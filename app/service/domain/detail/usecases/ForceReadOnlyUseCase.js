@@ -5,13 +5,12 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/DetailRuntimePayload",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailContracts, MessageKeyConstants) {
+], function (Result, Effects, ModelStateRuntime, DetailRuntimePayload, StatePaths, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, ModelContracts, DetailContracts, MessageKeyConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -108,7 +107,7 @@ sap.ui.define([
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_LOCK_LOST_REASON, sReason),
                 Effects.modelPatch(STATE_MODEL, StatePaths.PENDING_NAVIGATION_INTENT, null),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DIRTY, bPreserveDirty),
-                Effects.modelPatch(STATE_MODEL, ModelPathContracts.LOCK_EXPIRES, null),
+                Effects.modelPatch(STATE_MODEL, StatePaths.LOCK_EXPIRES, null),
                 Effects.modelPatch(MODELS.SHELL, MODEL_PATHS.SHELL_LOCK, {
                     ok: false,
                     reason: sReason,

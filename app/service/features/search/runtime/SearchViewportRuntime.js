@@ -116,10 +116,16 @@ sap.ui.define([
         return isFinite(iValue) ? iValue : 0;
     }
 
-    function isCompactStickyViewport() {
-        return typeof window !== "undefined"
-            && Number(window.innerWidth || 0) > 0
-            && Number(window.innerWidth || 0) <= SEARCH_MOBILE_STICKY_BREAKPOINT_PX;
+    /* Использует ширину реального DOM-контейнера вью, а не window.innerWidth:
+     * в двух-колоночном FlexibleColumnLayout (Search + Detail/Analytics) окно
+     * остаётся широким, но колонка Search может сжаться до мобильной ширины —
+     * ранее компакт-режим в этом случае не активировался вовсе. */
+    function isCompactStickyViewport(oController) {
+        var oViewDom = resolveViewDom(oController);
+        var iWidth = oViewDom && oViewDom.getBoundingClientRect
+            ? oViewDom.getBoundingClientRect().width
+            : (typeof window !== "undefined" ? window.innerWidth : 0);
+        return Number(iWidth || 0) > 0 && Number(iWidth || 0) <= SEARCH_MOBILE_STICKY_BREAKPOINT_PX;
     }
 
     function resolveShellHeaderOffset(oController, oScrollHost) {
@@ -147,7 +153,7 @@ sap.ui.define([
         var iTopBase = resolveShellHeaderOffset(oController, oScrollHost);
         var iActionTop;
         var iToolbarTop;
-        var bCompactSticky = isCompactStickyViewport();
+        var bCompactSticky = isCompactStickyViewport(oController);
 
         if (!iDockHeight) {
             iDockHeight = iFilterHeight + iActionHeight + iToolbarHeight;
@@ -193,7 +199,7 @@ sap.ui.define([
             resolveDomHeight(oResultsToolbarDom),
             resolveDomHeight(oFilterCard),
             resolveDomHeight(oActionRail),
-            isCompactStickyViewport() ? "compact" : "desktop"
+            isCompactStickyViewport(oController) ? "compact" : "desktop"
         ].join("|");
     }
 

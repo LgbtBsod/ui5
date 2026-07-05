@@ -10,7 +10,6 @@ sap.ui.define([
         sessionId: null,
         tabSessionId: null,
         activeObjectId: null,
-        copySourceId: null,
         navGuardBypass: false,
         analyticsNavReturn: {
             hash: "",

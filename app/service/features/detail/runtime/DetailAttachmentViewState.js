@@ -3,11 +3,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel"
-], function (ModelContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, ModelPathContracts, WorkflowContracts, DetailUseCaseConstants, CreateSentinel) {
+], function (ModelContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, WorkflowContracts, DetailUseCaseConstants, CreateSentinel) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -23,9 +22,9 @@ sap.ui.define([
         var oDetailModel = getModel(oController, MODELS.DETAIL);
         return String(
             ModelStateRuntime.readOnModel(oDetailModel, DETAIL_MODEL_PATHS.ROOT_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, StatePaths.POST_OPEN_HYDRATED_ROOT_ID, "")
             || ""
         ).trim();
     }

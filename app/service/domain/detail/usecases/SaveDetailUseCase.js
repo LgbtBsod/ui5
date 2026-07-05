@@ -10,7 +10,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailAttachmentDeltaRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailStateAccess",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPostOpenRuntime",
@@ -22,7 +21,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts"
-], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentSaveRuntime, DetailAttachmentDeltaRuntime, DetailStateAccess, ModelPathContracts, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, NavigationContracts) {
+], function (Result, Effects, DetailSaveRuntime, DetailRuntimePayload, UseCaseValue, StatePaths, DeltaPayloadBuilder, CreateSentinel, DetailAttachmentSaveRuntime, DetailAttachmentDeltaRuntime, DetailStateAccess, WorkflowContracts, DetailPersistenceRuntime, DetailPostOpenRuntime, CloneUtil, ChecklistIdentity, SearchReturnRediscoveryRuntime, ModelContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, NavigationContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -211,7 +210,7 @@ sap.ui.define([
                         if (sServerDbKey && !CreateSentinel.isCreateId(sServerDbKey)) {
                             aEffects.push(Effects.modelPatch(
                                 STATE_MODEL,
-                                ModelPathContracts.SEARCH_RETURN_CONTEXT,
+                                StatePaths.SEARCH_RETURN_CONTEXT,
                                 buildSearchReturnContext(
                                     bCreate ? SearchReturnRediscoveryRuntime.MODES.CREATE : SearchReturnRediscoveryRuntime.MODES.SAVE,
                                     sServerDbKey,
@@ -237,17 +236,17 @@ sap.ui.define([
                                         isKilled: false
                                     }));
                                 } else {
-                                    aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sServerDbKey));
-                                    aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sServerDbKey));
-                                    aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sServerDbKey));
+                                    aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID, sServerDbKey));
+                                    aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.SELECTED_ID, sServerDbKey));
+                                    aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.POST_OPEN_HYDRATED_ROOT_ID, sServerDbKey));
                                     aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
                                     aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, WorkflowContracts.LOCK_STATES.READ_ONLY));
                                     aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_AUTOSAVE_ENABLED, false));
                                 }
                                 aEffects.push(Effects.navigate(NavigationContracts.ROUTES.DETAIL, { id: sServerDbKey }, true));
                             } else {
-                                aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sServerDbKey));
-                                aEffects.push(Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sServerDbKey));
+                                aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID, sServerDbKey));
+                                aEffects.push(Effects.modelPatch(STATE_MODEL, StatePaths.SELECTED_ID, sServerDbKey));
                             }
                         }
                         return Result.ok({ serverSnapshot: oSavedSnapshot || {}, selectedSnapshot: oSelectedSnapshot || {}, savedAt: sNow, lock: oLockResult || null }, aEffects);

@@ -394,7 +394,8 @@ body.chkAppRoot.appDark .chkApp .analyticsChartPanel .sapMPanelContent {
 }
 
 .chkApp .analyticsReportDialog .sapMDialogSection {
-  background: color-mix(in srgb, var(--theme-block-bg) 96%, transparent);
+  /* color-mix() cannot blend a gradient (--theme-block-bg); use the token directly. */
+  background: var(--theme-block-bg);
 }
 
 .chkApp .analyticsReportTitle.sapMTitle,

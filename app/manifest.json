@@ -179,7 +179,7 @@
             "search",
             "detail"
           ],
-          "layout": "TwoColumnsMidExpanded"
+          "layout": "TwoColumnsBeginExpanded"
         }
       ],
       "targets": {

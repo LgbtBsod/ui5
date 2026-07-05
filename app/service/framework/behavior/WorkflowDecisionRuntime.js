@@ -5,8 +5,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/behavior/WorkflowBehaviorHelpers",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
+    "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
 ], function (
     LockAdapter,
     StatePaths,
@@ -14,8 +13,7 @@ sap.ui.define([
     WorkflowBehaviorHelpers,
     CreateSentinel,
     ModelContracts,
-    MessageCodeConstants,
-    ModelPathContracts
+    MessageCodeConstants
 ) {
     "use strict";
 
@@ -34,8 +32,8 @@ sap.ui.define([
         var oController = mContext && mContext.controller;
         var oStateModel = ModelStateRuntime.model(oController, STATE_MODEL);
         var sDbKey = String(
-            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "")
             || ""
         ).trim();
 

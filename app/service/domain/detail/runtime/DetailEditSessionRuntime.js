@@ -5,7 +5,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/usecases/ForceReadOnlyUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/lock/usecases/TakeoverLockUseCase",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailWorkflowRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailDirtyStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailEditRestoreRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailResetRuntime"
 ], function (
@@ -15,7 +14,6 @@ sap.ui.define([
     ForceReadOnlyUseCase,
     TakeoverLockUseCase,
     DetailWorkflowRuntime,
-    DetailDirtyStateRuntime,
     DetailEditRestoreRuntime,
     DetailResetRuntime
 ) {
@@ -70,7 +68,7 @@ sap.ui.define([
     };
 
     DetailEditSessionRuntime.prototype.markDirty = function (oController) {
-        return DetailDirtyStateRuntime.markDirty(oController);
+        return DetailResetRuntime.markDirty(oController);
     };
 
     DetailEditSessionRuntime.prototype.clearAnalyticsReturnRestore = function (oController) {

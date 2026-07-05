@@ -107,8 +107,8 @@ sap.ui.define([
 
         assert.strictEqual(
             oController.getModel(ModelContracts.MODELS.SHELL).getProperty(ModelContracts.MODEL_PATHS.SHELL_LAYOUT),
-            NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED,
-            "detail route owns split layout"
+            NavigationContracts.LAYOUTS.TWO_COLUMNS_BEGIN_EXPANDED,
+            "detail route owns split layout with the search column kept wide"
         );
     });
 

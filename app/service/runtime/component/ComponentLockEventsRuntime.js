@@ -2,7 +2,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/execution/FeedbackBannerRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/EditSessionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
@@ -11,7 +11,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentDetailMetaSyncRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts"
-], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, ModelPathContracts, ModelContracts, WorkflowContracts, MessageCodeConstants, MessageKeyConstants, ShellStateRuntime, RuntimeEventContracts, ComponentDetailMetaSyncRuntime, ComponentListenerContracts) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, EditSessionRuntime, StatePaths, ModelContracts, WorkflowContracts, MessageCodeConstants, MessageKeyConstants, ShellStateRuntime, RuntimeEventContracts, ComponentDetailMetaSyncRuntime, ComponentListenerContracts) {
     "use strict";
 
     var MODEL_PATHS = ModelContracts.MODEL_PATHS;
@@ -23,7 +23,7 @@ sap.ui.define([
 
     function readCurrentLockScope(oStateModel, oStatePaths) {
         return {
-            dbKey: String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim(),
+            dbKey: String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim(),
             sessionGuid: String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.SESSION_ID, "") || "").trim(),
             editMode: String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_EDIT_MODE, "") || "").trim(),
             lockState: String(ModelStateRuntime.readOnModel(oStateModel, oStatePaths.WORKFLOW_DETAIL_LOCK_STATE, "") || "").trim()
@@ -107,7 +107,7 @@ sap.ui.define([
                 }));
             }
             return oComponent._detailFacade.onLockLost({
-                dbKey: ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, ""),
+                dbKey: ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, ""),
                 reason: (oPayload && (oPayload.code || oPayload.reason_code)) || DETAIL_CODES.KILLED,
                 preserveDirty: false
             }, oComponent._ctx).then(function (oResult) {

@@ -6,9 +6,11 @@ const path = require('path');
 const ROOT = process.cwd();
 const metadataPath = path.join(ROOT, 'app', 'localService', 'metadata.xml');
 const metadata = fs.readFileSync(metadataPath, 'utf8');
-const mockApiPath = path.join(ROOT, 'backend', 'mock_gateway', 'api', 'gateway_canonical_api.py');
+const mockApiPath = path.join(ROOT, 'backend', 'mock_gateway', 'api', 'gateway_core.py');
 const mockApi = fs.readFileSync(mockApiPath, 'utf8');
-const parentBoundaryBlock = (mockApi.match(/def _boundary_parent_key[\s\S]*?return ""/) || [''])[0];
+const helpersPath = path.join(ROOT, 'backend', 'mock_gateway', 'api', 'gateway_helpers.py');
+const mockHelpers = fs.readFileSync(helpersPath, 'utf8');
+const parentBoundaryBlock = (mockHelpers.match(/def resolve_parent_key[\s\S]*?\n\n/) || [''])[0];
 const issues = [];
 
 function add(message) {
@@ -39,11 +41,11 @@ function entityBlock(name) {
   if (!/Name="DB_KEY"/.test(block)) {
     add(`child entity ${name} missing DB_KEY`);
   }
-  if (!/Name="DB_KEY" Type="Edm.Binary"/.test(block)) {
-    add(`child entity ${name} must expose DB_KEY as Edm.Binary`);
+  if (!/Name="DB_KEY" Type="Edm.String"/.test(block)) {
+    add(`child entity ${name} must expose DB_KEY as Edm.String (bin-to-hex string32 transport)`);
   }
-  if (!/Name="PARENT_KEY" Type="Edm.Binary"/.test(block)) {
-    add(`child entity ${name} must expose PARENT_KEY as Edm.Binary`);
+  if (!/Name="PARENT_KEY" Type="Edm.String"/.test(block)) {
+    add(`child entity ${name} must expose PARENT_KEY as Edm.String (bin-to-hex string32 transport)`);
   }
 });
 

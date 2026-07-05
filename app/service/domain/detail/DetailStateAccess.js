@@ -1,9 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts"
-], function (ModelContracts, ModelPathContracts, DetailUseCaseConstants, ViewPathContracts) {
+], function (ModelContracts, StatePaths, DetailUseCaseConstants, ViewPathContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -47,7 +47,7 @@ sap.ui.define([
 
     function readRequiredFields(mCtx) {
         var oUiState = uiState(mCtx);
-        var aRequired = oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.REQUIRED_FIELDS);
+        var aRequired = oUiState && oUiState.get(STATE_MODEL, StatePaths.REQUIRED_FIELDS);
         return Array.isArray(aRequired) && aRequired.length ? aRequired : null;
     }
 

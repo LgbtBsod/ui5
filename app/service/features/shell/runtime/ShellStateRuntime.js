@@ -6,11 +6,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentBootstrapContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiSemanticConstants"
-], function (LayoutStateRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, ModelPathContracts, MessageKeyConstants, ComponentBootstrapContracts, UiSemanticConstants) {
+], function (LayoutStateRuntime, PermissionPresentation, CreateSentinel, ModelStateRuntime, NavigationContracts, WorkflowContracts, ModelContracts, StatePaths, MessageKeyConstants, ComponentBootstrapContracts, UiSemanticConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -146,9 +146,9 @@ sap.ui.define([
         var sActiveDbKey;
         var sSelectedDbKey;
 
-        sHydratedDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
-        sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
-        sSelectedDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "") || "").trim();
+        sHydratedDbKey = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
+        sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
+        sSelectedDbKey = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "") || "").trim();
         sCurrentDbKey = sHydratedDbKey || sActiveDbKey || sSelectedDbKey;
         sEditMode = WorkflowContracts.normalizeEditMode(
             ModelStateRuntime.readOnModel(oStateModel, "/workflow/detail/editMode", WorkflowContracts.EDIT_MODES.READ)
@@ -194,8 +194,8 @@ sap.ui.define([
         ensureShellDefaults(oController);
         oShellLockState = resolveShellLockState(oState);
         sSelectedDbKey = String(
-            ModelStateRuntime.readOnModel(oState, ModelPathContracts.ACTIVE_OBJECT_ID, "")
-            || ModelStateRuntime.readOnModel(oState, ModelPathContracts.SELECTED_ID, "")
+            ModelStateRuntime.readOnModel(oState, StatePaths.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oState, StatePaths.SELECTED_ID, "")
             || ""
         ).trim();
         sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, "/currentRouteName", NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
@@ -211,7 +211,7 @@ sap.ui.define([
         bShowHints = !!ModelStateRuntime.read(oController, SHELL_MODEL, MODEL_PATHS.SHELL_PERSONALIZATION_SHOW_HINTS, false);
         sFrontendSource = String(
             ModelStateRuntime.read(oController, STATE_MODEL, "/frontendConfigSource", "")
-            || ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.BACKEND_MODE, "")
+            || ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.BACKEND_MODE, "")
             || ComponentBootstrapContracts.FRONTEND_CONFIG_SOURCE.GATEWAY_RUNTIME
         );
         bSearchWorkspace = !sSelectedDbKey;

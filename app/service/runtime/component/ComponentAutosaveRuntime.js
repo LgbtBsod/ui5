@@ -6,11 +6,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailPersistenceRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
-], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, ModelPathContracts, MessageKeyConstants, RuntimeEventContracts, MessageCodeConstants) {
+], function (ModelStateRuntime, FeedbackBannerRuntime, ComponentSaveGuardContracts, CloneUtil, CreateSentinel, WorkflowContracts, DetailPersistenceRuntime, StatePaths, MessageKeyConstants, RuntimeEventContracts, MessageCodeConstants) {
     "use strict";
 
     var BANNER_LEVEL = ComponentSaveGuardContracts.BANNER_LEVEL;
@@ -28,7 +28,7 @@ sap.ui.define([
 
     function hasHealthyAutosaveLockState(oStateModel, StatePaths) {
         var oUiState = createUiStateAdapter(oStateModel);
-        var sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        var sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
         return DetailPersistenceRuntime.canAutosaveFromState(oUiState, {
             dbKey: sActiveDbKey,
             isCreateDraft: CreateSentinel.isCreateId(sActiveDbKey)
@@ -74,7 +74,7 @@ sap.ui.define([
             },
             guardFn: function () {
                 var oUiState = createUiStateAdapter(oStateModel);
-                var sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+                var sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
                 return DetailPersistenceRuntime.canScheduleAutosave(oUiState, {
                     dbKey: sActiveDbKey,
                     isCreateDraft: CreateSentinel.isCreateId(sActiveDbKey)
@@ -82,14 +82,14 @@ sap.ui.define([
             },
             shouldSave: function () {
                 var oUiState = createUiStateAdapter(oStateModel);
-                var sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+                var sActiveDbKey = String(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
                 return DetailPersistenceRuntime.canScheduleAutosave(oUiState, {
                     dbKey: sActiveDbKey,
                     isCreateDraft: CreateSentinel.isCreateId(sActiveDbKey)
                 });
             },
             buildPayload: function () {
-                var sId = ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "");
+                var sId = ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "");
                 var oCurrent = fnResolveDetailCurrent();
                 var oBase = ModelStateRuntime.readOnModel(oDetailModel, "/base", {}) || {};
                 if (!sId || CreateSentinel.isCreateId(sId) || !oCurrent || !oCurrent.root || oCurrent.root.id !== sId) {

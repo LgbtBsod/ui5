@@ -1,10 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants"
-], function (ModelContracts, NavigationContracts, ModelPathContracts, StatePaths, MessageCodeConstants) {
+], function (ModelContracts, NavigationContracts, StatePaths, MessageCodeConstants) {
     "use strict";
 
     return Object.freeze({
@@ -14,12 +13,12 @@ sap.ui.define([
             MASTER_DATA: ModelContracts.MODELS.MASTER_DATA
         }),
         PATHS: Object.freeze({
-            ACTIVE_OBJECT_ID: ModelPathContracts.ACTIVE_OBJECT_ID,
+            ACTIVE_OBJECT_ID: StatePaths.ACTIVE_OBJECT_ID,
             DETAIL_ACCESS_GUARD: "/detailAccessGuard",
             IS_DIRTY: "/isDirty",
             IS_LOADING: StatePaths.IS_LOADING,
             NAV_GUARD_BYPASS: "/navGuardBypass",
-            SELECTED_ID: ModelPathContracts.SELECTED_ID
+            SELECTED_ID: StatePaths.SELECTED_ID
         }),
         VALUES: Object.freeze({
             AUTHORIZED: "AUTHORIZED",

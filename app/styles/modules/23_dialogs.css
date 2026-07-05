@@ -317,7 +317,8 @@ body.chkAppRoot .shellPopover .sapMDialogScrollCont {
   padding: 0.68rem 0.76rem;
   border-radius: calc(var(--radius-lg) - 0.14rem);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 42%, transparent);
-  background: color-mix(in srgb, var(--theme-block-bg) 96%, transparent);
+  /* color-mix() cannot blend a gradient (--theme-block-bg); use the token directly. */
+  background: var(--theme-block-bg);
 }
 
 .chkApp .shellItemHeader {

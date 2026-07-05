@@ -2,10 +2,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/ChecklistIdentity",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionStateRuntime"
-], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, ModelPathContracts, ChecklistIdentity, SearchSelectionStateRuntime) {
+], function (ControllerViewStateRuntime, ModelStateRuntime, ModelContracts, StatePaths, ChecklistIdentity, SearchSelectionStateRuntime) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -53,13 +53,13 @@ sap.ui.define([
         return buildContext(ModelStateRuntime.read(
             oController,
             STATE_MODEL,
-            ModelPathContracts.SEARCH_RETURN_CONTEXT,
+            StatePaths.SEARCH_RETURN_CONTEXT,
             null
         ));
     }
 
     function clearContext(oController) {
-        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.SEARCH_RETURN_CONTEXT, null);
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.SEARCH_RETURN_CONTEXT, null);
     }
 
     function hasLegacyRefreshFlag(_oController) {

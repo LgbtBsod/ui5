@@ -532,6 +532,7 @@ def _to_current_user(profile: dict) -> dict:
             "FullName": str(profile.get("full_name") or ""),
             "PermissionsCsv": ",".join(permission_codes),
             "PermissionRulesJson": json.dumps(permissions, ensure_ascii=False),
+            "CanCreate": "01" in permission_codes,
             "CanView": "03" in permission_codes,
             "CanEdit": "02" in permission_codes,
             "CanDelete": "06" in permission_codes,

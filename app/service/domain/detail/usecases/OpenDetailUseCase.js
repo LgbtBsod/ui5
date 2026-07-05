@@ -12,12 +12,11 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/DetailSaveRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/TimerDefaults"
-], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, ModelPathContracts, CloneUtil, DetailSaveRuntime, ModelContracts, TimerDefaults) {
+], function (Result, Effects, DetailAuthorizationRuntime, ViewPathContracts, UseCaseValue, StatePaths, CreateSentinel, WorkflowContracts, UiAssetPaths, NavigationContracts, DetailContracts, MessageCodeConstants, MessageKeyConstants, CloneUtil, DetailSaveRuntime, ModelContracts, TimerDefaults) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -108,8 +107,8 @@ sap.ui.define([
     }
 
     function resolveEditableOpenState(oUiState, sCurrentDbKey) {
-        var sHydratedDbKey = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID)) || "").trim();
-        var sActiveDbKey = String((oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID)) || "").trim();
+        var sHydratedDbKey = String((oUiState && oUiState.get(STATE_MODEL, StatePaths.POST_OPEN_HYDRATED_ROOT_ID)) || "").trim();
+        var sActiveDbKey = String((oUiState && oUiState.get(STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID)) || "").trim();
         var sEditMode = WorkflowContracts.normalizeEditMode(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE));
         var sLockState = WorkflowContracts.normalizeLockState(oUiState && oUiState.get(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE));
         var bMatchesDbKey = !!sCurrentDbKey && (sHydratedDbKey === sCurrentDbKey || sActiveDbKey === sCurrentDbKey);
@@ -312,9 +311,9 @@ sap.ui.define([
                     permissionKnown: true,
                     lockKnown: true
                 }),
-                Effects.modelPatch(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, sCanonicalDbKey),
-                Effects.modelPatch(STATE_MODEL, ModelPathContracts.SELECTED_ID, sCanonicalDbKey),
-                Effects.modelPatch(STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, sCanonicalDbKey),
+                Effects.modelPatch(STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID, sCanonicalDbKey),
+                Effects.modelPatch(STATE_MODEL, StatePaths.SELECTED_ID, sCanonicalDbKey),
+                Effects.modelPatch(STATE_MODEL, StatePaths.POST_OPEN_HYDRATED_ROOT_ID, sCanonicalDbKey),
                 Effects.modelPatch(STATE_MODEL, StatePaths.UI_BUSY_DETAIL, false),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, oEditState.editMode),
                 Effects.modelPatch(STATE_MODEL, StatePaths.WORKFLOW_DETAIL_LOCK_STATE, oEditState.lockState),

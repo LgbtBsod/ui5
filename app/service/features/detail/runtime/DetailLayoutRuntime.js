@@ -2,10 +2,10 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/LayoutStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/WorkspaceRouteNavigation",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts"
-], function (LayoutStateRuntime, WorkspaceRouteNavigation, ModelStateRuntime, ModelPathContracts, ModelContracts, NavigationContracts) {
+], function (LayoutStateRuntime, WorkspaceRouteNavigation, ModelStateRuntime, StatePaths, ModelContracts, NavigationContracts) {
     "use strict";
 
     var SHELL_MODEL = ModelContracts.MODELS.SHELL;
@@ -20,9 +20,9 @@ sap.ui.define([
         var oStateModel = getModel(oController, ModelContracts.MODELS.STATE);
         return String(
             ModelStateRuntime.readOnModel(oDetailModel, "/root/id", "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, StatePaths.POST_OPEN_HYDRATED_ROOT_ID, "")
             || ""
         ).trim();
     }

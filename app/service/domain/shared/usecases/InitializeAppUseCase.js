@@ -1,9 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/Result",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/BackendModeContracts"
-], function (Result, GatewayClient, ModelPathContracts, BackendModeContracts) {
+], function (Result, GatewayClient, StatePaths, BackendModeContracts) {
     "use strict";
 
     /**
@@ -17,7 +17,7 @@ sap.ui.define([
             var oStateModel = ctx && ctx.stateModel;
 
             if (oStateModel && oStateModel.setProperty) {
-                oStateModel.setProperty(ModelPathContracts.UI_BUSY_GLOBAL, false);
+                oStateModel.setProperty(StatePaths.UI_BUSY_GLOBAL, false);
                 oStateModel.setProperty("/locationsLoading", false);
                 oStateModel.setProperty(BackendModeContracts.PATHS.BACKEND_MODE, BackendModeContracts.MODES.REAL);
                 oStateModel.setProperty(BackendModeContracts.PATHS.BACKEND_SERVICE_URL, GatewayClient.serviceUrl() || "");

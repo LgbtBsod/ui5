@@ -3,11 +3,13 @@ sap.ui.define([
 ], function (GatewayContractConstants) {
     "use strict";
 
+    /* Backend serializes DB_KEY/PARENT_KEY as bin-to-hex string32 (Edm.String), not raw Edm.Binary
+     * - so filters/keys must use plain string literals, never the binary'...' OData literal. */
     var TYPES = Object.freeze({
         ATTACHMENT_KEY: "Edm.String",
         CURRENT_ALIAS_KEY: "Edm.String",
-        DB_KEY: "Edm.Binary",
-        PARENT_KEY: "Edm.Binary"
+        DB_KEY: "Edm.String",
+        PARENT_KEY: "Edm.String"
     });
 
     var IDENTITY = Object.freeze({

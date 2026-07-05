@@ -1,11 +1,10 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailRuntimePolicy",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ModelPathContracts, StatePaths, ModelStateRuntime, DetailRuntimePolicy, WorkflowContracts, ModelContracts) {
+], function (StatePaths, ModelStateRuntime, DetailRuntimePolicy, WorkflowContracts, ModelContracts) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -25,11 +24,11 @@ sap.ui.define([
     }
 
     function readAnalyticsReturnRestore(oController) {
-        return ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ANALYTICS_RETURN_RESTORE_EDIT, null) || null;
+        return ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.ANALYTICS_RETURN_RESTORE_EDIT, null) || null;
     }
 
     function clearAnalyticsReturnRestore(oController) {
-        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ANALYTICS_RETURN_RESTORE_EDIT, null);
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.ANALYTICS_RETURN_RESTORE_EDIT, null);
     }
 
     function requestAnalyticsEditRestore(oController, sDbKey, mHooks) {
@@ -69,7 +68,7 @@ sap.ui.define([
             clearAnalyticsReturnRestore(oController);
             return Promise.resolve(false);
         }
-        ModelStateRuntime.write(oController, STATE_MODEL, ModelPathContracts.ANALYTICS_RETURN_RESTORE_EDIT, {
+        ModelStateRuntime.write(oController, STATE_MODEL, StatePaths.ANALYTICS_RETURN_RESTORE_EDIT, {
             dbKey: sRequestedDbKey,
             requestedAt: oRestore && oRestore.requestedAt ? oRestore.requestedAt : new Date().toISOString(),
             attempts: iAttempts + 1
