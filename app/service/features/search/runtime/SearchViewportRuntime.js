@@ -6,9 +6,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/SearchContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/UiControlIds",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/search/contracts/SearchViewportContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/search/runtime/SearchSelectionRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/AppShellDomRuntime"
+    "PRODUCTION_CONTROL_CHECKLIST/service/features/shell/runtime/AppShellDomRuntime",
+    "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
 ], function (
     ModelStateRuntime,
     SchedulingRuntime,
@@ -17,9 +17,9 @@ sap.ui.define([
     SearchUiContracts,
     JsRuntime,
     UiControlIds,
-    SearchViewportContracts,
     SearchSelectionRuntime,
-    AppShellDomRuntime
+    AppShellDomRuntime,
+    ModelContracts
 ) {
     "use strict";
 
@@ -31,8 +31,10 @@ sap.ui.define([
     var SEARCH_HEADER_OFFSET_PADDING_PX = VIEWPORT.HEADER_OFFSET_PADDING_PX;
     var SEARCH_MOBILE_STICKY_BREAKPOINT_PX = VIEWPORT.MOBILE_STICKY_BREAKPOINT_PX;
     var SEARCH_VIEWPORT_LAYOUT_DEBOUNCE_MS = VIEWPORT.LAYOUT_DEBOUNCE_MS;
-    var STATE_MODEL = SearchViewportContracts.MODELS.STATE;
-    var STATE_PATHS = SearchViewportContracts.STATE_PATHS;
+    var STATE_MODEL = ModelContracts.MODELS.STATE;
+    var STATE_PATHS = Object.freeze({
+        SEARCH_SCROLL_STATE: "/searchScrollState"
+    });
     var TYPE_FUNCTION = JsRuntime.TYPEOF.FUNCTION;
 
     function getStateModel(oController) {
