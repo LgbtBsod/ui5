@@ -1,0 +1,106 @@
+/* ===================================================================
+   SAP PC Lite Check — CSS Custom Classes Convention
+   Префикс: pcLite — все кастомные классы проекта
+   =================================================================== */
+
+/* Banner (LiteCreateMode.js) */
+.pcLiteBanner {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 99;
+        background: var(--sapObjectHeader_Background, #fff);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        padding: 0.25rem 0 !important;
+        margin: 0 !important;
+}
+.pcLiteBanner .sapMText {
+        font-size: 0.75rem;
+        line-height: 1.2;
+}
+.pcLiteBanner .sapUiTinyMarginTop {
+        margin-top: 0.25rem !important;
+}
+
+html.pcLiteActive body {
+        box-sizing: border-box;
+        padding-top: var(--pc-lite-banner-height, 2.75rem);
+}
+
+.sapMPI {
+        overflow: visible;
+}
+.sapMPI .sapMPIBar,
+.sapMPI .sapMPIBarRemaining {
+        overflow: visible;
+        justify-content: center;
+}
+.sapMPI .sapMPIText {
+        position: relative;
+        z-index: 1;
+        overflow: visible;
+        text-overflow: clip;
+        text-align: center;
+}
+
+/* Flash guard для ValueHelpAutoApply.js — скрытие до готовности */
+.pcFlashGuardHidden {
+        visibility: hidden !important;
+}
+
+/* ===================================================================
+   SubTableCrud.js — Toolbar Buttons & Dialog (AUDIT FIX H1/H2)
+   =================================================================== */
+
+/* Add Entry Button (Добавить строку) */
+.pcLiteAddEntryButton {
+        /* Семантический класс для идентификации и кастомизации */
+}
+
+/* Delete Entry Button (Удалить строку) */
+.pcLiteDeleteEntryButton {
+        /* Семантический класс для идентификации и кастомизации */
+}
+
+/* Add Row Dialog (Диалог добавления строки) */
+.pcLiteAddRowDialog .sapMDialogHeader {
+        /* Кастомизация заголовка диалога при необходимости */
+}
+
+/* ===================================================================
+   ExcelExport.js — Export Button (AUDIT FIX H1)
+   =================================================================== */
+
+/* Export to Excel Button */
+.pcLiteExportButton {
+        /* Семантический класс для кнопки экспорта */
+}
+
+/* Превентивная защита от дублирования KPI: старая модель (annotations.xml)
+   не объявляет @UI.dataPoint на фасетах Object Page — сейчас класс здесь
+   ничего не гасит. Целевая CDS-модель (ZC_CheckRoot.ddls.asddls, фасет
+   'Kpi' — ChecksSuccess/BarriersSuccess) УЖЕ объявляет @UI.dataPoint —
+   после переноса на неё Fiori Elements начал бы рисовать собственный
+   прогресс-бар в заголовке поверх кастомных бейджей KpiBadges.js. Не
+   убирать при миграции на новую модель без ревью — иначе визуальный дубль. */
+.sapSmartTemplatesObjectPageDataPoint {
+        display: none !important;
+}
+
+/* Расширенный поиск в F4 (ValueHelpDialog): подписи полей обрезаются
+   эллипсисом в узкой grid-колонке лейбла — переносим на вторую строку
+   вместо потери текста. */
+.sapUiCompFilterLabel {
+        white-space: normal;
+        text-overflow: clip;
+}
+
+/* Тулбар "Скрыть/показать расширенный поиск" + "Применить" в ValueHelpDialog
+   тесен на узких экранах (framework-тулбар без overflow-меню) — уменьшаем
+   шрифт кнопки-переключателя, чтобы текст помещался без обрезания. */
+@media (max-width: 400px) {
+        .sapUiCompFilterBarToolbar .sapMTBShrinkItem .sapMBtnContent {
+                font-size: 0.75rem;
+        }
+}

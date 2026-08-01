@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <title>Управление проверками</title>
+        <link rel="stylesheet" href="css/style.css">
+        <style>
+                html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+                #content { height: 100%; }
+                /* Mobile: предотвращаем горизонтальный скролл */
+                @media (max-width: 600px) {
+                        html, body { overflow-x: hidden; }
+                }
+        </style>
+        <!--
+                Standalone bootstrap для Fiori Elements (Generic App) без FLP.
+                Mobile-friendly: viewport с maximum-scale=1 для предотвращения zoom
+                при фокусе на input (iOS Safari), apple/mobile-web-app-capable для
+                fullscreen режима на телефоне.
+                UI5 1.71 грузится с официального CDN.
+
+                data-sap-ui-libs ниже и sap.ui5.dependencies.libs в manifest.json —
+                ДВА независимых списка библиотек (см. аудит, Fragile Spot): этот
+                bootstrap-тег грузит библиотеки для standalone-запуска (без FLP),
+                manifest.json — для запуска через FLP-шелл. Структурно объединить
+                их нельзя (разный жизненный цикл загрузки), но при добавлении
+                новой библиотеки в один список — проверь и обновить второй.
+        -->
+        <!-- Security Fix: data-sap-ui-frameOptions="allow" отключал встроенную
+             защиту SAPUI5 от clickjacking полностью — любой сторонний сайт мог
+             заiframe'ить это транзакционное приложение. "trusted" — стандартный
+             выбор для приложения, которое ДОЛЖНО оставаться встраиваемым в
+             собственный FLP (см. flpSandbox.html, задачи #67-68 — embedded-
+             навигация встраивает index.html в iframe в рамках того же origin),
+             но больше не разрешает произвольный сторонний origin, в отличие от
+             "allow". -->
+
+        <!-- data-sap-ui-theme: только sap_fiori_3 доступна на этом ядре.
+             sap_horizon (и попытки поднять ядро до 1.96/1.150) проверялись
+             empirически — 1.71.82 тему "sap_horizon" не распознаёт вообще
+             (даже sap.ui.getCore().applyTheme('sap_horizon') из консоли
+             молча игнорируется, без ошибки), а более новое ядро прямо
+             запрещено ограничением по стеку (не выше 1.71 LTS). -->
+        <!-- Security Fix: бутстрап с публичного CDN (ui5.sap.com) на реальной
+             on-prem системе — нарушение ландшафтной политики (интернет-
+             зависимость + недоверенный источник кода ядра фреймворка). В
+             продуктивном/QA landscape ядро UI5 обязано грузиться из
+             собственного ABAP-репозитория системы (/sap/public/bc/ui5_ui5/).
+             CDN остаётся только резервным путём для локальной разработки
+             против serve.py (мок не отдаёт ресурсы ядра UI5).
+
+             document.write — намеренно, не document.createElement+appendChild:
+             appendChild после парсинга head даёt script только с async=false,
+             что упорядочивает его ТОЛЬКО относительно других так же вставленных
+             скриптов, но не блокирует парсер — body-скрипт ниже (sap.ui.getCore()
+             .attachInit) выполнился бы раньше, чем догрузится ядро (проверено:
+             именно так и произошло при первой версии этого фикса). document.write
+             в процессе парсинга head, наоборот, вставляет обычный parser-
+             blocking <script src>, с тем же порядком гарантий, что и статический
+             тег — единственный надёжный кросс-браузерный способ подставить
+             условный src без потери блокирующей семантики. -->
+             <!-- ? "https://ui5.sap.com/1.71.82/resources/sap-ui-core.js" -->
+        <script>
+                (function () {
+                        var bIsLocalDev = /^(localhost|127\.0\.0\.1)$/.test(window.location.hostname);
+                        var sCoreSrc = bIsLocalDev
+                                ? "https://ui5.sap.com/1.71.84/resources/sap-ui-core.js"
+                                : "/sap/public/bc/ui5_ui5/1/resources/sap-ui-core.js";
+                        document.write(
+                                '<script id="sap-ui-bootstrap" src="' + sCoreSrc + '"' +
+                                ' data-sap-ui-theme="sap_fiori_3"' +
+                                ' data-sap-ui-libs="sap.m,sap.suite.ui.generic.template,sap.ui.generic.app,sap.ui.comp,sap.ui.layout,sap.ui.export,sap.f"' +
+                                ' data-sap-ui-compatVersion="edge"' +
+                                ' data-sap-ui-resourceroots=\'{"sap.pc_lite.check": "./"}\'' +
+                                ' data-sap-ui-frameOptions="trusted"' +
+                                ' data-sap-ui-preload="async"' +
+                                ' data-sap-ui-language="ru"' +
+                                ' data-sap-ui-formatLocale="ru"' +
+                                ' data-sap-ui-xx-supportedDevices="phone,tablet,desktop">' +
+                                '<' + '/script>'
+                        );
+                }());
+        </script>
+</head>
+<body class="sapUiBody" id="content">
+        <script>
+                sap.ui.getCore().attachInit(function () {
+                        sap.ui.core.Component.create({
+                                name: "sap.pc_lite.check",
+                                manifest: true,
+                                async: true
+                        }).then(function (oComponent) {
+                                new sap.ui.core.ComponentContainer({
+                                        component: oComponent,
+                                        height: "100%"
+                                }).placeAt("content");
+                        });
+                });
+        </script>
+</body>
+</html>

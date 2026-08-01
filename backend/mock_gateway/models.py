@@ -68,6 +68,60 @@ class ChecklistRoot(Base):
     )
 
 
+class ChecklistRootDraft(Base):
+    """Fiori-style draft sibling of ChecklistRoot (additive, parallel concurrency model to
+    the LockEntry/LockService session-lock flow - see api/gateway_draft_api.py and
+    services/draft_service.py). Mirrors ChecklistRoot's editable columns 1:1 so
+    _apply_root_payload/_apply_basic_payload (api/gateway_operations.py,
+    api/gateway_validators.py) work unmodified against either model.
+
+    active_id is NULL for a create-draft (no active twin exists yet); root_id is the
+    stable id this draft becomes on activation - this row's own id for a create-draft,
+    active_id for an edit-draft (mirrors serve.py's RootId/DraftUUID reuse on create).
+    """
+    __tablename__ = "checklist_root_draft"
+    __table_args__ = (
+        Index("ix_checklist_root_draft_active_id", "active_id"),
+    )
+
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    active_id = Column(String, ForeignKey("checklist_root.id"), nullable=True)
+    root_id = Column(String, nullable=False)
+
+    checklist_id = Column(String, nullable=False, default="")
+    lpc = Column(String, nullable=False, default="")
+    status = Column(String, default="01")
+    integration_flag = Column(Boolean, default=False)
+
+    date = Column(String, default="")
+    time_check = Column(String, default="")
+    time_zone = Column(String, default="")
+    equipment = Column(String, default="")
+    bukrs = Column(String, default="")
+    lpc_text = Column(String, default="")
+
+    observer_fullname = Column(String, default="")
+    observer_perner = Column(String, default="")
+    observer_position = Column(String, default="")
+    observer_orgunit = Column(String, default="")
+    observer_integration_name = Column(String, default="")
+
+    observed_fullname = Column(String, default="")
+    observed_perner = Column(String, default="")
+    observed_position = Column(String, default="")
+    observed_orgunit = Column(String, default="")
+    observed_integration_name = Column(String, default="")
+
+    location_key = Column(String, default="")
+    location_name = Column(String, default="")
+    location_text = Column(String, default="")
+
+    created_on = Column(DateTime, default=now_utc)
+    created_by = Column(String)
+    changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)
+    changed_by = Column(String)
+
+
 class ChecklistCheck(Base):
     __tablename__ = "checklist_check"
     __table_args__ = (Index("ix_checklist_check_root_id", "root_id"),)

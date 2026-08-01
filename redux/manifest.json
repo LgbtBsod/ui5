@@ -1,0 +1,183 @@
+{
+  "_version": "1.40.0",
+
+  "sap.app": {
+    "id": "sap.pc_lite.check",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": { "version": "1.0.0" },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "dataSources": {
+      "mainService": {
+        "uri": "/sap/opu/odata/sap/ZCHECK_SRV/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "2.0",
+          "localUri": "localService/metadata.xml",
+          "annotations": ["localAnnotations"]
+        }
+      },
+      "localAnnotations": {
+        "uri": "annotation/annotations.xml",
+        "type": "ODataAnnotation"
+      }
+    },
+
+    "crossNavigation": {
+      "inbounds": {
+        "checkHeaderManage": {
+          "semanticObject": "CheckHeader",
+          "action": "manage",
+          "title": "{{appTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        },
+        "checkHeaderCreateLite": {
+          "semanticObject": "CheckHeader",
+          "action": "createLite",
+          "title": "{{liteTileTitle}}",
+          "subTitle": "{{liteTileSubtitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": { "desktop": true, "tablet": true, "phone": true }
+  },
+
+  "sap.ui5": {
+     "contentDensities": {"compact": true, "cozy": true },
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.71.28",
+      "libs": {
+        "sap.suite.ui.generic.template": {},
+        "sap.ui.generic.app": {},
+        "sap.m": {},
+        "sap.ui.comp": {},
+        "sap.ui.layout": {},
+        "sap.ui.export": {},
+        "sap.f": {}
+      }
+    },
+
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": { "bundleName": "sap.pc_lite.check.i18n.i18n" }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": false,
+        "settings": {
+          "defaultBindingMode": "TwoWay",
+          "defaultCountMode": "Inline",
+          "useBatch": true,
+          "updateMethod": "PATCH",
+          "handleValidation": true
+        }
+      }
+    },
+
+    "routing": {
+      "config": {
+        "routerClass": "sap.ui.core.routing.Router",
+        "viewType": "XML",
+        "async": true
+      },
+      "routes": [
+        {
+          "name": "createLite",
+          "pattern": "createLite",
+          "target": "objectPageCreateLite"
+        }
+      ],
+      "targets": {
+        "objectPageCreateLite": {
+          "type": "Component",
+          "name": "sap.suite.ui.generic.template.ObjectPage",
+          "options": {
+            "settings": {
+              "entitySet": "CheckRoots",
+              "createMode": true
+            }
+          }
+        }
+      }
+    },
+
+    "extends": {
+      "extensions": {}
+    }
+  },
+
+  "sap.ui.generic.app": {
+    "_version": "1.3.0",
+    "settings": {
+      "flexibleColumnLayout": {
+        "defaultTwoColumnLayoutType": "TwoColumnsMidExpanded"
+      }
+    },
+    "pages": {
+      "ListReport|CheckRoots": {
+        "entitySet": "CheckRoots",
+        "component": {
+          "name": "sap.suite.ui.generic.template.ListReport",
+          "list": true,
+          "settings": {
+            "tableSettings": {
+              "type": "ResponsiveTable",
+              "growingThreshold": 20
+            }
+          }
+        },
+        "pages": {
+          "ObjectPage|CheckRoots": {
+            "entitySet": "CheckRoots",
+            "component": {
+              "name": "sap.suite.ui.generic.template.ObjectPage",
+              "settings": {
+                "sections": {
+                  "CheckRowsSection": {
+                    "tableSettings": {
+                      "type": "ResponsiveTable",
+                      "multiSelect": true,
+                      "selectAll": true
+                    }
+                  },
+                  "BarriersSection": {
+                    "tableSettings": {
+                      "type": "ResponsiveTable",
+                      "multiSelect": true,
+                      "selectAll": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "sap.platform.abap": {
+    "_version": "1.1.0",
+    "uri": "/sap/opu/odata/sap/ZCHECK_SRV/"
+  },
+
+  "sap.fiori": {
+    "registrationIds": [],
+    "_version": "1.1.0",
+    "archeType": "transactional"
+  }
+}

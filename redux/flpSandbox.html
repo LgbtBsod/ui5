@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta charset="UTF-8">
+        <title>FLP Sandbox — Управление проверками (draft-режим)</title>
+        <!--
+                [Задачи #67-68, см. index.html] Минимальный локальный FLP-шелл для
+                standalone-разработки. Без него sap.suite.ui.generic.template
+                (List Report/Object Page) не может создать/сохранить запись:
+                Create вызывает ListReportController#fnStoreCurrentAppStateAndAdjustURL,
+                которому нужны сервисы CrossApplicationNavigation/AppState — они
+                существуют только внутри sap.ushell.Container. index.html (standalone
+                bootstrap без шелла) НЕ может это предоставить в принципе — не баг
+                index.html, а разный сценарий запуска.
+
+                Регистрирует ровно те inbound-интенты, что уже объявлены в
+                manifest.json (sap.app.crossNavigation.inbounds) — SSOT: имена
+                semanticObject/action здесь и там должны совпадать.
+        -->
+        <script>
+                window["sap-ushell-config"] = {
+                        defaultRenderer: "fiori2",
+                        applications: {},
+                        services: {
+                                LaunchPage: {
+                                        adapter: {
+                                                config: {
+                                                        groups: [{
+                                                                id: "group.local",
+                                                                title: "Локальная разработка",
+                                                                isPreset: true,
+                                                                tiles: [{
+                                                                        id: "tile.checkHeaderManage",
+                                                                        title: "Управление проверками",
+                                                                        size: "1x1",
+                                                                        tileType: "sap.ushell.ui.tile.StaticTile",
+                                                                        properties: {
+                                                                                title: "Управление проверками",
+                                                                                targetURL: "#CheckHeader-manage"
+                                                                        }
+                                                                }]
+                                                        }]
+                                                }
+                                        }
+                                },
+                                ClientSideTargetResolution: {
+                                        adapter: {
+                                                config: {
+                                                        inbounds: {
+                                                                checkHeaderManage: {
+                                                                        semanticObject: "CheckHeader",
+                                                                        action: "manage",
+                                                                        title: "Управление проверками",
+                                                                        signature: { parameters: {}, additionalParameters: "allowed" },
+                                                                        resolutionResult: {
+                                                                                applicationType: "SAPUI5",
+                                                                                additionalInformation: "SAPUI5.Component=sap.pc_lite.check",
+                                                                                url: "./",
+                                                                                loadDefaultDependencies: false
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                };
+        </script>
+        <script src="https://ui5.sap.com/1.71.84/test-resources/sap/ushell/bootstrap/sandbox.js"
+                id="sap-ushell-bootstrap"></script>
+        <script src="https://ui5.sap.com/1.71.84/resources/sap-ui-core.js"
+                id="sap-ui-bootstrap"
+                data-sap-ui-theme="sap_fiori_3"
+                data-sap-ui-libs="sap.m,sap.ushell,sap.suite.ui.generic.template,sap.ui.generic.app,sap.ui.comp,sap.ui.layout,sap.ui.export,sap.f"
+                data-sap-ui-compatVersion="edge"
+                data-sap-ui-resourceroots='{"sap.pc_lite.check": "./"}'
+                data-sap-ui-frameOptions="allow"
+                data-sap-ui-preload="async"
+                data-sap-ui-language="ru"
+                data-sap-ui-formatLocale="ru"
+                data-sap-ui-xx-supportedDevices="phone,tablet,desktop"></script>
+</head>
+<body class="sapUiBody" id="content">
+        <script>
+                sap.ui.getCore().attachInit(function () {
+                        sap.ushell.Container.createRenderer().placeAt("content");
+                });
+        </script>
+</body>
+</html>

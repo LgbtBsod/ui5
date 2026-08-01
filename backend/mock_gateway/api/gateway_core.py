@@ -14,7 +14,7 @@ from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
 from config import MAX_PAGE_SIZE
-from models import ChecklistRoot, LockEntry
+from models import ChecklistRoot, ChecklistRootDraft, LockEntry
 from services.authorization_service import AuthorizationService
 from services.current_user_service import CurrentUserService
 from utils.filter_parser import FilterParser
@@ -23,7 +23,7 @@ from utils.odata_etag import etag_for_datetime, validate_if_match
 from utils.time import now_utc
 from api.gateway_operations import _hex
 from api.gateway_validators import _status_external
-from api.gateway_helpers import BoundaryResolver
+from api.gateway_helpers import BoundaryResolver, HEX_ZERO_GUID
 
 _STATUS_TRANSITIONS = {
     "DRAFT": {"REGISTERED"},
@@ -213,6 +213,33 @@ def _load_root_or_error(db: Session, root_key: str):
     if not root:
         return None, _err(404, "NOT_FOUND", "Checklist not found")
     return root, None
+
+
+def _load_root_or_draft_or_error(db: Session, entity_key: str):
+    """Draft-aware sibling of _load_root_or_error - additive, does not replace it.
+
+    Returns (kind, obj, err) where kind is "active"|"draft"|None. Only takes the draft
+    branch when entity_key matches the compound ActiveUUID/DraftUUID form; every existing
+    flat-hex/business-key call site keeps going through the unmodified _load_root_or_error.
+    """
+    parsed = BoundaryResolver.resolve_draft_key(entity_key)
+    if parsed is None:
+        root, err = _load_root_or_error(db, entity_key)
+        return ("active", root, None) if root else (None, None, err)
+
+    active_hex, draft_hex = parsed
+    if draft_hex in ("", HEX_ZERO_GUID):
+        # Compound key addressing the ACTIVE side (DraftUUID=zero) - resolve exactly like
+        # the flat key would.
+        root, err = _load_root_or_error(db, active_hex)
+        return ("active", root, None) if root else (None, None, err)
+
+    draft = db.query(ChecklistRootDraft).filter(
+        ChecklistRootDraft.id == _entity_key(draft_hex)
+    ).first()
+    if not draft:
+        return None, None, _err(404, "NOT_FOUND", "Draft not found")
+    return "draft", draft, None
 
 
 _PERMISSION_FLAGS = {"view": "can_view", "edit": "can_edit", "delete": "can_delete"}
