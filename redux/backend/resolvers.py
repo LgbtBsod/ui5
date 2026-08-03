@@ -169,6 +169,14 @@ def compute_check_root_view(root_id, root_override=None):
     out["HeaderKpiTitle"] = "КПР: %s · Профессия: %s" % (out["LpcText"] or "—", out["ProfText"] or "—")
     out["HeaderKpiSubtitle"] = "Успешных проверок: %d · Барьеров: %d" % (checks_success, barriers_amount)
 
+    # [Fix] Chart target/warning values for UI.Chart Bullet visualization.
+    # Push-down from serve_config.BUSINESS_RULES CHART_* constants (SSOT).
+    # SAPUI5 1.71 VizFrame reads these to render color zones in bullet charts.
+    out["ChecksChartTargetValue"] = round(checks_amount * serve_config.BUSINESS_RULES.CHART_TARGET_ZONE_MIN / 100) if checks_amount else 0
+    out["BarriersChartTargetValue"] = round(barriers_amount * serve_config.BUSINESS_RULES.CHART_TARGET_ZONE_MIN / 100) if barriers_amount else 0
+    out["ChecksChartWarningValue"] = round(checks_amount * serve_config.BUSINESS_RULES.CHART_WARNING_ZONE_MIN / 100) if checks_amount else 0
+    out["BarriersChartWarningValue"] = round(barriers_amount * serve_config.BUSINESS_RULES.CHART_WARNING_ZONE_MIN / 100) if barriers_amount else 0
+
     out["ChecksHidden"] = (lpc_key == serve_config.BUSINESS_RULES.CHECKS_HIDDEN_PK_LEVEL)
     out["BarriersHidden"] = lpc_key in serve_config.BUSINESS_RULES.BARRIERS_HIDDEN_PK_LEVELS
 

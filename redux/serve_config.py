@@ -208,3 +208,10 @@ class BUSINESS_RULES:
     CHECKS_HIDDEN_PK_LEVEL = ""
 
     CHECK_TYPE_RAW_TEXT_CODE = "000.000"
+
+    # [Fix] Chart visualization thresholds for UI.Chart Bullet annotations.
+    # SAPUI5 1.71 VizFrame uses these to render color zones in bullet charts.
+    # SSOT: defined here in Python backend, pushed down via compute_check_root_view,
+    # NOT duplicated in JS Constants.js or CDS views.
+    CHART_TARGET_ZONE_MIN = 80  # Green zone >= 80%
+    CHART_WARNING_ZONE_MIN = 50  # Yellow zone 50-79%, Red < 50%
