@@ -99,6 +99,22 @@
         <Property Name="CreatedBy"             Type="Edm.String" MaxLength="12" sap:label="Кем создано" sap:creatable="false" sap:updatable="false"/>
         <Property Name="CreatedAt"             Type="Edm.DateTime" sap:label="Создано" sap:creatable="false" sap:updatable="false"/>
         <NavigationProperty Name="to_Basic"    Relationship="ZCheckService.CheckRoot_CheckBasic"  FromRole="Root" ToRole="Basic"    sap:creatable="true"/>
+        <!-- [JS-hooks/blockers pass] Tried sap:creatable-path here (pointing at
+             a computed root Boolean), per ui5.sap.com's "Enabling Action
+             Buttons in Tables on the Object Page" doc - live-tested with the
+             correct XML placement AND a confirmed-true value, and the
+             Object Page's nested composition-child SmartTable "Создать"
+             button STILL never became visible (mBindingInfos.visible stayed
+             null - no binding wired at all, regardless of this capability).
+             Reverted back to the original static sap:creatable="true" -
+             confirms (empirically, not just by inference from an old
+             comment) that this specific button is unconditionally hidden by
+             sap.suite.ui.generic.template in this UI5 1.71.84 build for a
+             1:n composition on the Object Page - the doc's guidance doesn't
+             apply to this exact template/version combination. See
+             ext/util/SubTableCrud.js (currently disabled) for the
+             JS-controller-extension workaround this app already has built
+             for exactly this gap. -->
         <NavigationProperty Name="to_Checks"   Relationship="ZCheckService.CheckRoot_CheckItems"  FromRole="Root" ToRole="CheckItem" sap:creatable="true"/>
         <NavigationProperty Name="to_Barriers" Relationship="ZCheckService.CheckRoot_Barriers"    FromRole="Root" ToRole="Barrier"  sap:creatable="true"/>
         <NavigationProperty Name="DraftAdministrativeData" Relationship="ZCheckService.CheckRoot_DraftAdministrativeData" FromRole="Root" ToRole="Draft"/>
@@ -185,6 +201,11 @@
         <Property Name="Comment"       Type="Edm.String" MaxLength="500" sap:label="Комментарий"/>
         <Property Name="Result"        Type="Edm.String" MaxLength="1"   sap:label="Результат" sap:text="ResultText"/>
         <Property Name="ResultText"    Type="Edm.String" MaxLength="100" sap:label="Результат"/>
+        <!-- [Fix, exhaustive-sweep pass] Computed, read-only - see
+             resolvers._resolve_type_and_result and annotations.xml's
+             Common.FieldControl/sap:deletable-path on CheckItems below. -->
+        <Property Name="CommentFieldControl" Type="Edm.Byte" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="Deletable"     Type="Edm.Boolean" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
         <Property Name="LastChangedAt" Type="Edm.DateTime" sap:visible="false" sap:creatable="false" sap:updatable="false" ConcurrencyMode="Fixed"/>
         <NavigationProperty Name="to_Root" Relationship="ZCheckService.CheckRoot_CheckItems" FromRole="CheckItem" ToRole="Root"/>
       </EntityType>
@@ -206,6 +227,10 @@
         <Property Name="Comment"       Type="Edm.String" MaxLength="500" sap:label="Примечания"/>
         <Property Name="Result"        Type="Edm.String" MaxLength="1"   sap:label="Результат" sap:text="ResultText"/>
         <Property Name="ResultText"    Type="Edm.String" MaxLength="100" sap:label="Результат"/>
+        <!-- [Fix, exhaustive-sweep pass] Same as CheckItem - see that
+             entity's comment. -->
+        <Property Name="CommentFieldControl" Type="Edm.Byte" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="Deletable"     Type="Edm.Boolean" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
         <Property Name="LastChangedAt" Type="Edm.DateTime" sap:visible="false" sap:creatable="false" sap:updatable="false" ConcurrencyMode="Fixed"/>
         <NavigationProperty Name="to_Root" Relationship="ZCheckService.CheckRoot_Barriers" FromRole="Barrier" ToRole="Root"/>
       </EntityType>
@@ -374,11 +399,18 @@
         <EntitySet Name="CheckBasics" EntityType="ZCheckService.CheckBasic"
                    sap:creatable="true" sap:updatable="true" sap:deletable="false"
                    sap:countable="true"/>
+        <!-- [Fix, exhaustive-sweep pass] sap:deletable-path (dynamic, per-row -
+             replaces the old static sap:deletable="true"; the two are
+             mutually exclusive per SAP's own convention) - _ODataMetaModelUtils
+             converts this to Capabilities.DeleteRestrictions/Deletable{Path}
+             internally, read by the Object Page's nested SmartTable toolbar
+             to gate the Delete button per row. See resolvers.
+             _resolve_type_and_result for how Deletable is computed. -->
         <EntitySet Name="CheckItems"  EntityType="ZCheckService.CheckItem"
-                   sap:creatable="true" sap:updatable="true" sap:deletable="true"
+                   sap:creatable="true" sap:updatable="true" sap:deletable-path="Deletable"
                    sap:countable="true"/>
         <EntitySet Name="Barriers"    EntityType="ZCheckService.Barrier"
-                   sap:creatable="true" sap:updatable="true" sap:deletable="true"
+                   sap:creatable="true" sap:updatable="true" sap:deletable-path="Deletable"
                    sap:countable="true"/>
         <EntitySet Name="DraftAdministrativeData" EntityType="ZCheckService.DraftAdministrativeData" sap:countable="false"/>
         <EntitySet Name="Persons"           EntityType="ZCheckService.Person"           sap:countable="true"/>

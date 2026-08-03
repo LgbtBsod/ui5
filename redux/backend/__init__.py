@@ -75,6 +75,7 @@ from .resolvers import (
     apply_expand,
 )
 from .draft_service import (
+    _draft_owner_mismatch,
     _missing_required_fields,
     _snapshot_children,
     _restore_children,
@@ -155,6 +156,7 @@ __all__ = [
     "_resolve_sublocation_names", "_rewrite_with_sublocation_tokens", "compare_dates",
     "eval_one_filter", "apply_filter", "apply_select", "apply_orderby",
     "_draft_admin_data_row", "_sibling_row", "apply_expand",
+    "_draft_owner_mismatch",
     "_missing_required_fields", "_snapshot_children", "_restore_children", "_purge_children",
     "_clone_children_into_draft", "_purge_tagged_children", "_activate_tagged_children",
     "_draft_prepare", "_draft_activate", "_draft_discard",

@@ -179,8 +179,8 @@ READONLY_FIELDS = {
         "ObserverIntegrationName", "ObservedPosition", "ObservedOrgunit",
         "ObservedIntegrationName", "LpcText", "ProfText", "LastChangedAt",
     },
-    "CheckItems": {"RootId", "ItemId", "LastChangedAt"},
-    "Barriers": {"RootId", "BarrierId", "LastChangedAt"},
+    "CheckItems": {"RootId", "ItemId", "LastChangedAt", "CommentFieldControl", "Deletable"},
+    "Barriers": {"RootId", "BarrierId", "LastChangedAt", "CommentFieldControl", "Deletable"},
 }
 
 

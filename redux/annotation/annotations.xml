@@ -89,6 +89,20 @@
            draft $metadata (ZEHS_TEST_V2_SRV): every BOPF-generated draft
            entity carries this, pointing at the ACTIVE-side key. Without it,
            the generic template/SmartFilterBar has no way to recognize that
+
+           [Fix, exhaustive-sweep pass] Points at RootId, NOT ActiveUUID. The
+           vocabulary's own contract requires this to be unique modulo
+           IsActiveEntity (sap.suite.ui.generic.template.js.AnnotationHelper.
+           isPropertySemanticKey genuinely reads/matches this at runtime, not
+           decorative) - but every brand-new create-draft's ActiveUUID is
+           ZERO_GUID until CheckRootActivationAction runs (see dispatch.py's
+           POST /CheckRoots handler and draft_service._draft_activate), so
+           two concurrent unsaved create-drafts previously reported an
+           IDENTICAL "unique" semantic-key value. RootId is freshly generated
+           per create-draft at POST time and never collides - it's already
+           this app's real stable business key from creation (see this same
+           file's CheckRoot LineItem comment below and metadata.xml's own
+           "Фаза 5" RootId/ActiveUUID distinction).
            the active row and its draft row are the SAME business object, so
            it never auto-collapses them into one list row or renders the
            standard Edit State ("All"/"Own unsaved changes"/...) quick filter
@@ -97,8 +111,139 @@
       <Annotations Target="ZCheckService.CheckRoot">
         <Annotation Term="Common.SemanticKey">
           <Collection>
-            <PropertyPath>ActiveUUID</PropertyPath>
+            <PropertyPath>RootId</PropertyPath>
           </Collection>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix, exhaustive-sweep pass] IconTabBar per-Status counts
+           (manifest.json's sap.ui.generic.app ListReport quickVariantSelectionX,
+           showCounts:true) - confirmed real, annotation+manifest-only, and
+           orthogonal to the EditState draft-status dropdown (this is a
+           BUSINESS-status split, not a draft-lifecycle one). Status already
+           exists as a real field (OK/CRITICAL/WARNING, see
+           resolvers.StatusCriticality) - reusing it here instead of
+           inventing a new dimension. Each tab is one UI.SelectionPresentationVariant
+           pairing a UI.SelectionVariant ($filter) with a shared
+           UI.PresentationVariant (just reuses the standard UI.LineItem) - the
+           template issues one CheckRoots/$count?$filter=<SelectOption> request
+           per tab for its badge count; resolvers.apply_filter/eval_one_filter
+           already evaluates a plain "Status eq 'OK'"-shaped filter correctly
+           (generic field-eq-string pattern), so no backend change was needed
+           beyond declaring these. -->
+      <Annotations Target="ZCheckService.CheckRoot">
+        <Annotation Term="UI.PresentationVariant">
+          <Record Type="UI.PresentationVariantType">
+            <PropertyValue Property="Text" String="Стандартный"/>
+            <PropertyValue Property="Visualizations">
+              <Collection>
+                <AnnotationPath>@UI.LineItem</AnnotationPath>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+
+        <Annotation Term="UI.SelectionVariant" Qualifier="TabAll">
+          <Record Type="UI.SelectionVariantType">
+            <PropertyValue Property="Text" String="Все"/>
+            <PropertyValue Property="SelectOptions">
+              <Collection/>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionPresentationVariant" Qualifier="TabAll">
+          <Record Type="UI.SelectionPresentationVariantType">
+            <PropertyValue Property="Text" String="Все"/>
+            <PropertyValue Property="SelectionVariant" AnnotationPath="@UI.SelectionVariant#TabAll"/>
+            <PropertyValue Property="PresentationVariant" AnnotationPath="@UI.PresentationVariant"/>
+          </Record>
+        </Annotation>
+
+        <Annotation Term="UI.SelectionVariant" Qualifier="TabOk">
+          <Record Type="UI.SelectionVariantType">
+            <PropertyValue Property="Text" String="Штатно"/>
+            <PropertyValue Property="SelectOptions">
+              <Collection>
+                <Record Type="UI.SelectOptionType">
+                  <PropertyValue Property="PropertyName" PropertyPath="Status"/>
+                  <PropertyValue Property="Ranges">
+                    <Collection>
+                      <Record Type="UI.SelectionRangeType">
+                        <PropertyValue Property="Sign" EnumMember="UI.SelectionRangeSignType/I"/>
+                        <PropertyValue Property="Option" EnumMember="UI.SelectionRangeOptionType/EQ"/>
+                        <PropertyValue Property="Low" String="OK"/>
+                      </Record>
+                    </Collection>
+                  </PropertyValue>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionPresentationVariant" Qualifier="TabOk">
+          <Record Type="UI.SelectionPresentationVariantType">
+            <PropertyValue Property="Text" String="Штатно"/>
+            <PropertyValue Property="SelectionVariant" AnnotationPath="@UI.SelectionVariant#TabOk"/>
+            <PropertyValue Property="PresentationVariant" AnnotationPath="@UI.PresentationVariant"/>
+          </Record>
+        </Annotation>
+
+        <Annotation Term="UI.SelectionVariant" Qualifier="TabCritical">
+          <Record Type="UI.SelectionVariantType">
+            <PropertyValue Property="Text" String="Критично"/>
+            <PropertyValue Property="SelectOptions">
+              <Collection>
+                <Record Type="UI.SelectOptionType">
+                  <PropertyValue Property="PropertyName" PropertyPath="Status"/>
+                  <PropertyValue Property="Ranges">
+                    <Collection>
+                      <Record Type="UI.SelectionRangeType">
+                        <PropertyValue Property="Sign" EnumMember="UI.SelectionRangeSignType/I"/>
+                        <PropertyValue Property="Option" EnumMember="UI.SelectionRangeOptionType/EQ"/>
+                        <PropertyValue Property="Low" String="CRITICAL"/>
+                      </Record>
+                    </Collection>
+                  </PropertyValue>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionPresentationVariant" Qualifier="TabCritical">
+          <Record Type="UI.SelectionPresentationVariantType">
+            <PropertyValue Property="Text" String="Критично"/>
+            <PropertyValue Property="SelectionVariant" AnnotationPath="@UI.SelectionVariant#TabCritical"/>
+            <PropertyValue Property="PresentationVariant" AnnotationPath="@UI.PresentationVariant"/>
+          </Record>
+        </Annotation>
+
+        <Annotation Term="UI.SelectionVariant" Qualifier="TabWarning">
+          <Record Type="UI.SelectionVariantType">
+            <PropertyValue Property="Text" String="Внимание"/>
+            <PropertyValue Property="SelectOptions">
+              <Collection>
+                <Record Type="UI.SelectOptionType">
+                  <PropertyValue Property="PropertyName" PropertyPath="Status"/>
+                  <PropertyValue Property="Ranges">
+                    <Collection>
+                      <Record Type="UI.SelectionRangeType">
+                        <PropertyValue Property="Sign" EnumMember="UI.SelectionRangeSignType/I"/>
+                        <PropertyValue Property="Option" EnumMember="UI.SelectionRangeOptionType/EQ"/>
+                        <PropertyValue Property="Low" String="WARNING"/>
+                      </Record>
+                    </Collection>
+                  </PropertyValue>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionPresentationVariant" Qualifier="TabWarning">
+          <Record Type="UI.SelectionPresentationVariantType">
+            <PropertyValue Property="Text" String="Внимание"/>
+            <PropertyValue Property="SelectionVariant" AnnotationPath="@UI.SelectionVariant#TabWarning"/>
+            <PropertyValue Property="PresentationVariant" AnnotationPath="@UI.PresentationVariant"/>
+          </Record>
         </Annotation>
       </Annotations>
 
@@ -406,10 +551,55 @@
         </Annotation>
       </Annotations>
 
+      <!-- [Fix, exhaustive-sweep pass] Common.SideEffects, SourceProperties
+           variant (property-level - different mechanism from
+           ChecksAndBarriersRecalc's SourceEntities/collection-level variant
+           above). Without this, resolvers.CommentFieldControl only gets
+           recomputed on the NEXT full GET (e.g. navigate away/back) - PATCH
+           returns 204 with no body, so the client's cached CommentFieldControl
+           silently goes stale the moment Result changes inline, and
+           Common.FieldControl's live-binding on Comment would keep showing
+           the OLD mandatory/optional state despite the SmartField/formatter
+           machinery itself working correctly (confirmed empirically: the
+           client model still held the pre-edit CommentFieldControl value
+           after a live Result edit, until this SideEffects was added).
+           SourceProperties (a plain field edit on THIS entity) is a
+           different trigger than SourceEntities (a child collection add/
+           delete) - ApplicationController's SideEffects execution for a
+           non-draft-root entity's own property-level SideEffects is a plain
+           targeted GET $select on the entity's own canonical key, not a
+           PreparationAction round-trip - our existing COMPOSITE_KEY_RE GET
+           route already recomputes CommentFieldControl fresh on every read
+           (resolvers.resolve_check_item), so no further backend wiring is
+           needed beyond declaring this. -->
+      <Annotations Target="ZCheckService.CheckItem">
+        <Annotation Term="Common.SideEffects" Qualifier="CommentControlRecalc">
+          <Record Type="Common.SideEffectsType">
+            <PropertyValue Property="SourceProperties">
+              <Collection>
+                <PropertyPath>Result</PropertyPath>
+              </Collection>
+            </PropertyValue>
+            <PropertyValue Property="TargetProperties">
+              <Collection>
+                <PropertyPath>CommentFieldControl</PropertyPath>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
       <Annotations Target="ZCheckService.CheckItem">
         <Annotation Term="UI.Creatable" Bool="true"/>
         <Annotation Term="UI.Updatable" Bool="true"/>
-        <Annotation Term="UI.Deletable" Bool="true"/>
+        <!-- [Fix, exhaustive-sweep pass] Path, not a hardcoded Bool="true" -
+             kept in sync with metadata.xml's sap:deletable-path="Deletable"
+             on the CheckItems EntitySet (both read the same computed
+             resolvers.Deletable field) so there's exactly one source of
+             truth for row-level delete-ability, not a dynamic capability
+             annotation contradicted by a static UI.Deletable=true sitting
+             right next to it. -->
+        <Annotation Term="UI.Deletable" Path="Deletable"/>
         <!-- [FIX, пересмотрено] Первая версия указывала Value на Code/Result —
              колонки стали редактируемыми, но SmartTable в 1.71 не подставляет
              Common.Text в инлайн-редактировании этой схемы (показывает голый
@@ -426,6 +616,18 @@
             <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Comment"/>     <PropertyValue Property="Label" String="Комментарий"/></Record>
           </Collection>
         </Annotation>
+      </Annotations>
+
+      <!-- [Fix, exhaustive-sweep pass] Common.FieldControl - live-binds
+           Comment's mandatory/optional state to resolvers.CommentFieldControl
+           (7=mandatory once Result=="Неудовлетворительно", 3=optional
+           otherwise) via sap.ui.comp.smartfield.FieldControl - recomputes
+           automatically the moment the inspector picks a Result in the same
+           inline-edited row, no reload/JS. Confirmed a real, live-consumed
+           1.71.84 mechanism (SmartField/ODataControlFactory/FieldControl
+           source), not V4-only. -->
+      <Annotations Target="ZCheckService.CheckItem/Comment">
+        <Annotation Term="Common.FieldControl" Path="CommentFieldControl"/>
       </Annotations>
 
       <!-- [Fix] Common.DraftNode for Barrier - see the CheckItem comment
@@ -448,7 +650,8 @@
       <Annotations Target="ZCheckService.Barrier">
         <Annotation Term="UI.Creatable" Bool="true"/>
         <Annotation Term="UI.Updatable" Bool="true"/>
-        <Annotation Term="UI.Deletable" Bool="true"/>
+        <!-- [Fix, exhaustive-sweep pass] See the matching CheckItem comment above. -->
+        <Annotation Term="UI.Deletable" Path="Deletable"/>
         <!-- [FIX, пересмотрено] См. аналогичный комментарий у CheckItem. -->
         <Annotation Term="UI.LineItem">
           <Collection>
@@ -456,6 +659,32 @@
             <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ResultText"/> <PropertyValue Property="Label" String="Результат"/></Record>
             <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Comment"/>    <PropertyValue Property="Label" String="Примечания"/></Record>
           </Collection>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix, exhaustive-sweep pass] Common.FieldControl for Barrier - see
+           the matching CheckItem/Comment annotation above, same mechanism. -->
+      <Annotations Target="ZCheckService.Barrier/Comment">
+        <Annotation Term="Common.FieldControl" Path="CommentFieldControl"/>
+      </Annotations>
+
+      <!-- [Fix, exhaustive-sweep pass] Common.SideEffects for Barrier - see
+           the matching CheckItem/CommentControlRecalc annotation above, same
+           mechanism/rationale. -->
+      <Annotations Target="ZCheckService.Barrier">
+        <Annotation Term="Common.SideEffects" Qualifier="CommentControlRecalc">
+          <Record Type="Common.SideEffectsType">
+            <PropertyValue Property="SourceProperties">
+              <Collection>
+                <PropertyPath>Result</PropertyPath>
+              </Collection>
+            </PropertyValue>
+            <PropertyValue Property="TargetProperties">
+              <Collection>
+                <PropertyPath>CommentFieldControl</PropertyPath>
+              </Collection>
+            </PropertyValue>
+          </Record>
         </Annotation>
       </Annotations>
 
@@ -823,6 +1052,14 @@
       </Annotations>
       <Annotations Target="ZCheckService.CheckItem/ResultText">
         <Annotation Term="Common.Label" String="Результат"/>
+        <!-- [Fix, exhaustive-sweep pass] Backed by a real server-side gate now
+             (draft_service._missing_required_child_fields) - Activation
+             rejects any tagged CheckItem whose Result is still unset,
+             errordetails[] target-ing the exact row via
+             to_Checks(RootId=..,ItemId=..)/Result (see dispatch.py). Client-
+             hint only here, same Nullable="true"-but-business-required
+             pattern as config.REQUIRED_ROOT_FIELDS. -->
+        <Annotation Term="Common.Required" Bool="true"/>
         <Annotation Term="Common.ValueList">
           <Record Type="Common.ValueListType">
             <PropertyValue Property="Label"          String="Результат проверки"/>
@@ -892,6 +1129,9 @@
       </Annotations>
       <Annotations Target="ZCheckService.Barrier/ResultText">
         <Annotation Term="Common.Label" String="Результат"/>
+        <!-- [Fix, exhaustive-sweep pass] See the matching CheckItem/ResultText
+             annotation above, same mechanism. -->
+        <Annotation Term="Common.Required" Bool="true"/>
         <Annotation Term="Common.ValueList">
           <Record Type="Common.ValueListType">
             <PropertyValue Property="Label"          String="Результат"/>

@@ -71,6 +71,20 @@ def _parse_key(url_path):
     return None, None
 
 
+def _draft_locked_response(owner):
+    """Shared 409 DRAFT_LOCKED shape - used both by the one-time
+    CheckRootPreparationAction foreign-lock branch and by
+    draft_service._draft_owner_mismatch's re-check on every later write to
+    an already-open draft (Activate/Discard/PATCH/MERGE/PUT/DELETE addressed
+    directly by the draft's own key)."""
+    return (409, {
+        "error": {
+            "code": "DRAFT_LOCKED",
+            "message": {"value": "Черновик уже редактируется пользователем: %s" % state._mock_user_display_name(owner)}
+        }
+    }, "application/json")
+
+
 def dispatch_request(method, rel_url, body=None, headers=None):
     headers = headers or {}
     parts = rel_url.split("?", 1)
@@ -106,11 +120,26 @@ def dispatch_request(method, rel_url, body=None, headers=None):
             # instead of silently resuming stale in-progress edits.
             preserve_raw = (query_params.get("PreserveChanges") or "").strip().lower()
             preserve_changes = preserve_raw != "false"
-            result_row = draft_service._draft_prepare(_guid_param("ActiveUUID"), preserve_changes=preserve_changes, requesting_user=requesting_user)
+            result_row = draft_service._draft_prepare(
+                _guid_param("ActiveUUID"), preserve_changes=preserve_changes,
+                requesting_user=requesting_user, draft_uuid_hint=_guid_param("DraftUUID"),
+            )
         elif url_path == "CheckRootActivationAction":
-            result_row = draft_service._draft_activate(_guid_param("DraftUUID"))
+            draft_uuid = _guid_param("DraftUUID")
+            # [Fix, exhaustive-sweep pass] see draft_service._draft_owner_mismatch -
+            # Activate/Discard addressed directly by an existing draft's own
+            # key were never re-checked against the CURRENT requesting user,
+            # unlike the one-time Prepare call.
+            locking_row = draft_service._draft_owner_mismatch(draft_uuid, requesting_user)
+            if locking_row is not None:
+                return _draft_locked_response(locking_row.get("InProcessByUser", config.MOCK_USER))
+            result_row = draft_service._draft_activate(draft_uuid)
         else:
-            result_row = draft_service._draft_discard(_guid_param("DraftUUID"))
+            draft_uuid = _guid_param("DraftUUID")
+            locking_row = draft_service._draft_owner_mismatch(draft_uuid, requesting_user)
+            if locking_row is not None:
+                return _draft_locked_response(locking_row.get("InProcessByUser", config.MOCK_USER))
+            result_row = draft_service._draft_discard(draft_uuid)
 
         if result_row is None:
             return (404, {"error": {"message": {"value": "%s: entity not found" % url_path}}}, "application/json")
@@ -125,6 +154,7 @@ def dispatch_request(method, rel_url, body=None, headers=None):
         # the field and retry.
         if isinstance(result_row, tuple) and result_row[0] == "validation_error":
             missing_fields = result_row[1]
+            missing_children = result_row[2]
             # [Fix] Field-level (target-bound) messages, alongside the
             # existing combined-text one. Verified by reading the actual
             # sap/ui/core ODataMessageParser source: _parseBodyJSON pushes
@@ -137,10 +167,29 @@ def dispatch_request(method, rel_url, body=None, headers=None):
             # show its own red-underline - each `target` is just the bare
             # property name on CheckRoot (the request addresses the entity
             # directly, no navigation prefix needed).
+            #
+            # [Fix, exhaustive-sweep pass] missing_children entries need a
+            # NAV-QUALIFIED target instead - confirmed by reading the real
+            # ODataMessageParser._createTarget source: for a non-absolute
+            # target it string-concatenates the FunctionImport's own
+            # resolved entity path ("CheckRoots(ActiveUUID=..,DraftUUID=..)")
+            # with whatever relative target we supply, then runs the result
+            # through ODataModel.resolve()/ODataMetadata._calculateCanonicalPath
+            # (pure metadata/string structural resolution, no dependency on
+            # the child already being loaded) - so
+            # "to_Checks(RootId='X',ItemId='Y')/Result" resolves to exactly
+            # the canonical model path the child's own SmartTable row is
+            # bound against, red-underlining that row's cell instead of the
+            # (nonexistent, on this FunctionImport's own entity) bare field.
+            all_labels = [label for _f, label in missing_fields] + [c["label"] for c in missing_children]
+            # The draft is left untouched on validation failure (see
+            # draft_service._draft_activate), so its own row - and RootId -
+            # is still resolvable here for building child targets below.
+            root_id_for_targets = state.draft_store["CheckRoots"][draft_uuid]["RootId"]
             return (400, {
                 "error": {
                     "code": "VALIDATION_ERROR",
-                    "message": {"value": "Не заполнены обязательные поля: " + ", ".join(label for _f, label in missing_fields)},
+                    "message": {"value": "Не заполнены обязательные поля: " + ", ".join(all_labels)},
                     "innererror": {
                         "errordetails": [
                             {
@@ -150,6 +199,14 @@ def dispatch_request(method, rel_url, body=None, headers=None):
                                 "target": field,
                             }
                             for field, label in missing_fields
+                        ] + [
+                            {
+                                "code": "VALIDATION_ERROR",
+                                "message": {"value": "%s: обязательное поле" % c["label"]},
+                                "severity": "error",
+                                "target": "%s(RootId='%s',%s='%s')/%s" % (c["nav"], root_id_for_targets, c["id_prop"], c["item_id"], c["field"]),
+                            }
+                            for c in missing_children
                         ]
                     }
                 }
@@ -165,13 +222,7 @@ def dispatch_request(method, rel_url, body=None, headers=None):
         # body here is mostly a sane fallback for direct/manual inspection.
         if isinstance(result_row, tuple) and result_row[0] == "foreign_lock":
             locked_draft = result_row[1]
-            owner = locked_draft.get("InProcessByUser", config.MOCK_USER)
-            return (409, {
-                "error": {
-                    "code": "DRAFT_LOCKED",
-                    "message": {"value": "Черновик уже редактируется пользователем: %s" % state._mock_user_display_name(owner)}
-                }
-            }, "application/json")
+            return _draft_locked_response(locked_draft.get("InProcessByUser", config.MOCK_USER))
         if url_path == "CheckRootActivationAction":
             state._set_sap_message("Черновик сохранён", code="DRAFT_ACTIVATED")
         return (200, {"d": result_row}, "application/json")
@@ -381,6 +432,14 @@ def dispatch_request(method, rel_url, body=None, headers=None):
                 # адресован (DraftUUID != ZERO_GUID) или активная запись.
                 root_id = row["RootId"]
                 is_draft_addressed = key_parts.get("DraftUUID", config.ZERO_GUID) != config.ZERO_GUID
+                # [Fix, exhaustive-sweep pass] see draft_service._draft_owner_mismatch -
+                # a raw PATCH/MERGE/PUT addressed directly by an existing
+                # draft's own key never went through the one-time Prepare
+                # gate at all.
+                if is_draft_addressed:
+                    locking_row = draft_service._draft_owner_mismatch(key_parts["DraftUUID"], state._resolve_mock_user(headers))
+                    if locking_row is not None:
+                        return _draft_locked_response(locking_row.get("InProcessByUser", config.MOCK_USER))
                 target_dict = state.draft_store["CheckRoots"] if is_draft_addressed else state.store["CheckRoots"]
                 store_key = key_parts["DraftUUID"] if is_draft_addressed else key_parts["ActiveUUID"]
 
@@ -429,6 +488,13 @@ def dispatch_request(method, rel_url, body=None, headers=None):
                 # DELETE удаляет только когда адресована сама активная запись.
                 root_id = row["RootId"]
                 if key_parts.get("DraftUUID", config.ZERO_GUID) != config.ZERO_GUID:
+                    # [Fix, exhaustive-sweep pass] see draft_service._draft_owner_mismatch -
+                    # a raw DELETE on a draft-addressed key IS a discard (see
+                    # the comment below), so it needs the exact same
+                    # ownership re-check CheckRootDiscardAction now has.
+                    locking_row = draft_service._draft_owner_mismatch(key_parts["DraftUUID"], state._resolve_mock_user(headers))
+                    if locking_row is not None:
+                        return _draft_locked_response(locking_row.get("InProcessByUser", config.MOCK_USER))
                     draft_row = state.draft_store["CheckRoots"].pop(key_parts["DraftUUID"], None)
                     # [Fix] Same rollback/cleanup semantics as
                     # CheckRootDiscardAction (draft_service._draft_discard) -

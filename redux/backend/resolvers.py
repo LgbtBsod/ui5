@@ -62,6 +62,22 @@ def _resolve_type_and_result(row, type_set, type_code_field, type_text_field, ra
     # template/SmartTable can tell an active-instance row from a
     # draft-instance one, same convention as the root.
     out["IsActiveEntity"] = out.get("DraftUUID", config.ZERO_GUID) == config.ZERO_GUID
+    # [Fix, exhaustive-sweep pass] Common.FieldControl (annotations.xml) live-
+    # binds Comment's mandatory state to this Edm.Byte value (7=mandatory,
+    # 3=optional) via sap.ui.comp.smartfield.FieldControl - recomputed
+    # automatically whenever Result changes, no reload/JS needed. "Failing"
+    # uses the exact same Result=="" check as compute_check_root_view's
+    # has_error_checks/has_error_barriers (CheckResults' only two reference
+    # codes are "X"=Удовлетворительно and ""=Неудовлетворительно - an
+    # unanswered Result is None, not "", so this never misfires on a
+    # brand-new not-yet-assessed row).
+    out["CommentFieldControl"] = 7 if out.get("Result") == "" else 3
+    # [Fix, exhaustive-sweep pass] sap:deletable-path (metadata.xml) reads
+    # this Boolean to gate the ResponsiveTable's per-row Delete button -
+    # blocks removing a line that already has a recorded outcome (Result is
+    # None only before the inspector has picked anything via the Code/Result
+    # F4 value-help).
+    out["Deletable"] = out.get("Result") is None
     return out
 
 

@@ -105,3 +105,12 @@ REQUIRED_FIELD_ALTERNATES = {
     "ObserverFullname": "ObserverPerner",
     "ObservedFullname": "ObservedPerner",
 }
+
+# [Fix, exhaustive-sweep pass] Every tagged CheckItem/Barrier row must have a
+# recorded Result (not None - a blank/unanswered check is meaningless data)
+# before its parent draft can Activate. Deliberately NOT a metadata.xml
+# Nullable="false" - a freshly-added row legitimately has no Result yet
+# while the checklist is still being filled in, same rationale as
+# REQUIRED_ROOT_FIELDS staying Nullable="true" and gating at Activation only.
+REQUIRED_CHILD_FIELD = "Result"
+REQUIRED_CHILD_FIELD_LABEL = "Результат"

@@ -137,6 +137,15 @@
             "tableSettings": {
               "type": "ResponsiveTable",
               "growingThreshold": 20
+            },
+            "quickVariantSelectionX": {
+              "showCounts": true,
+              "variants": {
+                "0": { "key": "TabAll", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#TabAll" },
+                "1": { "key": "TabOk", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#TabOk" },
+                "2": { "key": "TabCritical", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#TabCritical" },
+                "3": { "key": "TabWarning", "annotationPath": "com.sap.vocabularies.UI.v1.SelectionPresentationVariant#TabWarning" }
+              }
             }
           }
         },

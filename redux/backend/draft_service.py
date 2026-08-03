@@ -35,6 +35,26 @@ def _missing_required_fields(merged_view):
     return missing
 
 
+def _missing_required_child_fields(root_id, instance_tag):
+    """[Fix, exhaustive-sweep pass] Returns a list of {"nav", "id_prop",
+    "item_id", "field", "label"} dicts, one per tagged CheckItem/Barrier row
+    (instance_tag = the activating draft's own DraftUUID, or ZERO_GUID for
+    the active tree) whose Result is still None (never assessed). Separate
+    from _missing_required_fields (root-only, bare-field targets) because
+    each entry here needs enough to build a NAV-QUALIFIED errordetails[]
+    target (see dispatch.py's VALIDATION_ERROR branch) - a bare "Result"
+    target would ambiguously point at every child row at once instead of
+    the one that's actually incomplete."""
+    missing = []
+    for (rid, item_id), row in state.store["CheckItems"].items():
+        if rid == root_id and row.get("DraftUUID", config.ZERO_GUID) == instance_tag and row.get(config.REQUIRED_CHILD_FIELD) is None:
+            missing.append({"nav": "to_Checks", "id_prop": "ItemId", "item_id": item_id, "field": config.REQUIRED_CHILD_FIELD, "label": config.REQUIRED_CHILD_FIELD_LABEL})
+    for (rid, barrier_id), row in state.store["Barriers"].items():
+        if rid == root_id and row.get("DraftUUID", config.ZERO_GUID) == instance_tag and row.get(config.REQUIRED_CHILD_FIELD) is None:
+            missing.append({"nav": "to_Barriers", "id_prop": "BarrierId", "item_id": barrier_id, "field": config.REQUIRED_CHILD_FIELD, "label": config.REQUIRED_CHILD_FIELD_LABEL})
+    return missing
+
+
 def _snapshot_children(root_id):
     """[Fix] CheckBasics stays root-scoped (proxy-fields form, not a real
     draft node) - edits made against it while a parent edit-draft is open
@@ -141,11 +161,53 @@ def _activate_tagged_children(root_id, draft_uuid):
             row["DraftUUID"] = config.ZERO_GUID
 
 
-def _draft_prepare(active_uuid, preserve_changes=True, requesting_user=config.MOCK_USER):
+def _draft_owner_mismatch(draft_uuid, requesting_user):
+    """[Fix, exhaustive-sweep pass] sap.ui.generic.app.transaction.
+    TransactionController.prototype.editEntity (real 1.71.84 source) only
+    invokes the foreign-lock-checking EditAction/CheckRootPreparationAction
+    path when the addressed context's own IsActiveEntity is true - once a
+    context IS already a draft, the framework never re-enters that gate for
+    later writes to it (PATCH/MERGE/DELETE, Activate, Discard addressed
+    directly by the draft's own key). Without this check, any mock user who
+    knows/guesses another user's DraftUUID (e.g. via /dev/locks, or a stale
+    deep-link) could Activate, Discard, or edit that user's in-progress
+    draft outright - _draft_prepare's own foreign-lock branch only guards
+    the ONE-TIME Prepare call, not everything after it.
+
+    Returns the draft row if draft_uuid exists and is owned by a DIFFERENT
+    user than requesting_user (caller should reject the write), else None
+    (write is allowed - own draft, or draft_uuid doesn't exist at all, which
+    the caller's normal 404 handling already covers)."""
+    draft_row = state.draft_store["CheckRoots"].get(draft_uuid)
+    if draft_row is not None and draft_row.get("InProcessByUser", config.MOCK_USER) != requesting_user:
+        return draft_row
+    return None
+
+
+def _draft_prepare(active_uuid, preserve_changes=True, requesting_user=config.MOCK_USER, draft_uuid_hint=None):
     """[Фаза 5] CheckRootPreparationAction — готовит edit-черновик для
     активной записи active_uuid; повторный вызов идемпотентен (возвращает уже
     существующий черновик, не пересоздаёт его поверх правок пользователя).
     None, если активной записи с таким ActiveUUID нет вообще.
+
+    [Fix, exhaustive-sweep pass] draft_uuid_hint - PreparationAction is
+    re-invoked (not just called once at initial Edit-click) whenever
+    Common.SideEffects fires with the default EffectTypes="ValueChange" (see
+    the existing ChecksAndBarriersRecalc SideEffects, confirmed live to
+    trigger a PreparationAction call). For an EDIT-draft that's a harmless
+    no-op re-resolve of an existing active_uuid. But for a CREATE-draft
+    (never activated), the context's OWN ActiveUUID field is genuinely
+    config.ZERO_GUID (see dispatch.py's POST /CheckRoots handler) - live-
+    verified that the real framework sends exactly
+    "CheckRootPreparationAction?ActiveUUID=guid'00000000...'&DraftUUID=guid'<real>'"
+    in that case (both are declared FunctionImport parameters - see
+    metadata.xml's comment on why DraftUUID must be declared even though the
+    initial-Edit-click path ignores it), and ZERO_GUID is never a key in
+    state.store["CheckRoots"] - so without this branch, every SideEffects-
+    triggered recalc on an in-progress Create (e.g. adding/deleting a
+    CheckItem/Barrier row before ever hitting Save) would 404. Resolves
+    straight from the caller-supplied DraftUUID instead of treating
+    ZERO_GUID as "no such active row".
 
     [Fix] preserve_changes=False (see the metadata.xml PreserveChanges
     parameter) discards any existing in-progress edit-draft for this row and
@@ -166,6 +228,13 @@ def _draft_prepare(active_uuid, preserve_changes=True, requesting_user=config.MO
     actually differ per request (see state._resolve_mock_user / X-Mock-User
     header) - previously this mock had exactly one identity, so this branch
     could never fire."""
+    if active_uuid == config.ZERO_GUID:
+        draft_row = state.draft_store["CheckRoots"].get(draft_uuid_hint)
+        if draft_row is None or draft_row.get("ActiveUUID", config.ZERO_GUID) != config.ZERO_GUID:
+            return None
+        if _draft_owner_mismatch(draft_uuid_hint, requesting_user) is not None:
+            return ("foreign_lock", draft_row)
+        return resolvers.wrap_entity("CheckRoots", config.ENTITY_TYPES["CheckRoots"], draft_row, None)
     if active_uuid not in state.store["CheckRoots"]:
         return None
     draft_uuid, draft_row = state._find_draft_by_active_uuid(active_uuid)
@@ -218,8 +287,13 @@ def _draft_activate(draft_uuid):
     # happen to match a Perner record.
     raw_basic = state.store["CheckBasics"].get(root_id) or {}
     missing = _missing_required_fields({**draft_row, **raw_basic})
-    if missing:
-        return ("validation_error", missing)
+    # [Fix, exhaustive-sweep pass] Child rows (CheckItems/Barriers) get their
+    # own required-field gate here too - instance_tag is draft_uuid itself
+    # (this draft's own tagged copies), NOT ZERO_GUID, mirroring
+    # compute_check_root_view's root_override convention.
+    missing_children = _missing_required_child_fields(root_id, draft_uuid)
+    if missing or missing_children:
+        return ("validation_error", missing, missing_children)
     state.draft_store["CheckRoots"].pop(draft_uuid, None)
     draft_row.pop("_child_snapshot", None)
     # [Fix] CheckItems/Barriers are real draft nodes now - this draft's own

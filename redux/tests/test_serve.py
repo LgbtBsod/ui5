@@ -44,6 +44,26 @@ class ResolveCheckItemTests(unittest.TestCase):
         serve.resolve_check_item(row)
         self.assertNotIn("Text", row)
 
+    def test_field_control_is_optional_when_satisfactory(self):
+        out = serve.resolve_check_item({"Code": "VISUAL_INSPECTION", "RawText": "", "Result": "X"})
+        self.assertEqual(out["CommentFieldControl"], 3)
+
+    def test_field_control_is_mandatory_when_unsatisfactory(self):
+        # [Fix, exhaustive-sweep pass] Common.FieldControl - "" is the real
+        # CheckResults code for "Неудовлетворительно" (see serve_config's
+        # only two reference rows), not "no value yet" (that's None/missing).
+        out = serve.resolve_check_item({"Code": "VISUAL_INSPECTION", "RawText": "", "Result": ""})
+        self.assertEqual(out["CommentFieldControl"], 7)
+
+    def test_field_control_is_optional_when_not_yet_assessed(self):
+        out = serve.resolve_check_item({"Code": "VISUAL_INSPECTION", "RawText": "", "Result": None})
+        self.assertEqual(out["CommentFieldControl"], 3)
+
+    def test_deletable_true_only_before_a_result_is_recorded(self):
+        self.assertTrue(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": None})["Deletable"])
+        self.assertFalse(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": "X"})["Deletable"])
+        self.assertFalse(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": ""})["Deletable"])
+
 
 class ResolveBarrierTests(unittest.TestCase):
     def test_known_code_resolves_text_from_barrier_types(self):
@@ -58,6 +78,21 @@ class ResolveBarrierTests(unittest.TestCase):
         # общий helper _resolve_type_and_result её не потерял при рефакторинге.
         out = serve.resolve_barrier({"Code": "UNKNOWN_CODE", "RawText": "must not leak", "Result": None})
         self.assertEqual(out["Text"], "")
+
+    def test_field_control_and_deletable_mirror_check_item(self):
+        # Same shared _resolve_type_and_result computation as CheckItem -
+        # one representative test here is enough (the exhaustive cases live
+        # on ResolveCheckItemTests) to guard against a Barrier-specific
+        # regression in the shared helper.
+        satisfactory = serve.resolve_barrier({"Code": "SAFETY_FENCE", "Result": "X"})
+        failing = serve.resolve_barrier({"Code": "SAFETY_FENCE", "Result": ""})
+        unassessed = serve.resolve_barrier({"Code": "SAFETY_FENCE", "Result": None})
+        self.assertEqual(satisfactory["CommentFieldControl"], 3)
+        self.assertEqual(failing["CommentFieldControl"], 7)
+        self.assertEqual(unassessed["CommentFieldControl"], 3)
+        self.assertTrue(unassessed["Deletable"])
+        self.assertFalse(satisfactory["Deletable"])
+        self.assertFalse(failing["Deletable"])
 
 
 class RootEtagStringTests(unittest.TestCase):
@@ -491,6 +526,152 @@ class ForeignUserLockTests(unittest.TestCase):
         self.assertEqual(matching[0]["InProcessByUser"], "PETROV")
 
 
+class CreateDraftPreparationReinvocationTests(unittest.TestCase):
+    """[Fix, exhaustive-sweep pass] Common.SideEffects (EffectTypes="ValueChange",
+    our existing ChecksAndBarriersRecalc qualifier - confirmed live elsewhere
+    to trigger a PreparationAction call) re-invokes PreparationAction any
+    time a to_Checks/to_Barriers row changes, not just once at the initial
+    Edit click. For a CREATE-draft (never activated), the framework supplies
+    the draft's OWN ActiveUUID field value - genuinely config.ZERO_GUID,
+    live-verified via the real browser flow (Создать -> add/observe the
+    binding context) - alongside its real DraftUUID. Before this fix,
+    _draft_prepare's first line rejected ZERO_GUID outright since it's never
+    a key in store["CheckRoots"], 404ing every such re-invocation."""
+
+    def setUp(self):
+        status, resp, _c = serve.dispatch_request("POST", "CheckRoots", body={})
+        self.assertEqual(status, 201)
+        self.draft_uuid = resp["d"]["DraftUUID"]
+        self.root_id = resp["d"]["RootId"]
+
+    def tearDown(self):
+        serve.draft_store["CheckRoots"].pop(self.draft_uuid, None)
+        serve.store["CheckBasics"].pop(self.root_id, None)
+
+    def test_reinvoking_preparation_on_a_create_draft_resolves_instead_of_404(self):
+        status, resp, _c = serve.dispatch_request(
+            "POST",
+            "CheckRootPreparationAction?ActiveUUID=guid'%s'&DraftUUID=guid'%s'&SideEffectsQualifier=ChecksAndBarriersRecalc"
+            % (serve.ZERO_GUID, self.draft_uuid),
+        )
+        self.assertEqual(status, 200)
+        self.assertEqual(resp["d"]["DraftUUID"], self.draft_uuid)
+        self.assertEqual(resp["d"]["RootId"], self.root_id)
+        # Must not mutate/recreate the draft - still the same object.
+        self.assertIn(self.draft_uuid, serve.draft_store["CheckRoots"])
+
+    def test_unknown_draft_uuid_with_zero_active_uuid_still_404s(self):
+        status, _resp, _c = serve.dispatch_request(
+            "POST", "CheckRootPreparationAction?ActiveUUID=guid'%s'&DraftUUID=guid'%s'" % (serve.ZERO_GUID, serve.ZERO_GUID),
+        )
+        self.assertEqual(status, 404)
+
+    def test_reinvocation_by_a_foreign_user_is_rejected(self):
+        status, resp, _c = serve.dispatch_request(
+            "POST",
+            "CheckRootPreparationAction?ActiveUUID=guid'%s'&DraftUUID=guid'%s'" % (serve.ZERO_GUID, self.draft_uuid),
+            headers={"x-mock-user": "SIDOROVA"},
+        )
+        self.assertEqual(status, 409)
+        self.assertEqual(resp["error"]["code"], "DRAFT_LOCKED")
+
+
+class ForeignUserWriteLockTests(unittest.TestCase):
+    """[Fix, exhaustive-sweep pass] sap.ui.generic.app's TransactionController.
+    editEntity only runs the foreign-lock check ONCE, at the initial Edit
+    click (see ForeignUserLockTests) - a raw PATCH/MERGE/PUT or DELETE, or a
+    CheckRootActivationAction/CheckRootDiscardAction call, addressed directly
+    by an EXISTING draft's own DraftUUID key, never went through that gate at
+    all. Without draft_service._draft_owner_mismatch, any mock user who knew/
+    guessed another user's DraftUUID could hijack their in-progress draft
+    outright - these tests cover every write path that needed the same
+    re-check CheckRootPreparationAction already had."""
+
+    def setUp(self):
+        self.root_id = "write-lock-test-root"
+        serve.store["CheckRoots"][self.root_id] = {
+            "RootId": self.root_id, "ActiveUUID": self.root_id, "DraftUUID": serve.ZERO_GUID,
+            "IsActiveEntity": True, "DocId": "WRITE-LOCK-TEST", "Status": "OK",
+            "LastChangedAt": serve.odata_date(), "CreatedAt": serve.odata_date(),
+        }
+        serve.store["CheckBasics"][self.root_id] = {"RootId": self.root_id, "LastChangedAt": serve.odata_date()}
+        status, resp, _c = serve.dispatch_request(
+            "POST", "CheckRootPreparationAction?ActiveUUID=guid'%s'" % self.root_id,
+            headers={"x-mock-user": "PETROV"},
+        )
+        self.assertEqual(status, 200)
+        self.draft_uuid = resp["d"]["DraftUUID"]
+
+    def tearDown(self):
+        serve.store["CheckRoots"].pop(self.root_id, None)
+        serve.store["CheckBasics"].pop(self.root_id, None)
+        serve.draft_store["CheckRoots"].clear()
+
+    def _draft_key(self):
+        return "CheckRoots(ActiveUUID=guid'%s',DraftUUID=guid'%s')" % (self.root_id, self.draft_uuid)
+
+    def test_patch_by_foreign_user_is_rejected(self):
+        status, resp, _c = serve.dispatch_request(
+            "PATCH", self._draft_key(), body={"Equipment": "hijacked"},
+            headers={"x-mock-user": "SIDOROVA", "if-match": "*"},
+        )
+        self.assertEqual(status, 409)
+        self.assertEqual(resp["error"]["code"], "DRAFT_LOCKED")
+        self.assertNotEqual(serve.store["CheckBasics"][self.root_id].get("Equipment"), "hijacked")
+
+    def test_patch_by_owning_user_still_succeeds(self):
+        status, _resp, _c = serve.dispatch_request(
+            "PATCH", self._draft_key(), body={"Equipment": "legit-edit"},
+            headers={"x-mock-user": "PETROV", "if-match": "*"},
+        )
+        self.assertEqual(status, 204)
+        self.assertEqual(serve.store["CheckBasics"][self.root_id]["Equipment"], "legit-edit")
+
+    def test_delete_by_foreign_user_is_rejected(self):
+        status, resp, _c = serve.dispatch_request(
+            "DELETE", self._draft_key(), headers={"x-mock-user": "SIDOROVA", "if-match": "*"},
+        )
+        self.assertEqual(status, 409)
+        self.assertEqual(resp["error"]["code"], "DRAFT_LOCKED")
+        self.assertIn(self.draft_uuid, serve.draft_store["CheckRoots"])
+
+    def test_activate_by_foreign_user_is_rejected(self):
+        status, resp, _c = serve.dispatch_request(
+            "POST", "CheckRootActivationAction?DraftUUID=guid'%s'" % self.draft_uuid,
+            headers={"x-mock-user": "SIDOROVA"},
+        )
+        self.assertEqual(status, 409)
+        self.assertEqual(resp["error"]["code"], "DRAFT_LOCKED")
+        self.assertIn(self.draft_uuid, serve.draft_store["CheckRoots"])
+
+    def test_discard_by_foreign_user_is_rejected(self):
+        status, resp, _c = serve.dispatch_request(
+            "POST", "CheckRootDiscardAction?DraftUUID=guid'%s'" % self.draft_uuid,
+            headers={"x-mock-user": "SIDOROVA"},
+        )
+        self.assertEqual(status, 409)
+        self.assertEqual(resp["error"]["code"], "DRAFT_LOCKED")
+        self.assertIn(self.draft_uuid, serve.draft_store["CheckRoots"])
+
+    def test_activate_by_owning_user_still_succeeds(self):
+        # Zero-regression: fill in required fields so activation actually
+        # succeeds rather than hitting the (unrelated) validation gate.
+        serve.dispatch_request(
+            "PATCH", self._draft_key(),
+            body={
+                "ObserverFullname": "X", "ObservedFullname": "Y", "Date": serve.odata_date(),
+                "Time": "PT09H00M00S", "Timezone": "Europe/Moscow", "LpcKey": "1", "ProfKey": "ELECTRICIAN",
+            },
+            headers={"x-mock-user": "PETROV", "if-match": "*"},
+        )
+        status, _resp, _c = serve.dispatch_request(
+            "POST", "CheckRootActivationAction?DraftUUID=guid'%s'" % self.draft_uuid,
+            headers={"x-mock-user": "PETROV"},
+        )
+        self.assertEqual(status, 200)
+        self.assertNotIn(self.draft_uuid, serve.draft_store["CheckRoots"])
+
+
 class FieldLevelValidationMessageTests(unittest.TestCase):
     """[Fix] VALIDATION_ERROR on Activate now carries innererror.errordetails[]
     with a `target` per missing property, alongside the existing combined-text
@@ -536,6 +717,84 @@ class FieldLevelValidationMessageTests(unittest.TestCase):
         for d in details:
             self.assertEqual(d["code"], "VALIDATION_ERROR")
             self.assertIn("value", d["message"])
+
+
+class ChildRowValidationMessageTests(unittest.TestCase):
+    """[Fix, exhaustive-sweep pass] CheckItem/Barrier Result is now required
+    at Activation too (config.REQUIRED_CHILD_FIELD), not just root fields -
+    a checklist line with no recorded outcome is meaningless data. Each
+    missing row gets its own nav-qualified errordetails[] target
+    ("to_Checks(RootId=..,ItemId=..)/Result") instead of a bare field name,
+    since a bare "Result" target would be ambiguous across multiple rows -
+    see draft_service._missing_required_child_fields/dispatch.py's
+    VALIDATION_ERROR branch. Confirmed via the real ODataMessageParser.
+    _createTarget source that this is a first-class supported target shape
+    (string-concatenated with the FunctionImport's own resolved entity path,
+    then run through the model's normal canonical-path resolution - no
+    dependency on $batch/changeset context)."""
+
+    ALL_REQUIRED_ROOT_FIELDS = {
+        "ObserverFullname": "X", "ObservedFullname": "Y", "Date": "2026-07-27T00:00:00.000Z",
+        "Time": "PT09H00M00S", "Timezone": "Europe/Moscow", "LpcKey": "1", "ProfKey": "ELECTRICIAN",
+    }
+
+    def setUp(self):
+        _status, resp, _c = serve.dispatch_request("POST", "CheckRoots", body=dict(self.ALL_REQUIRED_ROOT_FIELDS))
+        self.root_id = resp["d"]["RootId"]
+        self.draft_key = "CheckRoots(ActiveUUID=guid'%s',DraftUUID=guid'%s')" % (serve.ZERO_GUID, self.root_id)
+
+    def tearDown(self):
+        serve.store["CheckRoots"].pop(self.root_id, None)
+        serve.store["CheckBasics"].pop(self.root_id, None)
+        serve.draft_store["CheckRoots"].pop(self.root_id, None)
+        for key in [k for k in serve.store["CheckItems"] if k[0] == self.root_id]:
+            del serve.store["CheckItems"][key]
+
+    def _add_check_item(self, result=None):
+        body = {"Code": "VISUAL_INSPECTION"}
+        if result is not None:
+            body["Result"] = result
+        status, resp, _c = serve.dispatch_request("POST", self.draft_key + "/to_Checks", body=body)
+        self.assertEqual(status, 201)
+        return resp["d"]["ItemId"]
+
+    def _activate(self):
+        return serve.dispatch_request("POST", "CheckRootActivationAction?DraftUUID=guid'%s'" % self.root_id)
+
+    def test_root_fields_alone_activate_successfully_with_no_children(self):
+        status, _resp, _c = self._activate()
+        self.assertEqual(status, 200)
+
+    def test_child_row_missing_result_blocks_activation_with_nav_qualified_target(self):
+        item_id = self._add_check_item()  # Result omitted entirely -> None
+        status, resp, _c = self._activate()
+        self.assertEqual(status, 400)
+        targets = {d["target"] for d in resp["error"]["innererror"]["errordetails"]}
+        self.assertEqual(targets, {"to_Checks(RootId='%s',ItemId='%s')/Result" % (self.root_id, item_id)})
+        # Draft untouched - not activated, not popped.
+        self.assertIn(self.root_id, serve.draft_store["CheckRoots"])
+
+    def test_child_row_with_recorded_result_activates_successfully(self):
+        self._add_check_item(result="X")
+        status, _resp, _c = self._activate()
+        self.assertEqual(status, 200)
+
+    def test_child_row_with_explicit_unsatisfactory_result_is_not_missing(self):
+        # "" is a real CheckResults code (Неудовлетворительно), not "unset".
+        self._add_check_item(result="")
+        status, _resp, _c = self._activate()
+        self.assertEqual(status, 200)
+
+    def test_multiple_incomplete_rows_each_get_their_own_target(self):
+        item_id_1 = self._add_check_item()
+        item_id_2 = self._add_check_item()
+        status, resp, _c = self._activate()
+        self.assertEqual(status, 400)
+        targets = {d["target"] for d in resp["error"]["innererror"]["errordetails"]}
+        self.assertEqual(targets, {
+            "to_Checks(RootId='%s',ItemId='%s')/Result" % (self.root_id, item_id_1),
+            "to_Checks(RootId='%s',ItemId='%s')/Result" % (self.root_id, item_id_2),
+        })
 
 
 class BatchChangesetAtomicityTests(unittest.TestCase):
