@@ -2,9 +2,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/PollingManager",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/RuntimeEventContracts"
-], function (PollingManager, ModelStateRuntime, WorkflowContracts, ModelPathContracts, RuntimeEventContracts) {
+], function (PollingManager, ModelStateRuntime, WorkflowContracts, StatePaths, RuntimeEventContracts) {
     "use strict";
 
     function isLockActive(oStateModel, StatePaths) {
@@ -26,7 +26,7 @@ sap.ui.define([
                 if (!oComponent._ctx || !oComponent._ctx.lock || typeof oComponent._ctx.lock[sLockMethod] !== "function") {
                     return Promise.resolve({ success: false, is_killed: false, skipped: true, missing: "ctx.lock." + sLockMethod });
                 }
-                var sDbKey = ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "");
+                var sDbKey = ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "");
                 var sSessionGuid = ModelStateRuntime.readOnModel(oStateModel, StatePaths.SESSION_ID, "");
                 return oComponent._ctx.lock[sLockMethod]({ dbKey: sDbKey, sessionGuid: sSessionGuid }).then(function (oRes) {
                     return Object.assign({ dbKey: sDbKey, sessionGuid: sSessionGuid }, oRes || {});

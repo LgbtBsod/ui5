@@ -1,5 +1,14 @@
-sap.ui.define([], function () {
+sap.ui.define([
+    "sap/ui/core/routing/HashChanger",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteHashResolver"
+], function (HashChanger, RouteHashResolver) {
     "use strict";
+
+    /* route.attachPatternMatched()/router.attachRoutePatternMatched() do not reliably reach
+     * app-level listeners for in-app navTo() transitions in this build (confirmed: FlexibleColumnLayout
+     * column switching is driven by the router's private target/layout wiring, not by this public
+     * event). HashChanger's hashChanged event is the lower-level, framework-guaranteed signal every
+     * navigation goes through, so every route-matched consumer is anchored there instead. */
 
     function resolveRouter(oController) {
         var oOwnerComponent = oController && oController.getOwnerComponent && oController.getOwnerComponent();
@@ -26,36 +35,47 @@ sap.ui.define([], function () {
             }
         },
         attachRouteMatched: function (sRouteName, fnHandler) {
-            var oRouter = this.getRouter();
-            var oRoute = oRouter && oRouter.getRoute ? oRouter.getRoute(sRouteName) : null;
+            var oController = this;
             var aHooks = routeHooks(this);
-            if (!oRoute || !oRoute.attachPatternMatched || typeof fnHandler !== "function") {
+            var fnHashChanged;
+            if (typeof fnHandler !== "function" || aHooks.some(function (oHook) { return sameHook(oHook, sRouteName, fnHandler); })) {
                 return null;
             }
-            if (!aHooks.some(function (oHook) { return sameHook(oHook, sRouteName, fnHandler); })) {
-                oRoute.attachPatternMatched(fnHandler, this);
-                aHooks.push({
-                    routeName: sRouteName,
-                    route: oRoute,
-                    fnHandler: fnHandler
-                });
-            }
-            return oRoute;
+            fnHashChanged = function () {
+                var oRoute = RouteHashResolver.resolveRouteFromHash(HashChanger.getInstance().getHash());
+                if (oRoute.name === sRouteName) {
+                    fnHandler.call(oController, RouteHashResolver.buildRouteEvent(oRoute));
+                }
+            };
+            HashChanger.getInstance().attachEvent("hashChanged", fnHashChanged);
+            aHooks.push({
+                routeName: sRouteName,
+                fnHandler: fnHandler,
+                fnHashChanged: fnHashChanged
+            });
+            /* A view created lazily in reaction to a hash change (e.g. an FCL column instantiated by
+             * the very navigation this hook wants to observe) attaches its listener after that
+             * hashChanged event already dispatched to the listeners registered at the time - so it
+             * silently misses the navigation that caused its own creation. Re-checking the current
+             * hash once on a microtask (after the attaching controller's synchronous init finishes)
+             * catches that race without relying on view re-render timing. */
+            Promise.resolve().then(fnHashChanged);
+            return true;
         },
         detachRouteMatched: function (sRouteName, fnHandler) {
             var aHooks = routeHooks(this);
             this._aRouteMatchedHooks = aHooks.filter(function (oHook) {
                 var bMatch = sameHook(oHook, sRouteName, fnHandler);
-                if (bMatch && oHook.route && oHook.route.detachPatternMatched) {
-                    oHook.route.detachPatternMatched(oHook.fnHandler, this);
+                if (bMatch && oHook.fnHashChanged) {
+                    HashChanger.getInstance().detachEvent("hashChanged", oHook.fnHashChanged);
                 }
                 return !bMatch;
             }, this);
         },
         detachAllRouteMatched: function () {
             routeHooks(this).forEach(function (oHook) {
-                if (oHook && oHook.route && oHook.route.detachPatternMatched) {
-                    oHook.route.detachPatternMatched(oHook.fnHandler, this);
+                if (oHook && oHook.fnHashChanged) {
+                    HashChanger.getInstance().detachEvent("hashChanged", oHook.fnHashChanged);
                 }
             }, this);
             this._aRouteMatchedHooks = [];

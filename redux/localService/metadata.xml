@@ -1,0 +1,504 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<edmx:Edmx Version="1.0"
+           xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx"
+           xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata"
+           xmlns:sap="http://www.sap.com/Protocols/SAPData">
+  <edmx:DataServices m:DataServiceVersion="2.0">
+    <Schema Namespace="ZCheckService" xml:lang="ru-RU"
+            xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+
+      <!-- [W1] 4 top-level сущности (Root/Basic/CheckItem/Barrier) вместо
+           старой единой CheckHeaders — см. abap/README.md и abap/cds/*.
+           Root/Basic — независимые ETag (раздельный PATCH без блокировки
+           конкурентностью), CheckItem/Barrier — композитный ключ
+           RootId+ItemId / RootId+BarrierId, как в целевых CDS-вьюхах. -->
+
+      <!-- [Фаза 5, NW 7.50/pre-S4 1610 draft-конвенция] Реальная целевая
+           система (SAP NW 7.5, до S/4HANA 1610) НЕ поддерживает
+           IsActiveEntity как часть URL-ключа автоматически — это позже
+           стандартизированный BOPF/S4-приём. Классический ручной паттерн
+           (пример в системе — SEPMRA_PD_D): активная и черновиковая таблицы
+           объединяются вручную через UNION ALL в один CDS-view/классическую
+           вьюху (см. ZI_CheckRoot.ddls.asddls), а адресация экземпляра идёт
+           через пару технических GUID-ключей ActiveUUID/DraftUUID — БЕЗ
+           отдельного IsActiveEntity в URL. IsActiveEntity/HasActiveEntity/
+           HasDraftEntity остаются как обычные (неключенные) вычисляемые
+           булевы поля — ровно как в SEPMRA_PD_D.
+           ActiveUUID для активной строки = значению RootId (то есть значение
+           таблицы дублируется в оба поля: RootId остаётся стабильным
+           бизнес-ключом для FK у CheckBasic/CheckItem/Barrier, ActiveUUID —
+           технический OData-ключ). DraftUUID для активной строки — GUID-
+           заглушка из 32 нулей (00000000-0000-0000-0000-000000000000),
+           поскольку у активной таблицы своей draft_uuid-колонки нет.
+           Симметрично: у черновиковой строки ActiveUUID — либо GUID
+           связанной активной записи (edit-драфт), либо та же заглушка
+           (create-драфт без активного двойника), DraftUUID — собственный
+           ключ черновиковой таблицы. -->
+      <EntityType Name="CheckRoot" sap:label="Проверка">
+        <Key>
+          <PropertyRef Name="ActiveUUID"/>
+          <PropertyRef Name="DraftUUID"/>
+        </Key>
+        <Property Name="ActiveUUID"           Type="Edm.Guid" Nullable="false" sap:label="Активный UUID" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="DraftUUID"            Type="Edm.Guid" Nullable="false" sap:label="UUID черновика" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="RootId"               Type="Edm.String" Nullable="false" MaxLength="36" sap:label="ID заголовка" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="IsActiveEntity"        Type="Edm.Boolean" Nullable="false" sap:label="Активная версия" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="HasActiveEntity"       Type="Edm.Boolean" Nullable="false" sap:label="Есть активная версия" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="HasDraftEntity"        Type="Edm.Boolean" Nullable="false" sap:label="Есть черновик" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="DocId"                Type="Edm.String" MaxLength="10" sap:label="№ документа" sap:creatable="false" sap:updatable="false"/>
+
+        <!-- [Basic-proxy] Поля-прокси Basic на Root — редактируемые (не
+             read-only!), см. ZI_CheckRoot.ddls.asddls "EMPIRICAL FIX":
+             facet через to_Basic-навигацию не получал BindingContext для
+             transient Root в SAPUI5 1.71 + OData v2 (проверено эмпирически),
+             поэтому Object Page редактирует эти поля прямо на Root, а
+             DPC_EXT-прокси (serve.py) маршрутизирует запись в CheckBasics —
+             SSOT по значению остаётся там, ETag CheckBasics независим. -->
+        <Property Name="Date"          Type="Edm.DateTime" Nullable="false" sap:display-format="Date" sap:label="Дата проверки"/>
+        <Property Name="Time"          Type="Edm.Time" Nullable="false" sap:label="Время проверки"/>
+        <Property Name="Timezone"      Type="Edm.String" Nullable="false" MaxLength="50" sap:label="Часовой пояс" sap:text="TimezoneText"/>
+        <Property Name="TimezoneText"  Type="Edm.String" Nullable="false" MaxLength="100" sap:label="Часовой пояс"/>
+        <Property Name="LocationKey"   Type="Edm.String" MaxLength="36" sap:label="Местоположение" sap:text="LocationName"/>
+        <Property Name="LocationName"  Type="Edm.String" MaxLength="100" sap:label="Местоположение"/>
+        <Property Name="Equipment"     Type="Edm.String" MaxLength="100" sap:label="Оборудование"/>
+        <Property Name="ObserverFullname" Type="Edm.String" Nullable="false" MaxLength="100" sap:label="ФИО инспектора" sap:quickcreate="true"/>
+        <Property Name="ObserverPerner"   Type="Edm.String" MaxLength="8" sap:label="Табельный № инспектора" sap:visible="false"/>
+        <Property Name="ObservedFullname" Type="Edm.String" Nullable="false" MaxLength="100" sap:label="ФИО проверяемого" sap:quickcreate="true"/>
+        <Property Name="ObservedPerner"   Type="Edm.String" MaxLength="8" sap:label="Табельный № проверяемого" sap:visible="false"/>
+        <Property Name="LpcKey"        Type="Edm.String" MaxLength="10" sap:label="Уровень КПР" sap:text="LpcText"/>
+        <Property Name="LpcText"       Type="Edm.String" Nullable="false" MaxLength="100" sap:label="Уровень КПР"/>
+        <Property Name="ProfKey"       Type="Edm.String" MaxLength="50" sap:label="Профессия" sap:text="ProfText"/>
+        <Property Name="ProfText"      Type="Edm.String" Nullable="false" MaxLength="100" sap:label="Профессия"/>
+
+        <Property Name="Status"                Type="Edm.String" MaxLength="20" sap:label="Статус" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="StatusCriticality"     Type="Edm.Int32" sap:label="Критичность статуса" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ThisIsIntegrationData" Type="Edm.Boolean" Nullable="false" sap:label="Создано интеграцией" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ChecksAmount"          Type="Edm.Int32" Nullable="false" sap:label="Всего проверок" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ChecksSuccess"         Type="Edm.Int32" Nullable="false" sap:label="Успешных проверок" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="BarriersAmount"        Type="Edm.Int32" Nullable="false" sap:label="Барьеров" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="BarriersSuccess"       Type="Edm.Int32" Nullable="false" sap:label="Успешных барьеров" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="SuccessRateChecks"     Type="Edm.Decimal" Precision="5" Scale="2" sap:label="Успешность проверок, %" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="SuccessRateBarriers"   Type="Edm.Decimal" Precision="5" Scale="2" sap:label="Успешность барьеров, %" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ChecksCriticality"     Type="Edm.Int32" Nullable="false" sap:label="Критичность проверок" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="BarriersCriticality"   Type="Edm.Int32" Nullable="false" sap:label="Критичность барьеров" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="HasErrorChecks"        Type="Edm.Boolean" Nullable="false" sap:label="Есть неуспешные проверки" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="HasErrorBarriers"      Type="Edm.Boolean" Nullable="false" sap:label="Есть неуспешные барьеры" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="HeaderKpiTitle"        Type="Edm.String" MaxLength="200" sap:label="КПР/Профессия" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="HeaderKpiSubtitle"     Type="Edm.String" MaxLength="200" sap:label="Проверки/Барьеры" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ChecksHidden"          Type="Edm.Boolean" Nullable="false" sap:label="Проверки скрыты" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="BarriersHidden"        Type="Edm.Boolean" Nullable="false" sap:label="Барьеры скрыты" sap:creatable="false" sap:updatable="false"/>
+        <!-- Негации *-флагов выше — специально для UI.Hidden (скрывает при true,
+             а не показывает), тот же приём, что ChecksHidden/BarriersHidden для
+             фасетов. Раньше видимость этих 3 полей считалась в JS (KpiBadges.js) —
+             теперь это чистая CDS-вычисляемая проекция, без клиентского кода. -->
+        <Property Name="IntegrationBadgeHidden"    Type="Edm.Boolean" Nullable="false" sap:label="Не из интеграции" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ChecksErrorBadgeHidden"    Type="Edm.Boolean" Nullable="false" sap:label="Нет неуспешных проверок" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="BarriersErrorBadgeHidden"  Type="Edm.Boolean" Nullable="false" sap:label="Нет неуспешных барьеров" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="LastChangedAt"         Type="Edm.DateTime" sap:visible="false" sap:creatable="false" sap:updatable="false" ConcurrencyMode="Fixed"/>
+        <Property Name="CreatedBy"             Type="Edm.String" MaxLength="12" sap:label="Кем создано" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="CreatedAt"             Type="Edm.DateTime" sap:label="Создано" sap:creatable="false" sap:updatable="false"/>
+        <NavigationProperty Name="to_Basic"    Relationship="ZCheckService.CheckRoot_CheckBasic"  FromRole="Root" ToRole="Basic"    sap:creatable="true"/>
+        <!-- [JS-hooks/blockers pass] Tried sap:creatable-path here (pointing at
+             a computed root Boolean), per ui5.sap.com's "Enabling Action
+             Buttons in Tables on the Object Page" doc - live-tested with the
+             correct XML placement AND a confirmed-true value, and the
+             Object Page's nested composition-child SmartTable "Создать"
+             button STILL never became visible (mBindingInfos.visible stayed
+             null - no binding wired at all, regardless of this capability).
+             Reverted back to the original static sap:creatable="true" -
+             confirms (empirically, not just by inference from an old
+             comment) that this specific button is unconditionally hidden by
+             sap.suite.ui.generic.template in this UI5 1.71.84 build for a
+             1:n composition on the Object Page - the doc's guidance doesn't
+             apply to this exact template/version combination. See
+             ext/util/SubTableCrud.js (currently disabled) for the
+             JS-controller-extension workaround this app already has built
+             for exactly this gap. -->
+        <NavigationProperty Name="to_Checks"   Relationship="ZCheckService.CheckRoot_CheckItems"  FromRole="Root" ToRole="CheckItem" sap:creatable="true"/>
+        <NavigationProperty Name="to_Barriers" Relationship="ZCheckService.CheckRoot_Barriers"    FromRole="Root" ToRole="Barrier"  sap:creatable="true"/>
+        <NavigationProperty Name="DraftAdministrativeData" Relationship="ZCheckService.CheckRoot_DraftAdministrativeData" FromRole="Root" ToRole="Draft"/>
+        <!-- [Fix] SiblingEntity - self-referencing 0..1 nav to "the other
+             half of the active/draft pair" (the draft, if this is the
+             active row; the active twin, if this is a draft). Discovered
+             missing live: sap.suite.ui.generic.template's standard EditState
+             SmartFilterBar quick filter (see Common.DraftRoot/SemanticKey
+             above) builds $filter clauses referencing
+             "SiblingEntity/IsActiveEntity" - without a real NavigationProperty
+             of that exact name here, ODataMetaModel can't resolve the
+             property's type at all ("PropertyType for property
+             SiblingEntity/IsActiveEntity of EntityType CheckRoot not
+             found!"), breaking that filter option. Backed by serve.py (see
+             the NAV_SIBLING_RE dispatch branch). -->
+        <NavigationProperty Name="SiblingEntity" Relationship="ZCheckService.CheckRoot_SiblingEntity" FromRole="FromRole_Sibling" ToRole="ToRole_Sibling"/>
+      </EntityType>
+
+      <!-- [Фаза 3] IsActiveEntity в ключе — child-сущности драфт-дерева
+           хранятся тем же способом, что root (параллельная draft-копия),
+           без Has*/DraftAdministrativeData на уровне детей — эти флаги нужны
+           только на root (см. общее обоснование в комментарии CheckRoot выше). -->
+      <EntityType Name="CheckBasic" sap:label="Основная информация">
+        <Key>
+          <PropertyRef Name="RootId"/>
+          <PropertyRef Name="IsActiveEntity"/>
+        </Key>
+        <Property Name="RootId"                    Type="Edm.String" Nullable="false" MaxLength="36" sap:label="ID заголовка" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="IsActiveEntity"             Type="Edm.Boolean" Nullable="false" sap:label="Активная версия" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="Date"                       Type="Edm.DateTime" Nullable="false" sap:display-format="Date" sap:label="Дата проверки"/>
+        <Property Name="Time"                       Type="Edm.Time" Nullable="false" sap:label="Время проверки"/>
+        <Property Name="Timezone"                   Type="Edm.String" Nullable="false" MaxLength="50" sap:label="Часовой пояс" sap:text="TimezoneText"/>
+        <Property Name="TimezoneText"               Type="Edm.String" MaxLength="100" sap:label="Часовой пояс" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="Equipment"                  Type="Edm.String" MaxLength="100" sap:label="Оборудование"/>
+        <Property Name="LocationKey"                Type="Edm.String" MaxLength="36" sap:label="Местоположение" sap:text="LocationName"/>
+        <Property Name="LocationName"                Type="Edm.String" MaxLength="100" sap:label="Местоположение"/>
+        <Property Name="LocationText"                Type="Edm.String" MaxLength="100" sap:label="Местоположение (текст интеграции)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ObserverPerner"              Type="Edm.String" MaxLength="8" sap:label="Табельный № инспектора" sap:visible="false"/>
+        <Property Name="ObserverFullname"            Type="Edm.String" Nullable="false" MaxLength="100" sap:label="ФИО инспектора" sap:quickcreate="true"/>
+        <Property Name="ObserverPosition"            Type="Edm.String" MaxLength="100" sap:label="Должность инспектора (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ObserverOrgunit"             Type="Edm.String" MaxLength="100" sap:label="Подразделение инспектора (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ObserverIntegrationName"     Type="Edm.String" MaxLength="100" sap:label="ФИО инспектора (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ObservedPerner"              Type="Edm.String" MaxLength="8" sap:label="Табельный № проверяемого" sap:visible="false"/>
+        <Property Name="ObservedFullname"            Type="Edm.String" Nullable="false" MaxLength="100" sap:label="ФИО проверяемого" sap:quickcreate="true"/>
+        <Property Name="ObservedPosition"            Type="Edm.String" MaxLength="100" sap:label="Должность проверяемого (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ObservedOrgunit"             Type="Edm.String" MaxLength="100" sap:label="Подразделение проверяемого (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ObservedIntegrationName"     Type="Edm.String" MaxLength="100" sap:label="ФИО проверяемого (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="LpcKey"                      Type="Edm.String" MaxLength="10" sap:label="Уровень КПР" sap:text="LpcText"/>
+        <Property Name="LpcText"                     Type="Edm.String" MaxLength="100" sap:label="Уровень КПР" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="ProfKey"                     Type="Edm.String" MaxLength="50" sap:label="Профессия" sap:text="ProfText"/>
+        <Property Name="ProfText"                    Type="Edm.String" MaxLength="100" sap:label="Профессия" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="LastChangedAt"               Type="Edm.DateTime" sap:visible="false" sap:creatable="false" sap:updatable="false" ConcurrencyMode="Fixed"/>
+        <NavigationProperty Name="to_Root" Relationship="ZCheckService.CheckRoot_CheckBasic" FromRole="Basic" ToRole="Root"/>
+      </EntityType>
+
+      <EntityType Name="CheckItem" sap:label="Строка проверки">
+        <!-- [Fix] IsActiveEntity used to be part of this Key despite never
+             being implemented anywhere in serve.py - every CheckItem
+             response was missing a value for a property $metadata declared
+             as a mandatory key part, breaking ODataModel's own key
+             construction (undefined key segment). Removed from the key.
+             [Fix, later] CheckItem is now a genuine Common.DraftNode (see
+             annotations.xml) - each row is tagged with DraftUUID (ZERO_GUID
+             for the active instance, a specific draft's own uuid for that
+             draft's in-progress copy - see serve.py
+             _clone_children_into_draft/_activate_tagged_children), with
+             IsActiveEntity mirroring it. Still keyed by RootId+ItemId only -
+             ItemId is unique per physical row regardless of instance, so no
+             key-shape change was needed to add draft support. -->
+        <Key>
+          <PropertyRef Name="RootId"/>
+          <PropertyRef Name="ItemId"/>
+        </Key>
+        <Property Name="RootId"        Type="Edm.String" Nullable="false" MaxLength="36" sap:label="ID заголовка" sap:visible="false"/>
+        <Property Name="ItemId"        Type="Edm.String" Nullable="false" MaxLength="36" sap:label="ID строки" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="DraftUUID"     Type="Edm.Guid" sap:label="UUID черновика" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="IsActiveEntity" Type="Edm.Boolean" sap:label="Активная версия" sap:creatable="false" sap:updatable="false"/>
+        <!-- [FIX] Text/ResultText — реально write-able (по образцу CheckRoot/LpcText):
+             это поле, привязанное к инлайн-редактированию таблицы (см. UI.LineItem
+             в annotations.xml), Code/Result заполняются через Out-параметр F4. -->
+        <Property Name="Code"          Type="Edm.String" Nullable="true"  MaxLength="30"  sap:label="Тип проверки" sap:text="Text"/>
+        <Property Name="RawText"       Type="Edm.String" Nullable="true"  MaxLength="200" sap:label="Текст (как есть)"/>
+        <Property Name="Text"          Type="Edm.String" Nullable="true"  MaxLength="200" sap:label="Тип проверки"/>
+        <Property Name="Comment"       Type="Edm.String" MaxLength="500" sap:label="Комментарий"/>
+        <Property Name="Result"        Type="Edm.String" MaxLength="1"   sap:label="Результат" sap:text="ResultText"/>
+        <Property Name="ResultText"    Type="Edm.String" MaxLength="100" sap:label="Результат"/>
+        <!-- [Fix, exhaustive-sweep pass] Computed, read-only - see
+             resolvers._resolve_type_and_result and annotations.xml's
+             Common.FieldControl/sap:deletable-path on CheckItems below. -->
+        <Property Name="CommentFieldControl" Type="Edm.Byte" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="Deletable"     Type="Edm.Boolean" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="LastChangedAt" Type="Edm.DateTime" sap:visible="false" sap:creatable="false" sap:updatable="false" ConcurrencyMode="Fixed"/>
+        <NavigationProperty Name="to_Root" Relationship="ZCheckService.CheckRoot_CheckItems" FromRole="CheckItem" ToRole="Root"/>
+      </EntityType>
+
+      <EntityType Name="Barrier" sap:label="Барьер">
+        <!-- [Fix] Same IsActiveEntity-in-key issue as CheckItem above, fixed
+             the same way - see that comment. Also now a genuine
+             Common.DraftNode (see annotations.xml) exactly like CheckItem. -->
+        <Key>
+          <PropertyRef Name="RootId"/>
+          <PropertyRef Name="BarrierId"/>
+        </Key>
+        <Property Name="RootId"        Type="Edm.String" Nullable="false" MaxLength="36" sap:label="ID заголовка" sap:visible="false"/>
+        <Property Name="BarrierId"     Type="Edm.String" Nullable="false" MaxLength="36" sap:label="ID барьера" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="DraftUUID"     Type="Edm.Guid" sap:label="UUID черновика" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="IsActiveEntity" Type="Edm.Boolean" sap:label="Активная версия" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="Code"          Type="Edm.String" Nullable="false" MaxLength="30"  sap:label="Тип барьера" sap:text="Text"/>
+        <Property Name="Text"          Type="Edm.String" Nullable="true"  MaxLength="100" sap:label="Тип барьера"/>
+        <Property Name="Comment"       Type="Edm.String" MaxLength="500" sap:label="Примечания"/>
+        <Property Name="Result"        Type="Edm.String" MaxLength="1"   sap:label="Результат" sap:text="ResultText"/>
+        <Property Name="ResultText"    Type="Edm.String" MaxLength="100" sap:label="Результат"/>
+        <!-- [Fix, exhaustive-sweep pass] Same as CheckItem - see that
+             entity's comment. -->
+        <Property Name="CommentFieldControl" Type="Edm.Byte" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="Deletable"     Type="Edm.Boolean" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="LastChangedAt" Type="Edm.DateTime" sap:visible="false" sap:creatable="false" sap:updatable="false" ConcurrencyMode="Fixed"/>
+        <NavigationProperty Name="to_Root" Relationship="ZCheckService.CheckRoot_Barriers" FromRole="Barrier" ToRole="Root"/>
+      </EntityType>
+
+      <EntityType Name="Person" sap:label="Сотрудник">
+        <Key>
+          <PropertyRef Name="Pernr"/>
+        </Key>
+        <Property Name="Pernr"      Type="Edm.String" Nullable="false" MaxLength="8"   sap:label="Табельный номер"/>
+        <Property Name="Fio"        Type="Edm.String" MaxLength="100" sap:label="ФИО" sap:filterable="true"/>
+        <!-- [Fix] filterable=true — ObservedFullname/ObserverFullname value-help
+             (annotations.xml Common.ValueListParameterFilterOnly на Date→
+             ActiveFrom/ActiveTo) реально шлёт $filter по этим полям; тот же
+             баг обнаружен и исправлен в pc_lite/model/metadata.xml — sap.ui.
+             core.util.MockServer строго соблюдает sap:filterable и молча
+             возвращает 0 строк на $filter по полю с filterable=false, где бы
+             это ни проявилось. -->
+        <Property Name="ActiveFrom" Type="Edm.DateTime" sap:label="Активен с" sap:filterable="true"/>
+        <Property Name="ActiveTo"   Type="Edm.DateTime" sap:label="Активен по" sap:filterable="true"/>
+      </EntityType>
+
+      <EntityType Name="LocationHierarchy" sap:label="Иерархия местоположений">
+        <Key>
+          <PropertyRef Name="LocationUuid"/>
+        </Key>
+        <Property Name="LocationUuid"        Type="Edm.String" Nullable="false" MaxLength="36" sap:label="UUID местоположения"/>
+        <Property Name="LocationName"        Type="Edm.String" MaxLength="100" sap:label="Наименование" sap:filterable="true"/>
+        <Property Name="LocationCode"        Type="Edm.String" MaxLength="20"  sap:label="Код" sap:filterable="true"/>
+        <Property Name="ParentLocationUuid"  Type="Edm.String" MaxLength="36"  sap:label="Родительский UUID" sap:filterable="true"/>
+        <Property Name="HasChildren"         Type="Edm.Boolean" Nullable="false" sap:label="Есть дети"/>
+        <Property Name="Level"               Type="Edm.Int32" sap:label="Уровень иерархии"/>
+      </EntityType>
+
+      <EntityType Name="Location" sap:label="Местоположение">
+        <Key>
+          <PropertyRef Name="LocationUuid"/>
+        </Key>
+        <Property Name="LocationUuid" Type="Edm.String" Nullable="false" MaxLength="36" sap:label="UUID местоположения" sap:visible="false"/>
+        <Property Name="LocationName" Type="Edm.String" MaxLength="100" sap:label="Наименование" sap:filterable="true"/>
+        <Property Name="LocationCode" Type="Edm.String" MaxLength="20"  sap:label="Код" sap:filterable="true"/>
+      </EntityType>
+
+      <EntityType Name="BarrierType" sap:label="Тип барьера">
+        <Key><PropertyRef Name="BarrierTypeCode"/></Key>
+        <Property Name="BarrierTypeCode" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Код"/>
+        <Property Name="BarrierTypeText" Type="Edm.String" MaxLength="100" sap:label="Наименование" sap:filterable="true"/>
+        <Property Name="Category"        Type="Edm.String" MaxLength="50"  sap:label="Категория" sap:filterable="true"/>
+        <Property Name="PkLevels"        Type="Edm.String" MaxLength="50"  sap:label="Доступные уровни КПР"/>
+      </EntityType>
+
+      <EntityType Name="CheckType" sap:label="Тип проверки">
+        <Key><PropertyRef Name="CheckTypeCode"/></Key>
+        <Property Name="CheckTypeCode" Type="Edm.String" Nullable="false" MaxLength="30" sap:label="Код"/>
+        <Property Name="CheckTypeText" Type="Edm.String" MaxLength="100" sap:label="Наименование" sap:filterable="true"/>
+        <Property Name="Category"      Type="Edm.String" MaxLength="50"  sap:label="Категория" sap:filterable="true"/>
+        <Property Name="PkLevels"      Type="Edm.String" MaxLength="50"  sap:label="Доступные уровни КПР"/>
+      </EntityType>
+
+      <EntityType Name="CheckResult" sap:label="Результат проверки">
+        <Key><PropertyRef Name="ResultCode"/></Key>
+        <Property Name="ResultCode" Type="Edm.String" Nullable="false" MaxLength="20" sap:label="Код"/>
+        <Property Name="ResultText" Type="Edm.String" MaxLength="100" sap:label="Наименование" sap:filterable="true"/>
+      </EntityType>
+
+      <EntityType Name="PkLevel" sap:label="Уровень КПР">
+        <Key><PropertyRef Name="PkLevel"/></Key>
+        <Property Name="PkLevel"     Type="Edm.String" Nullable="false" MaxLength="10" sap:label="Код"/>
+        <Property Name="PkLevelText" Type="Edm.String" MaxLength="100" sap:label="Наименование" sap:filterable="true"/>
+      </EntityType>
+
+      <EntityType Name="TimeZone" sap:label="Часовой пояс">
+        <Key><PropertyRef Name="TimeZoneCode"/></Key>
+        <Property Name="TimeZoneCode" Type="Edm.String" Nullable="false" MaxLength="50" sap:label="Код"/>
+        <Property Name="TimeZoneText" Type="Edm.String" MaxLength="100" sap:label="Наименование" sap:filterable="true"/>
+      </EntityType>
+
+      <EntityType Name="Profession" sap:label="Профессия">
+        <Key><PropertyRef Name="ProfessionCode"/></Key>
+        <Property Name="ProfessionCode" Type="Edm.String" Nullable="false" MaxLength="50" sap:label="Код"/>
+        <Property Name="ProfessionText" Type="Edm.String" MaxLength="100" sap:label="Наименование" sap:filterable="true"/>
+      </EntityType>
+
+      <!-- [Фаза 3, draft-skeleton] Стандартная OData V2 draft-администрация —
+           одна запись на пару root(active)/root(draft), несёт метаданные о том,
+           кто и когда редактирует черновик. Только для CheckRoot (root драфт-
+           дерева) — у детей своей DraftAdministrativeData нет. -->
+      <EntityType Name="DraftAdministrativeData" sap:label="Данные черновика">
+        <!-- [Fix] Now actually backed by serve.py (_draft_admin_data_row) -
+             was declared here from the start but had zero server
+             implementation, so the standard "being edited by X" object-page
+             banner could never resolve it. Description/text-proxy fields
+             added to match the real NW 7.50 BOPF reference
+             (I_DraftAdministrativeDataType) so SmartField renders the
+             friendly display name via sap:text instead of the raw user ID. -->
+        <Key><PropertyRef Name="DraftUUID"/></Key>
+        <Property Name="DraftUUID"           Type="Edm.Guid" Nullable="false" sap:label="UUID черновика" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="CreationDateTime"    Type="Edm.DateTime" sap:label="Создан" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="CreatedByUser"       Type="Edm.String" MaxLength="12" sap:label="Кем создан" sap:text="CreatedByUserDescription" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="CreatedByUserDescription" Type="Edm.String" MaxLength="80" sap:label="Кем создан" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="LastChangeDateTime"  Type="Edm.DateTime" sap:label="Изменён" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="LastChangedByUser"   Type="Edm.String" MaxLength="12" sap:label="Кем изменён" sap:text="LastChangedByUserDescription" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="LastChangedByUserDescription" Type="Edm.String" MaxLength="80" sap:label="Кем изменён" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="InProcessByUser"     Type="Edm.String" MaxLength="12" sap:label="В обработке у" sap:text="InProcessByUserDescription" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="InProcessByUserDescription" Type="Edm.String" MaxLength="80" sap:label="В обработке у" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="DraftIsCreatedByMe"  Type="Edm.Boolean" Nullable="false" sap:label="Черновик мой" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="DraftIsLastChangedByMe" Type="Edm.Boolean" Nullable="false" sap:label="Последнее изменение моё" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="DraftIsProcessedByMe" Type="Edm.Boolean" Nullable="false" sap:label="В обработке у меня" sap:creatable="false" sap:updatable="false"/>
+      </EntityType>
+
+      <!-- [Фаза 5] DraftUUID у CheckRoot удваивается как FK на
+           DraftAdministrativeData.DraftUUID — отдельного поля
+           "DraftAdministrativeDataUUID" не заводим, тот же GUID уже есть в
+           составном ключе CheckRoot. Для активной строки (DraftUUID = зеро-
+           GUID) ссылка естественно ни на что не резолвится. -->
+      <Association Name="CheckRoot_DraftAdministrativeData">
+        <End Type="ZCheckService.CheckRoot"              Multiplicity="1"    Role="Root"/>
+        <End Type="ZCheckService.DraftAdministrativeData" Multiplicity="0..1" Role="Draft"/>
+        <ReferentialConstraint>
+          <Principal Role="Root"><PropertyRef Name="DraftUUID"/></Principal>
+          <Dependent Role="Draft"><PropertyRef Name="DraftUUID"/></Dependent>
+        </ReferentialConstraint>
+      </Association>
+
+      <!-- [Fix] Self-referencing - both ends are CheckRoot itself, so they
+           need distinct role names (can't both be "Root"). No
+           ReferentialConstraint: the sibling isn't found via a simple FK on
+           either side (an active row's sibling is looked up by RootId in
+           draft_store; a draft's sibling is looked up by RootId in store) -
+           see serve.py's NAV_SIBLING_RE handler. -->
+      <Association Name="CheckRoot_SiblingEntity">
+        <End Type="ZCheckService.CheckRoot" Multiplicity="1"    Role="FromRole_Sibling"/>
+        <End Type="ZCheckService.CheckRoot" Multiplicity="0..1" Role="ToRole_Sibling"/>
+      </Association>
+
+      <Association Name="CheckRoot_CheckBasic">
+        <End Type="ZCheckService.CheckRoot"  Multiplicity="1"   Role="Root"/>
+        <End Type="ZCheckService.CheckBasic" Multiplicity="0..1" Role="Basic"/>
+        <ReferentialConstraint>
+          <Principal Role="Root"><PropertyRef Name="RootId"/></Principal>
+          <Dependent Role="Basic"><PropertyRef Name="RootId"/></Dependent>
+        </ReferentialConstraint>
+      </Association>
+
+      <Association Name="CheckRoot_CheckItems">
+        <End Type="ZCheckService.CheckRoot" Multiplicity="1" Role="Root"/>
+        <End Type="ZCheckService.CheckItem" Multiplicity="*" Role="CheckItem"/>
+        <ReferentialConstraint>
+          <Principal Role="Root"><PropertyRef Name="RootId"/></Principal>
+          <Dependent Role="CheckItem"><PropertyRef Name="RootId"/></Dependent>
+        </ReferentialConstraint>
+      </Association>
+
+      <Association Name="CheckRoot_Barriers">
+        <End Type="ZCheckService.CheckRoot" Multiplicity="1" Role="Root"/>
+        <End Type="ZCheckService.Barrier"   Multiplicity="*" Role="Barrier"/>
+        <ReferentialConstraint>
+          <Principal Role="Root"><PropertyRef Name="RootId"/></Principal>
+          <Dependent Role="Barrier"><PropertyRef Name="RootId"/></Dependent>
+        </ReferentialConstraint>
+      </Association>
+
+      <EntityContainer Name="ZCheckServiceEntities" m:IsDefaultEntityContainer="true">
+        <EntitySet Name="CheckRoots"  EntityType="ZCheckService.CheckRoot"
+                   sap:creatable="true" sap:updatable="true" sap:deletable="true"
+                   sap:searchable="true" sap:countable="true"/>
+        <EntitySet Name="CheckBasics" EntityType="ZCheckService.CheckBasic"
+                   sap:creatable="true" sap:updatable="true" sap:deletable="false"
+                   sap:countable="true"/>
+        <!-- [Fix, exhaustive-sweep pass] sap:deletable-path (dynamic, per-row -
+             replaces the old static sap:deletable="true"; the two are
+             mutually exclusive per SAP's own convention) - _ODataMetaModelUtils
+             converts this to Capabilities.DeleteRestrictions/Deletable{Path}
+             internally, read by the Object Page's nested SmartTable toolbar
+             to gate the Delete button per row. See resolvers.
+             _resolve_type_and_result for how Deletable is computed. -->
+        <EntitySet Name="CheckItems"  EntityType="ZCheckService.CheckItem"
+                   sap:creatable="true" sap:updatable="true" sap:deletable-path="Deletable"
+                   sap:countable="true"/>
+        <EntitySet Name="Barriers"    EntityType="ZCheckService.Barrier"
+                   sap:creatable="true" sap:updatable="true" sap:deletable-path="Deletable"
+                   sap:countable="true"/>
+        <EntitySet Name="DraftAdministrativeData" EntityType="ZCheckService.DraftAdministrativeData" sap:countable="false"/>
+        <EntitySet Name="Persons"           EntityType="ZCheckService.Person"           sap:countable="true"/>
+        <EntitySet Name="LocationHierarchy" EntityType="ZCheckService.LocationHierarchy" sap:countable="true"/>
+        <EntitySet Name="Locations"         EntityType="ZCheckService.Location"         sap:countable="true"/>
+        <EntitySet Name="BarrierTypes"      EntityType="ZCheckService.BarrierType"      sap:countable="true"/>
+        <EntitySet Name="CheckTypes"        EntityType="ZCheckService.CheckType"        sap:countable="true"/>
+        <EntitySet Name="CheckResults"      EntityType="ZCheckService.CheckResult"      sap:countable="true"/>
+        <EntitySet Name="PkLevels"          EntityType="ZCheckService.PkLevel"          sap:countable="true"/>
+        <EntitySet Name="TimeZones"         EntityType="ZCheckService.TimeZone"         sap:countable="true"/>
+        <EntitySet Name="Professions"       EntityType="ZCheckService.Profession"       sap:countable="true"/>
+
+        <AssociationSet Name="CheckRoot_DraftAdministrativeDataSet" Association="ZCheckService.CheckRoot_DraftAdministrativeData">
+          <End EntitySet="CheckRoots"              Role="Root"/>
+          <End EntitySet="DraftAdministrativeData" Role="Draft"/>
+        </AssociationSet>
+        <AssociationSet Name="CheckRoot_SiblingEntitySet" Association="ZCheckService.CheckRoot_SiblingEntity">
+          <End EntitySet="CheckRoots" Role="FromRole_Sibling"/>
+          <End EntitySet="CheckRoots" Role="ToRole_Sibling"/>
+        </AssociationSet>
+        <AssociationSet Name="CheckRoot_CheckBasicSet" Association="ZCheckService.CheckRoot_CheckBasic">
+          <End EntitySet="CheckRoots"  Role="Root"/>
+          <End EntitySet="CheckBasics" Role="Basic"/>
+        </AssociationSet>
+        <AssociationSet Name="CheckRoot_CheckItemsSet" Association="ZCheckService.CheckRoot_CheckItems">
+          <End EntitySet="CheckRoots" Role="Root"/>
+          <End EntitySet="CheckItems" Role="CheckItem"/>
+        </AssociationSet>
+        <AssociationSet Name="CheckRoot_BarriersSet" Association="ZCheckService.CheckRoot_Barriers">
+          <End EntitySet="CheckRoots" Role="Root"/>
+          <End EntitySet="Barriers"   Role="Barrier"/>
+        </AssociationSet>
+
+        <!-- [Фаза 5] Три стандартных draft-действия, bound на CheckRoot через
+             sap:action-for (классическая OData V2/Gateway конвенция —
+             нативных Actions в V2 нет). Common.DraftRoot в annotations.xml
+             ссылается на эти же имена. Параметры теперь по ActiveUUID/
+             DraftUUID (не RootId+IsActiveEntity) — см. комментарий у
+             EntityType CheckRoot: Preparation адресует АКТИВНУЮ запись, для
+             которой готовится черновик (ActiveUUID); Activation/Discard
+             адресуют КОНКРЕТНЫЙ черновик (DraftUUID) — RootId один и тот же
+             у обеих записей пары, DraftUUID уникален по определению.
+             Реализация — в serve.py (см. README "Соответствие мок ↔ ABAP"). -->
+        <FunctionImport Name="CheckRootPreparationAction" ReturnType="ZCheckService.CheckRoot" EntitySet="CheckRoots"
+                         m:HttpMethod="POST" sap:action-for="ZCheckService.CheckRoot">
+          <Parameter Name="ActiveUUID" Type="Edm.Guid" Mode="In"/>
+          <!-- [Fix] DraftUUID - sap.ui.generic.app.transaction.BaseController.
+               _getActionParameters (sap/ui/generic/app/library-preload.js)
+               walks EVERY key property of the addressed entity type and
+               throws "Action does not contain a equally-named parameter for
+               key property: X" if a FunctionImport parameter named exactly
+               X isn't declared - its own "skip this for IsActiveEntity/
+               DraftUUID" exemption is dead code (buggy `!=A||!=B` condition,
+               always true, verified by reading the actual executing minified
+               source: T.oServices.oCRUDManager.editEntity -> ...
+               ->_prepareCallAction->_getActionParameters). CheckRoot's key
+               is (ActiveUUID,DraftUUID), so every draft FunctionImport must
+               declare BOTH parts even when one is always the zero-GUID for
+               that particular action (Preparation always addresses the
+               ACTIVE row, i.e. DraftUUID=00000000-0000-0000-0000-000000000000
+               here) - serve.py ignores it, this is purely to satisfy the
+               framework's parameter-presence check. -->
+          <Parameter Name="DraftUUID" Type="Edm.Guid" Mode="In"/>
+          <!-- [Fix] PreserveChanges - present on the real NW 7.50 BOPF
+               reference's Edit FunctionImport (this one doubles as both
+               PreparationAction and EditAction per annotations.xml). UI5
+               only sends it if $metadata declares it; serve.py's
+               _draft_prepare defaults to true (always resumes an existing
+               draft) when the caller omits it, matching prior behavior. -->
+          <Parameter Name="PreserveChanges" Type="Edm.Boolean" Mode="In" Nullable="true"/>
+        </FunctionImport>
+        <FunctionImport Name="CheckRootActivationAction" ReturnType="ZCheckService.CheckRoot" EntitySet="CheckRoots"
+                         m:HttpMethod="POST" sap:action-for="ZCheckService.CheckRoot">
+          <!-- [Fix] ActiveUUID - see the identical comment on
+               CheckRootPreparationAction's DraftUUID parameter above; same
+               framework quirk, mirrored the other way (Activation/Discard
+               address the DRAFT row, so ActiveUUID is the "extra" key part
+               that must be declared but is ignored server-side). -->
+          <Parameter Name="ActiveUUID" Type="Edm.Guid" Mode="In"/>
+          <Parameter Name="DraftUUID" Type="Edm.Guid" Mode="In"/>
+        </FunctionImport>
+        <FunctionImport Name="CheckRootDiscardAction" ReturnType="ZCheckService.CheckRoot" EntitySet="CheckRoots"
+                         m:HttpMethod="POST" sap:action-for="ZCheckService.CheckRoot">
+          <Parameter Name="ActiveUUID" Type="Edm.Guid" Mode="In"/>
+          <Parameter Name="DraftUUID" Type="Edm.Guid" Mode="In"/>
+        </FunctionImport>
+      </EntityContainer>
+
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

@@ -7,7 +7,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailInfoCardLayoutRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailEditRestoreRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/features/detail/runtime/DetailSelectedFieldRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/FeedbackDefaultHandlers",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
@@ -18,7 +17,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts"
-], function (DialogOrchestrator, DetailLayoutRuntime, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardFactory, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, ModelPathContracts, StatePaths, FeedbackDefaultHandlers, ModelStateRuntime, DetailRuntimePolicy, AttachmentGatewayRuntime, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
+], function (DialogOrchestrator, DetailLayoutRuntime, DetailChecklistStateBehavior, DetailChecklistRowBehavior, DetailInfoCardFactory, DetailInfoCardLayoutRuntime, DetailEditRestoreRuntime, DetailSelectedFieldRuntime, StatePaths, FeedbackDefaultHandlers, ModelStateRuntime, DetailRuntimePolicy, AttachmentGatewayRuntime, CreateSentinel, DialogContracts, WorkflowContracts, ModelContracts, OperationSourceContracts) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -86,7 +85,7 @@ sap.ui.define([
             var sMode = WorkflowContracts.normalizeEditMode(
                 ModelStateRuntime.read(this, STATE_MODEL, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ)
             );
-            var sActiveObjectId = String(ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+            var sActiveObjectId = String(ModelStateRuntime.read(this, STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
             if (!oViewModel || !oViewModel.setProperty) {
                 return;
             }
@@ -96,8 +95,8 @@ sap.ui.define([
         },
 
         _currentChecklistDbKey: function () {
-            return ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "")
-                || ModelStateRuntime.read(this, STATE_MODEL, ModelPathContracts.SELECTED_ID, "")
+            return ModelStateRuntime.read(this, STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID, "")
+                || ModelStateRuntime.read(this, STATE_MODEL, StatePaths.SELECTED_ID, "")
                 || "";
         },
 

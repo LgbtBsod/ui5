@@ -17,6 +17,7 @@ from models import (
     ChecklistBarrier,
     ChecklistCheck,
     ChecklistRoot,
+    ChecklistRootDraft,
     FrontendRuntimeSettings,
     RuntimeUserContext,
 )
@@ -125,6 +126,7 @@ def ensure_required_tables(bind=None) -> None:
         FrontendRuntimeSettings.__tablename__: FrontendRuntimeSettings.__table__,
         AppUserProfile.__tablename__: AppUserProfile.__table__,
         RuntimeUserContext.__tablename__: RuntimeUserContext.__table__,
+        ChecklistRootDraft.__tablename__: ChecklistRootDraft.__table__,
     }
     missing_tables = [table for name, table in required_tables.items() if name not in existing_tables]
     if not missing_tables:

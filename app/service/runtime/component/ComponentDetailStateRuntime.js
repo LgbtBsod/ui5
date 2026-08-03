@@ -4,9 +4,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CloneUtil",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (StatePaths, CreateSentinel, ModelStateRuntime, CloneUtil, WorkflowContracts, ModelPathContracts, ModelContracts) {
+], function (StatePaths, CreateSentinel, ModelStateRuntime, CloneUtil, WorkflowContracts, ModelContracts) {
     "use strict";
 
     function resolveBootDetailId(sHash) {

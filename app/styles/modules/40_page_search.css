@@ -993,9 +993,8 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   --search-scroll-anchor-offset-inline: clamp(0.85rem, 2vw, 1.4rem);
   --search-scroll-anchor-offset-block: clamp(0.9rem, 2vw, 1.6rem);
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto auto auto minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   align-items: stretch;
   gap: var(--search-workbench-gap);
   overflow: visible;
@@ -1003,7 +1002,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   min-height: 0;
 }
 
-.chkApp .searchWorkbenchDock > .searchFilterCardDense,
+.chkApp .searchWorkbenchDock > .searchFilterSurface,
 .chkApp .searchWorkbenchDock > .sapMTB {
   width: 100%;
   max-width: 100%;
@@ -1014,7 +1013,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   max-height: none;
 }
 
-.chkApp .searchWorkbenchDock > .searchFilterCardDense {
+.chkApp .searchWorkbenchDock > .searchFilterSurface {
   position: sticky;
   top: var(--search-sticky-filter-top, var(--search-filter-sticky-top));
   z-index: 24;
@@ -1040,7 +1039,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   z-index: 23;
 }
 
-.chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky > .searchFilterCardDense,
+.chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky > .searchFilterSurface,
 .chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky > .searchResultsActionRail,
 .chkApp .searchWorkbenchDock.searchWorkbenchDockCompactSticky > .searchActionRailStack {
   position: relative;
@@ -1060,7 +1059,8 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   width: 100%;
   min-width: 0;
   min-height: 0;
-  background: color-mix(in srgb, var(--theme-block-bg) 58%, transparent);
+  /* color-mix() cannot blend a gradient (--theme-block-bg); use the token directly. */
+  background: var(--theme-block-bg);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 46%, transparent);
   box-shadow:
     0 6px 14px rgba(18, 36, 64, 0.06),
@@ -1162,10 +1162,12 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 }
 
 .chkApp .searchResultsActionRail,
+.chkApp .searchActionRailStack,
 .chkApp .searchSettingsRail,
 .chkApp .searchResultsSummaryRail,
 .chkApp .searchResultsToolbarHost {
-  background: color-mix(in srgb, var(--theme-block-bg) 58%, transparent);
+  /* color-mix() cannot blend a gradient (--theme-block-bg); use the token directly. */
+  background: var(--theme-block-bg);
   border: 1px solid color-mix(in srgb, var(--theme-rail-border) 46%, transparent);
   box-shadow:
     0 6px 14px rgba(18, 36, 64, 0.06),
@@ -1175,6 +1177,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
 }
 
 .chkApp .searchWorkbenchDock > .searchResultsActionRail,
+.chkApp .searchWorkbenchDock > .searchActionRailStack,
 .chkApp .searchResultsSummaryRail {
   transition: box-shadow 180ms ease, border-color 180ms ease, background-color 180ms ease;
 }
@@ -1280,7 +1283,7 @@ body.chkAppRoot.appDark .chkApp .searchCustomBusyTitle {
   flex: 0 0 auto;
 }
 
-body.chkAppRoot.appDark .chkApp .searchWorkbenchDock > .searchFilterCardDense,
+body.chkAppRoot.appDark .chkApp .searchWorkbenchDock > .searchFilterSurface,
 body.chkAppRoot.appDark .chkApp .searchWorkbenchDock > .searchResultsActionRail,
 body.chkAppRoot.appDark .chkApp .searchResultsSummaryRail,
 body.chkAppRoot.appDark .chkApp .searchResultsToolbarHost {

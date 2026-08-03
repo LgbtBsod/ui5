@@ -59,11 +59,11 @@ if (!/name: "DB_KEY"/.test(lastChangeAdapter) || !/ODataKeyContracts\.TYPES\.DB_
 
 ["ChecklistCheck", "ChecklistBarrier", "Attachment"].forEach((entityName) => {
   const block = (metadata.match(new RegExp(`<EntityType Name="${entityName}"[\\s\\S]*?<\\/EntityType>`)) || [""])[0];
-  if (!/Name="DB_KEY" Type="Edm.Binary"/.test(block)) {
-    add(`app/localService/metadata.xml: ${entityName}.DB_KEY must be Edm.Binary`);
+  if (!/Name="DB_KEY" Type="Edm.String"/.test(block)) {
+    add(`app/localService/metadata.xml: ${entityName}.DB_KEY must be Edm.String (mock gateway serializes it as bin-to-hex string32)`);
   }
-  if (!/Name="PARENT_KEY" Type="Edm.Binary"/.test(block)) {
-    add(`app/localService/metadata.xml: ${entityName}.PARENT_KEY must be Edm.Binary`);
+  if (!/Name="PARENT_KEY" Type="Edm.String"/.test(block)) {
+    add(`app/localService/metadata.xml: ${entityName}.PARENT_KEY must be Edm.String (mock gateway serializes it as bin-to-hex string32)`);
   }
 });
 

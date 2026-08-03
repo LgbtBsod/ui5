@@ -3,8 +3,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/navigation/RouteModeCoordinator",
     "PRODUCTION_CONTROL_CHECKLIST/constants/NavigationContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (JSONModel, RouteModeCoordinator, NavigationContracts, ModelStateRuntime, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (JSONModel, RouteModeCoordinator, NavigationContracts, ModelStateRuntime, StatePaths) {
     "use strict";
 
     QUnit.module("RouteModeCoordinator");
@@ -12,9 +12,9 @@ sap.ui.define([
     QUnit.test("detail route sync keeps activeObjectId canonical and mirrors selectedId", function (assert) {
         var mSeed = {};
         var oStateModel;
-        mSeed[ModelPathContracts.SELECTED_ID] = "CHK-STALE-1";
-        mSeed[ModelPathContracts.ACTIVE_OBJECT_ID] = "CHK-STALE-2";
-        mSeed[ModelPathContracts.CURRENT_ROUTE_NAME] = NavigationContracts.ROUTES.SEARCH;
+        mSeed[StatePaths.SELECTED_ID] = "CHK-STALE-1";
+        mSeed[StatePaths.ACTIVE_OBJECT_ID] = "CHK-STALE-2";
+        mSeed[StatePaths.CURRENT_ROUTE_NAME] = NavigationContracts.ROUTES.SEARCH;
         oStateModel = new JSONModel(mSeed);
         var oCoordinator = new RouteModeCoordinator({
             router: {
@@ -36,7 +36,7 @@ sap.ui.define([
             }
         });
 
-        assert.strictEqual(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, ""), "CHK-00001", "active object id is canonical");
-        assert.strictEqual(ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, ""), "CHK-00001", "selected id mirrors active object id");
+        assert.strictEqual(ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, ""), "CHK-00001", "active object id is canonical");
+        assert.strictEqual(ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, ""), "CHK-00001", "selected id mirrors active object id");
     });
 });

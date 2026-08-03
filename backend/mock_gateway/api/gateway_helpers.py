@@ -3,9 +3,28 @@ from typing import Any, Dict
 import re
 from utils.key_normalizer import hex_to_storage_key
 
+# "Not applicable" sentinel for the ActiveUUID/DraftUUID compound key (see
+# api/gateway_draft_api.py, services/draft_service.py) - this codebase's hex32-string
+# equivalent of serve.py's guid'00000000-0000-0000-0000-000000000000' ZERO_GUID.
+HEX_ZERO_GUID = "0" * 32
+
+_DRAFT_KEY_RE = re.compile(r"^ActiveUUID='([^']*)',DraftUUID='([^']*)'$")
+
 
 class BoundaryResolver:
     """Single Responsibility: Resolve entity keys from various payload formats."""
+
+    @staticmethod
+    def resolve_draft_key(key_expr: str) -> tuple[str, str] | None:
+        """Parse the compound ChecklistRootSet(ActiveUUID='..',DraftUUID='..') key form
+        used to address a draft (or the active side via a draft-shaped key). Returns
+        (active_hex_or_empty, draft_hex) if it matches, else None - i.e. the legacy flat
+        'HEX32' form (or a business key) - so callers fall through to the existing path
+        unchanged."""
+        m = _DRAFT_KEY_RE.match(str(key_expr or "").strip())
+        if not m:
+            return None
+        return m.group(1), m.group(2)
 
     @staticmethod
     def resolve_key(key_expr: str) -> str:

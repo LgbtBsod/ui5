@@ -5,53 +5,26 @@ sap.ui.define([
 
     QUnit.module("framework/SearchFacade");
 
-    QUnit.test("routes startup and execution methods through grouped runtimes", function (assert) {
+    QUnit.test("routes startup and execution methods through injected usecases", function (assert) {
         var aCalls = [];
+        function trackedUseCase(sName) {
+            return {
+                execute: function () {
+                    aCalls.push(sName);
+                    return Promise.resolve(sName);
+                }
+            };
+        }
         var oFacade = new SearchFacade({
-            bootstrapRuntime: {
-                bootstrap: function () {
-                    aCalls.push("bootstrap");
-                    return Promise.resolve("bootstrap");
-                }
-            },
-            executionRuntime: {
-                buildFilter: function () {
-                    aCalls.push("buildFilter");
-                    return Promise.resolve("buildFilter");
-                },
-                executeSearch: function () {
-                    aCalls.push("executeSearch");
-                    return Promise.resolve("executeSearch");
-                },
-                rebind: function () {
-                    aCalls.push("rebind");
-                    return Promise.resolve("rebind");
-                },
-                applyRebindPolicy: function () {
-                    aCalls.push("applyRebindPolicy");
-                    return Promise.resolve("applyRebindPolicy");
-                }
-            },
-            selectionRuntime: {
-                selectRow: function () {
-                    aCalls.push("selectRow");
-                    return Promise.resolve("selectRow");
-                },
-                selectionChanged: function () {
-                    aCalls.push("selectionChanged");
-                    return Promise.resolve("selectionChanged");
-                }
-            },
-            presentationRuntime: {
-                analytics: function () {
-                    aCalls.push("analytics");
-                    return Promise.resolve("analytics");
-                },
-                exportFlow: function () {
-                    aCalls.push("exportFlow");
-                    return Promise.resolve("exportFlow");
-                }
-            }
+            bootstrapUseCase: trackedUseCase("bootstrap"),
+            buildFilterUseCase: trackedUseCase("buildFilter"),
+            executeUseCase: trackedUseCase("executeSearch"),
+            rebindUseCase: trackedUseCase("rebind"),
+            applyRebindPolicyUseCase: trackedUseCase("applyRebindPolicy"),
+            selectRowUseCase: trackedUseCase("selectRow"),
+            selectionChangedUseCase: trackedUseCase("selectionChanged"),
+            analyticsUseCase: trackedUseCase("analytics"),
+            exportUseCase: trackedUseCase("exportFlow")
         });
         var done = assert.async();
 
@@ -76,7 +49,7 @@ sap.ui.define([
                 "selectionChanged",
                 "analytics",
                 "exportFlow"
-            ], "facade delegates each scenario to the grouped runtime owner");
+            ], "facade delegates each scenario to its injected usecase");
             done();
         });
     });

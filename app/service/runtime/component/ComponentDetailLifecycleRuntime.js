@@ -1,9 +1,9 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ModelStateRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentNavigationGuardDecisionRuntime"
-], function (ModelStateRuntime, ModelPathContracts, WorkflowContracts, ComponentNavigationGuardDecisionRuntime) {
+], function (ModelStateRuntime, StatePaths, WorkflowContracts, ComponentNavigationGuardDecisionRuntime) {
     "use strict";
 
     function shouldReleaseDetailLock(oStateModel, oRouteEvent, StatePaths) {
@@ -20,7 +20,7 @@ sap.ui.define([
         var bPermissionKnown = !!oReadiness.permissionKnown;
         var sReadinessStatus = String(oReadiness.status || WorkflowContracts.READINESS_STATUS.IDLE).trim() || WorkflowContracts.READINESS_STATUS.IDLE;
         var bAllowed = bPermissionKnown && sReadinessStatus !== WorkflowContracts.READINESS_STATUS.DENIED && sReadinessStatus !== WorkflowContracts.READINESS_STATUS.ERROR;
-        var sActiveDbKey = String(oReadiness.rootId || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
+        var sActiveDbKey = String(oReadiness.rootId || ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
         ModelStateRuntime.writeOnModel(oStateModel, StatePaths.DETAIL_META, {
             rootId: sActiveDbKey,
             readiness: {

@@ -1,6 +1,5 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/DraftChecklistFactory",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ViewPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/ControllerStateRuntime",
@@ -11,7 +10,7 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/DetailContracts"
-], function (DraftChecklistFactory, ModelPathContracts, ViewPathContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, CreateSentinel, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts, DetailUseCaseConstants) {
+], function (DraftChecklistFactory, ViewPathContracts, StatePaths, ControllerViewStateRuntime, ModelStateRuntime, CreateSentinel, NavigationContracts, WorkflowContracts, ModelContracts, OperationSourceContracts, DetailUseCaseConstants) {
     "use strict";
 
     var MODELS = ModelContracts.MODELS;
@@ -24,14 +23,14 @@ sap.ui.define([
     function createMatchedStatePatch(sId, sRouteName, bCreate) {
         var mStatePatch = {};
 
-        mStatePatch[ModelPathContracts.ACTIVE_OBJECT_ID] = bCreate ? CreateSentinel.VALUE : sId;
-        mStatePatch[ModelPathContracts.SELECTED_ID] = bCreate ? CreateSentinel.VALUE : sId;
-        mStatePatch[ModelPathContracts.CURRENT_ROUTE_NAME] = sRouteName;
+        mStatePatch[StatePaths.ACTIVE_OBJECT_ID] = bCreate ? CreateSentinel.VALUE : sId;
+        mStatePatch[StatePaths.SELECTED_ID] = bCreate ? CreateSentinel.VALUE : sId;
+        mStatePatch[StatePaths.CURRENT_ROUTE_NAME] = sRouteName;
         if (bCreate) {
             mStatePatch[StatePaths.WORKFLOW_DETAIL_EDIT_MODE] = WorkflowContracts.EDIT_MODES.CREATE;
             mStatePatch[StatePaths.WORKFLOW_DETAIL_LOCK_STATE] = WorkflowContracts.LOCK_STATES.IDLE;
-            mStatePatch[ModelPathContracts.AUTOSAVE_ENABLED] = false;
-            mStatePatch[ModelPathContracts.IS_DIRTY] = false;
+            mStatePatch[StatePaths.WORKFLOW_AUTOSAVE_ENABLED] = false;
+            mStatePatch[StatePaths.WORKFLOW_DIRTY] = false;
         }
         return mStatePatch;
     }
@@ -92,9 +91,9 @@ sap.ui.define([
         var sLayoutArg = String(mArgs.layout || "").toLowerCase();
         var bCreate = CreateSentinel.isCreateId(sId);
         var sRouteLayout = sLayoutArg === "midcolumnfullscreen" ? NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN : NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
-        var sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
-        var sCurrentDbKey = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID, "") || "").trim();
-        var sPostOpenHydratedDbKey = String(ModelStateRuntime.read(oController, STATE_MODEL, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
+        var sCurrentRouteName = String(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.CURRENT_ROUTE_NAME, NavigationContracts.ROUTES.SEARCH) || NavigationContracts.ROUTES.SEARCH).trim() || NavigationContracts.ROUTES.SEARCH;
+        var sCurrentDbKey = String(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID, "") || "").trim();
+        var sPostOpenHydratedDbKey = String(ModelStateRuntime.read(oController, STATE_MODEL, StatePaths.POST_OPEN_HYDRATED_ROOT_ID, "") || "").trim();
         var oDetailModel = oController.getModel(DETAIL_MODEL);
         var oDetailData = (oDetailModel && oDetailModel.getData && oDetailModel.getData()) || {};
         var sSelectedDbKey = String((oDetailData && oDetailData.current && oDetailData.current.root && oDetailData.current.root.id) || "").trim();

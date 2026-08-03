@@ -12,7 +12,7 @@ sap.ui.define([
         var oBarrier = ODataDetailEntityContracts.DETAIL_ENTITY_FILTERS.CHECKLIST_BARRIER;
 
         assert.strictEqual(oBasic.property, "DB_KEY", "basic info uses canonical DB_KEY");
-        assert.strictEqual(oBasic.type, "Edm.Binary", "basic info filter keeps binary type");
+        assert.strictEqual(oBasic.type, "Edm.String", "basic info filter uses backend's bin-to-hex string type");
         assert.strictEqual(oCheck.property, "PARENT_KEY", "checks use canonical parent key");
         assert.strictEqual(oBarrier.property, "PARENT_KEY", "barriers use canonical parent key");
     });
@@ -24,13 +24,13 @@ sap.ui.define([
 
         assert.strictEqual(
             ODataChecklistReadRuntime.buildDetailFilter(oBasic, sRootId),
-            "DB_KEY eq binary'00112233445566778899AABBCCDDEEFF'",
-            "basic info uses binary literal"
+            "DB_KEY eq '00112233445566778899AABBCCDDEEFF'",
+            "basic info uses string literal matching backend's hex32 representation"
         );
         assert.strictEqual(
             ODataChecklistReadRuntime.buildDetailFilter(oCheck, sRootId),
-            "PARENT_KEY eq binary'00112233445566778899AABBCCDDEEFF'",
-            "check rows use canonical binary parent key"
+            "PARENT_KEY eq '00112233445566778899AABBCCDDEEFF'",
+            "check rows use canonical string parent key"
         );
     });
 

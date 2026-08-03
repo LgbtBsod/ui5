@@ -13,20 +13,20 @@ const shellState = read("app/service/features/shell/runtime/ShellStateRuntime.js
 const modelConstants = read("app/constants/ModelConstants.js");
 const modelFactory = read("app/model/ModelFactory.js");
 
-if (!/FunctionImport Name="LockAcquire"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.Binary"/.test(metadata)) {
-  issues.push("app/localService/metadata.xml: LockAcquire must expose DB_KEY as canonical Edm.Binary lock key");
+if (!/FunctionImport Name="LockAcquire"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.String"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: LockAcquire must expose DB_KEY as canonical Edm.String lock key (mock gateway bin-to-hex transport)");
 }
 
-if (!/FunctionImport Name="LockHeartbeat"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.Binary"/.test(metadata)) {
-  issues.push("app/localService/metadata.xml: LockHeartbeat must expose DB_KEY as canonical Edm.Binary lock key");
+if (!/FunctionImport Name="LockHeartbeat"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.String"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: LockHeartbeat must expose DB_KEY as canonical Edm.String lock key (mock gateway bin-to-hex transport)");
 }
 
-if (!/FunctionImport Name="LockRelease"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.Binary"/.test(metadata)) {
-  issues.push("app/localService/metadata.xml: LockRelease must expose DB_KEY as canonical Edm.Binary lock key");
+if (!/FunctionImport Name="LockRelease"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.String"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: LockRelease must expose DB_KEY as canonical Edm.String lock key (mock gateway bin-to-hex transport)");
 }
 
-if (!/FunctionImport Name="CopyChecklist"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.Binary"/.test(metadata)) {
-  issues.push("app/localService/metadata.xml: CopyChecklist must expose DB_KEY as canonical Edm.Binary root key");
+if (!/FunctionImport Name="CopyChecklist"[\s\S]*?<Parameter Name="DB_KEY" Type="Edm.String"/.test(metadata)) {
+  issues.push("app/localService/metadata.xml: CopyChecklist must expose DB_KEY as canonical Edm.String root key (mock gateway bin-to-hex transport)");
 }
 
 if (/ObjectUuid/.test(lockAdapter)) {

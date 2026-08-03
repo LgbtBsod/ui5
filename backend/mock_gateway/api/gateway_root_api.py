@@ -23,10 +23,10 @@ from api.gateway_validators import (
 )
 from api.gateway_core import (
     _err, _reject_expand, _agg_changed_on, _apply_select, _apply_order_filter,
-    _load_root_or_error, _require_permission, _require_create_permission,
+    _load_root_or_error, _load_root_or_draft_or_error, _require_permission, _require_create_permission,
 )
 from api.gateway_serializers import (
-    ROOT_MAP, SEARCH_MAP, _apply_orderby_rows, _to_search, _to_root, _to_basic,
+    ROOT_MAP, SEARCH_MAP, _apply_orderby_rows, _to_search, _to_root, _to_root_draft, _to_basic,
 )
 
 router = APIRouter(tags=["GatewayCanonical"])
@@ -77,9 +77,12 @@ def checklist_root_set(filter: str | None = Query(None, alias="$filter"), orderb
 
 @router.get(f"{SERVICE_ROOT}/ChecklistRootSet({{entity_key}})")
 def checklist_root_entity(entity_key: str, response: Response, db: Session = Depends(get_db)):
-    root, err = _load_root_or_error(db, entity_key)
+    kind, obj, err = _load_root_or_draft_or_error(db, entity_key)
     if err:
         return err
+    if kind == "draft":
+        return odata_entity(_to_root_draft(obj, db=db))
+    root = obj
     response.headers["ETag"] = format_entity_etag(_agg_changed_on(root), root.version_number)
     return odata_entity(_to_root(root, db=db))
 
@@ -131,9 +134,26 @@ def checklist_root_create(payload: dict, response: Response, request: Request, d
 
 @router.patch(f"{SERVICE_ROOT}/ChecklistRootSet({{entity_key}})")
 def checklist_root_update(entity_key: str, payload: dict, response: Response, request: Request, db: Session = Depends(get_db)):
-    root, err = _load_root_or_error(db, entity_key)
+    kind, obj, err = _load_root_or_draft_or_error(db, entity_key)
     if err:
         return err
+    if kind == "draft":
+        draft = obj
+        if draft.active_id:
+            active_for_permission = db.query(ChecklistRoot).filter(ChecklistRoot.id == draft.active_id).first()
+            if active_for_permission and (err := _require_permission(db, request, active_for_permission, "edit")):
+                return err
+        elif (err := _require_create_permission(db, request)):
+            return err
+        _apply_root_payload(draft, payload)
+        _apply_basic_payload(draft, _normalize_basic_payload(payload, db))
+        draft.changed_by = CurrentUserService.resolve_uname(db=db) or draft.changed_by or "ANON"
+        draft.changed_on = now_utc()
+        db.commit()
+        response.headers["sap-message"] = build_sap_message("Draft updated", "success", code="SAVED")
+        return odata_entity(_to_root_draft(draft, db=db))
+
+    root = obj
     if (err := _require_permission(db, request, root, "edit")):
         return err
     session_guid = str(payload.get("SessionGuid") or payload.get("session_guid") or "").strip()
@@ -159,9 +179,15 @@ def checklist_root_update(entity_key: str, payload: dict, response: Response, re
 
 @router.delete(f"{SERVICE_ROOT}/ChecklistRootSet({{entity_key}})")
 def checklist_root_delete(entity_key: str, request: Request, db: Session = Depends(get_db)):
-    root, err = _load_root_or_error(db, entity_key)
+    kind, obj, err = _load_root_or_draft_or_error(db, entity_key)
     if err:
         return err
+    if kind == "draft":
+        db.delete(obj)
+        db.commit()
+        return Response(status_code=204)
+
+    root = obj
     if (err := _require_permission(db, request, root, "delete")):
         return err
     root.is_deleted = True

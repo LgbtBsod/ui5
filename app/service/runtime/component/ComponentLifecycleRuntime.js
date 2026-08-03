@@ -350,9 +350,9 @@ sap.ui.define([
     }
 
 
-    function resolveRuntimeServices(oRuntimeContext) {
+    function resolveRuntimeServices(oRuntimeContext, mDeps) {
         return oRuntimeContext.services || {
-            componentRuntimeSupport: oRuntimeContext.ComponentRuntimeSupport || oRuntimeContext.componentRuntimeSupport,
+            componentRuntimeSupport: oRuntimeContext.ComponentRuntimeSupport || oRuntimeContext.componentRuntimeSupport || (mDeps && mDeps.ComponentRuntimeSupport),
             searchConfig: oRuntimeContext.SearchUiConfig || oRuntimeContext.searchConfig
         };
     }
@@ -450,7 +450,7 @@ sap.ui.define([
 
     function attachRuntime(oComponent, mDeps, oRuntimeContext) {
         var mModels = oRuntimeContext.models || oRuntimeContext;
-        var mServices = resolveRuntimeServices(oRuntimeContext);
+        var mServices = resolveRuntimeServices(oRuntimeContext, mDeps);
         var mTelemetry = resolveRuntimeTelemetry(oRuntimeContext, mModels);
         var mHandlers = resolveRuntimeHandlers(oComponent, mServices, oRuntimeContext);
         var oRuntimeSupport = mServices.componentRuntimeSupport;

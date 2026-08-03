@@ -11,7 +11,6 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/OperationSourceContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/JsRuntime",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/framework/behavior/WorkflowDecisionRuntime"
 ], function (
     ClipboardRuntime,
@@ -26,7 +25,6 @@ sap.ui.define([
     ModelContracts,
     OperationSourceContracts,
     JsRuntime,
-    ModelPathContracts,
     WorkflowDecisionRuntime
 ) {
     "use strict";
@@ -48,9 +46,9 @@ sap.ui.define([
 
     function resolveActiveDbKey(oStateModel) {
         return String(
-            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.SELECTED_ID, "")
-            || ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID, "")
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, StatePaths.SELECTED_ID, "")
+            || ModelStateRuntime.readOnModel(oStateModel, StatePaths.POST_OPEN_HYDRATED_ROOT_ID, "")
             || ""
         ).trim();
     }
@@ -88,8 +86,8 @@ sap.ui.define([
                 }
                 if (sDecision === WorkflowDecisionRuntime.RESULTS.DISCARD) {
                     oDetailEditSessionRuntime.resetDetailWorkflowState(oController, {
-                        [ModelPathContracts.SELECTED_ID]: "",
-                        [ModelPathContracts.ACTIVE_OBJECT_ID]: ""
+                        [StatePaths.SELECTED_ID]: "",
+                        [StatePaths.ACTIVE_OBJECT_ID]: ""
                     });
                     ModelStateRuntime.write(oController, SHELL_MODEL, MODEL_PATHS.SHELL_LAYOUT, NavigationContracts.LAYOUTS.ONE_COLUMN);
                     oDetailEditSessionRuntime.resetDetailRuntimeData(oController);

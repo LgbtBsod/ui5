@@ -253,7 +253,7 @@ def test_boot_and_runtime_source_lock_strict_success_path():
     assert "AutoSaveCoordinator" in bootstrap_source
     assert "Object.freeze({" in bootstrap_source
     assert 'REAL: "real"' in backend_mode_contracts
-    assert 'BACKEND_MODE: ModelPathContracts.BACKEND_MODE' in backend_mode_contracts
+    assert 'BACKEND_MODE: StatePaths.BACKEND_MODE' in backend_mode_contracts
     for path in removed_framework_aliases:
         assert not path.exists(), f"alias-only framework file still present: {path}"
 
@@ -270,15 +270,15 @@ def test_component_runtime_uses_canonical_model_paths_and_backend_mode_contracts
 
     assert not (APP_ROOT / "service" / "framework" / "RootIdRuntime.js").exists()
     assert '"/activeObjectId"' not in telemetry_runtime
-    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in autosave_runtime
+    assert "StatePaths.ACTIVE_OBJECT_ID" in autosave_runtime
     assert "buildLatestCtx" in autosave_runtime
     assert "var oLatestCtx = fnBuildLatestCtx ? fnBuildLatestCtx() : oComponent._ctx;" in autosave_runtime
-    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in cross_tab_runtime
-    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in polling_runtime
-    assert "ModelPathContracts.ACTIVE_OBJECT_ID" in lock_events_runtime
-    assert "ModelPathContracts.POST_OPEN_HYDRATED_ROOT_ID" in open_detail_usecase
-    assert "ModelPathContracts.SELECTED_ID" in open_detail_usecase
-    assert "ModelPathContracts.BACKEND_MODE" in shell_state_runtime
+    assert "StatePaths.ACTIVE_OBJECT_ID" in cross_tab_runtime
+    assert "StatePaths.ACTIVE_OBJECT_ID" in polling_runtime
+    assert "StatePaths.ACTIVE_OBJECT_ID" in lock_events_runtime
+    assert "StatePaths.POST_OPEN_HYDRATED_ROOT_ID" in open_detail_usecase
+    assert "StatePaths.SELECTED_ID" in open_detail_usecase
+    assert "StatePaths.BACKEND_MODE" in shell_state_runtime
     assert "BackendModeContracts.MODES.REAL" in diagnostics_usecase
     assert "BackendModeContracts.CAPABILITY.READY" in startup_capability_usecase
 
@@ -286,20 +286,20 @@ def test_route_runtime_is_manifest_first_without_route_sync_shadow_layer():
     route_mode = _read(APP_ROOT / "infra" / "navigation" / "RouteModeCoordinator.js")
     shell_layout_runtime = _read(APP_ROOT / "service" / "features" / "shell" / "runtime" / "ShellLayoutRuntime.js")
     state_paths = _read(APP_ROOT / "model" / "StatePaths.js")
-    model_paths = _read(APP_ROOT / "service" / "domain" / "shared" / "ModelPathContracts.js")
     component_app_runtime = _read(APP_ROOT / "service" / "framework" / "ComponentAppRuntime.js")
     apply_runtime_settings = _read(APP_ROOT / "service" / "domain" / "shared" / "usecases" / "ApplyRuntimeSettingsUseCase.js")
 
+    # ModelPathContracts.js was consolidated into model/StatePaths.js (single source of truth
+    # for state-model paths); StatePaths.js now carries the invariants once split across both.
+    assert not (APP_ROOT / "service" / "domain" / "shared" / "ModelPathContracts.js").exists()
     assert "RouteSync" not in route_mode
     assert "oRouteSync" not in route_mode
     assert "shellModel" not in route_mode
-    assert "ModelPathContracts.LAYOUT" not in route_mode
+    assert "StatePaths.LAYOUT" not in route_mode
     assert "resolveDesiredLayout" in shell_layout_runtime
     assert "MODEL_PATHS.SHELL_LAYOUT" in shell_layout_runtime
     assert "WORKFLOW_SEARCH_MODE" not in state_paths
     assert "WORKFLOW_SEARCH_SEGMENTS" not in state_paths
-    assert "WORKFLOW_SEARCH_MODE" not in model_paths
-    assert "WORKFLOW_SEARCH_SEGMENTS" not in model_paths
     assert "envState:" in component_app_runtime
     assert "envModel:" not in component_app_runtime
     assert "syncShellRuntimeState:" not in component_app_runtime
@@ -399,7 +399,6 @@ def test_detail_search_and_shell_message_keys_live_only_in_dedicated_constant_mo
 
 def test_productive_runtime_has_no_raw_active_or_selected_id_paths_outside_canonical_contracts():
     allowed_suffixes = {
-        str(APP_ROOT / "service" / "domain" / "shared" / "ModelPathContracts.js"),
         str(APP_ROOT / "service" / "runtime" / "component" / "ComponentListenerContracts.js"),
     }
 
@@ -511,14 +510,14 @@ def test_explicit_delta_contract_is_canonical_for_save_and_autosave():
     assert "participants: Array.isArray(oIn.participants)" in payload_mapper
     assert "mergeDeltaAttachments" in save_usecase
     assert "mergeDeltaAttachments" in autosave_usecase
-    assert 'ModelPathContracts.SEARCH_RETURN_CONTEXT' in save_usecase
+    assert 'StatePaths.SEARCH_RETURN_CONTEXT' in save_usecase
     assert 'SearchReturnRediscoveryRuntime.MODES.CREATE' in save_usecase
     assert 'SearchReturnRediscoveryRuntime.MODES.SAVE' in save_usecase
     assert 'ChecklistIdentity.extractChecklistDisplayId' in save_usecase
-    assert 'ModelPathContracts.SEARCH_FORCE_REFRESH_ON_RETURN' not in save_usecase
-    assert 'ModelPathContracts.SEARCH_FORCE_REFRESH_ON_RETURN' not in autosave_usecase
-    assert 'ModelPathContracts.SEARCH_RETURN_CONTEXT' not in autosave_usecase
-    assert 'ModelPathContracts.SEARCH_RETURN_CONTEXT' in delete_usecase
+    assert 'StatePaths.SEARCH_FORCE_REFRESH_ON_RETURN' not in save_usecase
+    assert 'StatePaths.SEARCH_FORCE_REFRESH_ON_RETURN' not in autosave_usecase
+    assert 'StatePaths.SEARCH_RETURN_CONTEXT' not in autosave_usecase
+    assert 'StatePaths.SEARCH_RETURN_CONTEXT' in delete_usecase
     assert 'SearchReturnRediscoveryRuntime.MODES.DELETE' in delete_usecase
     assert 'SEARCH_RETURN_CONTEXT: "/searchReturnContext"' in state_paths
     assert "searchReturnContext: null," in workflow_schema

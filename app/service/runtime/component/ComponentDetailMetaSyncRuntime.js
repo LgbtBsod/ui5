@@ -3,9 +3,9 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/detail/runtime/DetailEditSessionRuntime",
     "PRODUCTION_CONTROL_CHECKLIST/constants/WorkflowContracts",
     "PRODUCTION_CONTROL_CHECKLIST/service/runtime/component/ComponentListenerContracts",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts",
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants"
-], function (ModelStateRuntime, DetailEditSessionRuntime, WorkflowContracts, ComponentListenerContracts, ModelPathContracts, ModelContracts) {
+], function (ModelStateRuntime, DetailEditSessionRuntime, WorkflowContracts, ComponentListenerContracts, StatePaths, ModelContracts) {
     "use strict";
 
     var READINESS_STATUS = WorkflowContracts.READINESS_STATUS;
@@ -20,7 +20,7 @@ sap.ui.define([
         var oReadiness = ModelStateRuntime.readOnModel(oStateModel, StatePaths.READINESS_DETAIL, {}) || {};
         var sActiveObjectId = String(
             ModelStateRuntime.readOnModel(oStateModel, ComponentListenerContracts.PATHS.ACTIVE_OBJECT_ID, "") ||
-            ModelStateRuntime.readOnModel(oStateModel, ModelPathContracts.ACTIVE_OBJECT_ID, "") ||
+            ModelStateRuntime.readOnModel(oStateModel, StatePaths.ACTIVE_OBJECT_ID, "") ||
             ""
         ).trim();
         var sMode = WorkflowContracts.normalizeEditMode(ModelStateRuntime.readOnModel(oStateModel, StatePaths.WORKFLOW_DETAIL_EDIT_MODE, WorkflowContracts.EDIT_MODES.READ));
@@ -59,8 +59,8 @@ sap.ui.define([
 
     function resetDetailNavigationState(oComponent) {
         oDetailEditSessionRuntime.resetDetailWorkflowState(oComponent, {
-            [ModelPathContracts.SELECTED_ID]: "",
-            [ModelPathContracts.ACTIVE_OBJECT_ID]: ""
+            [StatePaths.SELECTED_ID]: "",
+            [StatePaths.ACTIVE_OBJECT_ID]: ""
         });
         ModelStateRuntime.write(oComponent, ComponentListenerContracts.MODEL_NAMES.SHELL, ModelContracts.MODEL_PATHS.SHELL_LAYOUT, VALUES.ONE_COLUMN);
         oDetailEditSessionRuntime.resetDetailRuntimeData(oComponent);

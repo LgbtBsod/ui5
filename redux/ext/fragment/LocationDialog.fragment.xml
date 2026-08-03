@@ -1,0 +1,64 @@
+<core:FragmentDefinition
+        xmlns="sap.m"
+        xmlns:core="sap.ui.core"
+        xmlns:data="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+
+        <Dialog title="{i18n>locationDialogTitle}" stretch="false" contentWidth="24rem" resizable="true">
+                <content>
+                        <VBox class="sapUiSmallMargin">
+
+                                <Breadcrumbs currentLocationText="{locationModel>/breadcrumbCurrentText}"
+                                             links="{locationModel>/breadcrumbLinks}">
+                                        <Link text="{locationModel>text}" press="onBreadcrumbPress" data:uuid="{locationModel>uuid}"/>
+                                </Breadcrumbs>
+
+                                <!-- [UX FIX hint] Подсказка пользователю, как работает выбор локации -->
+                                <Text text="{i18n>locationPickerHintText}" wrapping="true"
+                                      class="sapUiTinyMarginTop" textAlign="Center"/>
+                                <SearchField liveChange="onLocSearch" placeholder="{i18n>locationSearchPlaceholder}" width="100%" class="sapUiTinyMarginTop"/>
+
+                                <List items="{locationModel>/levelItems}" mode="None"
+                                      noDataText="{i18n>noDataFoundText}" class="sapUiTinyMarginTop">
+                                        <CustomListItem highlight="{parts: [{path:'locationModel>LocationUuid'}, {path:'locationModel>/selectedNodeId'}], formatter: '.formatter.locationRowHighlight'}"
+                                                        type="Active" press="onLocationRowPress">
+                                                <HBox alignItems="Center" justifyContent="SpaceBetween" width="100%">
+                                                        <!-- [UX FIX] Левая часть: иконка-статус (галочка если выбрано)
+                                                             + иконка-тип (папка/документ) + название.
+                                                             Вся левая часть — кликабельная (через type="Active"
+                                                             на самом CustomListItem) и ВЫБИРАЕТ строку. -->
+                                                        <HBox alignItems="Center">
+                                                                <!-- Галочка-статус выбора: показывается только если
+                                                                     строка уже выбрана (selectedNodeId === LocationUuid) -->
+                                                                <core:Icon src="sap-icon://accept" size="1.0rem"
+                                                                        visible="{parts: [{path:'locationModel>LocationUuid'}, {path:'locationModel>/selectedNodeId'}], formatter: '.formatter.locationIsSelected'}"
+                                                                        color="#2b7c2b" class="sapUiTinyMarginEnd"/>
+                                                                <core:Icon src="{= ${locationModel>HasChildren} ? 'sap-icon://folder' : 'sap-icon://document' }"
+                                                                        size="1.0rem" class="sapUiTinyMarginEnd"/>
+                                                                <Text text="{locationModel>LocationName}" wrapping="false"/>
+                                                        </HBox>
+                                                        <!-- [UX FIX] Правая часть: стрелка навигации вниз —
+                                                             только для узлов с дочерними элементами.
+                                                             Клик по стрелке ПЕРЕХОДИТ на уровень ниже. -->
+                                                        <Button type="Transparent" icon="sap-icon://slim-arrow-right"
+                                                                visible="{locationModel>HasChildren}"
+                                                                press="onLocationRowNavigate"
+                                                                tooltip="{i18n>locationNavigateTooltip}"/>
+                                                </HBox>
+                                        </CustomListItem>
+                                </List>
+
+                                <HBox alignItems="Center" justifyContent="SpaceBetween" width="100%"
+                                      visible="{locationModel>/showSublocationSwitch}" class="sapUiTinyMarginTop">
+                                        <Label text="{i18n>withSublocationLabel}" labelFor="withSublocationSwitch"/>
+                                        <Switch id="withSublocationSwitch" state="{locationModel>/withSublocation}"/>
+                                </HBox>
+                        </VBox>
+                </content>
+                <buttons>
+                        <Button text="{i18n>selectLabel}" type="Emphasized" press="onLocationChooseCurrentLevel"
+                                enabled="{= !!${locationModel>/selectedNodeId} }"/>
+                        <Button text="{i18n>cancelLabel}" press="onCloseLocationDialog"/>
+                </buttons>
+        </Dialog>
+
+</core:FragmentDefinition>

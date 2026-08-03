@@ -1,10 +1,11 @@
 sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataAdapterUtils",
+    "PRODUCTION_CONTROL_CHECKLIST/infra/adapters/shared/ODataEntityContracts",
     "PRODUCTION_CONTROL_CHECKLIST/constants/GatewayContractConstants",
     "PRODUCTION_CONTROL_CHECKLIST/service/backend/GatewayClient",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageCodeConstants",
     "PRODUCTION_CONTROL_CHECKLIST/constants/MessageKeyConstants"
-], function (ODataAdapterUtils, GatewayContractConstants, GatewayClient, MessageCodeConstants, MessageKeyConstants) {
+], function (ODataAdapterUtils, ODataEntityContracts, GatewayContractConstants, GatewayClient, MessageCodeConstants, MessageKeyConstants) {
     "use strict";
 
     var DETAIL_CODES = MessageCodeConstants.FLOW;
@@ -108,7 +109,7 @@ sap.ui.define([
                 SessionGuid: sToken
             },
             {
-                DB_KEY: { type: "Edm.Binary" },
+                DB_KEY: { type: ODataEntityContracts.TYPES.DB_KEY },
                 SessionGuid: { type: "Edm.String" }
             }
         )).then(function (oResult) {

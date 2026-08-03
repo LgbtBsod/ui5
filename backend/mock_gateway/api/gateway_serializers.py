@@ -12,7 +12,7 @@ from urllib.parse import unquote
 
 from sqlalchemy.orm import Session
 
-from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, DictionaryItem, Person
+from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, ChecklistRootDraft, DictionaryItem, Person
 from services.authorization_service import AuthorizationService
 from services.settings_service import DEFAULT_FRONTEND_VARIABLES, SettingsService
 from repo.settings_repo import SettingsRepo
@@ -22,7 +22,7 @@ from utils.time import now_utc
 from utils.common_helpers import parse_date_ms
 from api.gateway_operations import _dict_text, _hex, _normalize_hex_key
 from api.gateway_validators import _status_external, _date_ymd_from_any
-from api.gateway_helpers import ODataSerializer
+from api.gateway_helpers import HEX_ZERO_GUID, ODataSerializer
 from api.gateway_core import _entity_key
 
 ROOT_MAP = {
@@ -363,8 +363,18 @@ def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
     )
 
 
-def _to_root(root: ChecklistRoot, db: Session | None = None) -> dict:
+def _to_root(root: ChecklistRoot, db: Session | None = None, draft_map: dict | None = None) -> dict:
+    """draft_map (optional): a prefetched {active_id: has_draft_bool} dict, so list
+    endpoints (ChecklistRootSet GET collection) can batch the HasDraftEntity lookup
+    instead of running one extra query per row. Single-entity GET can omit it (falls
+    back to a per-row query)."""
     s = _to_search(root, db=db)
+    if draft_map is not None:
+        has_draft = bool(draft_map.get(root.id))
+    elif db is not None:
+        has_draft = bool(db.query(ChecklistRootDraft.id).filter(ChecklistRootDraft.active_id == root.id).first())
+    else:
+        has_draft = False
     return ODataSerializer.build_entity(
         "ChecklistRoot",
         "ChecklistRootSet",
@@ -384,8 +394,55 @@ def _to_root(root: ChecklistRoot, db: Session | None = None) -> dict:
             "SuccessBarriersRate": s["SuccessBarriersRate"],
             "ChecksTotal": s["ChecksTotal"],
             "BarriersTotal": s["BarriersTotal"],
+            "ActiveUUID": s["DB_KEY"],
+            "DraftUUID": HEX_ZERO_GUID,
+            "IsActiveEntity": True,
+            "HasActiveEntity": True,
+            "HasDraftEntity": has_draft,
         }
     )
+
+
+def _to_root_draft(draft: ChecklistRootDraft, db: Session) -> dict:
+    """Serializes a ChecklistRootDraft row (create-draft or edit-draft-in-progress).
+    Children (ChecklistCheck/ChecklistBarrier) stay non-draft-aware - looked up directly
+    by root_id, same rows the active side would see, no rollback on discard (matches
+    redux/serve.py's reference scope)."""
+    active_hex = _hex(draft.active_id) if draft.active_id else HEX_ZERO_GUID
+    draft_hex = _hex(draft.id)
+    checks = db.query(ChecklistCheck).filter(ChecklistCheck.root_id == draft.root_id).all()
+    barriers = db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == draft.root_id).all()
+    entity = ODataSerializer.build_entity(
+        "ChecklistRoot",
+        "ChecklistRootSet",
+        draft_hex,
+        {
+            "DB_KEY": active_hex if draft.active_id else draft_hex,
+            "Key": active_hex if draft.active_id else draft_hex,
+            "RequestId": draft.checklist_id or "",
+            "Id": draft.checklist_id or "",
+            "ChangedOn": format_datetime(draft.changed_on),
+            "CreatedOn": format_datetime(draft.created_on),
+            "VersionNumber": 0,
+            "Status": _status_external(draft.status),
+            "HasFailedChecks": any((c.status or "").upper() == "FAIL" for c in checks),
+            "HasFailedBarriers": any(not bool(b.is_active) for b in barriers),
+            "SuccessChecksRate": _rate(checks, lambda c: (c.status or "").upper() != "FAIL"),
+            "SuccessBarriersRate": _rate(barriers, lambda b: bool(b.is_active)),
+            "ChecksTotal": len(checks),
+            "BarriersTotal": len(barriers),
+            "ActiveUUID": active_hex,
+            "DraftUUID": draft_hex,
+            "IsActiveEntity": False,
+            "HasActiveEntity": bool(draft.active_id),
+            "HasDraftEntity": False,
+        }
+    )
+    entity["__metadata"] = {
+        "type": entity["__metadata"]["type"],
+        "uri": f"{SERVICE_ROOT}/ChecklistRootSet(ActiveUUID='{active_hex}',DraftUUID='{draft_hex}')",
+    }
+    return entity
 
 
 def _to_basic(root: ChecklistRoot) -> dict:
@@ -532,6 +589,7 @@ def _to_current_user(profile: dict) -> dict:
             "FullName": str(profile.get("full_name") or ""),
             "PermissionsCsv": ",".join(permission_codes),
             "PermissionRulesJson": json.dumps(permissions, ensure_ascii=False),
+            "CanCreate": "01" in permission_codes,
             "CanView": "03" in permission_codes,
             "CanEdit": "02" in permission_codes,
             "CanDelete": "06" in permission_codes,

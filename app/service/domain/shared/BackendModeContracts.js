@@ -1,6 +1,6 @@
 sap.ui.define([
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (StatePaths) {
     "use strict";
 
     return Object.freeze({
@@ -8,7 +8,7 @@ sap.ui.define([
             REAL: "real"
         }),
         PATHS: Object.freeze({
-            BACKEND_MODE: ModelPathContracts.BACKEND_MODE,
+            BACKEND_MODE: StatePaths.BACKEND_MODE,
             BACKEND_SERVICE_URL: "/backendServiceUrl",
             MAIN_SERVICE_METADATA_ERROR: "/mainServiceMetadataError",
             MAIN_SERVICE_METADATA_OK: "/mainServiceMetadataOk"

@@ -52,46 +52,24 @@ sap.ui.define([
         return SearchActionBehavior.runSearchCommand(oController, sMethod, mInput || {});
     }
 
-    function getRouter(oController) {
-        return oController && oController.getRouter ? oController.getRouter() : null;
-    }
-
-    function getRouteRegistry(oController) {
-        oController._searchRouteRegistry = oController._searchRouteRegistry || [];
-        return oController._searchRouteRegistry;
-    }
-
     function attachRouteHandlers(oController, aRoutes) {
-        var oRouter = getRouter(oController);
-        if (!oRouter || !Array.isArray(aRoutes)) {
+        if (!Array.isArray(aRoutes) || typeof oController.attachRouteMatched !== "function") {
             return;
         }
         aRoutes.forEach(function (oRouteConfig) {
             var sName = String(oRouteConfig && oRouteConfig.name || "").trim();
             var fnHandler = oRouteConfig && oRouteConfig.handler;
-            var oRoute;
-            if (!sName || typeof fnHandler !== "function" || !oRouter.getRoute) {
+            if (!sName || typeof fnHandler !== "function") {
                 return;
             }
-            oRoute = oRouter.getRoute(sName);
-            if (!oRoute || !oRoute.attachPatternMatched) {
-                return;
-            }
-            oRoute.attachPatternMatched(fnHandler, oController);
-            getRouteRegistry(oController).push({
-                route: oRoute,
-                handler: fnHandler
-            });
+            oController.attachRouteMatched(sName, fnHandler);
         });
     }
 
     function detachRouteHandlers(oController) {
-        getRouteRegistry(oController).forEach(function (oEntry) {
-            if (oEntry.route && oEntry.route.detachPatternMatched) {
-                oEntry.route.detachPatternMatched(oEntry.handler, oController);
-            }
-        });
-        oController._searchRouteRegistry = [];
+        if (typeof oController.detachAllRouteMatched === "function") {
+            oController.detachAllRouteMatched();
+        }
     }
 
     function syncSmartControlAvailability(oController) {
@@ -207,7 +185,6 @@ sap.ui.define([
         }
         oController._bSearchInitialRouteHandled = null;
         oController._bSearchRouteActive = null;
-        oController._searchRouteRegistry = null;
     }
 
     function onSearchMatched(oController, fnApplyAnalyticsDrilldownIntent) {

@@ -15,7 +15,7 @@ sap.ui.define([
             return NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
         }
         if (sLayout === NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED || sLayout === NavigationContracts.LAYOUTS.TWO_COLUMNS_BEGIN_EXPANDED) {
-            return NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
+            return sLayout;
         }
         return NavigationContracts.LAYOUTS.ONE_COLUMN;
     }

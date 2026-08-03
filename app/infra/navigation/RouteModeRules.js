@@ -11,13 +11,17 @@ sap.ui.define([
         }
         if (
             sLayout === NavigationContracts.LAYOUTS.TWO_COLUMNS_BEGIN_EXPANDED ||
-            sLower === "twocolumnsbeginexpanded" ||
+            sLower === "twocolumnsbeginexpanded"
+        ) {
+            return NavigationContracts.LAYOUTS.TWO_COLUMNS_BEGIN_EXPANDED;
+        }
+        if (
             sLayout === NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED ||
             sLower === "twocolumnsmidexpanded"
         ) {
             return NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
         }
-        return NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
+        return NavigationContracts.LAYOUTS.TWO_COLUMNS_BEGIN_EXPANDED;
     }
 
     function resolveLayoutFromRoute(sRouteName, mArgs) {
@@ -28,7 +32,7 @@ sap.ui.define([
             return NavigationContracts.LAYOUTS.MID_COLUMN_FULL_SCREEN;
         }
         if (sRouteName === NavigationContracts.ROUTES.DETAIL) {
-            return NavigationContracts.LAYOUTS.TWO_COLUMNS_MID_EXPANDED;
+            return NavigationContracts.LAYOUTS.TWO_COLUMNS_BEGIN_EXPANDED;
         }
         return null;
     }

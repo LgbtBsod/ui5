@@ -2,8 +2,8 @@ sap.ui.define([
     "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/UseCaseValue",
     "PRODUCTION_CONTROL_CHECKLIST/service/shared/CreateSentinel",
     "PRODUCTION_CONTROL_CHECKLIST/constants/ModelConstants",
-    "PRODUCTION_CONTROL_CHECKLIST/service/domain/shared/ModelPathContracts"
-], function (UseCaseValue, CreateSentinel, ModelContracts, ModelPathContracts) {
+    "PRODUCTION_CONTROL_CHECKLIST/model/StatePaths"
+], function (UseCaseValue, CreateSentinel, ModelContracts, StatePaths) {
     "use strict";
 
     var STATE_MODEL = ModelContracts.MODELS.STATE;
@@ -23,8 +23,8 @@ sap.ui.define([
         var sInputDbKey = sanitizeId((mInput && (mInput.dbKey || mInput.DB_KEY)) || UseCaseValue.requestedDbKey(mInput));
         var sHydratedDbKey = sanitizeId(oUiState && oUiState.get(STATE_MODEL, "/postOpenHydratedRootId"));
         var sSnapshotDbKey = sanitizeId(oUiState && oUiState.get(DETAIL_MODEL, "/current/root/id"));
-        var sActiveDbKey = sanitizeId(oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.ACTIVE_OBJECT_ID));
-        var sSelectedId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.SELECTED_ID));
+        var sActiveDbKey = sanitizeId(oUiState && oUiState.get(STATE_MODEL, StatePaths.ACTIVE_OBJECT_ID));
+        var sSelectedId = sanitizeId(oUiState && oUiState.get(STATE_MODEL, StatePaths.SELECTED_ID));
         var aCandidates = [sInputDbKey, sSnapshotDbKey, sHydratedDbKey, sActiveDbKey, sSelectedId];
         var i;
         for (i = 0; i < aCandidates.length; i += 1) {
@@ -52,7 +52,7 @@ sap.ui.define([
         var oUiState = mCtx && mCtx.uiState;
         return String(
             (mInput && (mInput.sessionGuid || mInput.SessionGuid))
-            || (oUiState && oUiState.get(STATE_MODEL, ModelPathContracts.SESSION_ID))
+            || (oUiState && oUiState.get(STATE_MODEL, StatePaths.SESSION_ID))
             || ""
         ).trim();
     }
