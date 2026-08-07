@@ -3,15 +3,24 @@ set of accessors tightly coupled to it (mailboxes, mock-user resolution,
 raw child-row lookups). Everything here is safe for any other module in the
 package to import - state.py itself only depends on config.py.
 """
+from typing import Any, Dict, List
+
 import json
 
 import serve_config
 
 from . import config
 
+# Type aliases for store structures
+EntityKey = str  # RootId for CheckRoots/CheckBasics
+CompositeKey = tuple  # (RootId, ItemId) or (RootId, BarrierId)
+EntityRow = Dict[str, Any]
+EntitySet = Dict[EntityKey, EntityRow]
+CompositeEntitySet = Dict[CompositeKey, EntityRow]
+
 # store["CheckRoots"][RootId] -> dict ; store["CheckBasics"][RootId] -> dict
 # store["CheckItems"][(RootId, ItemId)] -> dict ; store["Barriers"][(RootId, BarrierId)] -> dict
-store = {set_name: {} for set_name in serve_config.TRANSACTIONAL_ENTITIES}
+store: Dict[str, EntitySet | CompositeEntitySet] = {set_name: {} for set_name in serve_config.TRANSACTIONAL_ENTITIES}
 
 # [Фаза 5, NW 7.50/pre-S4 1610] Параллельный слой черновиков — ТОЛЬКО
 # CheckRoots (см. redux/abap/README.md). Ключ — DraftUUID (собственный,
@@ -21,12 +30,13 @@ store = {set_name: {} for set_name in serve_config.TRANSACTIONAL_ENTITIES}
 # активация/чтение черновика видит их как в активной записи. Отдельный
 # словарь, а не поле внутри store["CheckRoots"], чтобы не трогать формат
 # ключей store для уже работающих non-draft путей (zero regression risk).
-draft_store = {"CheckRoots": {}}
+draft_store: Dict[str, EntitySet] = {"CheckRoots": {}}
 
-next_doc_id = [1]
+next_doc_id: List[int] = [1]
 
 
-def draw_doc_id():
+def draw_doc_id() -> str:
+    """Generate next document ID with zero-padding."""
     doc_id = str(next_doc_id[0]).zfill(10)
     next_doc_id[0] += 1
     return doc_id

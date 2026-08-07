@@ -11,19 +11,10 @@ the Command pattern for better separation of concerns and testability.
 """
 from __future__ import annotations
 
-import re
 from typing import Optional, Tuple, Match
 
 from .handlers import RequestDispatcher
-
-# Compiled regex patterns (kept here for use by other modules)
-SINGLE_KEY_RE = re.compile(r"^(\w+)\('([^']*)'\)$")
-COMPOSITE_KEY_RE = re.compile(r"^(\w+)\(RootId='([^']*)',(ItemId|BarrierId)='([^']*)'\)$")
-CHECKROOT_KEY_RE = re.compile(r"^CheckRoots\(ActiveUUID=guid'([^']*)',DraftUUID=guid'([^']*)'\)$")
-NAV_COLLECTION_RE = re.compile(r"^CheckRoots\(ActiveUUID=guid'([^']*)',DraftUUID=guid'([^']*)'\)/(to_Basic|to_Checks|to_Barriers)$")
-NAV_CREATE_RE = re.compile(r"^CheckRoots\(ActiveUUID=guid'([^']*)',DraftUUID=guid'([^']*)'\)/(to_Checks|to_Barriers)$")
-NAV_DRAFT_ADMIN_RE = re.compile(r"^CheckRoots\(ActiveUUID=guid'([^']*)',DraftUUID=guid'([^']*)'\)/DraftAdministrativeData$")
-NAV_SIBLING_RE = re.compile(r"^CheckRoots\(ActiveUUID=guid'([^']*)',DraftUUID=guid'([^']*)'\)/SiblingEntity$")
+from .patterns import Patterns
 
 
 def _nav_root_id(m: Match[str]) -> str:
@@ -59,23 +50,26 @@ def _parse_key(url_path: str) -> Tuple[Optional[str], Optional[dict]]:
     """
     from . import config
     import serve_config
+    from urllib.parse import unquote
     
-    m = CHECKROOT_KEY_RE.match(url_path)
+    # Use centralized pattern registry
+    m = Patterns.CHECKROOT_KEY_RE.match(url_path)
     if m:
         return "CheckRoots", {"ActiveUUID": m.group(1), "DraftUUID": m.group(2)}
-    m = COMPOSITE_KEY_RE.match(url_path)
+    
+    m = Patterns.COMPOSITE_KEY_RE.match(url_path)
     if m:
-        from urllib.parse import unquote
         set_name, root_id, id_prop, id_val = m.groups()
         return set_name, {"RootId": unquote(root_id), id_prop: unquote(id_val)}
-    m = SINGLE_KEY_RE.match(url_path)
+    
+    m = Patterns.SINGLE_KEY_RE.match(url_path)
     if m:
-        from urllib.parse import unquote
         set_name, key = m.groups()
         props = config.KEY_PROP_TUPLES.get(set_name) or (serve_config.REFERENCE_KEY_PROPS.get(set_name),)
         if props[0] is None:
             return None, None
         return set_name, {props[0]: unquote(key)}
+    
     return None, None
 
 

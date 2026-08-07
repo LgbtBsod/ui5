@@ -10,8 +10,8 @@ from __future__ import annotations
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
-from urllib.parse import parse_qs, unquote
+from typing import Any, Dict, List, Match, Optional, Tuple, TYPE_CHECKING, Callable
+from urllib.parse import parse_qs
 
 import serve_config
 
@@ -22,6 +22,7 @@ from . import resolvers
 from . import query
 from . import draft_service
 from . import crud
+from .patterns import Patterns
 from .enums import (
     DraftOperation,
     ErrorCode,
@@ -48,23 +49,27 @@ class RequestContext:
     
     @classmethod
     def from_raw(cls, method: str, rel_url: str, body: Optional[Dict], headers: Optional[Dict]) -> RequestContext:
-        """Parse raw request into structured context."""
-        headers = headers or {}
-        parts = rel_url.split("?", 1)
-        raw_path = parts[0]
-        query_params = {}
-        if len(parts) > 1:
-            for k, v in parse_qs(parts[1]).items():
-                query_params[k] = v[0] if len(v) == 1 else v
+        """Create RequestContext from raw request data."""
+        parsed = parse_qs(rel_url.split('?')[1]) if '?' in rel_url else {}
+        query_params = {k: v[0] if len(v) == 1 else v for k, v in parsed.items()}
         
-        url_path = raw_path.lstrip("/")
         return cls(
             method=method,
-            url_path=url_path,
+            url_path=rel_url.split('?')[0],
             query_params=query_params,
             body=body,
-            headers=headers,
+            headers=headers or {}
         )
+
+
+def _guid_param_factory(query_params: Dict[str, Any]) -> Callable[[str], str]:
+    """Factory for GUID parameter extraction with validation."""
+    def _guid_param(name: str) -> str:
+        value = query_params.get(name, '')
+        if not value:
+            raise ValueError(f"Missing required parameter: {name}")
+        return value
+    return _guid_param
 
 
 class ResponseBuilder:
@@ -198,7 +203,7 @@ class FunctionImportHandler(BaseHandler):
     
     def _handle_prepare(
         self,
-        guid_param: callable,
+        guid_param: Callable[[str], str],
         requesting_user: str,
         query_params: Dict[str, Any]
     ) -> Tuple[int, Any, str]:
@@ -217,7 +222,7 @@ class FunctionImportHandler(BaseHandler):
     
     def _handle_activate(
         self,
-        guid_param: callable,
+        guid_param: Callable[[str], str],
         requesting_user: str
     ) -> Tuple[int, Any, str]:
         """Handle CheckRootActivationAction."""
@@ -245,7 +250,7 @@ class FunctionImportHandler(BaseHandler):
     
     def _handle_discard(
         self,
-        guid_param: callable,
+        guid_param: Callable[[str], str],
         requesting_user: str
     ) -> Tuple[int, Any, str]:
         """Handle CheckRootDiscardAction."""
@@ -312,12 +317,11 @@ class CountHandler(BaseHandler):
         self.container = container
     
     def handle(self, ctx: RequestContext) -> Optional[Tuple[int, Any, str]]:
-        m = re.match(r'^(\w+)/\$count$', ctx.url_path)
-        if ctx.method == "GET" and m:
-            set_name = m.group(1)
-            data, _ = query._resolve_source(set_name)
+        entity_set = Patterns.parse_count_endpoint(ctx.url_path)
+        if ctx.method == "GET" and entity_set:
+            data, _ = query._resolve_source(entity_set)
             if data is None:
-                return ResponseBuilder.not_found(f"Unknown set: {set_name}")
+                return ResponseBuilder.not_found(f"Unknown set: {entity_set}")
             
             data = resolvers.apply_filter(
                 data,
@@ -337,12 +341,11 @@ class ListHandler(BaseHandler):
         self.container = container
     
     def handle(self, ctx: RequestContext) -> Optional[Tuple[int, Any, str]]:
-        m = re.match(r'^(\w+)$', ctx.url_path)
-        if ctx.method == "GET" and m:
-            set_name = m.group(1)
-            if set_name in config.REFERENCE_DATA or set_name in state.store:
+        entity_set = Patterns.parse_entity_set(ctx.url_path)
+        if ctx.method == "GET" and entity_set:
+            if entity_set in config.REFERENCE_DATA or entity_set in state.store:
                 return query._list_response(
-                    set_name,
+                    entity_set,
                     ctx.query_params,
                     state._resolve_mock_user(ctx.headers)
                 )
@@ -353,17 +356,6 @@ class ListHandler(BaseHandler):
 class NavigationHandler(BaseHandler):
     """Handler for navigation property requests (to_Basic, to_Checks, etc.)."""
     
-    # Compiled regex patterns for navigation properties
-    NAV_DRAFT_ADMIN_RE = re.compile(
-        r"^CheckRoots\(ActiveUUID=guid'([^']*)',DraftUUID=guid'([^']*)'\)/DraftAdministrativeData$"
-    )
-    NAV_SIBLING_RE = re.compile(
-        r"^CheckRoots\(ActiveUUID=guid'([^']*)',DraftUUID=guid'([^']*)'\)/SiblingEntity$"
-    )
-    NAV_COLLECTION_RE = re.compile(
-        r"^CheckRoots\(ActiveUUID=guid'([^']*)',DraftUUID=guid'([^']*)'\)/(to_Basic|to_Checks|to_Barriers)$"
-    )
-    
     def __init__(self, container: Optional['ServiceContainer'] = None):
         """Initialize with optional dependency injection container."""
         self.container = container
@@ -373,17 +365,17 @@ class NavigationHandler(BaseHandler):
             return None
         
         # Try DraftAdministrativeData navigation
-        admin_m = self.NAV_DRAFT_ADMIN_RE.match(ctx.url_path)
+        admin_m = Patterns.NAV_DRAFT_ADMIN_RE.match(ctx.url_path)
         if admin_m:
             return self._handle_draft_admin(admin_m, ctx.headers)
         
         # Try SiblingEntity navigation
-        sibling_m = self.NAV_SIBLING_RE.match(ctx.url_path)
+        sibling_m = Patterns.NAV_SIBLING_RE.match(ctx.url_path)
         if sibling_m:
             return self._handle_sibling(sibling_m)
         
         # Try collection navigations (to_Basic, to_Checks, to_Barriers)
-        nav_m = self.NAV_COLLECTION_RE.match(ctx.url_path)
+        nav_m = Patterns.NAV_COLLECTION_RE.match(ctx.url_path)
         if nav_m:
             return self._handle_collection(nav_m, ctx.query_params)
         
@@ -599,10 +591,6 @@ class CreateRootHandler(BaseHandler):
 class CreateChildHandler(BaseHandler):
     """Handler for POST to navigation properties (create child entities)."""
     
-    NAV_CREATE_RE = re.compile(
-        r"^CheckRoots\(ActiveUUID=guid'([^']*)',DraftUUID=guid'([^']*)'\)/(to_Checks|to_Barriers)$"
-    )
-    
     def __init__(self, container: Optional['ServiceContainer'] = None):
         """Initialize with optional dependency injection container."""
         self.container = container
@@ -611,7 +599,7 @@ class CreateChildHandler(BaseHandler):
         if ctx.method != "POST":
             return None
         
-        nav_m = self.NAV_CREATE_RE.match(ctx.url_path)
+        nav_m = Patterns.NAV_CREATE_RE.match(ctx.url_path)
         if not nav_m:
             return None
         

@@ -6,7 +6,6 @@ odata_format.py, resolvers.py.
 """
 from __future__ import annotations
 
-import re
 from typing import Any, Dict, List, Optional, Tuple
 
 import serve_config
@@ -15,6 +14,7 @@ from . import config
 from . import state
 from . import odata_format
 from . import resolvers
+from .patterns import Patterns
 
 # Type aliases
 EntityRow = Dict[str, Any]
@@ -50,10 +50,6 @@ def csrf_check_failed(headers: Dict[str, str]) -> bool:
     return headers.get("x-csrf-token") != config.CSRF_TOKEN
 
 
-_LOCAL_ORIGIN_RE = re.compile(r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$", re.I)
-_PREVIEW_ORIGIN_RE = re.compile(r"^https://[a-z0-9-]+\.space-z\.ai$", re.I)
-
-
 def _is_allowed_cors_origin(origin: Optional[str]) -> bool:
     """Check if origin is allowed for CORS.
     
@@ -65,7 +61,10 @@ def _is_allowed_cors_origin(origin: Optional[str]) -> bool:
     """
     if not origin:
         return False
-    return bool(_LOCAL_ORIGIN_RE.match(origin) or _PREVIEW_ORIGIN_RE.match(origin))
+    return bool(
+        Patterns.LOCAL_ORIGIN_RE.match(origin) or 
+        Patterns.PREVIEW_ORIGIN_RE.match(origin)
+    )
 
 
 def _augment_edit_state_fields(rows: List[EntityRow]) -> List[EntityRow]:

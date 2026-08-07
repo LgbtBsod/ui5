@@ -2,7 +2,6 @@
 building, and the CheckRoots ETag aggregation. Depends on config.py and
 state.py (for store reads used by the etag aggregation) only.
 """
-import re
 from datetime import datetime, timezone
 from urllib.parse import quote
 
@@ -10,6 +9,7 @@ import serve_config
 
 from . import config
 from . import state
+from .patterns import Patterns
 
 
 def odata_date(dt=None):
@@ -22,13 +22,13 @@ def parse_odata_date(s):
     if s is None or s == "":
         return None
     s = str(s).strip()
-    m = re.match(r'^/Date\((\d+)\)/$', s)
+    m = Patterns.ODATA_DATE_RE.match(s)
     if m:
         return int(m.group(1))
-    m = re.match(r"^datetime'([^']+)'$", s, re.I)
+    m = Patterns.ODATA_DATETIME_RE.match(s)
     if m:
         return int(datetime.fromisoformat(m.group(1).replace("Z", "+00:00")).timestamp() * 1000)
-    m = re.match(r"^'([^']+)'$", s)
+    m = Patterns.QUOTED_STRING_RE.match(s)
     if m:
         try:
             return int(datetime.fromisoformat(m.group(1).replace("Z", "+00:00")).timestamp() * 1000)
