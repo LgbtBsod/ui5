@@ -29,6 +29,8 @@ from .config import (
     ETAG_SENTINEL_MS,
     REQUIRED_ROOT_FIELDS,
     REQUIRED_FIELD_ALTERNATES,
+    REQUIRED_CHILD_FIELD,
+    REQUIRED_CHILD_FIELD_LABEL,
 )
 from .state import (
     store,
@@ -115,7 +117,7 @@ from .crud import (
     _create_check_item,
     _create_barrier,
 )
-from .dispatch import (
+from .patterns import (
     SINGLE_KEY_RE,
     COMPOSITE_KEY_RE,
     CHECKROOT_KEY_RE,
@@ -123,6 +125,8 @@ from .dispatch import (
     NAV_CREATE_RE,
     NAV_DRAFT_ADMIN_RE,
     NAV_SIBLING_RE,
+)
+from .dispatch import (
     _nav_root_id,
     _parse_key,
     dispatch_request,
@@ -156,6 +160,7 @@ __all__ = [
     "DATASET_INDEX", "ZERO_GUID", "MOCK_USER", "MOCK_USER_REGISTRY",
     "MOCK_USER_DISPLAY_NAME", "KEY_PROP_TUPLES", "ENTITY_TYPES", "BASIC_PROXY_FIELDS",
     "ETAG_SENTINEL_MS", "REQUIRED_ROOT_FIELDS", "REQUIRED_FIELD_ALTERNATES",
+    "REQUIRED_CHILD_FIELD", "REQUIRED_CHILD_FIELD_LABEL",
     "store", "draft_store", "next_doc_id", "draw_doc_id", "_set_sap_message",
     "_pop_sap_message", "_set_pending_etag", "_pop_pending_etag", "_resolve_mock_user",
     "_mock_user_display_name", "_find_draft_by_active_uuid", "_checks_of", "_barriers_of",

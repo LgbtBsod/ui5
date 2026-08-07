@@ -1,50 +1,23 @@
-```
-# Python
+```gitignore
+# Python compiled files
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+*.pyc
+*.pyo
+*.pyd
 
-# Database
+# Database files
 *.db
-gateway.db
+*.sqlite
+*.sqlite3
 
-# Coverage
-.coverage
-.coverage.*
-
-# Uploads/temporary files
-uploads/
+# Uploads directory (assuming temporary/user uploads)
+backend/mock_gateway/uploads/
 
 # Logs
 *.log
 
-# Environment
+# Environment files
 .env
 .env.local
-*.env
-
-# IDE
-.vscode/
-.idea/
-
-# OS
-.DS_Store
-Thumbs.db
+*.env.*
 ```

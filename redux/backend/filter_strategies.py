@@ -12,7 +12,9 @@ from __future__ import annotations
 
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Pattern, Tuple, TYPE_CHECKING
+from typing import Any, Callable, Dict, Optional, Pattern, Tuple, TYPE_CHECKING
+
+from .patterns import Patterns
 
 if TYPE_CHECKING:
     from .resolvers import EntityRow
@@ -49,9 +51,9 @@ class FilterStrategy(ABC):
 class SublocationFilterStrategy(FilterStrategy):
     """Handles location_name_insub('value') filters."""
     
-    PATTERN: Pattern[str] = re.compile(r"location_name_insub\('([^']*)'\)")
+    PATTERN = Patterns.LOCATION_INSUB_RE
     
-    def __init__(self, sublocation_resolver: callable):
+    def __init__(self, sublocation_resolver: Callable[[str], list[str]]):
         """Initialize with sublocation resolver function.
         
         Args:
@@ -76,7 +78,7 @@ class SublocationFilterStrategy(FilterStrategy):
 class SubstringFilterStrategy(FilterStrategy):
     """Handles substringof('value', field) filters."""
     
-    PATTERN: Pattern[str] = re.compile(r"substringof\('([^']*)'\s*,\s*(\w+)\)", re.I)
+    PATTERN = Patterns.SUBSTRING_OF_RE
     
     def __init__(self):
         self._match: Optional[re.Match] = None
@@ -97,7 +99,7 @@ class SubstringFilterStrategy(FilterStrategy):
 class ToLowerEqualsFilterStrategy(FilterStrategy):
     """Handles tolower(field) eq 'value' filters."""
     
-    PATTERN: Pattern[str] = re.compile(r"tolower\((\w+)\)\s+eq\s+'([^']*)'", re.I)
+    PATTERN = Patterns.TOLOWER_EQ_RE
     
     def __init__(self):
         self._match: Optional[re.Match] = None
@@ -118,10 +120,10 @@ class ToLowerEqualsFilterStrategy(FilterStrategy):
 class DateCompareFilterStrategy(FilterStrategy):
     """Handles date comparison filters (le, ge)."""
     
-    LE_PATTERN: Pattern[str] = re.compile(r"(\w+)\s+le\s+(datetime'[^']+'|/Date\(\d+\)/|'[^']*')", re.I)
-    GE_PATTERN: Pattern[str] = re.compile(r"(\w+)\s+ge\s+(datetime'[^']+'|/Date\(\d+\)/|'[^']*')", re.I)
+    LE_PATTERN = Patterns.FIELD_LE_RE
+    GE_PATTERN = Patterns.FIELD_GE_RE
     
-    def __init__(self, date_comparator: callable):
+    def __init__(self, date_comparator: Callable[[Any, str, str], bool]):
         """Initialize with date comparator function.
         
         Args:
@@ -154,7 +156,7 @@ class DateCompareFilterStrategy(FilterStrategy):
 class PkLevelsFilterStrategy(FilterStrategy):
     """Handles PkLevels eq 'value' filters (CSV containment)."""
     
-    PATTERN: Pattern[str] = re.compile(r"(PkLevels)\s+eq\s+'([^']*)'", re.I)
+    PATTERN: Pattern[str] = Patterns.PK_LEVELS_EQ_RE
     
     def __init__(self):
         self._match: Optional[re.Match] = None
@@ -175,7 +177,7 @@ class PkLevelsFilterStrategy(FilterStrategy):
 class BooleanEqualsFilterStrategy(FilterStrategy):
     """Handles field eq true/false filters."""
     
-    PATTERN: Pattern[str] = re.compile(r"([\w/]+)\s+eq\s+(true|false)", re.I)
+    PATTERN: Pattern[str] = Patterns.FIELD_BOOL_EQ_RE
     
     def __init__(self):
         self._match: Optional[re.Match] = None
@@ -196,7 +198,7 @@ class BooleanEqualsFilterStrategy(FilterStrategy):
 class NotEqualsFilterStrategy(FilterStrategy):
     """Handles field ne 'value' filters."""
     
-    PATTERN: Pattern[str] = re.compile(r"([\w/]+)\s+ne\s+'([^']*)'", re.I)
+    PATTERN: Pattern[str] = Patterns.FIELD_NE_RE
     
     def __init__(self):
         self._match: Optional[re.Match] = None
@@ -217,7 +219,7 @@ class NotEqualsFilterStrategy(FilterStrategy):
 class EqualsFilterStrategy(FilterStrategy):
     """Handles field eq 'value' filters."""
     
-    PATTERN: Pattern[str] = re.compile(r"([\w/]+)\s+eq\s+'([^']*)'")
+    PATTERN: Pattern[str] = Patterns.FIELD_STR_EQ_RE
     
     def __init__(self):
         self._match: Optional[re.Match] = None
@@ -238,7 +240,7 @@ class EqualsFilterStrategy(FilterStrategy):
 class NullEqualsFilterStrategy(FilterStrategy):
     """Handles field eq null filters."""
     
-    PATTERN: Pattern[str] = re.compile(r"([\w/]+)\s+eq\s+null", re.I)
+    PATTERN: Pattern[str] = Patterns.FIELD_NULL_EQ_RE
     
     def __init__(self):
         self._match: Optional[re.Match] = None
@@ -257,7 +259,11 @@ class NullEqualsFilterStrategy(FilterStrategy):
 class FilterStrategyFactory:
     """Factory for creating filter strategies."""
     
-    def __init__(self, sublocation_resolver: callable, date_comparator: callable):
+    def __init__(
+        self, 
+        sublocation_resolver: Callable[[str], list[str]], 
+        date_comparator: Callable[[Any, str, str], bool]
+    ):
         """Initialize factory with resolver functions.
         
         Args:

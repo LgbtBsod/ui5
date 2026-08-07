@@ -3,17 +3,30 @@ inner changeset parts, dispatching each embedded request, and re-serializing
 responses - including changeset all-or-nothing atomicity (snapshot/rollback
 over state.store/state.draft_store on any sub-request failure).
 """
+from __future__ import annotations
+
 import copy
 import json
 import re
+from typing import Any, Dict, List, Optional, Tuple
 
 from . import config
 from . import state
 from . import odata_format
 from . import dispatch
+from .patterns import Patterns
 
 
-def split_on_boundary(text, boundary):
+def split_on_boundary(text: str, boundary: str) -> List[str]:
+    """Split text by boundary marker.
+    
+    Args:
+        text: Raw multipart text
+        boundary: Boundary string separator
+        
+    Returns:
+        List of non-empty parts
+    """
     parts = text.split("--" + boundary)
     result = []
     for p in parts:
@@ -23,18 +36,29 @@ def split_on_boundary(text, boundary):
     return result
 
 
-def parse_embedded_http(raw_part):
+def parse_embedded_http(raw_part: str) -> Optional[Dict[str, Any]]:
+    """Parse embedded HTTP request from batch part.
+    
+    Args:
+        raw_part: Raw part containing HTTP request
+        
+    Returns:
+        Dictionary with method, url, body, headers or None if invalid
+    """
     normalized = raw_part.replace("\r\n", "\n")
     header_end = normalized.find("\n\n")
     if header_end == -1:
         return None
+    
     http_msg = normalized[header_end + 2:]
     lines = http_msg.split("\n")
     request_line = lines[0] or ""
-    m = re.match(r'^(GET|POST|PUT|PATCH|DELETE|MERGE)\s+(\S+)\s+HTTP', request_line, re.I)
+    
+    m = Patterns.HTTP_REQUEST_LINE_RE.match(request_line)
     if not m:
         return None
-    hdrs = {}
+    
+    hdrs: Dict[str, str] = {}
     i = 1
     for i in range(1, len(lines)):
         line = lines[i]
@@ -44,26 +68,49 @@ def parse_embedded_http(raw_part):
         colon = line.find(":")
         if colon > 0:
             hdrs[line[:colon].strip().lower()] = line[colon + 1:].strip()
+    
     body_text = "\n".join(lines[i:]).strip()
     body = None
     if body_text:
         try:
             body = json.loads(body_text)
-        except:
+        except json.JSONDecodeError:
             body = body_text
-    return {"method": m.group(1).upper(), "url": m.group(2), "body": body, "headers": hdrs}
+    
+    return {
+        "method": m.group(1).upper(),
+        "url": m.group(2),
+        "body": body,
+        "headers": hdrs
+    }
 
 
-def parse_batch_part(raw_part):
+def parse_batch_part(raw_part: str) -> Optional[Dict[str, Any]]:
+    """Parse batch part (single request or changeset).
+    
+    Args:
+        raw_part: Raw batch part
+        
+    Returns:
+        Dictionary with type and requests/request, or None if invalid
+    """
     normalized = raw_part.replace("\r\n", "\n")
     header_end = normalized.find("\n\n")
     outer_headers = normalized[:header_end] if header_end >= 0 else normalized
-    cs_match = re.search(r'content-type:\s*multipart/mixed;\s*boundary=([^\s;]+)', outer_headers, re.I)
+    
+    cs_match = Patterns.MULTIPART_BOUNDARY_RE.search(outer_headers)
     if cs_match:
         inner_boundary = cs_match.group(1).strip('"')
         rest = normalized[header_end + 2:] if header_end >= 0 else ""
-        inner_reqs = [r for r in (parse_embedded_http(p) for p in split_on_boundary(rest, inner_boundary)) if r]
+        inner_reqs = [
+            r for r in (
+                parse_embedded_http(p) 
+                for p in split_on_boundary(rest, inner_boundary)
+            ) 
+            if r
+        ]
         return {"type": "changeset", "requests": inner_reqs}
+    
     req = parse_embedded_http(raw_part)
     return {"type": "single", "request": req} if req else None
 
@@ -104,8 +151,17 @@ def build_response_part(status, body, content_type="application/json", sap_messa
     )
 
 
-def handle_batch(raw_body, content_type_header):
-    ct_match = re.search(r'boundary=([^\s;]+)', content_type_header or "")
+def handle_batch(raw_body: str, content_type_header: Optional[str]) -> Tuple[int, Any, str]:
+    """Handle OData $batch request.
+    
+    Args:
+        raw_body: Raw multipart batch request body
+        content_type_header: Content-Type header with boundary
+        
+    Returns:
+        Tuple of (status, response_body, content_type)
+    """
+    ct_match = Patterns.BOUNDARY_PARAM_RE.search(content_type_header or "")
     if not ct_match:
         return (400, json.dumps({"error": {"message": {"value": "Malformed $batch"}}}), "application/json")
     boundary = ct_match.group(1).strip('"')

@@ -1,16 +1,14 @@
 """Boundary key resolution and OData entity-serialization base helpers."""
 
-import re
 from typing import Any, Dict
 
 from utils.key_normalizer import hex_to_storage_key
+from utils.patterns import BINARY_LITERAL_PATTERN, DRAFT_KEY_PATTERN
 
 # "Not applicable" sentinel for the ActiveUUID/DraftUUID compound key (see
 # api/gateway_draft_api.py, services/draft_service.py) - this codebase's hex32-string
 # equivalent of serve.py's guid'00000000-0000-0000-0000-000000000000' ZERO_GUID.
 HEX_ZERO_GUID = "0" * 32
-
-_DRAFT_KEY_RE = re.compile(r"^ActiveUUID='([^']*)',DraftUUID='([^']*)'$")
 
 
 class BoundaryResolver:
@@ -23,7 +21,7 @@ class BoundaryResolver:
         (active_hex_or_empty, draft_hex) if it matches, else None - i.e. the legacy flat
         'HEX32' form (or a business key) - so callers fall through to the existing path
         unchanged."""
-        m = _DRAFT_KEY_RE.match(str(key_expr or "").strip())
+        m = DRAFT_KEY_PATTERN.match(str(key_expr or "").strip())
         if not m:
             return None
         return m.group(1), m.group(2)
@@ -49,7 +47,7 @@ class BoundaryResolver:
         # RAW16/Edm.Binary keys may arrive as the OData binary literal binary'HEX...'
         # (SADL/CDS BINTOHEX convention referenced in README_ODATA.md); unwrap it before
         # the generic quote-strip below, which would otherwise leave a stray "binary" prefix.
-        binary_literal = re.match(r"^binary'(.*)'$", cleaned, re.IGNORECASE)
+        binary_literal = BINARY_LITERAL_PATTERN.match(cleaned)
         cleaned = binary_literal.group(1) if binary_literal else cleaned.strip("'")
 
         return hex_to_storage_key(cleaned)

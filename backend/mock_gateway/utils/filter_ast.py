@@ -13,20 +13,16 @@ own representation (SQLAlchemy expression vs. a Python predicate closure), not h
 
 from __future__ import annotations
 
-import re
 from dataclasses import dataclass
 from typing import Union
 
 from utils.filter_errors import FilterSyntaxError
+from utils.patterns import ODATA_COMPARISON_OPS, ODATA_FILTER_TOKEN_PATTERN, ODATA_FUNCTION_TOKENS
 
-_TOKEN_RE = re.compile(
-    r"substringof\(|contains\(|startswith\(|datetime'[^']*'|/Date\([^)]*\)/|'[^']*'|\(|\)|,|"
-    r"\b(?:and|or|not|eq|ne|gt|ge|lt|le|true|false)\b|[A-Za-z_][A-Za-z0-9_]*|-?\d+(?:\.\d+)?",
-    re.IGNORECASE,
-)
-
-_COMPARISON_OPS = {"eq", "ne", "gt", "lt", "ge", "le"}
-_FUNCTION_TOKENS = {"substringof(", "contains(", "startswith("}
+# Re-export for backward compatibility if needed
+_COMPARISON_OPS = ODATA_COMPARISON_OPS
+_FUNCTION_TOKENS = ODATA_FUNCTION_TOKENS
+_TOKEN_RE = ODATA_FILTER_TOKEN_PATTERN
 
 
 @dataclass(frozen=True)
