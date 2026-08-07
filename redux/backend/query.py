@@ -4,7 +4,10 @@ checking, CSRF/CORS gates, and the EditState synthetic-field stamping the
 standard quick filter depends on. Depends on config.py, state.py,
 odata_format.py, resolvers.py.
 """
+from __future__ import annotations
+
 import re
+from typing import Any, Dict, List, Optional, Tuple
 
 import serve_config
 
@@ -13,16 +16,37 @@ from . import state
 from . import odata_format
 from . import resolvers
 
+# Type aliases
+EntityRow = Dict[str, Any]
+KeyParts = Dict[str, Any]
+QueryParams = Dict[str, str]
 
-def _split_root_body(body):
-    """Возвращает (root_fields, basic_fields) — маршрутизация по BASIC_PROXY_FIELDS."""
-    root_fields, basic_fields = {}, {}
+
+def _split_root_body(body: Optional[Dict[str, Any]]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """Возвращает (root_fields, basic_fields) — маршрутизация по BASIC_PROXY_FIELDS.
+    
+    Args:
+        body: Request body dictionary
+        
+    Returns:
+        Tuple of (root_fields, basic_fields) dictionaries
+    """
+    root_fields: Dict[str, Any] = {}
+    basic_fields: Dict[str, Any] = {}
     for k, v in (body or {}).items():
         (basic_fields if k in config.BASIC_PROXY_FIELDS else root_fields)[k] = v
     return root_fields, basic_fields
 
 
-def csrf_check_failed(headers):
+def csrf_check_failed(headers: Dict[str, str]) -> bool:
+    """Check if CSRF token validation failed.
+    
+    Args:
+        headers: Request headers dictionary
+        
+    Returns:
+        True if CSRF check failed, False otherwise
+    """
     return headers.get("x-csrf-token") != config.CSRF_TOKEN
 
 
@@ -30,13 +54,21 @@ _LOCAL_ORIGIN_RE = re.compile(r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$", re.
 _PREVIEW_ORIGIN_RE = re.compile(r"^https://[a-z0-9-]+\.space-z\.ai$", re.I)
 
 
-def _is_allowed_cors_origin(origin):
+def _is_allowed_cors_origin(origin: Optional[str]) -> bool:
+    """Check if origin is allowed for CORS.
+    
+    Args:
+        origin: Origin header value
+        
+    Returns:
+        True if origin is allowed, False otherwise
+    """
     if not origin:
         return False
     return bool(_LOCAL_ORIGIN_RE.match(origin) or _PREVIEW_ORIGIN_RE.match(origin))
 
 
-def _augment_edit_state_fields(rows):
+def _augment_edit_state_fields(rows: List[EntityRow]) -> List[EntityRow]:
     """Stamps two synthetic, dict-key-as-nav-path fields onto each CheckRoots
     row so the generic $filter engine (resolvers.apply_filter/eval_one_filter)
     can treat them exactly like any other field - no special nav-property
@@ -58,6 +90,12 @@ def _augment_edit_state_fields(rows):
                                              draft. Empty string when there's
                                              no draft at all (an active row
                                              with no edit in progress).
+                                             
+    Args:
+        rows: List of entity rows to augment
+        
+    Returns:
+        Same list with augmented fields (mutated in place)
     """
     for row in rows:
         root_id = row["RootId"]
@@ -72,7 +110,9 @@ def _augment_edit_state_fields(rows):
             _draft_uuid, draft_row = state._find_draft_by_active_uuid(root_id)
             has_draft = draft_row is not None
             row["SiblingEntity/IsActiveEntity"] = False if has_draft else None
-            row["DraftAdministrativeData/InProcessByUser"] = draft_row.get("InProcessByUser", config.MOCK_USER) if has_draft else ""
+            row["DraftAdministrativeData/InProcessByUser"] = (
+                draft_row.get("InProcessByUser", config.MOCK_USER) if has_draft else ""
+            )
             # HasDraftEntity/HasActiveEntity are otherwise only computed later
             # in wrap_entity - which runs AFTER filtering - so the $filter
             # engine would never see them without stamping here too (e.g. the
@@ -88,8 +128,15 @@ def _augment_edit_state_fields(rows):
     return rows
 
 
-def _resolve_source(set_name):
-    """Returns (data_list, entity_type) for a reference or transactional entity set, or (None, None)."""
+def _resolve_source(set_name: str) -> Tuple[Optional[List[EntityRow]], Optional[str]]:
+    """Returns (data_list, entity_type) for a reference or transactional entity set, or (None, None).
+    
+    Args:
+        set_name: Name of the entity set to resolve
+        
+    Returns:
+        Tuple of (data_list, entity_type) or (None, None) if not found
+    """
     if set_name in config.REFERENCE_DATA:
         entity_type, _key_prop = config.DATASET_INDEX[set_name]
         return config.REFERENCE_DATA[set_name], entity_type
@@ -119,15 +166,33 @@ def _resolve_source(set_name):
     return None, None
 
 
-def _key_parts_of(set_name, row):
+def _key_parts_of(set_name: str, row: EntityRow) -> KeyParts:
+    """Extract key properties from entity row.
+    
+    Args:
+        set_name: Entity set name to determine key properties
+        row: Entity row to extract keys from
+        
+    Returns:
+        Dictionary of key property names to values
+    """
     props = config.KEY_PROP_TUPLES.get(set_name) or (serve_config.REFERENCE_KEY_PROPS.get(set_name),)
     return {p: row.get(p) for p in props}
 
 
-def _parse_int_param(query, name, default):
+def _parse_int_param(query: QueryParams, name: str, default: int) -> int:
     """Safe int(...) for $top/$skip - a malformed value (e.g. $top=abc, from
     a hand-typed URL or a client bug) must degrade to the default instead of
-    raising an uncaught ValueError out of dispatch_request."""
+    raising an uncaught ValueError out of dispatch_request.
+    
+    Args:
+        query: Query parameters dictionary
+        name: Parameter name to parse
+        default: Default value if parsing fails
+        
+    Returns:
+        Parsed integer value or default
+    """
     raw = query.get(name)
     if raw is None:
         return default
@@ -137,7 +202,21 @@ def _parse_int_param(query, name, default):
         return default
 
 
-def _list_response(set_name, query, requesting_user=config.MOCK_USER):
+def _list_response(
+    set_name: str, 
+    query: QueryParams, 
+    requesting_user: str = config.MOCK_USER
+) -> Optional[Tuple[int, Dict[str, Any], str]]:
+    """Build list response with filtering, ordering, and pagination.
+    
+    Args:
+        set_name: Entity set name
+        query: Query parameters dictionary
+        requesting_user: User making the request (default: MOCK_USER)
+        
+    Returns:
+        Tuple of (status_code, response_body, content_type) or None if not found
+    """
     data, entity_type = _resolve_source(set_name)
     if data is None:
         return None
@@ -155,14 +234,30 @@ def _list_response(set_name, query, requesting_user=config.MOCK_USER):
         keep = set(f.strip() for f in query["$select"].split(",")) | {"__metadata"}
         page_wrapped = [{k: v for k, v in r.items() if k in keep} for r in page_wrapped]
     if query.get("$expand"):
-        page_wrapped = [resolvers.apply_expand(r, set_name, query["$expand"], requesting_user) for r in page_wrapped]
+        page_wrapped = [
+            resolvers.apply_expand(r, set_name, query["$expand"], requesting_user) 
+            for r in page_wrapped
+        ]
     return (200, {"d": {"results": page_wrapped, "__count": str(len(filtered))}}, "application/json")
 
 
-def _find_by_key(set_name, key_parts):
+def _find_by_key(set_name: str, key_parts: KeyParts) -> Optional[EntityRow]:
+    """Find entity by key properties.
+    
+    Args:
+        set_name: Entity set name
+        key_parts: Dictionary of key property names to values
+        
+    Returns:
+        Entity row if found, None otherwise
+    """
     if set_name in config.REFERENCE_DATA:
         code_field = serve_config.REFERENCE_KEY_PROPS[set_name]
-        return next((r for r in config.REFERENCE_DATA[set_name] if str(r.get(code_field)) == str(key_parts[code_field])), None)
+        return next(
+            (r for r in config.REFERENCE_DATA[set_name] 
+             if str(r.get(code_field)) == str(key_parts[code_field])), 
+            None
+        )
     # [Фаза 5] DraftUUID != ZERO_GUID => явно адресованный черновик — читаем
     # из draft_store по его собственному ключу, не из store.
     if set_name == "CheckRoots":
@@ -174,7 +269,23 @@ def _find_by_key(set_name, key_parts):
     return state.store[set_name].get(store_key)
 
 
-def _single_response(set_name, key_parts, query, requesting_user=config.MOCK_USER):
+def _single_response(
+    set_name: str, 
+    key_parts: KeyParts, 
+    query: QueryParams, 
+    requesting_user: str = config.MOCK_USER
+) -> Optional[Tuple[int, Dict[str, Any], str]]:
+    """Build single entity response.
+    
+    Args:
+        set_name: Entity set name
+        key_parts: Dictionary of key property names to values
+        query: Query parameters dictionary
+        requesting_user: User making the request (default: MOCK_USER)
+        
+    Returns:
+        Tuple of (status_code, response_body, content_type) or None if not found
+    """
     if set_name in config.REFERENCE_DATA:
         entity_type = config.DATASET_INDEX[set_name][0]
     elif set_name in state.store:
@@ -190,7 +301,21 @@ def _single_response(set_name, key_parts, query, requesting_user=config.MOCK_USE
     return (200, {"d": wrapped}, "application/json")
 
 
-def _precondition_failed(set_name, key_parts, headers):
+def _precondition_failed(
+    set_name: str, 
+    key_parts: KeyParts, 
+    headers: Dict[str, str]
+) -> bool:
+    """Check if If-Match precondition failed for entity.
+    
+    Args:
+        set_name: Entity set name
+        key_parts: Dictionary of key property names to values
+        headers: Request headers dictionary
+        
+    Returns:
+        True if precondition failed, False otherwise
+    """
     if set_name not in ("CheckRoots", "CheckBasics", "CheckItems", "Barriers"):
         return False
     if_match = headers.get("if-match", "")

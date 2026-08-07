@@ -1,16 +1,28 @@
 """[SEED] Начальные тестовые данные для демо — создаются при старте сервера.
 Позволяют сразу проверить Object Page с заполненными базовыми полями
 (персона, дата, локация, etc.) без необходимости создавать запись через UI.
+
+Refactored with type hints (PEP 484) and logging instead of print statements.
 """
+from __future__ import annotations
+
+import logging
+
 import serve_config
 
 from . import config
 from . import state
 from . import odata_format
 
+logger = logging.getLogger(__name__)
 
-def seed_test_data(port=None):
-    """Создаёт тестовую запись CheckRoot со всеми базовыми полями."""
+
+def seed_test_data(port: int | None = None) -> None:
+    """Создаёт тестовую запись CheckRoot со всеми базовыми полями.
+    
+    Args:
+        port: Server port for display in log message
+    """
     if state.store["CheckRoots"]:  # Уже есть данные — не пересоздаём
         return
 
@@ -87,6 +99,12 @@ def seed_test_data(port=None):
         "LastChangedAt": now,
     }
 
-    print(f"[SEED] Created test record: CheckRoots(ActiveUUID=guid'{root_id}',DraftUUID=guid'{config.ZERO_GUID}')")
     display_port = port if port is not None else config.DEFAULT_PORT
-    print(f"[SEED] URL: http://localhost:{display_port}/index.html#/CheckRoots(ActiveUUID=guid'{root_id}',DraftUUID=guid'{config.ZERO_GUID}')")
+    logger.info(
+        "[SEED] Created test record: CheckRoots(ActiveUUID=guid'%s',DraftUUID=guid'%s')",
+        root_id, config.ZERO_GUID
+    )
+    logger.info(
+        "[SEED] URL: http://localhost:%s/index.html#/CheckRoots(ActiveUUID=guid'%s',DraftUUID=guid'%s')",
+        display_port, root_id, config.ZERO_GUID
+    )

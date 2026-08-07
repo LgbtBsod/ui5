@@ -4,27 +4,70 @@ its own arguments - no mutation of store/draft_store happens in this module.
 Depends on config.py, state.py, odata_format.py only (draft_service.py
 depends on this module, not the other way around, to avoid an import cycle
 between "read a draft's admin data" and "mutate a draft").
+
+Refactored with type hints (PEP 484), Strategy Pattern for filter evaluation
+(filter_strategies.py), and reduced cyclomatic complexity by extracting helper
+functions for filter evaluation and expand operations.
 """
+from __future__ import annotations
+
 import re
-import functools
+from typing import Any, Dict, List, Optional, Tuple, Callable
+from functools import lru_cache
 
 import serve_config
 
 from . import config
 from . import state
 from . import odata_format
+from .filter_strategies import FilterStrategyFactory
 
 
-def _ref_lookup(set_name, code_field, text_field, code_value):
+# Type aliases
+EntityRow = Dict[str, Any]
+FilterPredicate = Callable[[EntityRow], bool]
+KeyParts = Dict[str, str]
+QueryParams = Dict[str, Any]
+
+# Global filter strategy factory instance
+_filter_factory: Optional[FilterStrategyFactory] = None
+
+
+def _ref_lookup(
+    set_name: str,
+    code_field: str,
+    text_field: str,
+    code_value: Any
+) -> Optional[Any]:
+    """Look up reference text by code from reference data.
+    
+    Args:
+        set_name: Reference entity set name (e.g., "Persons", "PkLevels")
+        code_field: Field name containing the code
+        text_field: Field name containing the display text
+        code_value: Code value to look up
+        
+    Returns:
+        Display text if found, None otherwise
+    """
     for row in config.REFERENCE_DATA.get(set_name, []):
         if str(row.get(code_field)) == str(code_value):
             return row.get(text_field)
     return None
 
 
-def resolve_check_basic(row):
-    """Пуш-даун резолва текстов на CheckBasics — аналог ZI_CheckBasic (coalesce
-    Person.Fio / *_IntegrationName, LpcText/ProfText/TimezoneText/LocationName)."""
+def resolve_check_basic(row: EntityRow) -> EntityRow:
+    """Resolve reference texts for CheckBasics entity.
+    
+    Push-down resolver for CheckBasics - analogous to ZI_CheckBasic CDS view
+    (coalesce Person.Fio / *_IntegrationName, LpcText/ProfText/TimezoneText/LocationName).
+    
+    Args:
+        row: Raw CheckBasics entity row
+        
+    Returns:
+        Resolved entity row with display texts
+    """
     out = dict(row)
 
     observer_fio = _ref_lookup("Persons", "Pernr", "Fio", out.get("ObserverPerner")) if out.get("ObserverPerner") else None
@@ -45,11 +88,29 @@ def resolve_check_basic(row):
     return out
 
 
-def _resolve_type_and_result(row, type_set, type_code_field, type_text_field, raw_text_fallback=False):
-    """Общая часть resolve_check_item/resolve_barrier: Code->Text по
-    справочнику типа + Result->ResultText по CheckResults. raw_text_fallback
-    сохраняет поведение resolve_check_item (RawText для строк из интеграции
-    без сопоставления в CheckTypes) — resolve_barrier такого fallback не имеет."""
+def _resolve_type_and_result(
+    row: EntityRow,
+    type_set: str,
+    type_code_field: str,
+    type_text_field: str,
+    raw_text_fallback: bool = False
+) -> EntityRow:
+    """Resolve type code to text and result code to text for check items/barriers.
+    
+    Common logic for resolve_check_item/resolve_barrier: Code->Text lookup from
+    type reference data + Result->ResultText lookup from CheckResults.
+    
+    Args:
+        row: Raw entity row
+        type_set: Reference entity set name (e.g., "CheckTypes", "BarrierTypes")
+        type_code_field: Field name containing the type code
+        type_text_field: Field name containing the type display text
+        raw_text_fallback: If True, use RawText as fallback when type not found
+                          (used for resolve_check_item, not for resolve_barrier)
+        
+    Returns:
+        Entity row with resolved Text and ResultText fields
+    """
     out = dict(row)
     type_text = _ref_lookup(type_set, type_code_field, type_text_field, out.get("Code")) if out.get("Code") else None
     if raw_text_fallback:
@@ -81,15 +142,40 @@ def _resolve_type_and_result(row, type_set, type_code_field, type_text_field, ra
     return out
 
 
-def resolve_check_item(row):
+def resolve_check_item(row: EntityRow) -> EntityRow:
+    """Resolve CheckItem entity with type and result texts.
+    
+    Args:
+        row: Raw CheckItem entity row
+        
+    Returns:
+        Resolved entity row with Text, ResultText, and computed fields
+    """
     return _resolve_type_and_result(row, "CheckTypes", "CheckTypeCode", "CheckTypeText", raw_text_fallback=True)
 
 
-def resolve_barrier(row):
+def resolve_barrier(row: EntityRow) -> EntityRow:
+    """Resolve Barrier entity with type and result texts.
+    
+    Args:
+        row: Raw Barrier entity row
+        
+    Returns:
+        Resolved entity row with Text, ResultText, and computed fields
+    """
     return _resolve_type_and_result(row, "BarrierTypes", "BarrierTypeCode", "BarrierTypeText")
 
 
-def _rate_to_criticality(rate, total):
+def _rate_to_criticality(rate: float, total: int) -> int:
+    """Convert success rate percentage to criticality level (1=Critical, 2=Warning, 3=Good).
+    
+    Args:
+        rate: Success rate percentage (0-100)
+        total: Total number of items
+        
+    Returns:
+        Criticality level: 1 (Critical), 2 (Warning), or 3 (Good/Satisfactory)
+    """
     if not total:
         return 3
     if rate >= 90:
@@ -99,18 +185,28 @@ def _rate_to_criticality(rate, total):
     return 1
 
 
-def compute_check_root_view(root_id, root_override=None):
-    """[W1] Пуш-даун KPI/criticality/hidden/HeaderKpi* — аналог ZI_CheckRoot
-    (push-down на HANA в реальной CDS), здесь пересчитывается на каждое
-    чтение из store, а не хранится денормализованно.
-
-    root_override — [Фаза 3] позволяет вызвать эту же вычислительную функцию
-    для черновика (draft_store["CheckRoots"][root_id]) вместо активной
-    записи; CheckBasics по-прежнему резолвится от активного root_id (root-
-    scoped proxy-поля, не draft-узел). [Fix] CheckItems/Barriers ТЕПЕРЬ
-    настоящие draft-узлы (Common.DraftNode) - резолвятся от instance_tag
-    (draft_row['DraftUUID'] при просмотре черновика, иначе ZERO_GUID/active)
-    вместо всегда-активных таблиц, см. state._checks_of/_barriers_of."""
+def compute_check_root_view(
+    root_id: str,
+    root_override: Optional[EntityRow] = None
+) -> Optional[EntityRow]:
+    """Compute CheckRoot view with KPIs, criticality, and computed fields.
+    
+    Push-down KPI/criticality/hidden/HeaderKpi* calculations - analogous to 
+    ZI_CheckRoot CDS view (push-down on HANA in real CDS). Computed on each 
+    read from store, not stored denormalized.
+    
+    Args:
+        root_id: Root ID to compute view for
+        root_override: Optional override row (for draft rows from draft_store 
+                      instead of active store). CheckBasics still resolves from 
+                      active root_id (root-scoped proxy-fields, not draft-node).
+                      CheckItems/Barriers are now real draft-nodes (Common.DraftNode) 
+                      - resolve from instance_tag (draft_row['DraftUUID'] when 
+                      viewing draft, otherwise ZERO_GUID/active).
+        
+    Returns:
+        Computed entity row with all KPI and computed fields, or None if not found
+    """
     root = root_override if root_override is not None else state.store["CheckRoots"].get(root_id)
     if root is None:
         return None
@@ -188,7 +284,23 @@ def compute_check_root_view(root_id, root_override=None):
     return out
 
 
-def wrap_entity(entity_set, entity_type, row, key_parts):
+def wrap_entity(
+    entity_set: str,
+    entity_type: str,
+    row: EntityRow,
+    key_parts: Optional[KeyParts]
+) -> EntityRow:
+    """Wrap raw entity row with OData metadata and computed fields.
+    
+    Args:
+        entity_set: Entity set name (e.g., "CheckRoots", "CheckBasics")
+        entity_type: Entity type name from metadata
+        row: Raw entity row from store
+        key_parts: Key parts for URL generation
+        
+    Returns:
+        Wrapped entity row with __metadata and computed fields
+    """
     if entity_set == "CheckRoots":
         # [Фаза 5] is_active определяется ПРОИСХОЖДЕНИЕМ строки (откуда её
         # достал вызывающий код — store vs draft_store), а не разбором ключа
