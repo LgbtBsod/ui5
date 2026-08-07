@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session, selectinload
 
 from models import AnalyticsBreakdown, AnalyticsRefreshState, AnalyticsSnapshot, ChecklistRoot
-from utils.time import now_utc, as_utc as _as_utc
+from utils.time import as_utc as _as_utc
+from utils.time import now_utc
 
 logger = logging.getLogger("gateway.analytics")
 
@@ -39,10 +40,17 @@ class _DashboardAccumulators:
     AnalyticsService itself (new_summary/finalize_summary/build_charts).
     """
 
-    totals_by_month: defaultdict = field(default_factory=lambda: defaultdict(lambda: {
-        "TOTAL": 0, "FAILED_CHECKS": 0, "FAILED_BARRIERS": 0,
-        "FAILED_CHECKLISTS": 0, "FAILED_BARRIER_CHECKLISTS": 0,
-    }))
+    totals_by_month: defaultdict = field(
+        default_factory=lambda: defaultdict(
+            lambda: {
+                "TOTAL": 0,
+                "FAILED_CHECKS": 0,
+                "FAILED_BARRIERS": 0,
+                "FAILED_CHECKLISTS": 0,
+                "FAILED_BARRIER_CHECKLISTS": 0,
+            }
+        )
+    )
     failed_checks_by_profession: Counter = field(default_factory=Counter)
     failed_barriers_by_profession: Counter = field(default_factory=Counter)
     failed_checks_by_lpc: Counter = field(default_factory=Counter)
@@ -162,11 +170,22 @@ class _DashboardAccumulators:
         self.success_barriers += successful_barriers
 
     def finalize_summary(self, summary: dict, selected_year: int) -> None:
-        summary["monthly"] = self.totals_by_month[(selected_year, now_utc().month)]["TOTAL"] if selected_year == AnalyticsService._current_year() else 0
+        summary["monthly"] = (
+            self.totals_by_month[(selected_year, now_utc().month)]["TOTAL"]
+            if selected_year == AnalyticsService._current_year()
+            else 0
+        )
         summary["avgChecksRate"] = round((self.success_checks / self.total_checks) * 100, 2) if self.total_checks else 0
-        summary["avgBarriersRate"] = round((self.success_barriers / self.total_barriers) * 100, 2) if self.total_barriers else 0
-        summary["healthy"] = max(summary["total"] - summary["failedChecklistCount"] - summary["failedBarrierChecklistCount"], 0)
-        summary["availableYears"] = [{"key": str(year_value), "text": str(year_value)} for year_value in sorted(self.totals_all_years.keys(), reverse=True)] or [{"key": str(selected_year), "text": str(selected_year)}]
+        summary["avgBarriersRate"] = (
+            round((self.success_barriers / self.total_barriers) * 100, 2) if self.total_barriers else 0
+        )
+        summary["healthy"] = max(
+            summary["total"] - summary["failedChecklistCount"] - summary["failedBarrierChecklistCount"], 0
+        )
+        summary["availableYears"] = [
+            {"key": str(year_value), "text": str(year_value)}
+            for year_value in sorted(self.totals_all_years.keys(), reverse=True)
+        ] or [{"key": str(selected_year), "text": str(selected_year)}]
         summary["availableYearsJson"] = json.dumps(summary["availableYears"], ensure_ascii=False)
 
     def build_charts(self, selected_year: int) -> list[dict]:
@@ -226,10 +245,14 @@ class AnalyticsService:
 
     @staticmethod
     def _base_roots_query(db: Session):
-        return db.query(ChecklistRoot).options(
-            selectinload(ChecklistRoot.checks),
-            selectinload(ChecklistRoot.barriers),
-        ).filter(ChecklistRoot.is_deleted.isnot(True))
+        return (
+            db.query(ChecklistRoot)
+            .options(
+                selectinload(ChecklistRoot.checks),
+                selectinload(ChecklistRoot.barriers),
+            )
+            .filter(ChecklistRoot.is_deleted.isnot(True))
+        )
 
     @staticmethod
     def _normalize_text(v_value: str, fallback_text: str) -> str:
@@ -269,22 +292,29 @@ class AnalyticsService:
 
     @staticmethod
     def _years_for_source(roots: list[ChecklistRoot], source: str) -> list[int]:
-        years = sorted({
-            AnalyticsService._resolve_root_date(root)[0]
-            for root in (roots or [])
-            if AnalyticsService._matches_source(root, source)
-        }, reverse=True)
+        years = sorted(
+            {
+                AnalyticsService._resolve_root_date(root)[0]
+                for root in (roots or [])
+                if AnalyticsService._matches_source(root, source)
+            },
+            reverse=True,
+        )
         return years or [AnalyticsService._current_year()]
 
     @staticmethod
     def _chart_rows(counter: Counter, limit: int = 10) -> list[dict]:
         rows = []
-        for index, (label, value) in enumerate(sorted(counter.items(), key=lambda item: (-item[1], item[0]))[:limit], start=1):
-            rows.append({
-                "label": str(label),
-                "value": int(value),
-                "order": index,
-            })
+        for index, (label, value) in enumerate(
+            sorted(counter.items(), key=lambda item: (-item[1], item[0]))[:limit], start=1
+        ):
+            rows.append(
+                {
+                    "label": str(label),
+                    "value": int(value),
+                    "order": index,
+                }
+            )
         return rows
 
     @staticmethod
@@ -299,14 +329,16 @@ class AnalyticsService:
                 "FAILED_CHECKLISTS",
                 "FAILED_BARRIER_CHECKLISTS",
             ]:
-                rows.append({
-                    "dimension": "MONTHLY",
-                    "metric": metric,
-                    "bucketKey": f"{selected_year}-{month:02d}",
-                    "label": s_label,
-                    "value": int(grouped[(selected_year, month)].get(metric, 0)),
-                    "order": month,
-                })
+                rows.append(
+                    {
+                        "dimension": "MONTHLY",
+                        "metric": metric,
+                        "bucketKey": f"{selected_year}-{month:02d}",
+                        "label": s_label,
+                        "value": int(grouped[(selected_year, month)].get(metric, 0)),
+                        "order": month,
+                    }
+                )
         return rows
 
     @staticmethod
@@ -324,7 +356,9 @@ class AnalyticsService:
         ]
 
     @staticmethod
-    def _compute_dashboard_from_roots(roots: list[ChecklistRoot], year: int | None = None, source: str | None = None) -> dict:
+    def _compute_dashboard_from_roots(
+        roots: list[ChecklistRoot], year: int | None = None, source: str | None = None
+    ) -> dict:
         selected_year = AnalyticsService._normalize_year(year)
         source_key = AnalyticsService._normalize_source(source)
         filtered_roots = [root for root in (roots or []) if AnalyticsService._matches_source(root, source_key)]
@@ -348,7 +382,7 @@ class AnalyticsService:
             task_name=TASK_NAME_ANALYTICS_REFRESH if resolved_key == TASK_KEY_ANALYTICS_REFRESH else resolved_key,
             status="IDLE",
             is_running=False,
-            last_message="Waiting for refresh"
+            last_message="Waiting for refresh",
         )
         db.add(row)
         db.commit()
@@ -400,26 +434,32 @@ class AnalyticsService:
         )
         db.add(snapshot)
         for row in charts or []:
-            db.add(AnalyticsBreakdown(
-                month_key=snapshot.month_key,
-                selected_year=snapshot.selected_year,
-                source_key=snapshot.source_key,
-                dimension=str(row.get("dimension") or ""),
-                metric=str(row.get("metric") or ""),
-                bucket_key=str(row.get("bucketKey") or ""),
-                bucket_text=str(row.get("label") or row.get("bucketKey") or ""),
-                metric_value=int(row.get("value") or 0),
-                sort_order=int(row.get("order") or 0),
-            ))
+            db.add(
+                AnalyticsBreakdown(
+                    month_key=snapshot.month_key,
+                    selected_year=snapshot.selected_year,
+                    source_key=snapshot.source_key,
+                    dimension=str(row.get("dimension") or ""),
+                    metric=str(row.get("metric") or ""),
+                    bucket_key=str(row.get("bucketKey") or ""),
+                    bucket_text=str(row.get("label") or row.get("bucketKey") or ""),
+                    metric_value=int(row.get("value") or 0),
+                    sort_order=int(row.get("order") or 0),
+                )
+            )
 
     @staticmethod
     def _ensure_cached(db: Session, year: int | None = None, source: str | None = None) -> None:
         selected_year = AnalyticsService._normalize_year(year)
         source_key = AnalyticsService._normalize_source(source)
-        exists = db.query(AnalyticsSnapshot).filter(
-            AnalyticsSnapshot.selected_year == selected_year,
-            AnalyticsSnapshot.source_key == source_key,
-        ).first()
+        exists = (
+            db.query(AnalyticsSnapshot)
+            .filter(
+                AnalyticsSnapshot.selected_year == selected_year,
+                AnalyticsSnapshot.source_key == source_key,
+            )
+            .first()
+        )
         if exists:
             return
         AnalyticsService.refresh_cache(db, trigger="lazy-load")
@@ -429,10 +469,15 @@ class AnalyticsService:
         selected_year = AnalyticsService._normalize_year(year)
         source_key = AnalyticsService._normalize_source(source)
         AnalyticsService._ensure_cached(db, selected_year, source_key)
-        snapshot = db.query(AnalyticsSnapshot).filter(
-            AnalyticsSnapshot.selected_year == selected_year,
-            AnalyticsSnapshot.source_key == source_key,
-        ).order_by(AnalyticsSnapshot.refreshed_at.desc()).first()
+        snapshot = (
+            db.query(AnalyticsSnapshot)
+            .filter(
+                AnalyticsSnapshot.selected_year == selected_year,
+                AnalyticsSnapshot.source_key == source_key,
+            )
+            .order_by(AnalyticsSnapshot.refreshed_at.desc())
+            .first()
+        )
         if not snapshot:
             return AnalyticsService._compute_dashboard_from_roots([], selected_year, source_key), []
 
@@ -461,23 +506,31 @@ class AnalyticsService:
             "source": AnalyticsService._normalize_source(snapshot.source_key or snapshot.source),
             "sourceText": AnalyticsService._source_text(snapshot.source_key or snapshot.source),
         }
-        rows = db.query(AnalyticsBreakdown).filter(
-            AnalyticsBreakdown.selected_year == selected_year,
-            AnalyticsBreakdown.source_key == source_key,
-        ).order_by(
-            AnalyticsBreakdown.dimension.asc(),
-            AnalyticsBreakdown.metric.asc(),
-            AnalyticsBreakdown.sort_order.asc(),
-            AnalyticsBreakdown.bucket_text.asc(),
-        ).all()
-        charts = [{
-            "dimension": str(row.dimension or ""),
-            "metric": str(row.metric or ""),
-            "bucketKey": str(row.bucket_key or ""),
-            "label": str(row.bucket_text or row.bucket_key or ""),
-            "value": int(row.metric_value or 0),
-            "order": int(row.sort_order or 0),
-        } for row in rows]
+        rows = (
+            db.query(AnalyticsBreakdown)
+            .filter(
+                AnalyticsBreakdown.selected_year == selected_year,
+                AnalyticsBreakdown.source_key == source_key,
+            )
+            .order_by(
+                AnalyticsBreakdown.dimension.asc(),
+                AnalyticsBreakdown.metric.asc(),
+                AnalyticsBreakdown.sort_order.asc(),
+                AnalyticsBreakdown.bucket_text.asc(),
+            )
+            .all()
+        )
+        charts = [
+            {
+                "dimension": str(row.dimension or ""),
+                "metric": str(row.metric or ""),
+                "bucketKey": str(row.bucket_key or ""),
+                "label": str(row.bucket_text or row.bucket_key or ""),
+                "value": int(row.metric_value or 0),
+                "order": int(row.sort_order or 0),
+            }
+            for row in rows
+        ]
         return summary, charts
 
     @staticmethod
@@ -557,7 +610,11 @@ class AnalyticsService:
                 years = AnalyticsService._years_for_source(roots, source_key)
                 for selected_year in years:
                     dashboard = AnalyticsService._compute_dashboard_from_roots(roots, selected_year, source_key)
-                    AnalyticsService._persist_dashboard(db, {key: value for key, value in dashboard.items() if key != "charts"}, dashboard.get("charts") or [])
+                    AnalyticsService._persist_dashboard(
+                        db,
+                        {key: value for key, value in dashboard.items() if key != "charts"},
+                        dashboard.get("charts") or [],
+                    )
 
             row.status = "READY"
             row.is_running = False

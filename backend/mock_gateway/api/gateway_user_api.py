@@ -1,17 +1,21 @@
 """CurrentUserSet / ChecklistCreatePermissionSet / ChecklistPermissionSet routes."""
+
 from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy.orm import Session
 
+from api.gateway_core import (
+    _apply_order_filter,
+    _err,
+    _load_root_or_error,
+    _normalize_root_filter_aliases,
+)
+from api.gateway_serializers import _to_create_permission, _to_current_user, _to_permission
 from config import DEFAULT_PAGE_SIZE
 from database import get_db
 from models import ChecklistRoot
 from services.current_user_service import CurrentUserService
 from utils.odata import SERVICE_ROOT, odata_payload
 from utils.odata_response import odata_collection, odata_entity
-from api.gateway_core import (
-    _err, _apply_order_filter, _load_root_or_error, _normalize_root_filter_aliases,
-)
-from api.gateway_serializers import _to_permission, _to_create_permission, _to_current_user
 
 router = APIRouter(tags=["GatewayCanonical"])
 
@@ -28,7 +32,7 @@ def current_user_entity(entity_key: str, request: Request, response: Response, d
     cleaned = str(entity_key or "").strip()
     if cleaned.startswith("Key="):
         cleaned = cleaned.split("=", 1)[1]
-    cleaned = cleaned.strip("\'\"")
+    cleaned = cleaned.strip("'\"")
     if cleaned and cleaned.upper() != "CURRENT":
         return _err(404, "NOT_FOUND", "Current user not found")
     profile = CurrentUserService.resolve_profile(db, request=request)
@@ -44,11 +48,13 @@ def checklist_create_permission_set(request: Request, response: Response, db: Se
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistCreatePermissionSet({{entity_key}})")
-def checklist_create_permission_entity(entity_key: str, request: Request, response: Response, db: Session = Depends(get_db)):
+def checklist_create_permission_entity(
+    entity_key: str, request: Request, response: Response, db: Session = Depends(get_db)
+):
     cleaned = str(entity_key or "").strip()
     if cleaned.startswith("DB_KEY=") or cleaned.startswith("Key="):
         cleaned = cleaned.split("=", 1)[1]
-    cleaned = cleaned.strip("\'\"")
+    cleaned = cleaned.strip("'\"")
     if cleaned and cleaned.upper() != "CURRENT":
         return _err(404, "NOT_FOUND", "Create permission not found")
     resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
@@ -67,12 +73,12 @@ def checklist_permission_set(
     db: Session = Depends(get_db),
 ):
     resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
-    filter = _normalize_root_filter_aliases(filter)
+    filter_expr = _normalize_root_filter_aliases(filter)
     rows, total = _apply_order_filter(
         db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)),
         ChecklistRoot,
         {"DB_KEY": "id"},
-        filter,
+        filter_expr,
         orderby,
         top,
         skip,

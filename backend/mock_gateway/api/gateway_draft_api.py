@@ -3,15 +3,16 @@
 to the existing session-lock edit flow in gateway_lock_api.py / gateway_save_api.py;
 nothing here touches LockEntry/LockService. Business logic lives in services.draft_service
 (DraftService), following this codebase's api/services split - route bodies stay thin."""
+
 from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy.orm import Session
 
-from database import get_db
-from utils.odata import SERVICE_ROOT
-from utils.odata_response import odata_entity
 from api.gateway_core import _err, _load_root_or_error, _require_create_permission, _require_permission
 from api.gateway_serializers import _to_root, _to_root_draft
+from database import get_db
 from services.draft_service import DraftService
+from utils.odata import SERVICE_ROOT
+from utils.odata_response import odata_entity
 
 router = APIRouter(tags=["GatewayCanonical"])
 
@@ -25,13 +26,13 @@ def checklist_root_preparation_action(
     active_uuid = str(active_uuid or "").strip()
     is_create = not active_uuid or set(active_uuid.replace("-", "")) <= {"0"}
     if is_create:
-        if (err := _require_create_permission(db, request)):
+        if err := _require_create_permission(db, request):
             return err
     else:
         existing_root, load_err = _load_root_or_error(db, active_uuid)
         if load_err:
             return load_err
-        if (err := _require_permission(db, request, existing_root, "edit")):
+        if err := _require_permission(db, request, existing_root, "edit"):
             return err
 
     draft = DraftService.prepare(db, active_uuid)

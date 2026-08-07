@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 import uuid
 from dataclasses import dataclass
+
 from fastapi import HTTPException
 
 
@@ -111,7 +112,9 @@ def _normalize_content_type(content_type: str | None) -> str:
     return value
 
 
-def format_http_response(status_code: int, reason: str, content_type: str, body: str, content_id: str | None = None) -> str:
+def format_http_response(
+    status_code: int, reason: str, content_type: str, body: str, content_id: str | None = None
+) -> str:
     body_text = body or ""
     payload_type = _normalize_content_type(content_type)
     headers = ["Content-Type: application/http", "Content-Transfer-Encoding: binary"]
@@ -124,7 +127,7 @@ def format_http_response(status_code: int, reason: str, content_type: str, body:
         "MaxDataServiceVersion: 2.0",
         f"Content-Length: {len(body_text.encode('utf-8'))}",
         "",
-        body_text
+        body_text,
     ]
     return "\r\n".join(headers) + "\r\n\r\n" + "\r\n".join(payload)
 

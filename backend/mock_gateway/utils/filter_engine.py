@@ -95,7 +95,9 @@ def _compile(node, field_map: dict) -> Callable[[dict], bool]:
     raise FilterSyntaxError(f"Unsupported $filter AST node: {node!r}")
 
 
-def parse_filter_to_predicate(filter_string: str | None, field_map: dict[str, str] | None = None) -> Callable[[dict], bool]:
+def parse_filter_to_predicate(
+    filter_string: str | None, field_map: dict[str, str] | None = None
+) -> Callable[[dict], bool]:
     """In-memory compiler for the shared $filter AST (see utils.filter_ast)."""
     if not filter_string:
         return lambda _row: True

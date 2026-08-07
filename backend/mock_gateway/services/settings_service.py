@@ -5,7 +5,6 @@ import json
 from config import FRONTEND_TIMER_PROFILE, LOCK_TTL
 from repo.settings_repo import SettingsRepo
 
-
 DEFAULT_REQUIRED_FIELDS = [
     "/basic/date",
     "/basic/time",
@@ -58,10 +57,14 @@ def _normalize_upload_policy(raw_value):
     if not isinstance(parsed, dict):
         parsed = {}
     allowed_mime = _normalize_string_list(DEFAULT_UPLOAD_POLICY.get("allowedMime")) + [
-        item for item in _normalize_string_list(parsed.get("allowedMime")) if item not in _normalize_string_list(DEFAULT_UPLOAD_POLICY.get("allowedMime"))
+        item
+        for item in _normalize_string_list(parsed.get("allowedMime"))
+        if item not in _normalize_string_list(DEFAULT_UPLOAD_POLICY.get("allowedMime"))
     ]
     allowed_extensions = _normalize_string_list(DEFAULT_UPLOAD_POLICY.get("allowedExtensions")) + [
-        item for item in _normalize_string_list(parsed.get("allowedExtensions")) if item not in _normalize_string_list(DEFAULT_UPLOAD_POLICY.get("allowedExtensions"))
+        item
+        for item in _normalize_string_list(parsed.get("allowedExtensions"))
+        if item not in _normalize_string_list(DEFAULT_UPLOAD_POLICY.get("allowedExtensions"))
     ]
     try:
         max_size_mb = float(parsed.get("maxSizeMb") or DEFAULT_UPLOAD_POLICY["maxSizeMb"])
@@ -106,13 +109,19 @@ class SettingsService:
             "Key": "GLOBAL",
             "CacheToleranceMs": SettingsService.GLOBAL_CACHE_TOLERANCE_MS,
             "HeartbeatIntervalSec": max(1, int((row.heartbeat_ms or FRONTEND_TIMER_PROFILE["heartbeat_ms"]) / 1000)),
-            "StatusPollIntervalSec": max(1, int((row.lock_status_ms or FRONTEND_TIMER_PROFILE["lock_status_ms"]) / 1000)),
-            "LockPollingIntervalSec": max(1, int((row.lock_status_ms or FRONTEND_TIMER_PROFILE["lock_status_ms"]) / 1000)),
+            "StatusPollIntervalSec": max(
+                1, int((row.lock_status_ms or FRONTEND_TIMER_PROFILE["lock_status_ms"]) / 1000)
+            ),
+            "LockPollingIntervalSec": max(
+                1, int((row.lock_status_ms or FRONTEND_TIMER_PROFILE["lock_status_ms"]) / 1000)
+            ),
             "LockTtlSec": max(1, int(LOCK_TTL.total_seconds())),
             "IdleTimeoutSec": max(1, int((row.idle_ms or FRONTEND_TIMER_PROFILE["idle_ms"]) / 1000)),
             "AutoSaveDebounceMs": int(row.autosave_debounce_ms or FRONTEND_TIMER_PROFILE["autosave_debounce_ms"]),
             "AutoSaveIntervalMs": int(row.autosave_interval_ms or FRONTEND_TIMER_PROFILE["autosave_interval_ms"]),
-            "LockRefreshCooldownMs": int(row.lock_refresh_cooldown_ms or FRONTEND_TIMER_PROFILE["lock_refresh_cooldown_ms"]),
+            "LockRefreshCooldownMs": int(
+                row.lock_refresh_cooldown_ms or FRONTEND_TIMER_PROFILE["lock_refresh_cooldown_ms"]
+            ),
             "GcdIntervalMs": int(row.gcd_ms or FRONTEND_TIMER_PROFILE["gcd_ms"]),
             "NetworkGraceMs": int(row.network_grace_ms or FRONTEND_TIMER_PROFILE["network_grace_ms"]),
             "AnalyticsRefreshMs": int(row.analytics_refresh_ms or FRONTEND_TIMER_PROFILE["analytics_refresh_ms"]),

@@ -20,31 +20,31 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
-# Environment
-.env
-.env.local
-.env.*
-.venv/
-venv/
-ENV/
+# Database
+*.db
+gateway.db
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
+# Coverage
+.coverage
+.coverage.*
+
+# Uploads/temporary files
+uploads/
 
 # Logs
 *.log
 
-# Coverage
-.coverage
-coverage/
-htmlcov/
+# Environment
+.env
+.env.local
+*.env
 
-# Testing
-.pytest_cache/
-.mypy_cache/
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
 ```

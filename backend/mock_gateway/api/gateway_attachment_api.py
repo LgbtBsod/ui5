@@ -1,4 +1,5 @@
 """AttachmentFolderSet / AttachmentSet routes."""
+
 import json
 from pathlib import Path
 
@@ -6,17 +7,23 @@ from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
+from api.gateway_core import (
+    _boundary_parent_key,
+    _boundary_root_key,
+    _entity_key,
+    _entity_metadata,
+    _err,
+    _load_root_or_error,
+    _reject_expand,
+    _require_permission,
+)
+from api.gateway_operations import _apply_save_attachments, _hex, _media_upload_payload
+from api.gateway_serializers import _attachment_matches_filter, _decode_slug, _to_attachment
 from database import get_db
 from models import AttachmentEntry, ChecklistRoot
 from utils.odata import SERVICE_ROOT, format_datetime, odata_payload
 from utils.odata_response import odata_entity
 from utils.time import now_utc
-from api.gateway_operations import _apply_save_attachments, _hex, _media_upload_payload
-from api.gateway_core import (
-    _err, _reject_expand, _entity_key, _boundary_root_key, _boundary_parent_key,
-    _entity_metadata, _load_root_or_error, _require_permission,
-)
-from api.gateway_serializers import _decode_slug, _attachment_matches_filter, _to_attachment
 
 router = APIRouter(tags=["GatewayCanonical"])
 
@@ -25,32 +32,42 @@ router = APIRouter(tags=["GatewayCanonical"])
 def attachment_folder_set(filter: str | None = Query(None, alias="$filter"), db: Session = Depends(get_db)):
     folder_keys = set()
     rows = []
-    for entry in db.query(AttachmentEntry).order_by(asc(AttachmentEntry.folder_key), asc(AttachmentEntry.changed_on)).all():
+    for entry in (
+        db.query(AttachmentEntry).order_by(asc(AttachmentEntry.folder_key), asc(AttachmentEntry.changed_on)).all()
+    ):
         if not str(entry.folder_key or "").strip() or entry.folder_key in folder_keys:
             continue
         if not _attachment_matches_filter(entry, filter):
             continue
         folder_keys.add(entry.folder_key)
         folder_key_str = str(entry.folder_key)
-        rows.append({
-            "__metadata": _entity_metadata("AttachmentFolder", "AttachmentFolderSet", folder_key_str),
-            "FolderKey": folder_key_str,
-            "DB_KEY": _hex(entry.root_id),
-            "Title": folder_key_str,
-            "CreatedOn": format_datetime(entry.created_on),
-            "ChangedOn": format_datetime(entry.changed_on),
-        })
+        rows.append(
+            {
+                "__metadata": _entity_metadata("AttachmentFolder", "AttachmentFolderSet", folder_key_str),
+                "FolderKey": folder_key_str,
+                "DB_KEY": _hex(entry.root_id),
+                "Title": folder_key_str,
+                "CreatedOn": format_datetime(entry.created_on),
+                "ChangedOn": format_datetime(entry.changed_on),
+            }
+        )
     folders = rows
     return odata_payload(folders)
 
 
 @router.get(f"{SERVICE_ROOT}/AttachmentSet")
-def attachment_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), db: Session = Depends(get_db)):
-    if (err := _reject_expand(expand)):
+def attachment_set(
+    filter: str | None = Query(None, alias="$filter"),
+    expand: str | None = Query(None, alias="$expand"),
+    db: Session = Depends(get_db),
+):
+    if err := _reject_expand(expand):
         return err
     rows = [
         _to_attachment(entry, db=db)
-        for entry in db.query(AttachmentEntry).order_by(desc(AttachmentEntry.changed_on), desc(AttachmentEntry.created_on)).all()
+        for entry in db.query(AttachmentEntry)
+        .order_by(desc(AttachmentEntry.changed_on), desc(AttachmentEntry.created_on))
+        .all()
         if _attachment_matches_filter(entry, filter)
     ]
     return odata_payload(rows)
@@ -87,7 +104,7 @@ async def attachment_create(
     file_name: str | None = Header(None, alias="X-File-Name"),
     slug: str | None = Header(None, alias="Slug"),
     content_type: str | None = Header(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     body = {}
     raw_body = await request.body()
@@ -101,11 +118,13 @@ async def attachment_create(
     if raw_body:
         body = _media_upload_payload(
             db_key=_boundary_root_key({"DB_KEY": db_key}, db_key),
-            parent_key=_boundary_parent_key({"PARENT_KEY": parent_key}, parent_key) or _boundary_root_key({"DB_KEY": db_key}, db_key),
+            parent_key=_boundary_parent_key({"PARENT_KEY": parent_key}, parent_key)
+            or _boundary_root_key({"DB_KEY": db_key}, db_key),
             folder_key=str(folder_key or "").strip(),
             category_key=str(category_key or "").strip() or "GEN",
             file_name=_decode_slug(slug) or str(file_name or "").strip() or "attachment",
-            mime_type=str(content_type or "application/octet-stream").split(";", 1)[0].strip() or "application/octet-stream",
+            mime_type=str(content_type or "application/octet-stream").split(";", 1)[0].strip()
+            or "application/octet-stream",
             description=str(description or "").strip(),
             body=raw_body,
             attachment_key=str(attachment_key or "").strip(),
@@ -114,14 +133,16 @@ async def attachment_create(
     root, err = _load_root_or_error(db, _boundary_root_key(body, body.get("PARENT_KEY")))
     if err:
         return err
-    if (err := _require_permission(db, request, root, "edit")):
+    if err := _require_permission(db, request, root, "edit"):
         return err
     try:
         _apply_save_attachments(db, root, [body], allow_media_content=True)
     except ValueError as ex:
         db.rollback()
         if str(ex) == "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN":
-            return _err(400, "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN", "Attachment upload must use media stream endpoint")
+            return _err(
+                400, "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN", "Attachment upload must use media stream endpoint"
+            )
         return _err(400, "INVALID_ATTACHMENT_PAYLOAD", "Attachment payload is invalid")
     except RuntimeError as ex:
         db.rollback()
@@ -129,7 +150,12 @@ async def attachment_create(
     root.changed_on = now_utc()
     root.version_number = int(root.version_number or 0) + 1
     db.commit()
-    entry = db.query(AttachmentEntry).filter(AttachmentEntry.root_id == root.id).order_by(desc(AttachmentEntry.created_on), desc(AttachmentEntry.changed_on)).first()
+    entry = (
+        db.query(AttachmentEntry)
+        .filter(AttachmentEntry.root_id == root.id)
+        .order_by(desc(AttachmentEntry.created_on), desc(AttachmentEntry.changed_on))
+        .first()
+    )
     return odata_entity(_to_attachment(entry, db=db))
 
 

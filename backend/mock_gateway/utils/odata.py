@@ -57,7 +57,9 @@ def build_odata_error_payload(code: str, message: str, details: list[dict[str, s
     }
 
 
-def odata_error_response(status_code: int, code: str, message: str, details: list[dict[str, str]] | None = None) -> JSONResponse:
+def odata_error_response(
+    status_code: int, code: str, message: str, details: list[dict[str, str]] | None = None
+) -> JSONResponse:
     return JSONResponse(
         status_code=status_code,
         content=build_odata_error_payload(code=code, message=message, details=details),

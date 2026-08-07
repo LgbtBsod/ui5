@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from services.current_user_service import CurrentUserService
 from models import ChecklistRoot
+from services.current_user_service import CurrentUserService
 
 AUTH_OBJECT_CHECKLIST = "Z_UI5_CHKL"
 OPERATION_CREATE = "01"
@@ -67,14 +67,12 @@ def _permissions_from_profile(db, root: ChecklistRoot, user_id: str) -> tuple[bo
         for item in permissions
         if _permission_matches_scope(root, item or {})
     }
-    return (
-        "03" in permission_codes,
-        "02" in permission_codes,
-        "06" in permission_codes
-    )
+    return ("03" in permission_codes, "02" in permission_codes, "06" in permission_codes)
 
 
-def _permission_payload(root: ChecklistRoot, user_id: str, can_view: bool, can_edit: bool, can_delete: bool, reason_code: str, message: str) -> dict:
+def _permission_payload(
+    root: ChecklistRoot, user_id: str, can_view: bool, can_edit: bool, can_delete: bool, reason_code: str, message: str
+) -> dict:
     return {
         "root_id": str(root.id or ""),
         "user_id": user_id,

@@ -1,6 +1,8 @@
 """Boundary key resolution and OData entity-serialization base helpers."""
-from typing import Any, Dict
+
 import re
+from typing import Any, Dict
+
 from utils.key_normalizer import hex_to_storage_key
 
 # "Not applicable" sentinel for the ActiveUUID/DraftUUID compound key (see
@@ -68,7 +70,12 @@ class BoundaryResolver:
     def resolve_parent_key(payload: Dict | None = None, *candidates: str) -> str:
         """Find parent entity key from payload with fallback candidates."""
         if payload and isinstance(payload, dict):
-            for candidate in [*candidates, payload.get("PARENT_KEY"), payload.get("parent_key"), payload.get("ParentKey")]:
+            for candidate in [
+                *candidates,
+                payload.get("PARENT_KEY"),
+                payload.get("parent_key"),
+                payload.get("ParentKey"),
+            ]:
                 if candidate:
                     raw = str(candidate).strip()
                     if raw:
@@ -84,6 +91,7 @@ class ODataSerializer:
     def build_metadata(entity_type: str, entity_set: str, key_value: str) -> dict:
         """Build OData __metadata structure (reusable for all entity types)."""
         from utils.odata import ODATA_NS, SERVICE_ROOT
+
         safe_key = str(key_value or "").replace("'", "''")
         return {
             "type": f"{ODATA_NS}.{entity_type}",

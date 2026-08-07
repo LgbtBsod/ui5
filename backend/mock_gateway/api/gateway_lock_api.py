@@ -1,9 +1,25 @@
 """LastChangeSet / LockStatusSet / lock_control (LockAcquire/Heartbeat/Release) routes."""
+
 import json
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy.orm import Session
 
+from api.gateway_core import (
+    _agg_changed_on,
+    _apply_order_filter,
+    _build_lock_status_row,
+    _entity_key,
+    _entity_metadata,
+    _err,
+    _load_root_or_error,
+    _lock_import_payload,
+    _merge_query_and_payload,
+    _normalize_root_filter_aliases,
+    _require_permission,
+    _resolve_lock_root_id,
+)
+from api.gateway_operations import _hex
 from config import DEFAULT_PAGE_SIZE
 from database import get_db
 from models import ChecklistRoot
@@ -11,13 +27,6 @@ from services.current_user_service import CurrentUserService
 from services.lock_service import LockService
 from utils.odata import SERVICE_ROOT, format_datetime, format_entity_etag, odata_payload
 from utils.odata_response import odata_entity
-from api.gateway_operations import _hex
-from api.gateway_core import (
-    _err, _entity_key, _entity_metadata, _agg_changed_on, _build_lock_status_row,
-    _apply_order_filter, _load_root_or_error, _require_permission,
-    _resolve_lock_root_id, _normalize_root_filter_aliases, _merge_query_and_payload,
-    _lock_import_payload,
-)
 
 router = APIRouter(tags=["GatewayCanonical"])
 
@@ -30,11 +39,13 @@ def last_change_entity(entity_key: str, response: Response, db: Session = Depend
     agg = _agg_changed_on(root)
     root_key_hex = _hex(root.id)
     response.headers["ETag"] = format_entity_etag(agg, root.version_number)
-    return odata_entity({
-        "__metadata": _entity_metadata("LastChange", "LastChangeSet", root_key_hex),
-        "DB_KEY": root_key_hex,
-        "AggChangedOn": format_datetime(agg)
-    })
+    return odata_entity(
+        {
+            "__metadata": _entity_metadata("LastChange", "LastChangeSet", root_key_hex),
+            "DB_KEY": root_key_hex,
+            "AggChangedOn": format_datetime(agg),
+        }
+    )
 
 
 @router.get(f"{SERVICE_ROOT}/LastChangeSet")
@@ -46,21 +57,24 @@ def last_change_set(
     inlinecount: str | None = Query(None, alias="$inlinecount"),
     db: Session = Depends(get_db),
 ):
-    filter = _normalize_root_filter_aliases(filter)
+    filter_expr = _normalize_root_filter_aliases(filter)
     rows, total = _apply_order_filter(
         db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)),
         ChecklistRoot,
         {"DB_KEY": "id"},
-        filter,
+        filter_expr,
         orderby,
         top,
         skip,
     )
-    payload = [{
-        "__metadata": _entity_metadata("LastChange", "LastChangeSet", _hex(r.id)),
-        "DB_KEY": _hex(r.id),
-        "AggChangedOn": format_datetime(_agg_changed_on(r))
-    } for r in rows]
+    payload = [
+        {
+            "__metadata": _entity_metadata("LastChange", "LastChangeSet", _hex(r.id)),
+            "DB_KEY": _hex(r.id),
+            "AggChangedOn": format_datetime(_agg_changed_on(r)),
+        }
+        for r in rows
+    ]
     return odata_payload(payload, total if inlinecount == "allpages" else None)
 
 
@@ -74,12 +88,12 @@ def lock_status_set(
     session_guid: str = Query("", alias="SessionGuid"),
     db: Session = Depends(get_db),
 ):
-    filter = _normalize_root_filter_aliases(filter)
+    filter_expr = _normalize_root_filter_aliases(filter)
     rows, total = _apply_order_filter(
         db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)),
         ChecklistRoot,
         {"DB_KEY": "id"},
-        filter,
+        filter_expr,
         orderby,
         top,
         skip,
@@ -89,7 +103,9 @@ def lock_status_set(
 
 
 @router.get(f"{SERVICE_ROOT}/LockStatusSet({{entity_key}})")
-def lock_status_entity(entity_key: str, session_guid: str = Query("", alias="SessionGuid"), db: Session = Depends(get_db)):
+def lock_status_entity(
+    entity_key: str, session_guid: str = Query("", alias="SessionGuid"), db: Session = Depends(get_db)
+):
     return odata_entity(_build_lock_status_row(db, _entity_key(entity_key), session_guid=session_guid))
 
 
@@ -100,20 +116,32 @@ def lock_control(payload: dict, db: Session):
     uname = CurrentUserService.resolve_uname(db=db)
     if not root_key:
         return _err(400, "VALIDATION_ERROR", "DB_KEY is required")
-    def _lock_entity(ok: bool, reason: str, expires_at, is_killed: bool, action_name: str, owner: str = "", owner_session: str = "", code: str = ""):
+
+    def _lock_entity(
+        ok: bool,
+        reason: str,
+        expires_at,
+        is_killed: bool,
+        action_name: str,
+        owner: str = "",
+        owner_session: str = "",
+        code: str = "",
+    ):
         lock_exp = format_datetime(expires_at)
-        return odata_entity({
-            "Success": ok,
-            "Ok": ok,
-            "Code": str(code or reason or "").strip(),
-            "LockExpires": lock_exp,
-            "ExpiresOn": lock_exp,
-            "IsKilled": is_killed,
-            "ReasonCode": reason,
-            "Action": action_name,
-            "Owner": owner,
-            "OwnerSession": owner_session,
-        })
+        return odata_entity(
+            {
+                "Success": ok,
+                "Ok": ok,
+                "Code": str(code or reason or "").strip(),
+                "LockExpires": lock_exp,
+                "ExpiresOn": lock_exp,
+                "IsKilled": is_killed,
+                "ReasonCode": reason,
+                "Action": action_name,
+                "Owner": owner,
+                "OwnerSession": owner_session,
+            }
+        )
 
     if root_key == "__CREATE":
         if action == "HEARTBEAT":
@@ -124,7 +152,9 @@ def lock_control(payload: dict, db: Session):
             return _lock_entity(True, "OWNED_BY_YOU", None, False, "ACQUIRED", uname, session, "LOCK_OK")
 
     root_uuid = _entity_key(root_key)
-    root_exists = db.query(ChecklistRoot).filter(ChecklistRoot.id == root_uuid, ChecklistRoot.is_deleted.isnot(True)).first()
+    root_exists = (
+        db.query(ChecklistRoot).filter(ChecklistRoot.id == root_uuid, ChecklistRoot.is_deleted.isnot(True)).first()
+    )
     if not root_exists:
         if action == "RELEASE":
             return _lock_entity(True, "FREE", None, False, "RELEASED", code="LOCK_OK")
@@ -134,12 +164,7 @@ def lock_control(payload: dict, db: Session):
 
     if action == "ACQUIRE":
         r = LockService.acquire(
-            db,
-            root_uuid,
-            session,
-            uname,
-            payload.get("StealFrom"),
-            force_takeover=bool(payload.get("ForceTakeover"))
+            db, root_uuid, session, uname, payload.get("StealFrom"), force_takeover=bool(payload.get("ForceTakeover"))
         )
         ok = bool(r.get("success"))
         return _lock_entity(
@@ -171,11 +196,11 @@ def lock_control(payload: dict, db: Session):
             if code == "LOCK_MISSING":
                 return _lock_entity(False, "FREE", None, False, "FREE", code="LOCK_MISSING")
             if code == "LOCK_NOT_OWNED_BY_SESSION":
-                active_lock = LockService._active_lock(db, root_uuid)
+                active_lock = LockService.active_lock(db, root_uuid)
                 return _lock_entity(
                     False,
                     "LOCKED_BY_OTHER",
-                    LockService._lock_expires_at(active_lock),
+                    LockService.lock_expires_at(active_lock),
                     False,
                     "FAILED",
                     str(active_lock.user_id or "") if active_lock else "",
@@ -200,7 +225,13 @@ def lock_control(payload: dict, db: Session):
 
 
 @router.post(f"{SERVICE_ROOT}/LockAcquire")
-async def lock_acquire_function_import(request: Request, root_id: str | None = Query(None, alias="DB_KEY"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
+async def lock_acquire_function_import(
+    request: Request,
+    root_id: str | None = Query(None, alias="DB_KEY"),
+    session_guid: str | None = Query(None, alias="SessionGuid"),
+    payload: dict | None = None,
+    db: Session = Depends(get_db),
+):
     body = payload or {}
     if not body:
         try:
@@ -224,7 +255,13 @@ async def lock_acquire_function_import(request: Request, root_id: str | None = Q
 
 
 @router.post(f"{SERVICE_ROOT}/LockHeartbeat")
-async def lock_heartbeat_function_import(request: Request, root_id: str | None = Query(None, alias="DB_KEY"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
+async def lock_heartbeat_function_import(
+    request: Request,
+    root_id: str | None = Query(None, alias="DB_KEY"),
+    session_guid: str | None = Query(None, alias="SessionGuid"),
+    payload: dict | None = None,
+    db: Session = Depends(get_db),
+):
     body = payload or {}
     if not body:
         try:
@@ -240,7 +277,13 @@ async def lock_heartbeat_function_import(request: Request, root_id: str | None =
 
 
 @router.post(f"{SERVICE_ROOT}/LockRelease")
-async def lock_release_function_import(request: Request, root_id: str | None = Query(None, alias="DB_KEY"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
+async def lock_release_function_import(
+    request: Request,
+    root_id: str | None = Query(None, alias="DB_KEY"),
+    session_guid: str | None = Query(None, alias="SessionGuid"),
+    payload: dict | None = None,
+    db: Session = Depends(get_db),
+):
     body = payload or {}
     if not body:
         try:

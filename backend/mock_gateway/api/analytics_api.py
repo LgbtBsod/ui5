@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from database import get_db
-from services.analytics_service import AnalyticsService, TASK_KEY_ANALYTICS_REFRESH
+from services.analytics_service import TASK_KEY_ANALYTICS_REFRESH, AnalyticsService
 from utils.odata import ODATA_NS, SERVICE_ROOT, format_datetime, odata_error_response, odata_payload
 from utils.odata_response import odata_entity
 
@@ -136,7 +136,12 @@ def simple_analytical(year: int | None = None, source: str | None = None, db: Se
 
 
 @router.get(f"{SERVICE_ROOT}/SimpleAnalyticalSet")
-def simple_analytical_set(year: int | None = None, source: str | None = None, filter_expr: str | None = Query(None, alias="$filter"), db: Session = Depends(get_db)):
+def simple_analytical_set(
+    year: int | None = None,
+    source: str | None = None,
+    filter_expr: str | None = Query(None, alias="$filter"),
+    db: Session = Depends(get_db),
+):
     iFilterYear, sFilterSource = _parse_breakdown_filter(filter_expr)
     year = iFilterYear if iFilterYear is not None else year
     source = sFilterSource if sFilterSource is not None else source
@@ -145,7 +150,9 @@ def simple_analytical_set(year: int | None = None, source: str | None = None, fi
 
 
 @router.get(f"{SERVICE_ROOT}/WorkflowAnalyticsBreakdownSet")
-def workflow_analytics_breakdown_set(filter_expr: str | None = Query(None, alias="$filter"), db: Session = Depends(get_db)):
+def workflow_analytics_breakdown_set(
+    filter_expr: str | None = Query(None, alias="$filter"), db: Session = Depends(get_db)
+):
     iYear, sSource = _parse_breakdown_filter(filter_expr)
     if not str(filter_expr or "").strip():
         return odata_error_response(400, "VALIDATION_ERROR", "WorkflowAnalyticsBreakdownSet requires $filter")
@@ -169,7 +176,7 @@ def analytics_refresh_state_entity(task_key: str, db: Session = Depends(get_db))
 def analytics_refresh_trigger(
     task_key: str | None = Query(None, alias="TaskKey"),
     requested_by: str | None = Query(None, alias="RequestedBy"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     payload = AnalyticsService.request_refresh(db, requested_by=requested_by, task_key=task_key)
     logger.info("Analytics refresh requested task=%s status=%s", payload.get("taskKey"), payload.get("status"))

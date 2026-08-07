@@ -33,6 +33,7 @@ if engine.dialect.name == "sqlite":
     def _sqlite_emit_explicit_begin(conn):
         conn.exec_driver_sql("BEGIN")
 
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

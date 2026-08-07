@@ -5,8 +5,7 @@ from sqlalchemy.orm import Session
 class HierarchyService:
     @staticmethod
     def get_tree(db: Session, check_date):
-        sql = text(
-            """
+        sql = text("""
             WITH RECURSIVE tree AS (
                 SELECT l.node_id, l.parent_id, l.location_name, 0 AS hierarchy_level
                 FROM locations l
@@ -22,8 +21,7 @@ class HierarchyService:
             )
             SELECT ROW_NUMBER() OVER () as hierarchy_rank, node_id, parent_id, location_name, hierarchy_level
             FROM tree
-            """
-        )
+            """)
         rows = db.execute(sql, {"check_date": check_date}).fetchall()
         child_parent_ids = {row.parent_id for row in rows if row.parent_id is not None}
         return [

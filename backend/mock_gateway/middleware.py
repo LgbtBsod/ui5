@@ -1,6 +1,8 @@
 import json
 import logging
+
 from fastapi import Request, Response
+
 from utils.odata import SERVICE_ROOT, odata_error_response
 from utils.sap_message import build_sap_message
 
@@ -37,7 +39,9 @@ def _format_batch_operations_for_log(s_body: str, s_content_type: str) -> list[s
     return lines if lines else [f"($batch with {len(s_body)} bytes)"]
 
 
-def _build_request_log_lines(request: Request, b_content_forced: bool, s_body_text: str | None, s_effective_method: str) -> list[str]:
+def _build_request_log_lines(
+    request: Request, b_content_forced: bool, s_body_text: str | None, s_effective_method: str
+) -> list[str]:
     lines = [f"REQ {s_effective_method} {request.url.path}"]
     if b_content_forced and s_body_text:
         s_content_type = str(request.headers.get("content-type") or "").lower()
@@ -49,6 +53,7 @@ def _build_request_log_lines(request: Request, b_content_forced: bool, s_body_te
 
 async def setup_csrf_middleware(app, csrf_store):
     """Register CSRF validation/issuance middleware."""
+
     @app.middleware("http")
     async def odata_csrf_middleware(request: Request, call_next):
         path = request.url.path
@@ -87,6 +92,7 @@ async def setup_csrf_middleware(app, csrf_store):
 
 async def setup_odata_headers_middleware(app):
     """Register OData v2 response headers middleware."""
+
     @app.middleware("http")
     async def odata_response_headers_middleware(request: Request, call_next):
         response = await call_next(request)
@@ -107,12 +113,15 @@ async def setup_odata_headers_middleware(app):
                     payload = {}
                 data = payload.get("d") if isinstance(payload, dict) else None
                 if isinstance(data, dict) and data.get("Message"):
-                    response.headers["sap-message"] = build_sap_message(data.get("Message"), "success", code=str(data.get("ReasonCode") or ""))
+                    response.headers["sap-message"] = build_sap_message(
+                        data.get("Message"), "success", code=str(data.get("ReasonCode") or "")
+                    )
         return response
 
 
 async def setup_logging_middleware(app, log_request_bodies: bool):
     """Register request/response logging middleware."""
+
     @app.middleware("http")
     async def request_response_logging(request: Request, call_next):
         s_effective_method = _resolve_effective_method(request)
@@ -139,6 +148,7 @@ async def setup_logging_middleware(app, log_request_bodies: bool):
 
 async def setup_error_envelope_middleware(app):
     """Register OData error envelope middleware."""
+
     @app.middleware("http")
     async def odata_error_envelope_middleware(request: Request, call_next):
         path = request.url.path
@@ -182,9 +192,10 @@ async def setup_error_envelope_middleware(app):
 
 def setup_rate_limit_middleware(app) -> None:
     """Configure per-IP rate limiting (DDoS protection complement to CSRF)."""
-    from utils.rate_limiter import RateLimiter, extract_client_ip
     from fastapi import Response
-    from config import RATE_LIMIT_REQUESTS_PER_WINDOW, RATE_LIMIT_WINDOW_SECONDS, RATE_LIMIT_TRUSTED_PROXIES
+
+    from config import RATE_LIMIT_REQUESTS_PER_WINDOW, RATE_LIMIT_TRUSTED_PROXIES, RATE_LIMIT_WINDOW_SECONDS
+    from utils.rate_limiter import RateLimiter, extract_client_ip
 
     limiter = RateLimiter(requests_per_window=RATE_LIMIT_REQUESTS_PER_WINDOW, window_seconds=RATE_LIMIT_WINDOW_SECONDS)
     app.state.rate_limiter = limiter

@@ -3,24 +3,41 @@ session-lock flow in services/lock_service.py). Mirrors redux/serve.py's
 _draft_prepare/_draft_activate/_draft_discard semantics, adapted to this codebase's
 SQLAlchemy/hex32-key conventions - see api/gateway_draft_api.py for the thin route layer
 that calls into this module."""
+
 import uuid
 
 from sqlalchemy.orm import Session
 
-from api.gateway_helpers import BoundaryResolver, HEX_ZERO_GUID
+from api.gateway_helpers import HEX_ZERO_GUID, BoundaryResolver
 from models import ChecklistRoot, ChecklistRootDraft
 from services.analytics_service import AnalyticsService
 from services.current_user_service import CurrentUserService
 from utils.time import now_utc
 
 _MIRRORED_COLUMNS = (
-    "checklist_id", "lpc", "status", "integration_flag",
-    "date", "time_check", "time_zone", "equipment", "bukrs", "lpc_text",
-    "observer_fullname", "observer_perner", "observer_position", "observer_orgunit",
+    "checklist_id",
+    "lpc",
+    "status",
+    "integration_flag",
+    "date",
+    "time_check",
+    "time_zone",
+    "equipment",
+    "bukrs",
+    "lpc_text",
+    "observer_fullname",
+    "observer_perner",
+    "observer_position",
+    "observer_orgunit",
     "observer_integration_name",
-    "observed_fullname", "observed_perner", "observed_position", "observed_orgunit",
+    "observed_fullname",
+    "observed_perner",
+    "observed_position",
+    "observed_orgunit",
     "observed_integration_name",
-    "location_key", "location_name", "location_text",
+    "location_key",
+    "location_name",
+    "location_text",
 )
 
 
@@ -51,10 +68,14 @@ class DraftService:
             db.commit()
             return draft
 
-        active = db.query(ChecklistRoot).filter(
-            ChecklistRoot.id == resolved,
-            ChecklistRoot.is_deleted.isnot(True),
-        ).first()
+        active = (
+            db.query(ChecklistRoot)
+            .filter(
+                ChecklistRoot.id == resolved,
+                ChecklistRoot.is_deleted.isnot(True),
+            )
+            .first()
+        )
         if not active:
             return None
 
