@@ -7,22 +7,33 @@ the result; resolvers itself never imports this module, breaking what would
 otherwise be an import cycle between "mutate a draft" and "read a draft's
 admin data").
 """
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Tuple
+
 from . import config
 from . import state
 from . import odata_format
 from . import resolvers
 
 
-def _missing_required_fields(merged_view):
-    """merged_view: any dict exposing the required fields directly (either
-    the merged compute_check_root_view() output, or a root_fields/to_basic
-    pair pre-merged by the caller). Returns a list of (field_name, label)
-    tuples for every missing field, empty if nothing's missing.
-
-    [Fix] Used to return just the label strings - fine for a single combined
-    MessageBox text, but not enough to build per-field `target`-bound
-    messages (see dispatch.py's VALIDATION_ERROR response, which needs the
-    actual property NAME to underline the right SmartField red)."""
+def _missing_required_fields(merged_view: Dict[str, Any]) -> List[Tuple[str, str]]:
+    """Find missing required fields in merged view.
+    
+    Args:
+        merged_view: Dict exposing required fields directly (either the merged
+            compute_check_root_view() output, or a root_fields/to_basic pair
+            pre-merged by the caller)
+    
+    Returns:
+        List of (field_name, label) tuples for every missing field
+    
+    Note:
+        Used to return just the label strings - fine for a single combined
+        MessageBox text, but not enough to build per-field `target`-bound
+        messages (see dispatch.py's VALIDATION_ERROR response, which needs the
+        actual property NAME to underline the right SmartField red).
+    """
     missing = []
     for field, label in config.REQUIRED_ROOT_FIELDS.items():
         val = merged_view.get(field)
@@ -35,16 +46,30 @@ def _missing_required_fields(merged_view):
     return missing
 
 
-def _missing_required_child_fields(root_id, instance_tag):
-    """[Fix, exhaustive-sweep pass] Returns a list of {"nav", "id_prop",
-    "item_id", "field", "label"} dicts, one per tagged CheckItem/Barrier row
-    (instance_tag = the activating draft's own DraftUUID, or ZERO_GUID for
-    the active tree) whose Result is still None (never assessed). Separate
-    from _missing_required_fields (root-only, bare-field targets) because
-    each entry here needs enough to build a NAV-QUALIFIED errordetails[]
-    target (see dispatch.py's VALIDATION_ERROR branch) - a bare "Result"
-    target would ambiguously point at every child row at once instead of
-    the one that's actually incomplete."""
+def _missing_required_child_fields(
+    root_id: str,
+    instance_tag: str
+) -> List[Dict[str, str]]:
+    """Find missing required child fields.
+    
+    Args:
+        root_id: Parent root identifier
+        instance_tag: Draft UUID (or ZERO_GUID for active tree)
+    
+    Returns:
+        List of dicts with keys: nav, id_prop, item_id, field, label
+    
+    Note:
+        [Fix, exhaustive-sweep pass] Returns a list of {"nav", "id_prop",
+        "item_id", "field", "label"} dicts, one per tagged CheckItem/Barrier row
+        (instance_tag = the activating draft's own DraftUUID, or ZERO_GUID for
+        the active tree) whose Result is still None (never assessed). Separate
+        from _missing_required_fields (root-only, bare-field targets) because
+        each entry here needs enough to build a NAV-QUALIFIED errordetails[]
+        target (see dispatch.py's VALIDATION_ERROR branch) - a bare "Result"
+        target would ambiguously point at every child row at once instead of
+        the one that's actually incomplete.
+    """
     missing = []
     for (rid, item_id), row in state.store["CheckItems"].items():
         if rid == root_id and row.get("DraftUUID", config.ZERO_GUID) == instance_tag and row.get(config.REQUIRED_CHILD_FIELD) is None:
