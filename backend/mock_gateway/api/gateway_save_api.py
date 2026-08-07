@@ -1,12 +1,51 @@
 """AutoSave / CreateChecklist / CopyChecklist / SaveChanges / SetChecklistStatus /
-GetHierarchy / ReportExport routes."""
+GetHierarchy / ReportExport routes.
+
+Refactored to use SaveService and ReportExportService for business logic (SRP compliance).
+"""
+
 import json
 import uuid
 from datetime import datetime, timezone
+from typing import Any
 
 from fastapi import APIRouter, Depends, Header, Query, Request, Response
 from sqlalchemy.orm import Session
 
+from api.gateway_core import (
+    _agg_changed_on,
+    _boundary_root_key,
+    _entity_key,
+    _err,
+    _if_match_check,
+    _load_root_or_error,
+    _merge_query_and_payload,
+    _optimistic_check,
+    _parse_odata_datetime,
+    _require_create_permission,
+    _require_permission,
+    _validate_status_change,
+)
+from api.gateway_detail_kind import _BARRIER_KIND, _CHECK_KIND
+from api.gateway_mutations import (
+    _apply_save_detail_rows,
+    _apply_save_root,
+    _save_request_root,
+    _save_request_root_key,
+    _save_request_session,
+)
+from api.gateway_operations import _apply_save_attachments, _hex, _normalize_hex_key, _replace_detail_rows
+from api.gateway_root_api import _build_new_root
+from api.gateway_serializers import (
+    _normalize_export_limit,
+    _normalize_export_search_contract,
+    _search_contract_matches,
+    _to_barrier,
+    _to_check,
+    _to_root,
+    _to_search,
+)
+from api.gateway_validators import _normalize_basic_payload, _normalize_status_input, _pick_text, _status_external
 from config import LOCK_TTL
 from database import get_db
 from models import ChecklistRoot, DictionaryItem
@@ -15,82 +54,70 @@ from services.checklist_service import ChecklistService
 from services.current_user_service import CurrentUserService
 from services.hierarchy_service import HierarchyService
 from services.lock_service import LockService
+from services.report_export_service import ReportExportService
+from services.save_service import SaveResult, SaveService
 from utils.odata import SERVICE_ROOT, format_datetime
 from utils.odata_response import odata_collection, odata_entity
-from utils.time import now_utc
 from utils.sap_message import build_sap_message
-from api.gateway_operations import _apply_save_attachments, _replace_detail_rows, _hex, _normalize_hex_key
-from api.gateway_validators import _pick_text, _status_external, _normalize_basic_payload, _normalize_status_input
-from api.gateway_root_api import _build_new_root
-from api.gateway_core import (
-    _err, _boundary_root_key, _agg_changed_on, _parse_odata_datetime, _if_match_check,
-    _optimistic_check, _load_root_or_error, _require_permission, _require_create_permission,
-    _validate_status_change, _merge_query_and_payload, _entity_key,
-)
-from api.gateway_detail_kind import _CHECK_KIND, _BARRIER_KIND
-from api.gateway_serializers import (
-    _normalize_export_limit, _normalize_export_search_contract, _search_contract_matches,
-    _to_search, _to_root, _to_check, _to_barrier,
-)
-from api.gateway_mutations import (
-    _save_request_root, _save_request_root_key, _save_request_session,
-    _apply_save_root, _apply_save_detail_rows,
-)
+from utils.time import now_utc
 
 router = APIRouter(tags=["GatewayCanonical"])
 
 
 @router.post(f"{SERVICE_ROOT}/AutoSave")
-def auto_save(payload: dict, response: Response, request: Request, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
+def auto_save(
+    payload: dict,
+    response: Response,
+    request: Request,
+    if_match: str | None = Header(None, alias="If-Match"),
+    db: Session = Depends(get_db),
+):
+    """Handle AutoSave operation for checklist.
+
+    Uses SaveService for business logic (SRP, DIP compliance).
+
+    Args:
+        payload: Request payload containing checklist data
+        response: FastAPI response object
+        request: FastAPI request object
+        if_match: ETag for optimistic concurrency
+        db: Database session
+
+    Returns:
+        JSONResponse with save confirmation and lock status
+    """
     body = payload.get("Payload") if isinstance(payload.get("Payload"), dict) else payload
     root, err = _load_root_or_error(db, _save_request_root_key(payload))
     if err:
         return err
-    if (err := _require_permission(db, request, root, "edit")):
+    if err := _require_permission(db, request, root, "edit"):
         return err
     session_guid = _save_request_session(payload)
     if not session_guid:
         return _err(400, "VALIDATION_ERROR", "SessionGuid is required")
-    try:
-        LockService.validate_session_lock(db, root.id, session_guid)
-    except ValueError as ex:
-        if str(ex) in {"LOCK_MISSING", "LOCK_NOT_OWNED_BY_SESSION"}:
-            return _err(409, str(ex), "Active lock for session is required")
-        return _err(409, "LOCK_EXPIRED", "Lock expired")
 
-    _apply_save_root(root, _save_request_root(payload), db)
-    _apply_save_detail_rows(db, root, body.get("checks"), _CHECK_KIND)
-    _apply_save_detail_rows(db, root, body.get("barriers"), _BARRIER_KIND)
-    active_lock = LockService._active_lock(db, root.id)
-    lock_refreshed_at = now_utc()
-    if active_lock and str(active_lock.session_guid or "").strip() == str(session_guid or "").strip():
-        active_lock.last_refresh_at = lock_refreshed_at
-        active_lock.expires_at = lock_refreshed_at + LOCK_TTL
-    root.changed_by = CurrentUserService.resolve_uname(db=db) or root.changed_by or "ANON"
-    root.changed_on = now_utc()
-    root.version_number = int(root.version_number or 0) + 1
-    db.commit()
-    AnalyticsService.mark_dirty()
-    root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
-    active_lock = LockService._active_lock(db, root.id)
-    request_id = str(uuid.uuid4())
-    response.headers["sap-message"] = build_sap_message("Autosave completed", "success", code="SAVED")
-    return odata_entity({
-        "db_key": _hex(root.id),
-        "changed_on": format_datetime(root.changed_on),
-        "version_number": int(root.version_number or 0),
-        "code": "LOCK_OK",
-        "reason_code": "SAVED",
-        "lock_refreshed": True,
-        "lock_expires_at": format_datetime(LockService._lock_expires_at(active_lock)) if active_lock else "",
-        "server_now": format_datetime(now_utc()),
-        "request_id": request_id
-    })
+    # Use SaveService for lock validation (DIP, SRP)
+    lock_error = SaveService.validate_lock_or_error(db, root.id, session_guid)
+    if lock_error:
+        return _err(409, lock_error.error_code or "LOCK_ERROR", lock_error.error_message or "Lock validation failed")
+
+    # Use SaveService for save operation (SRP, DRY)
+    result = SaveService.apply_save_and_commit(
+        db=db,
+        root=root,
+        payload_body=body,
+        check_kind=_CHECK_KIND,
+        barrier_kind=_BARRIER_KIND,
+        session_guid=session_guid,
+    )
+
+    SaveService.build_success_response(result, response, "Autosave completed", "SAVED")
+    return odata_entity(result.to_dict())
 
 
 @router.post(f"{SERVICE_ROOT}/CreateChecklist")
 def create_checklist(payload: dict, response: Response, request: Request, db: Session = Depends(get_db)):
-    if (err := _require_create_permission(db, request)):
+    if err := _require_create_permission(db, request):
         return err
     body = payload.get("Payload") if isinstance(payload.get("Payload"), dict) else payload
     full = body.get("FullPayload") or body
@@ -133,7 +160,13 @@ def create_checklist(payload: dict, response: Response, request: Request, db: Se
 
 
 @router.post(f"{SERVICE_ROOT}/CopyChecklist")
-async def copy_checklist(request: Request, root_id: str | None = Query(None, alias="DB_KEY"), session_guid: str | None = Query(None, alias="SessionGuid"), payload: dict | None = None, db: Session = Depends(get_db)):
+async def copy_checklist(
+    request: Request,
+    root_id: str | None = Query(None, alias="DB_KEY"),
+    session_guid: str | None = Query(None, alias="SessionGuid"),
+    payload: dict | None = None,
+    db: Session = Depends(get_db),
+):
     body = payload or {}
     if not body:
         try:
@@ -141,7 +174,9 @@ async def copy_checklist(request: Request, root_id: str | None = Query(None, ali
         except (json.JSONDecodeError, ValueError):
             body = {}
     merged = _merge_query_and_payload(request, body)
-    resolved_root_id = _boundary_root_key(merged, root_id, merged.get("source_parent_key"), merged.get("SourceParentKey"), merged.get("SourceUuid"))
+    resolved_root_id = _boundary_root_key(
+        merged, root_id, merged.get("source_parent_key"), merged.get("SourceParentKey"), merged.get("SourceUuid")
+    )
     resolved_session_guid = session_guid or merged.get("SessionGuid") or merged.get("session_guid")
     resolved_uname = CurrentUserService.resolve_uname(db=db, request=request)
     if not resolved_root_id or not resolved_session_guid:
@@ -150,14 +185,16 @@ async def copy_checklist(request: Request, root_id: str | None = Query(None, ali
     source_root, err = _load_root_or_error(db, resolved_root_id)
     if err:
         return err
-    if (err := _require_permission(db, request, source_root, "view")):
+    if err := _require_permission(db, request, source_root, "view"):
         return err
-    if (err := _require_create_permission(db, request)):
+    if err := _require_create_permission(db, request):
         return err
 
     try:
         copied_root = ChecklistService.copy(db, source_root.id, str(resolved_uname))
-        lock_result = LockService.acquire(db, copied_root.id, str(resolved_session_guid).strip(), str(resolved_uname), None)
+        lock_result = LockService.acquire(
+            db, copied_root.id, str(resolved_session_guid).strip(), str(resolved_uname), None
+        )
     except ValueError:
         return _err(404, "NOT_FOUND", "Checklist not found")
 
@@ -183,12 +220,18 @@ async def copy_checklist(request: Request, root_id: str | None = Query(None, ali
 
 
 @router.post(f"{SERVICE_ROOT}/SaveChanges")
-def save_changes(payload: dict, response: Response, request: Request, if_match: str | None = Header(None, alias="If-Match"), db: Session = Depends(get_db)):
+def save_changes(
+    payload: dict,
+    response: Response,
+    request: Request,
+    if_match: str | None = Header(None, alias="If-Match"),
+    db: Session = Depends(get_db),
+):
     body = payload.get("Payload") if isinstance(payload.get("Payload"), dict) else payload
     root, err = _load_root_or_error(db, _save_request_root_key(payload))
     if err:
         return err
-    if (err := _require_permission(db, request, root, "edit")):
+    if err := _require_permission(db, request, root, "edit"):
         return err
     session_guid = _save_request_session(payload)
     if not session_guid:
@@ -208,12 +251,14 @@ def save_changes(payload: dict, response: Response, request: Request, if_match: 
     except ValueError as ex:
         db.rollback()
         if str(ex) == "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN":
-            return _err(400, "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN", "Attachment upload must use media stream endpoint")
+            return _err(
+                400, "ATTACHMENT_BASE64_SAVE_PATH_FORBIDDEN", "Attachment upload must use media stream endpoint"
+            )
         return _err(400, "INVALID_ATTACHMENT_PAYLOAD", "Attachment payload is invalid")
     except RuntimeError as ex:
         db.rollback()
         return ex.args[0]
-    active_lock = LockService._active_lock(db, root.id)
+    active_lock = LockService.active_lock(db, root.id)
     lock_refreshed_at = now_utc()
     if active_lock and str(active_lock.session_guid or "").strip() == str(session_guid or "").strip():
         active_lock.last_refresh_at = lock_refreshed_at
@@ -224,20 +269,22 @@ def save_changes(payload: dict, response: Response, request: Request, if_match: 
     db.commit()
     AnalyticsService.mark_dirty()
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
-    active_lock = LockService._active_lock(db, root.id)
+    active_lock = LockService.active_lock(db, root.id)
     request_id = str(uuid.uuid4())
     response.headers["sap-message"] = build_sap_message("Checklist updated", "success", code="SAVED")
-    return odata_entity({
-        "db_key": _hex(root.id),
-        "changed_on": format_datetime(root.changed_on),
-        "version_number": int(root.version_number or 0),
-        "code": "LOCK_OK",
-        "reason_code": "SAVED",
-        "lock_refreshed": True,
-        "lock_expires_at": format_datetime(LockService._lock_expires_at(active_lock)) if active_lock else "",
-        "server_now": format_datetime(now_utc()),
-        "request_id": request_id
-    })
+    return odata_entity(
+        {
+            "db_key": _hex(root.id),
+            "changed_on": format_datetime(root.changed_on),
+            "version_number": int(root.version_number or 0),
+            "code": "LOCK_OK",
+            "reason_code": "SAVED",
+            "lock_refreshed": True,
+            "lock_expires_at": format_datetime(LockService.lock_expires_at(active_lock)) if active_lock else "",
+            "server_now": format_datetime(now_utc()),
+            "request_id": request_id,
+        }
+    )
 
 
 @router.post(f"{SERVICE_ROOT}/SetChecklistStatus")
@@ -259,13 +306,20 @@ async def set_status(
         body = {}
     merged = _merge_query_and_payload(request, body)
     resolved_root_key = _boundary_root_key(merged, root_key_q)
-    resolved_new_status = new_status_q or merged.get("NewStatus") or merged.get("new_status") or merged.get("Status") or merged.get("status") or ""
+    resolved_new_status = (
+        new_status_q
+        or merged.get("NewStatus")
+        or merged.get("new_status")
+        or merged.get("Status")
+        or merged.get("status")
+        or ""
+    )
     resolved_client_agg = client_agg_q or merged.get("ClientAggChangedOn") or merged.get("client_agg_changed_on")
 
     root, err = _load_root_or_error(db, resolved_root_key)
     if err:
         return err
-    if (err := _require_permission(db, request, root, "edit")):
+    if err := _require_permission(db, request, root, "edit"):
         return err
     try:
         _if_match_check(if_match, _agg_changed_on(root), root.version_number)
@@ -298,12 +352,25 @@ async def set_status(
     AnalyticsService.mark_dirty()
     root = db.query(ChecklistRoot).filter(ChecklistRoot.id == root.id).first()
     response.headers["sap-message"] = build_sap_message("Status updated", "success", code="STATUS_SET")
-    return odata_entity({"DB_KEY": _hex(root.id), "Status": _status_external(root.status), "AggChangedOn": format_datetime(_agg_changed_on(root)), "Message": "Status updated", "ReasonCode": "STATUS_SET"})
+    return odata_entity(
+        {
+            "DB_KEY": _hex(root.id),
+            "Status": _status_external(root.status),
+            "AggChangedOn": format_datetime(_agg_changed_on(root)),
+            "Message": "Status updated",
+            "ReasonCode": "STATUS_SET",
+        }
+    )
 
 
 @router.get(f"{SERVICE_ROOT}/GetHierarchy")
 @router.post(f"{SERVICE_ROOT}/GetHierarchy")
-async def get_hierarchy(request: Request, date_check: str | None = Query(None, alias="DateCheck"), method: str | None = Query(None, alias="Method"), db: Session = Depends(get_db)):
+async def get_hierarchy(
+    request: Request,
+    date_check: str | None = Query(None, alias="DateCheck"),
+    method: str | None = Query(None, alias="Method"),
+    db: Session = Depends(get_db),
+):
     payload = {}
     if request.method == "POST":
         try:
@@ -320,22 +387,29 @@ async def get_hierarchy(request: Request, date_check: str | None = Query(None, a
     except (ValueError, TypeError, AttributeError):
         dt = now_utc()
     nodes = HierarchyService.get_tree(db, dt.date())
-    return odata_entity({"DateCheck": format_datetime(datetime(dt.year, dt.month, dt.day, tzinfo=timezone.utc)), "results": nodes})
+    return odata_entity(
+        {"DateCheck": format_datetime(datetime(dt.year, dt.month, dt.day, tzinfo=timezone.utc)), "results": nodes}
+    )
 
 
 @router.post(f"{SERVICE_ROOT}/ReportExport")
 def report_export(payload: dict, db: Session = Depends(get_db)):
+    """Handle ReportExport operation.
+
+    Uses ReportExportService for business logic (SRP, DRY compliance).
+
+    Args:
+        payload: Request payload containing export parameters
+        db: Database session
+
+    Returns:
+        OData collection of export rows or error response
+    """
     payload = payload if isinstance(payload, dict) else {}
     selection_mode = str(payload.get("SelectionMode") or "").strip().lower()
     entity = str(payload.get("Entity") or "screen").strip().lower() or "screen"
     export_limit = _normalize_export_limit(payload.get("Limit") or payload.get("limit"))
-    root_keys = (
-        payload.get("RootKeys")
-        or payload.get("DBKeys")
-        or payload.get("keys")
-        or payload.get("ids")
-        or []
-    )
+    root_keys = payload.get("RootKeys") or payload.get("DBKeys") or payload.get("keys") or payload.get("ids") or []
 
     if not root_keys:
         single_key = _boundary_root_key(payload)
@@ -343,102 +417,25 @@ def report_export(payload: dict, db: Session = Depends(get_db)):
             root_keys = [single_key]
 
     root_keys = [_normalize_hex_key(value) for value in root_keys if _normalize_hex_key(value)]
-    if root_keys and len(root_keys) > export_limit:
-        return _err(400, "EXPORT_LIMIT_EXCEEDED", "Selected export exceeds configured limit")
 
-    roots = []
-    if root_keys:
-        roots_by_key = {}
-        for key in root_keys:
-            root = db.query(ChecklistRoot).filter(ChecklistRoot.id == _entity_key(str(key)), ChecklistRoot.is_deleted.isnot(True)).first()
-            if root:
-                roots_by_key[str(key)] = root
-        roots = [roots_by_key[key] for key in root_keys if key in roots_by_key]
-    elif selection_mode == "all":
-        search_contract = _normalize_export_search_contract(payload.get("SearchContract"))
-        roots = [
-            root for root in db.query(ChecklistRoot).filter(ChecklistRoot.is_deleted.isnot(True)).all()
-            if _search_contract_matches(root, search_contract, db)
-        ]
+    # Use ReportExportService for root retrieval and validation (SRP)
+    export_service = ReportExportService(db)
 
-    # Preload CHECK/BARRIER dictionary texts once instead of one query per row - the loop
-    # below can run over thousands of check/barrier rows for a single "all" export.
-    check_dict_texts = {item.key: item.text for item in db.query(DictionaryItem).filter(DictionaryItem.domain == "CHECK").all()}
-    barrier_dict_texts = {item.key: item.text for item in db.query(DictionaryItem).filter(DictionaryItem.domain == "BARRIER").all()}
+    try:
+        roots = export_service.get_roots_for_export(
+            root_keys=root_keys if root_keys else None,
+            selection_mode=selection_mode,
+            search_contract=_normalize_export_search_contract(payload.get("SearchContract")),
+            export_limit=export_limit,
+        )
+    except ValueError as ex:
+        return _err(400, "EXPORT_LIMIT_EXCEEDED", str(ex))
 
-    rows = []
-    for root in roots:
-        base = _to_search(root, db=db)
-        checks = [_to_check(c) for c in root.checks]
-        barriers = [_to_barrier(b) for b in root.barriers]
-        base_row = {
-            "DB_KEY": base["DB_KEY"],
-            "Id": base["Id"],
-            "Lpc": base.get("Lpc", ""),
-            "LpcText": base.get("LpcText", ""),
-            "Profession": base.get("Profession", ""),
-            "ProfessionText": base.get("ProfessionText", ""),
-            "LocationKey": base.get("LocationKey", ""),
-            "Status": base.get("Status", ""),
-            "EquipName": base.get("EquipName", ""),
-            "ChangedOn": base.get("ChangedOn", ""),
-            "DateCheck": base["DateCheck"],
-        }
+    # Use ReportExportService for building export rows (DRY, SRP)
+    dictionary_texts = export_service.load_dictionary_texts()
+    rows = export_service.build_export_rows(roots=roots, entity_type=entity, dictionary_texts=dictionary_texts)
 
-        if entity == "screen":
-            rows.append({
-                **base_row,
-                "ItemType": "ROOT",
-                "Num": 0,
-                "Text": "", "Comment": "", "Result": None
-            })
-            continue
-
-        if entity == "check":
-            for c in checks:
-                key = str(c["ChecksNum"])
-                rows.append({
-                    **base_row,
-                    "ItemType": "CHECK",
-                    "Num": c["ChecksNum"],
-                    "Text": check_dict_texts[key] if key in check_dict_texts else c.get("Text", ""),
-                    "Comment": c["Comment"],
-                    "Result": c["Result"]
-                })
-            continue
-
-        if entity == "barrier":
-            for b in barriers:
-                key = str(b["BarriersNum"])
-                rows.append({
-                    **base_row,
-                    "ItemType": "BARRIER",
-                    "Num": b["BarriersNum"],
-                    "Text": barrier_dict_texts[key] if key in barrier_dict_texts else b.get("Text", ""),
-                    "Comment": b["Comment"],
-                    "Result": b["Result"]
-                })
-            continue
-
-        for c in checks:
-            key = str(c["ChecksNum"])
-            rows.append({
-                **base_row,
-                "ItemType": "CHECK", "Num": c["ChecksNum"],
-                "Text": check_dict_texts[key] if key in check_dict_texts else c.get("Text", ""),
-                "Comment": c["Comment"], "Result": c["Result"]
-            })
-        for b in barriers:
-            key = str(b["BarriersNum"])
-            rows.append({
-                "DB_KEY": base["DB_KEY"], "Id": base["Id"],
-                "Lpc": base.get("Lpc", ""), "LpcText": base.get("LpcText", ""),
-                "Profession": base.get("Profession", ""), "ProfessionText": base.get("ProfessionText", ""),
-                "DateCheck": base["DateCheck"],
-                "ItemType": "BARRIER", "Num": b["BarriersNum"],
-                "Text": barrier_dict_texts[key] if key in barrier_dict_texts else b.get("Text", ""),
-                "Comment": b["Comment"], "Result": b["Result"]
-            })
-    if len(rows) > export_limit:
+    if not export_service.validate_export_limit(rows, export_limit):
         return _err(400, "EXPORT_LIMIT_EXCEEDED", "Export exceeds configured limit")
+
     return odata_collection(rows)

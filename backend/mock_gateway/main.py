@@ -7,28 +7,35 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
+import bootstrap
 from api.analytics_api import router as analytics_router
 from api.batch_api import router as batch_router
-from api.gateway_root_api import router as gateway_root_router
-from api.gateway_detail_api import router as gateway_detail_router
-from api.gateway_reference_api import router as gateway_reference_router
-from api.gateway_user_api import router as gateway_user_router
-from api.gateway_lock_api import router as gateway_lock_router
-from api.gateway_save_api import router as gateway_save_router
-from api.gateway_draft_api import router as gateway_draft_router
-from api.gateway_attachment_api import router as gateway_attachment_router
 from api.capabilities_api import router as capabilities_router
-import bootstrap
-from bootstrap import bootstrap_schema, seed_checklist_roots_if_needed as _seed_checklist_roots_if_needed
-from background_jobs import lock_cleanup_job, metadata_refresh_job, analytics_refresh_job
-from middleware import setup_csrf_middleware, setup_odata_headers_middleware, setup_logging_middleware, setup_error_envelope_middleware, setup_rate_limit_middleware
+from api.gateway_attachment_api import router as gateway_attachment_router
+from api.gateway_detail_api import router as gateway_detail_router
+from api.gateway_draft_api import router as gateway_draft_router
+from api.gateway_lock_api import router as gateway_lock_router
+from api.gateway_reference_api import router as gateway_reference_router
+from api.gateway_root_api import router as gateway_root_router
+from api.gateway_save_api import router as gateway_save_router
+from api.gateway_user_api import router as gateway_user_router
+from background_jobs import analytics_refresh_job, lock_cleanup_job, metadata_refresh_job
+from bootstrap import bootstrap_schema
+from bootstrap import seed_checklist_roots_if_needed as _seed_checklist_roots_if_needed
 from config import CORS_ALLOWED_ORIGINS, LOG_REQUEST_BODIES
-from database import engine, SessionLocal
-from models import ChecklistRoot, ChecklistCheck, ChecklistBarrier
+from database import SessionLocal, engine
+from middleware import (
+    setup_csrf_middleware,
+    setup_error_envelope_middleware,
+    setup_logging_middleware,
+    setup_odata_headers_middleware,
+    setup_rate_limit_middleware,
+)
+from models import ChecklistBarrier, ChecklistCheck, ChecklistRoot
 from services.metadata_cache import refresh_metadata
+from utils.filter_errors import FilterSyntaxError
 from utils.odata import SERVICE_ROOT, odata_error_response
 from utils.odata_csrf import CsrfStore
-from utils.filter_errors import FilterSyntaxError
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("gateway")
@@ -131,7 +138,10 @@ def health():
 @app.get("/sap/bc/lrep/flex/data/checklist.app.Component")
 @app.get("/sap/bc/lrep/flex/data/PRODUCTION_CONTROL_CHECKLIST.Component")
 def ui5_flex_stub(appVersion: str | None = None):
-    return {"changes": [], "comp": {"name": "PRODUCTION_CONTROL_CHECKLIST.Component", "appVersion": appVersion or "1.0.0"}}
+    return {
+        "changes": [],
+        "comp": {"name": "PRODUCTION_CONTROL_CHECKLIST.Component", "appVersion": appVersion or "1.0.0"},
+    }
 
 
 @app.get("/sap/bc/lrep/flex/settings")

@@ -2,9 +2,12 @@
 Common helper functions shared across multiple modules.
 Single source of truth for: date parsing, policy loading.
 """
+
 import json
 from datetime import datetime, timedelta, timezone
+
 from sqlalchemy.orm import Session
+
 from repo.settings_repo import SettingsRepo
 from services.settings_service import SettingsService
 
@@ -53,9 +56,9 @@ def parse_date_ms(value) -> int:
     if value is None:
         return 0
     raw = str(value)
-    if raw.startswith('/Date(') and raw.endswith(')/'):
+    if raw.startswith("/Date(") and raw.endswith(")/"):
         body = raw[6:-2]
-        sign_pos = max(body.find('+', 1), body.find('-', 1))
+        sign_pos = max(body.find("+", 1), body.find("-", 1))
         ms_part = body if sign_pos < 0 else body[:sign_pos]
         try:
             return int(ms_part)
@@ -64,7 +67,7 @@ def parse_date_ms(value) -> int:
     if raw.lower().startswith("datetime'") and raw.endswith("'"):
         raw = raw[9:-1]
     try:
-        dt = datetime.fromisoformat(raw.replace('Z', '+00:00'))
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
         dt = dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
         return int(dt.astimezone(timezone.utc).timestamp() * 1000)
     except (ValueError, TypeError, AttributeError):

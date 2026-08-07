@@ -1,6 +1,5 @@
 from pathlib import Path
 
-
 LOCAL_METADATA_PATH = Path(__file__).resolve().parents[3] / "app" / "localService" / "metadata.xml"
 
 

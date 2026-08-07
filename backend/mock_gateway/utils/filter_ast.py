@@ -10,6 +10,7 @@ here, producing an AST; each backend only has to know how to *compile* that AST 
 own representation (SQLAlchemy expression vs. a Python predicate closure), not how to
 *parse* $filter syntax.
 """
+
 from __future__ import annotations
 
 import re
@@ -131,12 +132,14 @@ def parse_filter_ast(filter_string: str | None) -> ASTNode | None:
             idx += 1
             if idx >= len(tokens):
                 raise FilterSyntaxError(f"Unterminated {tok}")
-            first = _parse_literal(tokens[idx]); idx += 1
+            first = _parse_literal(tokens[idx])
+            idx += 1
             if idx < len(tokens) and tokens[idx] == ",":
                 idx += 1
             if idx >= len(tokens):
                 raise FilterSyntaxError(f"Unterminated {tok}")
-            second = _parse_literal(tokens[idx]); idx += 1
+            second = _parse_literal(tokens[idx])
+            idx += 1
             if idx < len(tokens) and tokens[idx] == ")":
                 idx += 1
             else:

@@ -1,18 +1,23 @@
 """SaveChanges/AutoSave row-mutation helpers: parsing the save-request envelope and
 upserting ChecklistRoot/Check/Barrier rows from it."""
+
 import uuid
 
 from sqlalchemy.orm import Session
 
-from models import ChecklistRoot
-from utils.time import now_utc
+from api.gateway_core import _boundary_root_key, _entity_key
+from api.gateway_detail_kind import _DetailKind
 from api.gateway_operations import _dict_text
 from api.gateway_validators import (
-    _pick_text, _pick_bool, _coerce_int, _date_ymd_from_any,
-    _pick_first_present, _normalize_status_input,
+    _coerce_int,
+    _date_ymd_from_any,
+    _normalize_status_input,
+    _pick_bool,
+    _pick_first_present,
+    _pick_text,
 )
-from api.gateway_core import _entity_key, _boundary_root_key
-from api.gateway_detail_kind import _DetailKind
+from models import ChecklistRoot
+from utils.time import now_utc
 
 
 def _save_request_root(payload: dict | None) -> dict:
@@ -42,11 +47,7 @@ def _save_request_session(payload: dict | None) -> str:
         body = body.get("Payload")
     root = _save_request_root(body)
     return str(
-        body.get("SessionGuid")
-        or body.get("session_guid")
-        or root.get("SessionGuid")
-        or root.get("session_guid")
-        or ""
+        body.get("SessionGuid") or body.get("session_guid") or root.get("SessionGuid") or root.get("session_guid") or ""
     ).strip()
 
 

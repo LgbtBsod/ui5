@@ -1,11 +1,10 @@
 import json
-from datetime import date
 import uuid
+from datetime import date
 
 from sqlalchemy.exc import IntegrityError
 
 from models import AppUserProfile, DictionaryItem, Location, Person, RuntimeUserContext
-
 
 _DICTIONARY_ENTRIES = {
     # Must match exactly the vocabulary _normalize_status_input()/_STATUS_TRANSITIONS
@@ -120,22 +119,28 @@ def seed_reference_data(db) -> None:
 def seed_dictionary_items(db) -> None:
     for domain, entries in _DICTIONARY_ENTRIES.items():
         for key, text in entries:
-            exists = db.query(DictionaryItem).filter(
-                DictionaryItem.domain == domain,
-                DictionaryItem.key == key,
-            ).first()
+            exists = (
+                db.query(DictionaryItem)
+                .filter(
+                    DictionaryItem.domain == domain,
+                    DictionaryItem.key == key,
+                )
+                .first()
+            )
             if exists:
                 if exists.text != text:
                     exists.text = text
                 continue
-            db.add(DictionaryItem(
-                id=str(uuid.uuid4()),
-                domain=domain,
-                key=key,
-                text=text,
-                begda=date(2000, 1, 1),
-                endda=None,
-            ))
+            db.add(
+                DictionaryItem(
+                    id=str(uuid.uuid4()),
+                    domain=domain,
+                    key=key,
+                    text=text,
+                    begda=date(2000, 1, 1),
+                    endda=None,
+                )
+            )
 
 
 def seed_persons(db) -> None:
@@ -149,17 +154,19 @@ def seed_persons(db) -> None:
             existing.org_unit = org_unit
             existing.integration_name = integration_name
             continue
-        db.add(Person(
-            perner=perner,
-            first_name=first_name,
-            last_name=last_name,
-            middle_name=middle_name,
-            position=position,
-            org_unit=org_unit,
-            integration_name=integration_name,
-            begda=date(2000, 1, 1),
-            endda=None,
-        ))
+        db.add(
+            Person(
+                perner=perner,
+                first_name=first_name,
+                last_name=last_name,
+                middle_name=middle_name,
+                position=position,
+                org_unit=org_unit,
+                integration_name=integration_name,
+                begda=date(2000, 1, 1),
+                endda=None,
+            )
+        )
 
 
 def seed_locations(db) -> None:
@@ -169,13 +176,15 @@ def seed_locations(db) -> None:
             existing.parent_id = parent_id
             existing.location_name = location_name
             continue
-        db.add(Location(
-            node_id=node_id,
-            parent_id=parent_id,
-            location_name=location_name,
-            begda=date(2000, 1, 1),
-            endda=None,
-        ))
+        db.add(
+            Location(
+                node_id=node_id,
+                parent_id=parent_id,
+                location_name=location_name,
+                begda=date(2000, 1, 1),
+                endda=None,
+            )
+        )
 
 
 def seed_user_profiles(db) -> None:
@@ -214,11 +223,7 @@ def seed_user_profiles(db) -> None:
             existing.full_name = full_name
             existing.permissions_json = serialized
             continue
-        db.add(AppUserProfile(
-            uname=uname,
-            full_name=full_name,
-            permissions_json=serialized
-        ))
+        db.add(AppUserProfile(uname=uname, full_name=full_name, permissions_json=serialized))
 
 
 def seed_runtime_user_context(db) -> None:

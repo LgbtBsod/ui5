@@ -1,20 +1,26 @@
 """ChecklistCheckSet / ChecklistBarrierSet routes."""
+
 import re
 import uuid
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy.orm import Session
 
+from api.gateway_core import (
+    _apply_order_filter,
+    _boundary_parent_key,
+    _entity_key,
+    _err,
+    _load_root_or_error,
+    _reject_expand,
+    _require_permission,
+)
+from api.gateway_detail_kind import _BARRIER_KIND, _CHECK_KIND, _DetailKind
 from database import get_db
 from models import ChecklistRoot
 from utils.odata import SERVICE_ROOT, odata_payload
 from utils.odata_response import odata_entity
 from utils.time import now_utc
-from api.gateway_core import (
-    _err, _reject_expand, _entity_key, _boundary_parent_key, _apply_order_filter,
-    _load_root_or_error, _require_permission,
-)
-from api.gateway_detail_kind import _DetailKind, _CHECK_KIND, _BARRIER_KIND
 
 router = APIRouter(tags=["GatewayCanonical"])
 
@@ -54,7 +60,7 @@ def _detail_create(db: Session, request: Request, payload: dict, kind: _DetailKi
     root, err = _load_root_or_error(db, _boundary_parent_key(payload))
     if err:
         return err
-    if (err := _require_permission(db, request, root, "edit")):
+    if err := _require_permission(db, request, root, "edit"):
         return err
     row = kind.model(
         id=str(uuid.uuid4()),
@@ -106,8 +112,15 @@ def _detail_delete(db: Session, request: Request, entity_key: str, kind: _Detail
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistCheckSet")
-def checklist_check_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
-    if (err := _reject_expand(expand)):
+def checklist_check_set(
+    filter: str | None = Query(None, alias="$filter"),
+    expand: str | None = Query(None, alias="$expand"),
+    top: int = Query(20, alias="$top"),
+    skip: int = Query(0, alias="$skip"),
+    inlinecount: str | None = Query(None, alias="$inlinecount"),
+    db: Session = Depends(get_db),
+):
+    if err := _reject_expand(expand):
         return err
     return _detail_list(db, _CHECK_KIND, filter, top, skip, inlinecount)
 
@@ -128,8 +141,15 @@ def checklist_check_delete(entity_key: str, request: Request, db: Session = Depe
 
 
 @router.get(f"{SERVICE_ROOT}/ChecklistBarrierSet")
-def checklist_barrier_set(filter: str | None = Query(None, alias="$filter"), expand: str | None = Query(None, alias="$expand"), top: int = Query(20, alias="$top"), skip: int = Query(0, alias="$skip"), inlinecount: str | None = Query(None, alias="$inlinecount"), db: Session = Depends(get_db)):
-    if (err := _reject_expand(expand)):
+def checklist_barrier_set(
+    filter: str | None = Query(None, alias="$filter"),
+    expand: str | None = Query(None, alias="$expand"),
+    top: int = Query(20, alias="$top"),
+    skip: int = Query(0, alias="$skip"),
+    inlinecount: str | None = Query(None, alias="$inlinecount"),
+    db: Session = Depends(get_db),
+):
+    if err := _reject_expand(expand):
         return err
     return _detail_list(db, _BARRIER_KIND, filter, top, skip, inlinecount)
 

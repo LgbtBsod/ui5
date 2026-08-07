@@ -4,10 +4,17 @@ import random
 import sys
 import uuid
 from datetime import datetime, timedelta, timezone
+
 from sqlalchemy import inspect, text
 from sqlalchemy.exc import IntegrityError
 
-from config import APP_PROFILE, AUTO_MUTATE_SCHEMA_ON_STARTUP, AUTO_SEED_STARTUP_DATA, FRONTEND_TIMER_PROFILE, PROMPT_LOGIN_ON_STARTUP_ENABLED
+from config import (
+    APP_PROFILE,
+    AUTO_MUTATE_SCHEMA_ON_STARTUP,
+    AUTO_SEED_STARTUP_DATA,
+    FRONTEND_TIMER_PROFILE,
+    PROMPT_LOGIN_ON_STARTUP_ENABLED,
+)
 from database import Base, SessionLocal, engine
 from models import (
     AnalyticsBreakdown,
@@ -153,7 +160,7 @@ def ensure_runtime_settings_row(db) -> FrontendRuntimeSettings:
         environment=APP_PROFILE or "default",
         required_fields_json=json.dumps(DEFAULT_REQUIRED_FIELDS),
         upload_policy_json=json.dumps(DEFAULT_UPLOAD_POLICY),
-        **FRONTEND_TIMER_PROFILE
+        **FRONTEND_TIMER_PROFILE,
     )
     db.add(settings_row)
     try:
@@ -183,7 +190,11 @@ def ensure_baseline_mock_data(db) -> None:
 
 def seed_checklist_roots_if_needed(db, minimum_rows: int = 100) -> int:
     """Seed checklist root records if count is below minimum."""
-    current_count = db.query(ChecklistRoot).filter((ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False))).count()
+    current_count = (
+        db.query(ChecklistRoot)
+        .filter((ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False)))
+        .count()
+    )
     if current_count >= minimum_rows:
         return 0
 
@@ -288,9 +299,11 @@ def ensure_seeded_detail_payload(db) -> int:
     if not required_tables.issubset(existing_tables):
         return 0
 
-    roots = db.query(ChecklistRoot).filter(
-        (ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False))
-    ).all()
+    roots = (
+        db.query(ChecklistRoot)
+        .filter((ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False)))
+        .all()
+    )
     added = 0
     for root in roots:
         has_checks = db.query(ChecklistCheck.id).filter(ChecklistCheck.root_id == root.id).first() is not None
@@ -312,9 +325,12 @@ def ensure_seeded_detail_payload(db) -> int:
 
 def ensure_integration_samples(db, minimum_ratio: float = 0.18) -> int:
     """Ensure minimum ratio of integration-flag checklists."""
-    roots = db.query(ChecklistRoot).filter(
-        (ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False))
-    ).order_by(ChecklistRoot.created_on.asc()).all()
+    roots = (
+        db.query(ChecklistRoot)
+        .filter((ChecklistRoot.is_deleted.is_(None)) | (ChecklistRoot.is_deleted.is_(False)))
+        .order_by(ChecklistRoot.created_on.asc())
+        .all()
+    )
 
     total = len(roots)
     if total == 0:

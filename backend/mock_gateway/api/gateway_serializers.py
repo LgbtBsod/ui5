@@ -5,6 +5,7 @@ wire shape, or normalize a raw filter/export payload into something the callers 
 can compare against. No permission checks, no mutation, no request/session handling -
 those live in api.gateway_core (auth/lock/etag kernel) and api.gateway_mutations.
 """
+
 import json
 import re
 from datetime import datetime, timezone
@@ -12,18 +13,26 @@ from urllib.parse import unquote
 
 from sqlalchemy.orm import Session
 
-from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, ChecklistRootDraft, DictionaryItem, Person
+from api.gateway_core import _entity_key
+from api.gateway_helpers import HEX_ZERO_GUID, ODataSerializer
+from api.gateway_operations import _dict_text, _hex, _normalize_hex_key
+from api.gateway_validators import _date_ymd_from_any, _status_external
+from models import (
+    AttachmentEntry,
+    ChecklistBarrier,
+    ChecklistCheck,
+    ChecklistRoot,
+    ChecklistRootDraft,
+    DictionaryItem,
+    Person,
+)
+from repo.settings_repo import SettingsRepo
 from services.authorization_service import AuthorizationService
 from services.settings_service import DEFAULT_FRONTEND_VARIABLES, SettingsService
-from repo.settings_repo import SettingsRepo
+from utils.common_helpers import parse_date_ms
 from utils.odata import SERVICE_ROOT, format_datetime
 from utils.odata_datetime import date_only_to_odata
 from utils.time import now_utc
-from utils.common_helpers import parse_date_ms
-from api.gateway_operations import _dict_text, _hex, _normalize_hex_key
-from api.gateway_validators import _status_external, _date_ymd_from_any
-from api.gateway_helpers import HEX_ZERO_GUID, ODataSerializer
-from api.gateway_core import _entity_key
 
 ROOT_MAP = {
     "Key": "id",
@@ -192,18 +201,19 @@ def _search_contract_matches(root: ChecklistRoot, contract: dict, db: Session) -
 
     matches = []
     if filter_id:
-        matches.append(
-            filter_id in str(root.checklist_id or "").lower()
-            or filter_id in str(root_id_hex or "").lower()
-        )
+        matches.append(filter_id in str(root.checklist_id or "").lower() or filter_id in str(root_id_hex or "").lower())
     if filter_date_from:
-        matches.append(bool(root_date) and root_date >= filter_date_from and (not filter_date_to or root_date <= filter_date_to))
+        matches.append(
+            bool(root_date) and root_date >= filter_date_from and (not filter_date_to or root_date <= filter_date_to)
+        )
     if filter_location_key:
         matches.append(filter_location_key in root_location_key.lower())
     if filter_lpc:
         matches.append(filter_lpc in root_lpc.lower() or filter_lpc in root_lpc_text.lower())
     if filter_profession:
-        matches.append(filter_profession in root_profession.lower() or filter_profession in root_profession_text.lower())
+        matches.append(
+            filter_profession in root_profession.lower() or filter_profession in root_profession_text.lower()
+        )
     if filter_status:
         matches.append(filter_status == str(root_status or "").upper())
     if checks_segment != "ALL":
@@ -245,7 +255,9 @@ def _attachment_matches_filter(row: AttachmentEntry, filter_expr: str | None) ->
         return True
     root_match = re.search(r"(?:PARENT_KEY|DB_KEY)\s+eq\s+(?:binary')?([^']+)'", expr, flags=re.IGNORECASE)
     if root_match:
-        return _hex(row.root_id) == _normalize_hex_key(root_match.group(1)) or str(row.root_id or "") == _entity_key(root_match.group(1))
+        return _hex(row.root_id) == _normalize_hex_key(root_match.group(1)) or str(row.root_id or "") == _entity_key(
+            root_match.group(1)
+        )
     key_match = re.search(r"(?:AttachmentKey|Key)\s+eq\s+'([^']+)'", expr, flags=re.IGNORECASE)
     if key_match:
         return str(row.id or "") == _entity_key(key_match.group(1))
@@ -257,7 +269,11 @@ def _to_attachment(entry: AttachmentEntry, db: Session | None = None) -> dict:
     category_key = str(entry.category_key or "GEN")
     category_text = category_key
     if db is not None:
-        item = db.query(DictionaryItem).filter(DictionaryItem.domain == "ATF_CAT", DictionaryItem.key == category_key).first()
+        item = (
+            db.query(DictionaryItem)
+            .filter(DictionaryItem.domain == "ATF_CAT", DictionaryItem.key == category_key)
+            .first()
+        )
         if item and item.text:
             category_text = str(item.text)
     return ODataSerializer.build_entity(
@@ -284,7 +300,7 @@ def _to_attachment(entry: AttachmentEntry, db: Session | None = None) -> dict:
             "ScannedOn": format_datetime(entry.changed_on),
             "CreatedOn": format_datetime(entry.created_on),
             "ChangedOn": format_datetime(entry.changed_on),
-        }
+        },
     )
 
 
@@ -296,11 +312,13 @@ def _rate(items, pred) -> float:
 
 
 def _person_full_name(person: Person) -> str:
-    return " ".join([
-        str(person.last_name or "").strip(),
-        str(person.first_name or "").strip(),
-        str(person.middle_name or "").strip()
-    ]).strip()
+    return " ".join(
+        [
+            str(person.last_name or "").strip(),
+            str(person.first_name or "").strip(),
+            str(person.middle_name or "").strip(),
+        ]
+    ).strip()
 
 
 def _to_person_vh(person: Person) -> dict:
@@ -319,7 +337,7 @@ def _to_person_vh(person: Person) -> dict:
             "Begda": date_only_to_odata(person.begda) if getattr(person, "begda", None) else None,
             "Endda": date_only_to_odata(person.endda) if getattr(person, "endda", None) else None,
             "ChangedOn": format_datetime(person.changed_on),
-        }
+        },
     )
 
 
@@ -359,7 +377,7 @@ def _to_search(root: ChecklistRoot, db: Session | None = None) -> dict:
             "SuccessBarriersRate": _rate(root.barriers, lambda b: bool(b.is_active)),
             "ChecksTotal": len(root.checks or []),
             "BarriersTotal": len(root.barriers or []),
-        }
+        },
     )
 
 
@@ -399,7 +417,7 @@ def _to_root(root: ChecklistRoot, db: Session | None = None, draft_map: dict | N
             "IsActiveEntity": True,
             "HasActiveEntity": True,
             "HasDraftEntity": has_draft,
-        }
+        },
     )
 
 
@@ -436,7 +454,7 @@ def _to_root_draft(draft: ChecklistRootDraft, db: Session) -> dict:
             "IsActiveEntity": False,
             "HasActiveEntity": bool(draft.active_id),
             "HasDraftEntity": False,
-        }
+        },
     )
     entity["__metadata"] = {
         "type": entity["__metadata"]["type"],
@@ -480,7 +498,7 @@ def _to_basic(root: ChecklistRoot) -> dict:
             "TimeCheck": root.time_check or "",
             "TimeZone": root.time_zone or "",
             "EquipName": root.equipment or "",
-        }
+        },
     )
 
 
@@ -506,7 +524,7 @@ def _to_permission(root: ChecklistRoot, user_id: str | None, db: Session | None 
             "CanDelete": bool(permission.get("can_delete")),
             "ReasonCode": str(permission.get("reason_code") or ""),
             "Message": str(permission.get("message") or ""),
-        }
+        },
     )
 
 
@@ -532,7 +550,7 @@ def _to_create_permission(user_id: str | None, db: Session | None = None) -> dic
             "CanDelete": bool(permission.get("can_delete")),
             "ReasonCode": str(permission.get("reason_code") or ""),
             "Message": str(permission.get("message") or ""),
-        }
+        },
     )
 
 
@@ -546,20 +564,25 @@ def _permission_groups(profile: dict) -> list[dict]:
         scope_kind = str((permission or {}).get("scope_kind") or "all").strip().lower() or "all"
         scope_value = str((permission or {}).get("scope_value") or "ALL").strip() or "ALL"
         group_key = f"{scope_kind}:{scope_value.upper()}"
-        group = groups.setdefault(group_key, {
-            "scopeKind": scope_kind,
-            "scopeValue": scope_value.upper() if scope_kind == "bukrs" else "ALL",
-            "permissionCodes": [],
-        })
+        group = groups.setdefault(
+            group_key,
+            {
+                "scopeKind": scope_kind,
+                "scopeValue": scope_value.upper() if scope_kind == "bukrs" else "ALL",
+                "permissionCodes": [],
+            },
+        )
         if code not in group["permissionCodes"]:
             group["permissionCodes"].append(code)
     result = list(groups.values())
     for item in result:
         item["permissionCodes"] = sorted(item.get("permissionCodes") or [], key=lambda value: order.get(value, 99))
-    result.sort(key=lambda item: (
-        0 if str(item.get("scopeKind") or "all") == "all" else 1,
-        str(item.get("scopeValue") or "ALL")
-    ))
+    result.sort(
+        key=lambda item: (
+            0 if str(item.get("scopeKind") or "all") == "all" else 1,
+            str(item.get("scopeValue") or "ALL"),
+        )
+    )
     return result
 
 
@@ -594,7 +617,7 @@ def _to_current_user(profile: dict) -> dict:
             "CanEdit": "02" in permission_codes,
             "CanDelete": "06" in permission_codes,
             "SummaryText": _current_user_summary(profile),
-        }
+        },
     )
 
 
@@ -612,7 +635,7 @@ def _to_check(item: ChecklistCheck) -> dict:
             "Comment": item.comment or "",
             "Result": (item.status or "").upper() != "FAIL",
             "ChangedOn": format_datetime(item.changed_on),
-        }
+        },
     )
 
 
@@ -630,5 +653,5 @@ def _to_barrier(item: ChecklistBarrier) -> dict:
             "Comment": item.comment or "",
             "Result": bool(item.is_active),
             "ChangedOn": format_datetime(item.changed_on),
-        }
+        },
     )

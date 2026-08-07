@@ -79,10 +79,9 @@ class ChecklistRootDraft(Base):
     stable id this draft becomes on activation - this row's own id for a create-draft,
     active_id for an edit-draft (mirrors serve.py's RootId/DraftUUID reuse on create).
     """
+
     __tablename__ = "checklist_root_draft"
-    __table_args__ = (
-        Index("ix_checklist_root_draft_active_id", "active_id"),
-    )
+    __table_args__ = (Index("ix_checklist_root_draft_active_id", "active_id"),)
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     active_id = Column(String, ForeignKey("checklist_root.id"), nullable=True)
@@ -233,8 +232,6 @@ class RuntimeUserContext(Base):
     changed_on = Column(DateTime, default=now_utc, onupdate=now_utc)
 
 
-
-
 class SaveRequestLedger(Base):
     __tablename__ = "save_request_ledger"
 
@@ -282,6 +279,7 @@ class DictionaryItem(Base):
     endda = Column(Date, nullable=True)
     changed_on = Column(DateTime, default=now_utc)
 
+
 class Location(Base):
     __tablename__ = "locations"
 
@@ -293,6 +291,7 @@ class Location(Base):
     endda = Column(Date, nullable=True)
 
     changed_on = Column(DateTime, default=now_utc)
+
 
 class AnalyticsSnapshot(Base):
     __tablename__ = "analytics_snapshot"

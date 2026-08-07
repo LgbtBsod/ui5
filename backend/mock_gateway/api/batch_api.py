@@ -4,6 +4,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
+
 from config import MAX_BATCH_OPERATIONS
 from database import SessionLocal, use_shared_session
 from utils.odata import SERVICE_ROOT
@@ -28,7 +29,9 @@ def _count_operations(operations: list[BatchOperation | list[BatchOperation]]) -
 def _enforce_batch_size(operations: list[BatchOperation | list[BatchOperation]]) -> None:
     count = _count_operations(operations)
     if count > MAX_BATCH_OPERATIONS:
-        raise HTTPException(status_code=400, detail=f"BATCH_TOO_LARGE: {count} operations exceeds limit of {MAX_BATCH_OPERATIONS}")
+        raise HTTPException(
+            status_code=400, detail=f"BATCH_TOO_LARGE: {count} operations exceeds limit of {MAX_BATCH_OPERATIONS}"
+        )
 
 
 def _has_write_operations(operations: list[BatchOperation | list[BatchOperation]]) -> bool:
@@ -80,7 +83,11 @@ def _resolve_service_root_path(path: str) -> str:
     normalized_path = parsed.path or ""
     if not normalized_path.startswith("/"):
         normalized_path = "/" + normalized_path
-    if normalized_path != "/$batch" and normalized_path != SERVICE_ROOT and not normalized_path.startswith(SERVICE_ROOT + "/"):
+    if (
+        normalized_path != "/$batch"
+        and normalized_path != SERVICE_ROOT
+        and not normalized_path.startswith(SERVICE_ROOT + "/")
+    ):
         normalized_path = SERVICE_ROOT + normalized_path
     return urlunsplit((parsed.scheme, parsed.netloc, normalized_path, parsed.query, parsed.fragment))
 
@@ -156,7 +163,11 @@ async def batch(request: Request):
             finally:
                 session.close()
             chunks.append(f"--{changeset_boundary}--\r\n")
-            response_parts.append("\r\n".join([f"Content-Type: multipart/mixed; boundary={changeset_boundary}", "", "".join(chunks)]).rstrip())
+            response_parts.append(
+                "\r\n".join(
+                    [f"Content-Type: multipart/mixed; boundary={changeset_boundary}", "", "".join(chunks)]
+                ).rstrip()
+            )
             if had_error:
                 continue
         else:
@@ -171,7 +182,9 @@ async def batch(request: Request):
             )
 
     payload, resp_boundary = encode_top_level(response_parts)
-    return Response(content=payload, media_type=f"multipart/mixed; boundary={resp_boundary}", headers={"DataServiceVersion": "2.0"})
+    return Response(
+        content=payload, media_type=f"multipart/mixed; boundary={resp_boundary}", headers={"DataServiceVersion": "2.0"}
+    )
 
 
 @router.post("/$batch/json")

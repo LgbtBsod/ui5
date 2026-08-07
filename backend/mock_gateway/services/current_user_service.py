@@ -24,7 +24,9 @@ def _normalize_uname(value: str | None) -> str:
 
 def _normalize_permission_scope(item: dict) -> tuple[str, str]:
     scope_kind = str(item.get("scope") or item.get("scope_kind") or item.get("object_type") or "").strip().lower()
-    scope_value = str(item.get("scopeValue") or item.get("scope_value") or item.get("bukrs") or item.get("object_value") or "").strip()
+    scope_value = str(
+        item.get("scopeValue") or item.get("scope_value") or item.get("bukrs") or item.get("object_value") or ""
+    ).strip()
     if scope_kind == "bukrs" and scope_value:
         return "bukrs", scope_value
     return "all", "ALL"
@@ -58,11 +60,13 @@ def _normalize_permissions(value) -> list[dict]:
         if resolved in seen:
             continue
         seen.add(resolved)
-        result.append({
-            "code": code,
-            "scope_kind": scope_kind,
-            "scope_value": scope_value,
-        })
+        result.append(
+            {
+                "code": code,
+                "scope_kind": scope_kind,
+                "scope_value": scope_value,
+            }
+        )
     return result
 
 
@@ -96,8 +100,4 @@ class CurrentUserService:
             row = None
         permissions = _normalize_permissions(getattr(row, "permissions_json", []))
         full_name = str(getattr(row, "full_name", "") or "").strip() or uname
-        return {
-            "uname": uname,
-            "full_name": full_name,
-            "permissions": permissions
-        }
+        return {"uname": uname, "full_name": full_name, "permissions": permissions}

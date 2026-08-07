@@ -1,7 +1,9 @@
 """
 Payload validation and normalization: input sanitization, schema verification.
 """
+
 from sqlalchemy.orm import Session
+
 from models import ChecklistRoot
 from utils.common_helpers import parse_date_ymd
 
@@ -137,10 +139,12 @@ def _normalize_child_rows(items, number_field: str) -> list[dict]:
     for idx, item in enumerate(items):
         if not isinstance(item, dict):
             continue
-        normalized.append({
-            **item,
-            number_field: _coerce_int(item.get(number_field), idx + 1),
-        })
+        normalized.append(
+            {
+                **item,
+                number_field: _coerce_int(item.get(number_field), idx + 1),
+            }
+        )
     return normalized
 
 
@@ -152,5 +156,6 @@ def _date_ymd_from_any(value) -> str:
 def _next_checklist_id(db: Session) -> str:
     """Generate next checklist ID based on existing count."""
     from models import ChecklistRoot
+
     count = db.query(ChecklistRoot).count()
     return f"CHK-{count + 1:05d}"

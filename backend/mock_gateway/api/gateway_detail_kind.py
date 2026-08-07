@@ -7,14 +7,27 @@ api.gateway_detail_api) - they used to each carry an independent, hand-duplicate
 of "Check has text/comment/status(PASS|FAIL)/position, Barrier has description/comment/
 is_active/position". This module is that mapping's only home.
 """
+
 from dataclasses import dataclass
 from typing import Callable
 
+from api.gateway_serializers import _to_barrier, _to_check
 from models import ChecklistBarrier, ChecklistCheck
-from api.gateway_serializers import _to_check, _to_barrier
 
-CHECK_MAP = {"Key": "id", "ParentKey": "root_id", "PARENT_KEY": "root_id", "ChecksNum": "position", "ChangedOn": "changed_on"}
-BARRIER_MAP = {"Key": "id", "ParentKey": "root_id", "PARENT_KEY": "root_id", "BarriersNum": "position", "ChangedOn": "changed_on"}
+CHECK_MAP = {
+    "Key": "id",
+    "ParentKey": "root_id",
+    "PARENT_KEY": "root_id",
+    "ChecksNum": "position",
+    "ChangedOn": "changed_on",
+}
+BARRIER_MAP = {
+    "Key": "id",
+    "ParentKey": "root_id",
+    "PARENT_KEY": "root_id",
+    "BarriersNum": "position",
+    "ChangedOn": "changed_on",
+}
 
 
 @dataclass(frozen=True)

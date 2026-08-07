@@ -2,14 +2,14 @@ import json
 import shutil
 import uuid
 from pathlib import Path
+
 from sqlalchemy.orm import Session
 
+from api.gateway_mutations import _apply_save_root
+from api.gateway_validators import _pick_first_present, _pick_text
 from models import AttachmentEntry, ChecklistBarrier, ChecklistCheck, ChecklistRoot, SaveRequestLedger
 from services.lock_service import LockService
 from utils.time import now_utc
-from api.gateway_validators import _pick_text, _pick_first_present
-from api.gateway_mutations import _apply_save_root
-
 
 _BUKRS_BY_ORGUNIT = {
     "EHS": "1000",
@@ -26,7 +26,9 @@ _BUKRS_BY_ORGUNIT = {
 }
 
 
-def resolve_bukrs_from_observer(observer_perner: str | None, observer_orgunit: str | None, bukrs_hint: str | None = None) -> str:
+def resolve_bukrs_from_observer(
+    observer_perner: str | None, observer_orgunit: str | None, bukrs_hint: str | None = None
+) -> str:
     hinted = str(bukrs_hint or "").strip()
     if hinted:
         return hinted
@@ -56,31 +58,42 @@ def lpc_allows_barriers(lpc: str) -> bool:
 class ChecklistService:
     @staticmethod
     def _copy_attachment_rows(db: Session, source_root_id: str, target_root_id: str) -> None:
-        entries = db.query(AttachmentEntry).filter(AttachmentEntry.root_id == source_root_id).order_by(AttachmentEntry.created_on.asc()).all()
+        entries = (
+            db.query(AttachmentEntry)
+            .filter(AttachmentEntry.root_id == source_root_id)
+            .order_by(AttachmentEntry.created_on.asc())
+            .all()
+        )
         for entry in entries:
             source_path = Path(entry.storage_path)
             new_id = str(uuid.uuid4())
             target_path = source_path.with_name(new_id)
             shutil.copyfile(source_path, target_path)
-            db.add(AttachmentEntry(
-                id=new_id,
-                root_id=target_root_id,
-                folder_key=str(entry.folder_key or target_root_id),
-                category_key=entry.category_key,
-                file_name=entry.file_name,
-                mime_type=entry.mime_type,
-                file_size=int(entry.file_size or 0),
-                storage_path=str(target_path),
-                created_on=now_utc(),
-                changed_on=now_utc(),
-            ))
+            db.add(
+                AttachmentEntry(
+                    id=new_id,
+                    root_id=target_root_id,
+                    folder_key=str(entry.folder_key or target_root_id),
+                    category_key=entry.category_key,
+                    file_name=entry.file_name,
+                    mime_type=entry.mime_type,
+                    file_size=int(entry.file_size or 0),
+                    storage_path=str(target_path),
+                    created_on=now_utc(),
+                    changed_on=now_utc(),
+                )
+            )
 
     @staticmethod
     def get(db: Session, root_id: str, expand: bool = False):
-        root = db.query(ChecklistRoot).filter(
-            ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.isnot(True),
-        ).first()
+        root = (
+            db.query(ChecklistRoot)
+            .filter(
+                ChecklistRoot.id == root_id,
+                ChecklistRoot.is_deleted.isnot(True),
+            )
+            .first()
+        )
         if not root:
             return None
 
@@ -111,8 +124,7 @@ class ChecklistService:
 
         if expand:
             result["checks"] = [
-                {"id": c.id, "text": c.text, "status": c.status, "position": c.position}
-                for c in root.checks
+                {"id": c.id, "text": c.text, "status": c.status, "position": c.position} for c in root.checks
             ]
             result["barriers"] = [
                 {
@@ -126,15 +138,29 @@ class ChecklistService:
         return result
 
     @staticmethod
-    def save_via_import(db: Session, root_id: str, user_id: str, payload: dict, is_autosave: bool = False, force: bool = False, request_guid: str | None = None, session_guid: str | None = None):
+    def save_via_import(
+        db: Session,
+        root_id: str,
+        user_id: str,
+        payload: dict,
+        is_autosave: bool = False,
+        force: bool = False,
+        request_guid: str | None = None,
+        session_guid: str | None = None,
+    ):
         operation = "AUTOSAVE" if is_autosave else "SAVE"
         if request_guid:
-            existing = db.query(SaveRequestLedger).filter(
-                SaveRequestLedger.request_guid == request_guid,
-                SaveRequestLedger.operation == operation,
-                SaveRequestLedger.root_id == root_id,
-                SaveRequestLedger.user_id == user_id,
-            ).order_by(SaveRequestLedger.created_on.desc()).first()
+            existing = (
+                db.query(SaveRequestLedger)
+                .filter(
+                    SaveRequestLedger.request_guid == request_guid,
+                    SaveRequestLedger.operation == operation,
+                    SaveRequestLedger.root_id == root_id,
+                    SaveRequestLedger.user_id == user_id,
+                )
+                .order_by(SaveRequestLedger.created_on.desc())
+                .first()
+            )
             if existing:
                 try:
                     return json.loads(existing.response_payload)
@@ -146,10 +172,14 @@ class ChecklistService:
         else:
             LockService.validate_lock(db, root_id, user_id)
 
-        root = db.query(ChecklistRoot).filter(
-            ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.isnot(True),
-        ).first()
+        root = (
+            db.query(ChecklistRoot)
+            .filter(
+                ChecklistRoot.id == root_id,
+                ChecklistRoot.is_deleted.isnot(True),
+            )
+            .first()
+        )
         if not root:
             raise ValueError("NOT_FOUND")
 
@@ -170,9 +200,13 @@ class ChecklistService:
             # other save entry point now, not a second, divergent SAP-uppercase dialect.
             _apply_save_root(root, basic_payload, db)
             if _pick_first_present(basic_payload, "observer_integration_name", "ObserverIntegrationName") is not None:
-                root.observer_integration_name = _pick_text(basic_payload, "observer_integration_name", "ObserverIntegrationName")
+                root.observer_integration_name = _pick_text(
+                    basic_payload, "observer_integration_name", "ObserverIntegrationName"
+                )
             if _pick_first_present(basic_payload, "observed_integration_name", "ObservedIntegrationName") is not None:
-                root.observed_integration_name = _pick_text(basic_payload, "observed_integration_name", "ObservedIntegrationName")
+                root.observed_integration_name = _pick_text(
+                    basic_payload, "observed_integration_name", "ObservedIntegrationName"
+                )
             root.bukrs = resolve_bukrs_from_observer(
                 root.observer_perner,
                 root.observer_orgunit,
@@ -197,14 +231,14 @@ class ChecklistService:
                 db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).delete()
                 for i, row in enumerate(barriers_payload or []):
                     db.add(
-                    ChecklistBarrier(
-                        root_id=root_id,
-                        description=(row or {}).get("text") or (row or {}).get("description") or "",
-                        comment=(row or {}).get("comment") or "",
-                        is_active=bool((row or {}).get("result", (row or {}).get("is_active", True))),
-                        position=i,
+                        ChecklistBarrier(
+                            root_id=root_id,
+                            description=(row or {}).get("text") or (row or {}).get("description") or "",
+                            comment=(row or {}).get("comment") or "",
+                            is_active=bool((row or {}).get("result", (row or {}).get("is_active", True))),
+                            position=i,
+                        )
                     )
-                )
             else:
                 db.query(ChecklistBarrier).filter(ChecklistBarrier.root_id == root_id).delete()
 
@@ -214,23 +248,29 @@ class ChecklistService:
         result = ChecklistService.get(db, root_id, expand=True)
 
         if request_guid and result:
-            db.add(SaveRequestLedger(
-                request_guid=request_guid,
-                operation=operation,
-                root_id=root_id,
-                user_id=user_id,
-                response_payload=json.dumps(result, default=str),
-            ))
+            db.add(
+                SaveRequestLedger(
+                    request_guid=request_guid,
+                    operation=operation,
+                    root_id=root_id,
+                    user_id=user_id,
+                    response_payload=json.dumps(result, default=str),
+                )
+            )
             db.commit()
 
         return result
 
     @staticmethod
     def copy(db: Session, root_id: str, user_id: str):
-        source = db.query(ChecklistRoot).filter(
-            ChecklistRoot.id == root_id,
-            ChecklistRoot.is_deleted.isnot(True),
-        ).first()
+        source = (
+            db.query(ChecklistRoot)
+            .filter(
+                ChecklistRoot.id == root_id,
+                ChecklistRoot.is_deleted.isnot(True),
+            )
+            .first()
+        )
         if not source:
             raise ValueError("NOT_FOUND")
         current_time = now_utc()

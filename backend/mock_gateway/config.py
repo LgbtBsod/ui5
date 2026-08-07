@@ -9,7 +9,10 @@ def _env_flag(name: str, default: bool) -> bool:
         return default
     return raw_value in {"1", "true", "yes", "on"}
 
-DATABASE_URL = str(os.getenv("PCCT_DATABASE_URL") or ("sqlite:///" + str((Path(__file__).resolve().parent / "gateway.db").as_posix())))
+
+DATABASE_URL = str(
+    os.getenv("PCCT_DATABASE_URL") or ("sqlite:///" + str((Path(__file__).resolve().parent / "gateway.db").as_posix()))
+)
 APP_PROFILE = str(os.getenv("PCCT_PROFILE", "production") or "production").strip().lower()
 IS_LOCAL_PROFILE = APP_PROFILE == "local"
 FRONTEND_TIMER_PROFILES = {
@@ -36,7 +39,7 @@ FRONTEND_TIMER_PROFILES = {
         "network_grace_ms": 4000,
         "cache_tolerance_ms": 5500,
         "analytics_refresh_ms": 5000,
-    }
+    },
 }
 FRONTEND_TIMER_PROFILE = FRONTEND_TIMER_PROFILES["test" if APP_PROFILE == "test" else "production"]
 LOCK_TTL = timedelta(seconds=600)
@@ -54,9 +57,7 @@ MAX_BATCH_OPERATIONS = int(os.getenv("PCCT_MAX_BATCH_OPERATIONS", "100"))
 
 RATE_LIMIT_REQUESTS_PER_WINDOW = int(os.getenv("PCCT_RATE_LIMIT_REQUESTS", "100"))
 RATE_LIMIT_WINDOW_SECONDS = int(os.getenv("PCCT_RATE_LIMIT_WINDOW_SECONDS", "60"))
-RATE_LIMIT_TRUSTED_PROXIES = {
-    ip.strip() for ip in os.getenv("PCCT_TRUSTED_PROXIES", "").split(",") if ip.strip()
-}
+RATE_LIMIT_TRUSTED_PROXIES = {ip.strip() for ip in os.getenv("PCCT_TRUSTED_PROXIES", "").split(",") if ip.strip()}
 
 
 CORS_ALLOWED_ORIGINS = [

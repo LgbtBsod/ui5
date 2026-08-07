@@ -2,6 +2,7 @@
 Rate limiting: per-IP request throttling to prevent DDoS attacks.
 Complements CSRF protection (which covers token validity, not volume).
 """
+
 from collections import defaultdict, deque
 from datetime import datetime, timedelta, timezone
 from threading import Lock
@@ -67,11 +68,8 @@ class RateLimiter:
 
     def _prune_inactive_clients(self, cutoff_time: datetime) -> None:
         """Remove clients with no activity in current window (not thread-safe, call with lock)."""
-        stale_clients = [
-            ip for ip, reqs in self.client_requests.items()
-            if not reqs or reqs[-1] < cutoff_time
-        ]
-        for ip in stale_clients[:len(stale_clients) // 2]:  # Remove 50% of stale
+        stale_clients = [ip for ip, reqs in self.client_requests.items() if not reqs or reqs[-1] < cutoff_time]
+        for ip in stale_clients[: len(stale_clients) // 2]:  # Remove 50% of stale
             del self.client_requests[ip]
 
     def reset_client(self, client_ip: str) -> None:

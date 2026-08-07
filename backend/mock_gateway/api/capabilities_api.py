@@ -1,5 +1,6 @@
-from config import ALLOW_MOCK_USER_HEADER, APP_PROFILE, AUTO_MUTATE_SCHEMA_ON_STARTUP, AUTO_SEED_STARTUP_DATA
 from fastapi import APIRouter
+
+from config import ALLOW_MOCK_USER_HEADER, APP_PROFILE, AUTO_MUTATE_SCHEMA_ON_STARTUP, AUTO_SEED_STARTUP_DATA
 from utils.odata import SERVICE_ROOT
 
 router = APIRouter(tags=["Capabilities"])
@@ -28,10 +29,7 @@ def capabilities():
             "featureFlagsEndpoint": True,
             "optimizedSearchEntity": True,
         },
-        "compatibility": {
-            "minUiContractVersion": "1.0.0",
-            "maxUiContractVersion": "1.x"
-        },
+        "compatibility": {"minUiContractVersion": "1.0.0", "maxUiContractVersion": "1.x"},
         "paths": {
             "serviceRoot": "/sap/opu/odata/sap/Z_EHS_PRODUCTION_CONTROL_CKLT_SRV",
             "batch": "/$batch",
@@ -48,5 +46,5 @@ def capabilities():
             "schema": AUTO_MUTATE_SCHEMA_ON_STARTUP,
             "seedData": AUTO_SEED_STARTUP_DATA,
         },
-        "source": "gateway_capabilities"
+        "source": "gateway_capabilities",
     }

@@ -6,6 +6,7 @@ Barrier _DetailKind machinery lives in api.gateway_detail_kind; SaveChanges/Auto
 row-mutation helpers live in api.gateway_mutations. The route modules
 (api/gateway_*_api.py) import from all four and only define @router routes.
 """
+
 import re
 from datetime import datetime, timezone
 
@@ -13,6 +14,9 @@ from fastapi import Request
 from sqlalchemy import asc, desc
 from sqlalchemy.orm import Session
 
+from api.gateway_helpers import HEX_ZERO_GUID, BoundaryResolver
+from api.gateway_operations import _hex
+from api.gateway_validators import _status_external
 from config import MAX_PAGE_SIZE
 from models import ChecklistRoot, ChecklistRootDraft, LockEntry
 from services.authorization_service import AuthorizationService
@@ -21,9 +25,6 @@ from utils.filter_parser import FilterParser
 from utils.odata import SERVICE_ROOT, format_datetime, odata_error_response
 from utils.odata_etag import etag_for_datetime, validate_if_match
 from utils.time import now_utc
-from api.gateway_operations import _hex
-from api.gateway_validators import _status_external
-from api.gateway_helpers import BoundaryResolver, HEX_ZERO_GUID
 
 _STATUS_TRANSITIONS = {
     "DRAFT": {"REGISTERED"},
@@ -114,14 +115,26 @@ def _build_lock_status_row(db: Session, root_uuid: str, session_guid: str = "") 
         }
 
     if root_uuid == "__CREATE":
-        return _row(bool(session_guid), "OWNED_BY_YOU" if session_guid else "FREE", CurrentUserService.resolve_uname(db=db) if session_guid else "", None)
+        return _row(
+            bool(session_guid),
+            "OWNED_BY_YOU" if session_guid else "FREE",
+            CurrentUserService.resolve_uname(db=db) if session_guid else "",
+            None,
+        )
 
     active = db.query(LockEntry).filter(LockEntry.db_key == root_uuid, LockEntry.is_killed.is_(False)).first()
     if not active:
-        own = db.query(LockEntry).filter(
-            LockEntry.db_key == root_uuid,
-            LockEntry.session_guid == session_guid,
-        ).order_by(LockEntry.last_refresh_at.desc()).first() if session_guid else None
+        own = (
+            db.query(LockEntry)
+            .filter(
+                LockEntry.db_key == root_uuid,
+                LockEntry.session_guid == session_guid,
+            )
+            .order_by(LockEntry.last_refresh_at.desc())
+            .first()
+            if session_guid
+            else None
+        )
         if own:
             if own.is_killed:
                 return _row(False, "KILLED", own.user_id or "", own.expires_at)
@@ -206,10 +219,14 @@ def _load_root_or_error(db: Session, root_key: str):
         _entity_key(root_key)
     except ValueError:
         return None, _err(400, "VALIDATION_ERROR", "DB_KEY must be RAW16 HEX (32 chars)")
-    root = db.query(ChecklistRoot).filter(
-        ChecklistRoot.id == _entity_key(root_key),
-        ChecklistRoot.is_deleted.isnot(True),
-    ).first()
+    root = (
+        db.query(ChecklistRoot)
+        .filter(
+            ChecklistRoot.id == _entity_key(root_key),
+            ChecklistRoot.is_deleted.isnot(True),
+        )
+        .first()
+    )
     if not root:
         return None, _err(404, "NOT_FOUND", "Checklist not found")
     return root, None
@@ -234,9 +251,7 @@ def _load_root_or_draft_or_error(db: Session, entity_key: str):
         root, err = _load_root_or_error(db, active_hex)
         return ("active", root, None) if root else (None, None, err)
 
-    draft = db.query(ChecklistRootDraft).filter(
-        ChecklistRootDraft.id == _entity_key(draft_hex)
-    ).first()
+    draft = db.query(ChecklistRootDraft).filter(ChecklistRootDraft.id == _entity_key(draft_hex)).first()
     if not draft:
         return None, None, _err(404, "NOT_FOUND", "Draft not found")
     return "draft", draft, None
@@ -277,7 +292,9 @@ def _validate_status_change(root: ChecklistRoot, new_status: str):
         raise ValueError("VALIDATION_ERROR")
 
 
-def _import_payload(root_id: str | None = None, session_guid: str | None = None, status: str | None = None, payload: dict | None = None) -> dict:
+def _import_payload(
+    root_id: str | None = None, session_guid: str | None = None, status: str | None = None, payload: dict | None = None
+) -> dict:
     body = payload or {}
     # root_id is already fully resolved by the caller (may legitimately be the "__CREATE"
     # sentinel for lock imports) - do not re-run it through _boundary_root_key, which would
