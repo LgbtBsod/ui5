@@ -6,6 +6,7 @@ acyclic dependency chain:
                                                   -> query -> crud
     {resolvers, draft_service, query, crud} -> dispatch -> batch -> http_server
                                                             seed (standalone)
+    db_models, error_format -> (used by dispatch, draft_service, resolvers)
 
 Everything re-exported here is what redux/serve.py (the thin backwards-
 compatible shim + process entry point) exposes as `serve.XXX`, matching the
@@ -53,6 +54,15 @@ from .odata_format import (
     _checkroot_meta,
     compute_etag_timestamp_ms,
     _root_etag_string,
+)
+from .error_format import (
+    format_error_response,
+    format_validation_error,
+    format_child_validation_error,
+    format_draft_locked_error,
+    format_not_found_error,
+    format_csrf_error,
+    format_internal_error,
 )
 from .resolvers import (
     _ref_lookup,
@@ -151,6 +161,9 @@ __all__ = [
     "_mock_user_display_name", "_find_draft_by_active_uuid", "_checks_of", "_barriers_of",
     "odata_date", "parse_odata_date", "generate_uuid", "_build_key_segment", "meta_for",
     "_checkroot_meta", "compute_etag_timestamp_ms", "_root_etag_string",
+    "format_error_response", "format_validation_error", "format_child_validation_error",
+    "format_draft_locked_error", "format_not_found_error", "format_csrf_error",
+    "format_internal_error",
     "_ref_lookup", "resolve_check_basic", "_resolve_type_and_result", "resolve_check_item",
     "resolve_barrier", "_rate_to_criticality", "compute_check_root_view", "wrap_entity",
     "_resolve_sublocation_names", "_rewrite_with_sublocation_tokens", "compare_dates",

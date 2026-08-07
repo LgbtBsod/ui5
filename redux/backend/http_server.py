@@ -29,6 +29,14 @@ Opens browser-friendly demo at the given port.
 All OData requests are handled in-process (no Node.js needed).
 """
 
+# SAP Gateway compatibility headers - sent with every OData response
+SAP_GATEWAY_HEADERS = {
+    "DataServiceVersion": "2.0",
+    "MaxDataServiceVersion": "2.0",
+    "sap-server": "true",
+    "sap-platform": "ABAP",
+}
+
 
 def read_static_file(rel_path):
     # [SECURITY FIX] startswith() на нормализованном пути пропускал соседние
@@ -56,49 +64,58 @@ def _requote_query(parsed_query):
 
 
 class FioriHandler(BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
 
     def log_request(self, code='-', size='-'):
         if self.path.startswith(config.ODATA_PREFIX) or self.path.startswith("/annotation/"):
             super().log_request(code, size)
 
-    def _send_json(self, status, obj):
-        body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+    def _send_response_base(self, status, content_type, body_bytes, extra_headers=None):
+        """Base response sender - DRY helper for all response types."""
         self.send_response(status)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body_bytes)))
+        
+        # SAP Gateway compatibility headers
+        if content_type.startswith("application/json") or content_type.startswith("application/xml"):
+            for header, value in SAP_GATEWAY_HEADERS.items():
+                self.send_header(header, value)
+        
+        # SAP message header (if pending)
         sap_message = state._pop_sap_message()
         if sap_message:
             self.send_header("sap-message", sap_message)
-        self._send_cors()
-        self.end_headers()
-        self.wfile.write(body)
-
-    def _send_xml(self, status, xml_bytes):
-        self.send_response(status)
-        self.send_header("Content-Type", "application/xml; charset=utf-8")
-        self.send_header("Content-Length", str(len(xml_bytes)))
-        self._send_cors()
-        self.end_headers()
-        self.wfile.write(xml_bytes)
-
-    def _send_text(self, status, text):
-        body = text.encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "text/plain; charset=utf-8")
-        self.send_header("Content-Length", str(len(body)))
-        self._send_cors()
-        self.end_headers()
-        self.wfile.write(body)
-
-    def _send_no_content(self, status=204):
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", "0")
+        
+        # ETag header (if pending)
         etag = state._pop_pending_etag()
         if etag:
             self.send_header("ETag", etag)
+        
+        # CORS headers
         self._send_cors()
+        
+        # Extra headers (caller-specific)
+        if extra_headers:
+            for header, value in extra_headers.items():
+                self.send_header(header, value)
+        
         self.end_headers()
+        self.wfile.write(body_bytes)
+
+    def _send_json(self, status, obj, extra_headers=None):
+        body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+        self._send_response_base(status, "application/json; charset=utf-8", body, extra_headers)
+
+    def _send_xml(self, status, xml_bytes, extra_headers=None):
+        self._send_response_base(status, "application/xml; charset=utf-8", xml_bytes, extra_headers)
+
+    def _send_text(self, status, text, extra_headers=None):
+        body = text.encode("utf-8")
+        self._send_response_base(status, "text/plain; charset=utf-8", body, extra_headers)
+
+    def _send_no_content(self, status=204, extra_headers=None):
+        """Send 204 No Content - used for successful mutations without response body."""
+        self._send_response_base(status, "application/json", b"", extra_headers)
 
     def _send_cors(self):
         # [Аудит: OWASP A05:2021] Access-Control-Allow-Origin:"*" вместе с
@@ -345,6 +362,11 @@ class FioriHandler(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, MERGE, HEAD, OPTIONS")
             self.send_header("Access-Control-Allow-Headers", "Content-Type, X-CSRF-Token, If-Match, Accept, X-HTTP-Method")
             self.send_header("Access-Control-Expose-Headers", "X-CSRF-Token")
+        
+        # SAP Gateway headers for OPTIONS preflight
+        for header, value in SAP_GATEWAY_HEADERS.items():
+            self.send_header(header, value)
+        
         self.end_headers()
 
 

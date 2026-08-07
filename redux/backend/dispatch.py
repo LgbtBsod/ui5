@@ -71,18 +71,55 @@ def _parse_key(url_path):
     return None, None
 
 
+def _format_error_response(code, message_value, severity="error", http_status=400):
+    """Format error response in SAP Gateway OData v2 format.
+    
+    Args:
+        code: Error code string (e.g., 'VALIDATION_ERROR', 'DRAFT_LOCKED')
+        message_value: Human-readable message text
+        severity: Error severity ('error', 'warning', 'info')
+        http_status: HTTP status code (default 400)
+    
+    Returns:
+        Tuple of (http_status, error_dict, content_type)
+        
+    SAP Gateway OData v2 error format follows the convention:
+    {
+        \"error\": {
+            \"code\": \"ERROR_CODE\",
+            \"message\": {\"value\": \"Human readable message\", \"lang\": \"en\"},
+            \"innererror\": {
+                \"errordetails\": [
+                    {
+                        \"code\": \"DETAIL_CODE\",
+                        \"message\": {\"value\": \"Detail message\"},
+                        \"severity\": \"error\",
+                        \"target\": \"PropertyName\"
+                    }
+                ]
+            }
+        }
+    }
+    """
+    return (http_status, {
+        "error": {
+            "code": code,
+            "message": {"value": message_value, "lang": "ru"},
+        }
+    }, "application/json")
+
+
 def _draft_locked_response(owner):
     """Shared 409 DRAFT_LOCKED shape - used both by the one-time
     CheckRootPreparationAction foreign-lock branch and by
     draft_service._draft_owner_mismatch's re-check on every later write to
     an already-open draft (Activate/Discard/PATCH/MERGE/PUT/DELETE addressed
     directly by the draft's own key)."""
-    return (409, {
-        "error": {
-            "code": "DRAFT_LOCKED",
-            "message": {"value": "Черновик уже редактируется пользователем: %s" % state._mock_user_display_name(owner)}
-        }
-    }, "application/json")
+    return _format_error_response(
+        code="DRAFT_LOCKED",
+        message_value="Черновик уже редактируется пользователем: %s" % state._mock_user_display_name(owner),
+        http_status=409
+    )
 
 
 def dispatch_request(method, rel_url, body=None, headers=None):
