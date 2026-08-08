@@ -1,5 +1,0 @@
-PRODUCTION_CONTROL_CHECKLIST
-
-This product includes open-source software components and SAP UI5 runtime dependencies.
-A generated software bill of materials (SBOM) and dependency license report are produced
-by CI via `scripts/ci/license-sbom-gate.js`.

@@ -1,7 +1,0 @@
-{
-  "professions": [
-    { "key": "PR1", "text": "Operator" },
-    { "key": "PR2", "text": "Technician" },
-    { "key": "PR3", "text": "Supervisor" }
-  ]
-}

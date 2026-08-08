@@ -2,16 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "backend",
+      "name": "pc_lite_serve",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["scripts/_preview_backend_launcher.py"],
+      "runtimeArgs": ["serve.py"],
       "port": 8000
-    },
-    {
-      "name": "ui",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["scripts/dev_static_server.py", "8080"],
-      "port": 8080
     }
   ]
 }
