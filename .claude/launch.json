@@ -4,8 +4,8 @@
     {
       "name": "pc_lite_serve",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["serve.py"],
-      "port": 8000
+      "runtimeArgs": ["serve.py", "--port", "8091"],
+      "port": 8091
     }
   ]
 }

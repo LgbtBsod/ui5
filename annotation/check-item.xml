@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/UI/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.UI.v1"            Alias="UI"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/Common/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.Common.v1"        Alias="Common"/>
+  </edmx:Reference>
+
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="ZCheckService.Annotations">
+
+      <!-- [Split, minimal-extension-set pass] All CheckItem annotations except Common.DraftNode (see draft.xml) - extracted verbatim from the original monolithic annotations.xml. -->
+
+      <!-- [Fix, exhaustive-sweep pass] Common.SideEffects, SourceProperties
+           variant (property-level - different mechanism from
+           ChecksAndBarriersRecalc's SourceEntities/collection-level variant
+           above). Without this, resolvers.CommentFieldControl only gets
+           recomputed on the NEXT full GET (e.g. navigate away/back) - PATCH
+           returns 204 with no body, so the client's cached CommentFieldControl
+           silently goes stale the moment Result changes inline, and
+           Common.FieldControl's live-binding on Comment would keep showing
+           the OLD mandatory/optional state despite the SmartField/formatter
+           machinery itself working correctly (confirmed empirically: the
+           client model still held the pre-edit CommentFieldControl value
+           after a live Result edit, until this SideEffects was added).
+           SourceProperties (a plain field edit on THIS entity) is a
+           different trigger than SourceEntities (a child collection add/
+           delete) - ApplicationController's SideEffects execution for a
+           non-draft-root entity's own property-level SideEffects is a plain
+           targeted GET $select on the entity's own canonical key, not a
+           PreparationAction round-trip - our existing COMPOSITE_KEY_RE GET
+           route already recomputes CommentFieldControl fresh on every read
+           (resolvers.resolve_check_item), so no further backend wiring is
+           needed beyond declaring this. -->
+      <Annotations Target="ZCheckService.CheckItem">
+        <Annotation Term="Common.SideEffects" Qualifier="CommentControlRecalc">
+          <Record Type="Common.SideEffectsType">
+            <PropertyValue Property="SourceProperties">
+              <Collection>
+                <PropertyPath>Result</PropertyPath>
+              </Collection>
+            </PropertyValue>
+            <PropertyValue Property="TargetProperties">
+              <Collection>
+                <PropertyPath>CommentFieldControl</PropertyPath>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckItem">
+        <Annotation Term="UI.Creatable" Bool="true"/>
+        <Annotation Term="UI.Updatable" Bool="true"/>
+        <!-- [Fix, exhaustive-sweep pass] Path, not a hardcoded Bool="true" -
+             kept in sync with metadata.xml's sap:deletable-path="Deletable"
+             on the CheckItems EntitySet (both read the same computed
+             resolvers.Deletable field) so there's exactly one source of
+             truth for row-level delete-ability, not a dynamic capability
+             annotation contradicted by a static UI.Deletable=true sitting
+             right next to it. -->
+        <Annotation Term="UI.Deletable" Path="Deletable"/>
+        <!-- [FIX, пересмотрено] Первая версия указывала Value на Code/Result —
+             колонки стали редактируемыми, но SmartTable в 1.71 не подставляет
+             Common.Text в инлайн-редактировании этой схемы (показывает голый
+             код). Разворачиваем на уже проверенный в этом же файле паттерн
+             CheckRoot/LpcKey+LpcText: редактируемое поле — САМ текст (Text),
+             с двусторонним Common.ValueList (InOut на Text, Out на Code).
+             F4 остаётся рабочим, редактирование печатает/показывает текст,
+             а не код. См. Text/ResultText ниже — теперь они реально
+             read/write (metadata.xml). -->
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Text"/>       <PropertyValue Property="Label" String="Тип проверки"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ResultText"/>  <PropertyValue Property="Label" String="Результат"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Comment"/>     <PropertyValue Property="Label" String="Комментарий"/></Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix, exhaustive-sweep pass] Common.FieldControl - live-binds
+           Comment's mandatory/optional state to resolvers.CommentFieldControl
+           (7=mandatory once Result=="Неудовлетворительно", 3=optional
+           otherwise) via sap.ui.comp.smartfield.FieldControl - recomputes
+           automatically the moment the inspector picks a Result in the same
+           inline-edited row, no reload/JS. Confirmed a real, live-consumed
+           1.71.84 mechanism (SmartField/ODataControlFactory/FieldControl
+           source), not V4-only. -->
+      <Annotations Target="ZCheckService.CheckItem/Comment">
+        <Annotation Term="Common.FieldControl" Path="CommentFieldControl"/>
+      </Annotations>
+
+      <!-- [FIX, пересмотрено] Ровно тот же паттерн, что CheckRoot/LpcKey+LpcText
+           (см. выше): редактируемое/отображаемое поле — Text (сам текст, с
+           двусторонним ValueList InOut на себя + Out на Code). Code больше не
+           несёт ValueList/Common.Text — он write-only "техническое" поле,
+           заполняемое через Out-параметр при выборе из F4. -->
+      <Annotations Target="ZCheckService.CheckItem/Code">
+        <Annotation Term="Common.Label" String="Тип проверки"/>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckItem/Text">
+        <Annotation Term="Common.Label"    String="Тип проверки"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Тип проверки"/>
+            <PropertyValue Property="CollectionPath" String="CheckTypes"/>
+            <PropertyValue Property="SearchSupported" Bool="false"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Text"/>
+                  <PropertyValue Property="ValueListProperty"  String="CheckTypeText"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Code"/>
+                  <PropertyValue Property="ValueListProperty"  String="CheckTypeCode"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                  <PropertyValue Property="ValueListProperty"  String="Category"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                  <PropertyValue Property="ValueListProperty"  String="PkLevels"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckItem/Result">
+        <Annotation Term="Common.Label" String="Результат"/>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckItem/ResultText">
+        <Annotation Term="Common.Label" String="Результат"/>
+        <!-- [Fix, exhaustive-sweep pass] Backed by a real server-side gate now
+             (draft_service._missing_required_child_fields) - Activation
+             rejects any tagged CheckItem whose Result is still unset,
+             errordetails[] target-ing the exact row via
+             to_Checks(RootId=..,ItemId=..)/Result (see dispatch.py). Client-
+             hint only here, same Nullable="true"-but-business-required
+             pattern as config.REQUIRED_ROOT_FIELDS. -->
+        <Annotation Term="Common.Required" Bool="true"/>
+        <!-- [Fix, best-practices pass] Tried Common.ValueListWithFixedValues
+             here (CheckResults is a tiny 2-row enum, otherwise a perfect
+             dropdown candidate) - reverted after live verification: SmartForm
+             (the Add-row dialog, SubTableCrud.js) honors it and renders a
+             ComboBox, but sap.ui.comp.smarttable.SmartTable's OWN inline-edit
+             cell rendering for this exact same field does NOT (confirmed
+             live - still sap.m.Input + F4 popover regardless of the
+             annotation, a SmartTable/SmartField rendering-path limitation in
+             this UI5 1.71.84 build, not a config mistake). Setting the
+             annotation would have made the dialog and the inline table cell
+             render DIFFERENTLY for the same field - reintroducing exactly the
+             two-different-search-experiences problem the SmartField rewrite
+             (see class comment above) was written to eliminate. Left as a
+             plain Common.ValueList so both surfaces stay on the identical F4
+             dialog. PkLevels/Professions/TimeZones on CheckRoot don't have
+             this conflict (no inline-table rendering of those fields exists
+             anywhere in the app) and do use ValueListWithFixedValues. -->
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Результат проверки"/>
+            <PropertyValue Property="CollectionPath" String="CheckResults"/>
+            <PropertyValue Property="SearchSupported" Bool="false"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ResultText"/>
+                  <PropertyValue Property="ValueListProperty"  String="ResultText"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Result"/>
+                  <PropertyValue Property="ValueListProperty"  String="ResultCode"/>
+                  <Annotation Term="UI.Hidden" Bool="true"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckItem/Comment">
+        <Annotation Term="Common.Label" String="Комментарий"/>
+        <!-- Стандартная аннотация UI.MultiLineText — SmartField/SmartTable сам
+             рендерит поле как sap.m.TextArea вместо sap.m.Input в инлайн-
+             редактировании таблицы и в диалоге "Добавить" (SubTableCrud уже
+             использует TextArea там же). TextArea растёт по вводу (growing) —
+             не кастомный JS, а стандартное поведение фреймворка. -->
+        <Annotation Term="UI.MultiLineText" Bool="true"/>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

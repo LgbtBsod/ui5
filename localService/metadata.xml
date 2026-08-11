@@ -84,6 +84,19 @@
         <Property Name="BarriersCriticality"   Type="Edm.Int32" Nullable="false" sap:label="Критичность барьеров" sap:creatable="false" sap:updatable="false"/>
         <Property Name="HasErrorChecks"        Type="Edm.Boolean" Nullable="false" sap:label="Есть неуспешные проверки" sap:creatable="false" sap:updatable="false"/>
         <Property Name="HasErrorBarriers"      Type="Edm.Boolean" Nullable="false" sap:label="Есть неуспешные барьеры" sap:creatable="false" sap:updatable="false"/>
+        <!-- [Fix, minimal-extension-set pass] Criticality Path targets for the
+             3 header badges (check-root.xml FieldGroup#General) - same
+             Edm.Int32/0-3 convention as ChecksCriticality/BarriersCriticality
+             above. Declared here because resolvers.compute_check_root_view()
+             computing these alone isn't enough: this mock OData layer
+             serializes a response entity strictly against this EntityType's
+             declared Properties, so a dict key with no matching <Property>
+             here is silently dropped from the wire response even though the
+             Python function set it - confirmed live (backend returned an
+             empty ChecksErrorCriticality until this was added). -->
+        <Property Name="ChecksErrorCriticality"   Type="Edm.Int32" Nullable="false" sap:label="Критичность бейджа проверок" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="BarriersErrorCriticality" Type="Edm.Int32" Nullable="false" sap:label="Критичность бейджа барьеров" sap:creatable="false" sap:updatable="false"/>
+        <Property Name="IntegrationCriticality"   Type="Edm.Int32" Nullable="false" sap:label="Критичность бейджа интеграции" sap:creatable="false" sap:updatable="false"/>
         <Property Name="HeaderKpiTitle"        Type="Edm.String" MaxLength="200" sap:label="КПР/Профессия" sap:creatable="false" sap:updatable="false"/>
         <Property Name="HeaderKpiSubtitle"     Type="Edm.String" MaxLength="200" sap:label="Проверки/Барьеры" sap:creatable="false" sap:updatable="false"/>
         <Property Name="ChecksHidden"          Type="Edm.Boolean" Nullable="false" sap:label="Проверки скрыты" sap:creatable="false" sap:updatable="false"/>

@@ -94,18 +94,6 @@ sap.ui.define(["./Constants"], function (Constants) {
 			return findElement("sap.f.FlexibleColumnLayout", () => true);
 		}
 
-		/**
-		 * Finds a button by ID suffix in a pre-built snapshot (one tree walk
-		 * shared across lookups) if given, otherwise falls back to a full scan.
-		 */
-		static findButtonInSnapshotOrScope(sSuffix, aSnapshot, oScope) {
-			const reSuffix = new RegExp(`${sSuffix}$`);
-			if (aSnapshot) {
-				return aSnapshot.find((oElement) => reSuffix.test(oElement.getId())) || null;
-			}
-			return findElement("sap.m.Button", (oElement) => reSuffix.test(oElement.getId()), oScope);
-		}
-
 		/** sap.ui.comp.smarttable.SmartTable exposes its toolbar via different getters depending on config. */
 		static getSmartTableToolbar(oSmartTable) {
 			return oSmartTable.getCustomToolbar ? oSmartTable.getCustomToolbar()

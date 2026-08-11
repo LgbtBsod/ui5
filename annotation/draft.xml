@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/UI/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.UI.v1"            Alias="UI"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/Common/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.Common.v1"        Alias="Common"/>
+  </edmx:Reference>
+
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="ZCheckService.Annotations">
+
+      <!-- [Split, minimal-extension-set pass] Draft-lifecycle annotations extracted verbatim from the original monolithic annotations.xml (Common.DraftRoot on CheckRoot, Common.SemanticKey, Common.DraftNode on CheckItem/Barrier) - grouped here so the whole draft skeleton is visible in one place. See manifest.json's dataSources for how this and the other split files are all merged by the ODataModel at runtime (the "annotations" array accepts multiple entries). -->
+
+      <!-- [W1] Полная замена под 4-сущностную модель (CheckRoots/CheckBasics/
+           CheckItems/Barriers) — см. abap/README.md и abap/cds/*. Старая
+           3-сущностная версия (CheckHeaders/CheckRows/Barriers) удалена
+           целиком, а не расширена мостом. -->
+
+      <!-- [Фаза 3, draft-skeleton] Common.DraftRoot — тот же вокабуляр, что
+           позже переиспользован OData V4/RAP. EditAction/PreparationAction/
+           ActivationAction ссылаются на FunctionImport в metadata.xml.
+           ValidationFunction не заведён в этом спайке (см. serve.py — только
+           CheckRoot, без композиции; полная валидация — Фаза 4). -->
+      <Annotations Target="ZCheckService.CheckRoot">
+        <Annotation Term="Common.DraftRoot">
+          <Record Type="Common.DraftRootType">
+            <!-- [Fix] Leading "/" is mandatory: sap.ui.generic.app's
+                 TransactionController._prepareCallAction does
+                 f.split("/")[1] unconditionally to strip it before looking
+                 up the FunctionImport in the metamodel. Without the slash,
+                 split("/") yields a 1-element array, [1] is undefined, and
+                 getODataFunctionImport(undefined) returns null, so it
+                 throws "Unknown Function Import <name>" - synchronously,
+                 inside a `new Promise` executor, so it becomes a silently
+                 rejected promise with NO console error, NO network call,
+                 NO visible effect. This is why Edit did nothing: onEdit's
+                 h1() swallows the rejection (no .catch chained), so the
+                 whole draft-prepare flow died before ever reaching
+                 oModel.callFunction. Confirmed by reading the actual
+                 executing sap/ui/generic/app/library-preload.js source and
+                 patching `new Promise` to capture the thrown error. -->
+            <PropertyValue Property="PreparationAction" String="/CheckRootPreparationAction"/>
+            <PropertyValue Property="ActivationAction"  String="/CheckRootActivationAction"/>
+            <PropertyValue Property="EditAction"         String="/CheckRootPreparationAction"/>
+            <!-- [Fix] DiscardAction removed - verified against the real
+                 NW 7.50 BOPF/CDS reference $metadata: Common.DraftRootType
+                 never carries this property there either. Discard in the
+                 real convention is a plain HTTP DELETE on the draft entity,
+                 which serve.py's DELETE handler already implements
+                 identically - this PropertyValue was inert (nothing reads
+                 it), just non-standard. -->
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix] Common.DraftRoot ALSO on the EntitySet path (not just the
+           EntityType above). Verified against a real NW 7.50 BOPF/CDS draft
+           $metadata (ZEHS_TEST_V2_SRV): its DraftRoot annotation targets
+           "<Namespace>.<EntityContainer>/<EntitySet>", not the bare entity
+           type. sap.suite.ui.generic.template's standard List Report XML
+           view only auto-adds the "EditState" SmartFilterBar control
+           (All/Draft/Locked/Unsaved segmented filter) when
+           `${entitySet>com.sap.vocabularies.Common.v1.DraftRoot}` resolves -
+           i.e. it reads the annotation off the ENTITY SET context, which our
+           EntityType-only annotation above never satisfies. This is the
+           actual missing piece that was keeping Edit State from ever
+           auto-appearing, confirmed by reading
+           sap/suite/ui/generic/template's own bundled XML view source. -->
+      <Annotations Target="ZCheckService.ZCheckServiceEntities/CheckRoots">
+        <Annotation Term="Common.DraftRoot">
+          <Record Type="Common.DraftRootType">
+            <!-- [Fix] Leading "/" required - see the identical comment on
+                 the EntityType-path DraftRoot annotation above. -->
+            <PropertyValue Property="PreparationAction" String="/CheckRootPreparationAction"/>
+            <PropertyValue Property="ActivationAction"  String="/CheckRootActivationAction"/>
+            <PropertyValue Property="EditAction"         String="/CheckRootPreparationAction"/>
+            <!-- [Fix] DiscardAction removed - verified against the real
+                 NW 7.50 BOPF/CDS reference $metadata: Common.DraftRootType
+                 never carries this property there either. Discard in the
+                 real convention is a plain HTTP DELETE on the draft entity,
+                 which serve.py's DELETE handler already implements
+                 identically - this PropertyValue was inert (nothing reads
+                 it), just non-standard. -->
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix] Common.SemanticKey - verified against a real NW 7.50 BOPF/CDS
+           draft $metadata (ZEHS_TEST_V2_SRV): every BOPF-generated draft
+           entity carries this, pointing at the ACTIVE-side key. Without it,
+           the generic template/SmartFilterBar has no way to recognize that
+
+           [Fix, exhaustive-sweep pass] Points at RootId, NOT ActiveUUID. The
+           vocabulary's own contract requires this to be unique modulo
+           IsActiveEntity (sap.suite.ui.generic.template.js.AnnotationHelper.
+           isPropertySemanticKey genuinely reads/matches this at runtime, not
+           decorative) - but every brand-new create-draft's ActiveUUID is
+           ZERO_GUID until CheckRootActivationAction runs (see dispatch.py's
+           POST /CheckRoots handler and draft_service._draft_activate), so
+           two concurrent unsaved create-drafts previously reported an
+           IDENTICAL "unique" semantic-key value. RootId is freshly generated
+           per create-draft at POST time and never collides - it's already
+           this app's real stable business key from creation (see this same
+           file's CheckRoot LineItem comment below and metadata.xml's own
+           "Фаза 5" RootId/ActiveUUID distinction).
+           the active row and its draft row are the SAME business object, so
+           it never auto-collapses them into one list row or renders the
+           standard Edit State ("All"/"Own unsaved changes"/...) quick filter
+           - both of those are automatic, out-of-the-box BOPF behavior we were
+           missing entirely, not something to hand-build. -->
+      <Annotations Target="ZCheckService.CheckRoot">
+        <Annotation Term="Common.SemanticKey">
+          <Collection>
+            <PropertyPath>RootId</PropertyPath>
+          </Collection>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix] Common.DraftNode - CheckItem is now a genuine draft node
+           (see serve.py _clone_children_into_draft/_activate_tagged_children
+           and the DraftUUID/IsActiveEntity properties on CheckItem in
+           metadata.xml), not a permanently-always-active composition child.
+           PreparationAction reuses the ROOT's own action (matches the real
+           BOPF convention: nodes ride on their root's draft lifecycle, they
+           don't have an independent prepare/activate of their own). Targeted
+           on BOTH the EntityType and the EntitySet path, mirroring the
+           Common.DraftRoot lesson learned earlier (see that annotation's own
+           comment) - sap.suite.ui.generic.template's SmartTable/SmartFilterBar
+           machinery reads these annotations off the ENTITY SET context. -->
+      <Annotations Target="ZCheckService.CheckItem">
+        <Annotation Term="Common.DraftNode">
+          <Record Type="Common.DraftNodeType">
+            <PropertyValue Property="PreparationAction" String="/CheckRootPreparationAction"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="ZCheckService.ZCheckServiceEntities/CheckItems">
+        <Annotation Term="Common.DraftNode">
+          <Record Type="Common.DraftNodeType">
+            <PropertyValue Property="PreparationAction" String="/CheckRootPreparationAction"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix] Common.DraftNode for Barrier - see the CheckItem comment
+           above, same rationale/convention. -->
+      <Annotations Target="ZCheckService.Barrier">
+        <Annotation Term="Common.DraftNode">
+          <Record Type="Common.DraftNodeType">
+            <PropertyValue Property="PreparationAction" String="/CheckRootPreparationAction"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+      <Annotations Target="ZCheckService.ZCheckServiceEntities/Barriers">
+        <Annotation Term="Common.DraftNode">
+          <Record Type="Common.DraftNodeType">
+            <PropertyValue Property="PreparationAction" String="/CheckRootPreparationAction"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

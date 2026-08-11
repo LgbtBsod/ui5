@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/UI/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.UI.v1"            Alias="UI"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/Common/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.Common.v1"        Alias="Common"/>
+  </edmx:Reference>
+
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="ZCheckService.Annotations">
+
+      <!-- [Split, minimal-extension-set pass] Reference/value-help entity annotations (Location, CheckType, BarrierType LineItem+SelectionFields; hidden technical key columns for PkLevel/TimeZone/Profession value-help dialogs) - extracted verbatim from the original monolithic annotations.xml. -->
+
+      <Annotations Target="ZCheckService.Location">
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="LocationName"/>
+              <PropertyValue Property="Label" String="Наименование"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="LocationCode"/>
+              <PropertyValue Property="Label" String="Код"/>
+            </Record>
+          </Collection>
+        </Annotation>
+        <Annotation Term="UI.SelectionFields">
+          <Collection>
+            <PropertyPath>LocationName</PropertyPath>
+            <PropertyPath>LocationCode</PropertyPath>
+          </Collection>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckType">
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="Category"/>
+              <PropertyValue Property="Label" String="Категория"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="CheckTypeCode"/>
+              <PropertyValue Property="Label" String="Код"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="CheckTypeText"/>
+              <PropertyValue Property="Label" String="Наименование"/>
+            </Record>
+          </Collection>
+        </Annotation>
+        <Annotation Term="UI.SelectionFields">
+          <Collection>
+            <PropertyPath>Category</PropertyPath>
+            <PropertyPath>CheckTypeText</PropertyPath>
+          </Collection>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.BarrierType">
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="Category"/>
+              <PropertyValue Property="Label" String="Категория"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="BarrierTypeCode"/>
+              <PropertyValue Property="Label" String="Код"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="BarrierTypeText"/>
+              <PropertyValue Property="Label" String="Наименование"/>
+            </Record>
+          </Collection>
+        </Annotation>
+        <Annotation Term="UI.SelectionFields">
+          <Collection>
+            <PropertyPath>Category</PropertyPath>
+            <PropertyPath>BarrierTypeText</PropertyPath>
+          </Collection>
+        </Annotation>
+      </Annotations>
+
+      <!-- [UX] Скрыть техническую колонку "Код" в диалогах Value Help для
+           Уровня КПР/Часового пояса/Профессии — пользователю нужен только
+           текст. Common.ValueListParameterOut/InOut на ключевом свойстве
+           обязателен для записи значения в модель при выборе строки, но
+           стандартный SmartField ValueHelpDialog (sap.ui.comp.providers.
+           ValueListProvider, 1.71) строит колонки результирующей таблицы из
+           СВОЙСТВ entity type самого ValueList (CollectionPath), а не из
+           списка ValueListParameter — и уважает UI.Hidden на этих свойствах.
+           Значение всё равно передаётся (Hidden скрывает только рендеринг
+           колонки, не поток данных). -->
+      <Annotations Target="ZCheckService.PkLevel/PkLevel">
+        <Annotation Term="UI.Hidden" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ZCheckService.TimeZone/TimeZoneCode">
+        <Annotation Term="UI.Hidden" Bool="true"/>
+      </Annotations>
+      <Annotations Target="ZCheckService.Profession/ProfessionCode">
+        <Annotation Term="UI.Hidden" Bool="true"/>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

@@ -234,7 +234,10 @@ class FunctionImportHandler(BaseHandler):
             return self._draft_locked_response(locking_row.get("InProcessByUser", config.MOCK_USER))
         
         result_row = draft_service._draft_activate(draft_uuid)
-        
+
+        if result_row is None:
+            return ResponseBuilder.not_found("CheckRootActivationAction: entity not found")
+
         if isinstance(result_row, tuple) and result_row[0] == "validation_error":
             missing_fields = result_row[1]
             missing_children = result_row[2]
@@ -771,23 +774,29 @@ class DeleteHandler(BaseHandler):
             return ResponseBuilder.precondition_failed()
         
         if set_name == "CheckRoots":
-            return self._delete_root(row, key_parts)
-        
+            return self._delete_root(row, key_parts, ctx.headers)
+
         return self._delete_child(set_name, row, key_parts)
-    
+
     def _delete_root(
         self,
         row: Dict,
-        key_parts: Dict
+        key_parts: Dict,
+        headers: Optional[Dict] = None
     ) -> Tuple[int, Any, str]:
         """Delete CheckRoots entity (with draft awareness)."""
         root_id = row["RootId"]
-        
+
         if key_parts.get("DraftUUID", ZERO_GUID) != ZERO_GUID:
             # Draft-addressed DELETE = discard
+            # [Fix] Was hardcoded state._resolve_mock_user({}) - an empty
+            # dict, ignoring whatever X-Mock-User header the actual request
+            # carried, so this always re-checked ownership against the
+            # DEFAULT identity instead of the real requester (see
+            # HandlersRefactorRegressionTests for the live-repro).
             locking_row = draft_service._draft_owner_mismatch(
                 key_parts["DraftUUID"],
-                state._resolve_mock_user({})
+                state._resolve_mock_user(headers)
             )
             if locking_row is not None:
                 return ResponseBuilder.conflict(
@@ -890,11 +899,16 @@ class RequestDispatcher:
             if result is not None:
                 return result
         
-        # No handler matched - unknown route
-        return ResponseBuilder.bad_request(
-            "UNKNOWN_ROUTE",
-            f"Unknown route: {method} {rel_url}"
-        )
+        # No handler matched - unknown route.
+        # [Fix] Was ResponseBuilder.bad_request (400, with an added 'code'/
+        # 'lang' shape) - the pre-refactor original returned a plain 404
+        # here, matching the SAP Gateway convention for a nonexistent OData
+        # resource path. Restored to 404 for behavioral parity; nothing in
+        # the client (sap.ui.model.odata.v2.ODataModel) distinguishes
+        # 400-vs-404 specially for a route that should never be hit by the
+        # real UI anyway, but tests should still pin the intended status so
+        # it can't silently drift again.
+        return ResponseBuilder.not_found(f"Unknown route: {method} {rel_url}")
 
 
 # Legacy function for backward compatibility

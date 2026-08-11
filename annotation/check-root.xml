@@ -1,0 +1,602 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/UI/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.UI.v1"            Alias="UI"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/Common/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.Common.v1"        Alias="Common"/>
+  </edmx:Reference>
+
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="ZCheckService.Annotations">
+
+      <!-- [Split, minimal-extension-set pass] All CheckRoot annotations (Object Page UI, FieldGroup, and property-level Label/Required/ValueList) except Common.DraftRoot/SemanticKey (see draft.xml) and the IconTabBar block (see list-report.xml) - extracted verbatim from the original monolithic annotations.xml. -->
+
+      <Annotations Target="ZCheckService.CheckRoot">
+
+        <!-- [FIX] Creatable обязателен для показа формы при создании нового объекта -->
+        <Annotation Term="UI.Creatable" Bool="true"/>
+        <Annotation Term="UI.Updatable" Bool="true"/>
+        <Annotation Term="UI.Deletable" Bool="true"/>
+
+        <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextOnly"/>
+
+        <Annotation Term="UI.HeaderInfo">
+          <Record Type="UI.HeaderInfoType">
+            <PropertyValue Property="TypeName"       String="Проверка"/>
+            <PropertyValue Property="TypeNamePlural" String="Проверки"/>
+            <PropertyValue Property="Title">
+              <Record Type="UI.DataField">
+                <PropertyValue Property="Value" Path="HeaderKpiTitle"/>
+              </Record>
+            </PropertyValue>
+            <PropertyValue Property="Description">
+              <Record Type="UI.DataField">
+                <PropertyValue Property="Value" Path="HeaderKpiSubtitle"/>
+              </Record>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+
+        <!-- [Fix] Common.SideEffects - without this, ChecksAmount/
+             ChecksSuccess/SuccessRateChecks/HeaderKpiTitle/etc. (all computed
+             server-side from to_Checks/to_Barriers, recomputed eagerly by
+             serve.py on every GET) go STALE on the Object Page after an
+             inline add/delete of a CheckItem/Barrier row, until the user
+             navigates away and back (which forces a fresh GET). Verified by
+             reading the actual framework source
+             (sap/ui/generic/app/library-preload.js ApplicationController._
+             executeSideEffects/_getSideEffect and the ObjectPage's inline
+             table add/delete handlers in
+             sap/suite/ui/generic/template/library-preload.js, which call
+             oApplicationController.executeSideEffects(rootContext, [],
+             [tableBindingPath]) unconditionally after every add/delete -
+             but that call is a pure lookup against this exact annotation;
+             with nothing to find, it silently no-ops). No EffectTypes is set
+             here, so it defaults to "ValueChange", which DraftController
+             maps to prepareDraft (=~ re-run CheckRootPreparationAction,
+             already correctly wired) - NOT validateDraft (which would need a
+             ValidationFunction PropertyValue on Common.DraftRoot that we
+             deliberately do not have; confirmed the EffectTypes="ValueChange"
+             default keeps that unrelated, currently-unimplemented
+             ValidationFunction code path dormant). -->
+        <Annotation Term="Common.SideEffects" Qualifier="ChecksAndBarriersRecalc">
+          <Record Type="Common.SideEffectsType">
+            <PropertyValue Property="SourceEntities">
+              <Collection>
+                <NavigationPropertyPath>to_Checks</NavigationPropertyPath>
+                <NavigationPropertyPath>to_Barriers</NavigationPropertyPath>
+              </Collection>
+            </PropertyValue>
+            <PropertyValue Property="TargetProperties">
+              <Collection>
+                <PropertyPath>ChecksAmount</PropertyPath>
+                <PropertyPath>ChecksSuccess</PropertyPath>
+                <PropertyPath>SuccessRateChecks</PropertyPath>
+                <PropertyPath>ChecksCriticality</PropertyPath>
+                <PropertyPath>HasErrorChecks</PropertyPath>
+                <PropertyPath>ChecksErrorBadgeHidden</PropertyPath>
+                <PropertyPath>ChecksErrorCriticality</PropertyPath>
+                <PropertyPath>ChecksHidden</PropertyPath>
+                <PropertyPath>BarriersAmount</PropertyPath>
+                <PropertyPath>BarriersSuccess</PropertyPath>
+                <PropertyPath>SuccessRateBarriers</PropertyPath>
+                <PropertyPath>BarriersCriticality</PropertyPath>
+                <PropertyPath>HasErrorBarriers</PropertyPath>
+                <PropertyPath>BarriersErrorBadgeHidden</PropertyPath>
+                <PropertyPath>BarriersErrorCriticality</PropertyPath>
+                <PropertyPath>BarriersHidden</PropertyPath>
+                <PropertyPath>StatusCriticality</PropertyPath>
+                <PropertyPath>HeaderKpiTitle</PropertyPath>
+                <PropertyPath>HeaderKpiSubtitle</PropertyPath>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+
+        <!-- [UAT-фикс] UI.Importance — штатная OData UI-аннотация, по которой
+             sap.ui.comp.smarttable.SmartTable сам решает, какие колонки
+             сворачивать в popin на узких экранах (мобильный ListReport).
+             Без неё все 7 колонок держатся горизontal-скроллом вместо
+             карточного popin. High держится дольше всего, Low схлопывается
+             первым — DocId/Date как идентифицирующие остаются колонками. -->
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="DocId"/>
+              <PropertyValue Property="Label" String="№ документа"/>
+              <PropertyValue Property="Importance" EnumMember="UI.ImportanceType/High"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="Date"/>
+              <PropertyValue Property="Label" String="Дата проверки"/>
+              <PropertyValue Property="Importance" EnumMember="UI.ImportanceType/High"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="LpcText"/>
+              <PropertyValue Property="Label" String="Уровень КПР"/>
+              <PropertyValue Property="Importance" EnumMember="UI.ImportanceType/Medium"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="ProfText"/>
+              <PropertyValue Property="Label" String="Профессия"/>
+              <PropertyValue Property="Importance" EnumMember="UI.ImportanceType/Medium"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="LocationName"/>
+              <PropertyValue Property="Label" String="Местоположение"/>
+              <PropertyValue Property="Importance" EnumMember="UI.ImportanceType/Low"/>
+            </Record>
+            <Record Type="UI.DataFieldForAnnotation">
+              <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#ChecksProgress"/>
+              <PropertyValue Property="Label" String="Успешность проверок"/>
+              <PropertyValue Property="Importance" EnumMember="UI.ImportanceType/Medium"/>
+            </Record>
+            <Record Type="UI.DataFieldForAnnotation">
+              <PropertyValue Property="Target" AnnotationPath="@UI.DataPoint#BarriersProgress"/>
+              <PropertyValue Property="Label" String="Успешность барьеров"/>
+              <PropertyValue Property="Importance" EnumMember="UI.ImportanceType/Low"/>
+            </Record>
+            <!-- [Fix] Plain UI.DataField on HeaderKpiTitle (the same path as
+                 UI.HeaderInfo/Title below), Importance=Low so it doesn't
+                 crowd the table on narrow screens but still exists as a real
+                 (non-Hidden) LineItem column. Verified by reading the actual
+                 ListReport controller source
+                 (AnnotationHelper.searchForFirstSemKey_Title_Description in
+                 sap/suite/ui/generic/template/library-preload.js): the
+                 multi-select delete confirmation dialog's item name comes
+                 from scanning UI.LineItem for the first plain UI.DataField
+                 (NOT UI.DataFieldForAnnotation - the two DataPoint entries
+                 above don't count) whose Value/Path equals the entity's
+                 Common.SemanticKey[0] path, or UI.HeaderInfo's Title/
+                 Description path. Without this, since ActiveUUID
+                 (SemanticKey) is a raw GUID never exposed as a LineItem
+                 column, that scan found nothing, and "Удалить" on a
+                 multi-selected row rendered the confirmation text with a
+                 blank/missing item name instead of e.g. "КПР: КПР-2 ...". -->
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="HeaderKpiTitle"/>
+              <PropertyValue Property="Label" String="Наименование"/>
+              <PropertyValue Property="Importance" EnumMember="UI.ImportanceType/Low"/>
+            </Record>
+          </Collection>
+        </Annotation>
+
+        <Annotation Term="UI.DataPoint" Qualifier="ChecksProgress">
+          <Record Type="UI.DataPointType">
+            <PropertyValue Property="Value" Path="ChecksSuccess"/>
+            <PropertyValue Property="Title" String="Успешность проверок"/>
+            <PropertyValue Property="TargetValue" Path="ChecksAmount"/>
+            <PropertyValue Property="Visualization" EnumMember="UI.VisualizationType/Progress"/>
+            <PropertyValue Property="Criticality" Path="ChecksCriticality"/>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.DataPoint" Qualifier="BarriersProgress">
+          <Record Type="UI.DataPointType">
+            <PropertyValue Property="Value" Path="BarriersSuccess"/>
+            <PropertyValue Property="Title" String="Успешность барьеров"/>
+            <PropertyValue Property="TargetValue" Path="BarriersAmount"/>
+            <PropertyValue Property="Visualization" EnumMember="UI.VisualizationType/Progress"/>
+            <PropertyValue Property="Criticality" Path="BarriersCriticality"/>
+          </Record>
+        </Annotation>
+
+        <!-- [Removed, best-practices pass] UI.Chart Qualifier=ChecksProgressChart/
+             BarriersProgressChart (Bullet chart defs) deleted as dead: grepped the
+             whole repo for any AnnotationPath="@UI.Chart..." or manifest.json Chart
+             facet config referencing either qualifier - zero hits anywhere. Neither
+             UI.Facets nor UI.HeaderFacets nor UI.LineItem below ever points at them;
+             they were scaffolded but never wired into any facet, so sap.ui.generic
+             .template has no way to ever render them. The DataPoint pair right above
+             (Qualifier=ChecksProgress/BarriersProgress) is the one actually consumed
+             - see UI.LineItem's DataFieldForAnnotation records further down. -->
+
+        <!-- [Fix] IsActiveEntity/HasDraftEntity added so the List Report
+             search bar can actually filter drafts vs active objects - without
+             this, the SmartFilterBar had no field for it at all, even though
+             the List Report's own collection already surfaces both (see
+             serve.py _resolve_source's CheckRoots branch). -->
+        <!-- [Fix] IsActiveEntity/HasDraftEntity removed from SelectionFields.
+             Verified by reading the actual ListReport controller source
+             (sap/suite/ui/generic/template/library-preload.js): the
+             "Статус редактирования" (EditState) quick filter is driven
+             ENTIRELY by a hardcoded SegmentedButton control (looked up by the
+             literal key "EditState") whose onBeforeRebindTable handler
+             manually builds the IsActiveEntity/HasDraftEntity/SiblingEntity
+             $filter clauses itself - it never reads UI.SelectionFields for
+             this. These two PropertyPaths were dead weight left over from
+             before that mechanism was understood, and worse than dead: since
+             SmartFilterBar renders one plain checkbox per SelectionFields
+             entry regardless, a user could tick "Активная версия" (manual
+             IsActiveEntity=true) while the EditState button is set to
+             "Draft only" (IsActiveEntity=false) and get a silently
+             self-contradictory filter - always zero rows, no error. -->
+        <Annotation Term="UI.SelectionFields">
+          <Collection>
+            <PropertyPath>DocId</PropertyPath>
+            <PropertyPath>Date</PropertyPath>
+            <PropertyPath>LpcKey</PropertyPath>
+            <PropertyPath>ProfKey</PropertyPath>
+            <PropertyPath>LocationName</PropertyPath>
+          </Collection>
+        </Annotation>
+
+        <Annotation Term="UI.Facets">
+          <Collection>
+            <Record Type="UI.ReferenceFacet">
+              <PropertyValue Property="ID" String="GeneralSection"/>
+              <PropertyValue Property="Label" String="Основная информация"/>
+              <!-- [W1 — EMPIRICAL FIX] БЫЛО: "to_Basic/@UI.FieldGroup#General"
+                   (facet через composition-навигацию) — SmartField не получал
+                   BindingContext для transient Root (SAPUI5 1.71 + OData v2),
+                   форма не рендерилась. СТАЛО: FieldGroup прямо на CheckRoot
+                   (поля-прокси Basic, см. ZI_CheckRoot.ddls.asddls). -->
+              <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#General"/>
+            </Record>
+            <Record Type="UI.ReferenceFacet">
+              <PropertyValue Property="ID" String="CheckRowsSection"/>
+              <PropertyValue Property="Label" String="Проверки"/>
+              <PropertyValue Property="Target" AnnotationPath="to_Checks/@UI.LineItem"/>
+              <Annotation Term="UI.Hidden" Path="ChecksHidden"/>
+            </Record>
+            <Record Type="UI.ReferenceFacet">
+              <PropertyValue Property="ID" String="BarriersSection"/>
+              <PropertyValue Property="Label" String="Барьеры"/>
+              <PropertyValue Property="Target" AnnotationPath="to_Barriers/@UI.LineItem"/>
+              <Annotation Term="UI.Hidden" Path="BarriersHidden"/>
+            </Record>
+          </Collection>
+        </Annotation>
+
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/DocId">
+        <Annotation Term="Common.Label" String="№ документа"/>
+      </Annotations>
+
+      <!-- [Basic-proxy] Форма редактирования — поля-прокси прямо на
+           CheckRoot (см. "EMPIRICAL FIX" выше и в ZI_CheckRoot.ddls.asddls),
+           не на CheckBasic. -->
+      <Annotations Target="ZCheckService.CheckRoot">
+        <Annotation Term="UI.FieldGroup" Qualifier="General">
+          <Record Type="UI.FieldGroupType">
+            <PropertyValue Property="Data">
+              <Collection>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ObservedFullname"/><PropertyValue Property="Label" String="ФИО проверяемого"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ObserverFullname"/><PropertyValue Property="Label" String="ФИО инспектора"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Date"/>            <PropertyValue Property="Label" String="Дата проверки"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Time"/>            <PropertyValue Property="Label" String="Время проверки"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="LpcText"/>         <PropertyValue Property="Label" String="Уровень КПР"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="LocationName"/>    <PropertyValue Property="Label" String="Местоположение"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="TimezoneText"/>    <PropertyValue Property="Label" String="Часовой пояс"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ProfText"/>        <PropertyValue Property="Label" String="Профессия"/></Record>
+                <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Equipment"/>       <PropertyValue Property="Label" String="Оборудование"/></Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix, use-case pass] Три ObjectStatus-баджа (Создано интеграцией/
+           Есть неуспешные проверки/барьеры) вынесены из FieldGroup#General
+           ("Основная информация" — надо было прокручивать форму, чтобы их
+           увидеть) в отдельный FieldGroup#StatusBadges, показанный через
+           UI.HeaderFacets ниже — рендерится прямо в шапке Object Page, видно
+           сразу при открытии записи, без скролла/клика по вкладке. Те же
+           самые DataField-записи (Value/Label/Criticality Path/UI.Hidden
+           Path), просто в своём собственном FieldGroup вместо общего с
+           текстовыми полями формы - see check-root.xml git history for the
+           original inline-in-General-form placement and the full
+           Criticality/ObjectStatus rationale (constant EnumMember doesn't
+           render an icon in this SAPUI5 1.71.84 build, only Path does). -->
+      <Annotations Target="ZCheckService.CheckRoot">
+        <Annotation Term="UI.FieldGroup" Qualifier="StatusBadges">
+          <Record Type="UI.FieldGroupType">
+            <PropertyValue Property="Data">
+              <Collection>
+                <Record Type="UI.DataField">
+                  <PropertyValue Property="Value" Path="ThisIsIntegrationData"/>
+                  <PropertyValue Property="Label" String="Создано интеграцией"/>
+                  <PropertyValue Property="Criticality" Path="IntegrationCriticality"/>
+                  <Annotation Term="UI.Hidden" Path="IntegrationBadgeHidden"/>
+                </Record>
+                <Record Type="UI.DataField">
+                  <PropertyValue Property="Value" Path="HasErrorChecks"/>
+                  <PropertyValue Property="Label" String="Есть неуспешные проверки"/>
+                  <PropertyValue Property="Criticality" Path="ChecksErrorCriticality"/>
+                  <Annotation Term="UI.Hidden" Path="ChecksErrorBadgeHidden"/>
+                </Record>
+                <Record Type="UI.DataField">
+                  <PropertyValue Property="Value" Path="HasErrorBarriers"/>
+                  <PropertyValue Property="Label" String="Есть неуспешные барьеры"/>
+                  <PropertyValue Property="Criticality" Path="BarriersErrorCriticality"/>
+                  <Annotation Term="UI.Hidden" Path="BarriersErrorBadgeHidden"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix, use-case pass] UI.HeaderFacets - classic Fiori Elements
+           (sap.suite.ui.generic.template) renders this collection directly
+           in the Object Page header content area, visible the instant the
+           page opens, distinct from UI.Facets' scrollable/tabbed sections
+           below. Confirmed real and applicable to this exact OData V2 +
+           1.71.84 stack (not V4/sap.fe-only) via SAP-docs GitHub
+           docs/06_SAP_Fiori_Elements/header-facets-a4e5efd.md (OData V2
+           article, exact XML shape) and independently via
+           sap/suite/ui/generic/template/js/AnnotationHelper-dbg.js on the
+           real 1.71.84 CDN, which checks for
+           "com.sap.vocabularies.UI.v1.HeaderFacets" by name when building
+           stable control IDs - i.e. the classic template genuinely walks
+           this annotation. -->
+      <Annotations Target="ZCheckService.CheckRoot">
+        <Annotation Term="UI.HeaderFacets">
+          <Collection>
+            <Record Type="UI.ReferenceFacet">
+              <PropertyValue Property="ID" String="StatusBadgesHeaderFacet"/>
+              <PropertyValue Property="Target" AnnotationPath="@UI.FieldGroup#StatusBadges"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/ObservedPerner">
+        <Annotation Term="Common.Label"    String="Табельный № проверяемого"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/ObserverPerner">
+        <Annotation Term="Common.Label"    String="Табельный № инспектора"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+      </Annotations>
+
+      <!-- [Bug fix] SearchSupported="true" (в старой модели было false, отчего
+           type-ahead суггест не мог заработать даже с startSuggestion — см.
+           обсуждение бага "суггест не работает"). Фронт резолвит ФИО в *Perner
+           через InOut на type-ahead, а не только через модальный F4. -->
+      <Annotations Target="ZCheckService.CheckRoot/ObservedFullname">
+        <Annotation Term="Common.Label"    String="ФИО проверяемого"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Выбор проверяемого"/>
+            <PropertyValue Property="CollectionPath" String="Persons"/>
+            <PropertyValue Property="SearchSupported" Bool="true"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ObservedFullname"/>
+                  <PropertyValue Property="ValueListProperty"  String="Fio"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ObservedPerner"/>
+                  <PropertyValue Property="ValueListProperty"  String="Pernr"/>
+                </Record>
+                <Record Type="Common.ValueListParameterFilterOnly">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Date"/>
+                  <PropertyValue Property="ValueListProperty"  String="ActiveFrom"/>
+                </Record>
+                <Record Type="Common.ValueListParameterFilterOnly">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Date"/>
+                  <PropertyValue Property="ValueListProperty"  String="ActiveTo"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/ObserverFullname">
+        <Annotation Term="Common.Label"    String="ФИО инспектора"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Выбор инспектора"/>
+            <PropertyValue Property="CollectionPath" String="Persons"/>
+            <PropertyValue Property="SearchSupported" Bool="true"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ObserverFullname"/>
+                  <PropertyValue Property="ValueListProperty"  String="Fio"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ObserverPerner"/>
+                  <PropertyValue Property="ValueListProperty"  String="Pernr"/>
+                </Record>
+                <Record Type="Common.ValueListParameterFilterOnly">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Date"/>
+                  <PropertyValue Property="ValueListProperty"  String="ActiveFrom"/>
+                </Record>
+                <Record Type="Common.ValueListParameterFilterOnly">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Date"/>
+                  <PropertyValue Property="ValueListProperty"  String="ActiveTo"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/Date">
+        <Annotation Term="Common.Label"    String="Дата проверки"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/Time">
+        <Annotation Term="Common.Label" String="Время проверки"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+      </Annotations>
+
+      <!-- [Bug fix E] LpcKey — прокси-ключ, форма (FieldGroup#General) показывает
+           LpcText, не LpcKey (см. ниже). Common.Required оставлен только на
+           отображаемом поле LpcText — тот же паттерн, что LocationKey/LocationName,
+           Timezone/TimezoneText, ProfKey/ProfText (везде Required только на *Text/
+           *Name, не на ключе-прокси). Раньше Required стоял на ОБОИХ LpcKey и
+           LpcText — RequiredFieldsRule.js (список читается из ODataMetaModel)
+           находил два required-свойства с одинаковым Label "Уровень КПР" и
+           показывал одинаковое сообщение дважды в списке "Сообщения". -->
+      <Annotations Target="ZCheckService.CheckRoot/LpcKey">
+        <Annotation Term="Common.Label"    String="Уровень КПР"/>
+        <Annotation Term="Common.Text" Path="LpcText">
+          <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextOnly"/>
+        </Annotation>
+        <!-- [Fix, best-practices pass] PkLevels is a small, stable, closed
+             enumeration (5 rows: КПР-0..4) - a textbook case for
+             Common.ValueListWithFixedValues. With this set, SmartField
+             renders a plain sap.m.Select (native dropdown, opens instantly,
+             no dialog round-trip) instead of an Input+F4 button that opens
+             the full ValueHelpDialog for what is, functionally, a 5-item
+             enum. Left OFF Persons/Locations/CheckTypes/BarrierTypes -
+             those are genuinely searchable/growable reference lists (multi-
+             field filter UI, could scale past what a dropdown should hold)
+             where the F4 dialog is the right tool. -->
+        <Annotation Term="Common.ValueListWithFixedValues" Bool="true"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Уровень КПР"/>
+            <PropertyValue Property="CollectionPath" String="PkLevels"/>
+            <PropertyValue Property="SearchSupported" Bool="false"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="LpcKey"/>
+                  <PropertyValue Property="ValueListProperty"  String="PkLevel"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                  <PropertyValue Property="ValueListProperty"  String="PkLevelText"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Bug fix E] LpcText — read-only display-text proxy для LpcKey (тот же
+           паттерн, что LocationName у LocationKey, см. ниже) — НЕ отдельное
+           обязательное поле. LpcKey уже несёт Common.Required=true выше; если
+           оба поля помечены Required, RequiredFieldsRule.js (клиентский гейт
+           обязательных полей, читает список из ODataMetaModel) находит ДВА
+           required-свойства с одинаковым Label "Уровень КПР" и показывает
+           одно и то же сообщение дважды в списке "Сообщения" на пустой форме. -->
+      <Annotations Target="ZCheckService.CheckRoot/LpcText">
+        <Annotation Term="Common.Label"    String="Уровень КПР"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+        <!-- [Fix, best-practices pass] Same fixed-list rationale as LpcKey
+             above - LpcText is the property the edit form actually renders
+             (see "Bug fix E" comment above), so this is the one that turns
+             the visible field into a dropdown. -->
+        <Annotation Term="Common.ValueListWithFixedValues" Bool="true"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Уровень КПР"/>
+            <PropertyValue Property="CollectionPath" String="PkLevels"/>
+            <PropertyValue Property="SearchSupported" Bool="false"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="LpcText"/>
+                  <PropertyValue Property="ValueListProperty"  String="PkLevelText"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="LpcKey"/>
+                  <PropertyValue Property="ValueListProperty"  String="PkLevel"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/LocationName">
+        <Annotation Term="Common.Label"    String="Местоположение"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Местоположение"/>
+            <PropertyValue Property="CollectionPath" String="Locations"/>
+            <PropertyValue Property="SearchSupported" Bool="false"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="LocationName"/>
+                  <PropertyValue Property="ValueListProperty"  String="LocationName"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="LocationKey"/>
+                  <PropertyValue Property="ValueListProperty"  String="LocationUuid"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                  <PropertyValue Property="ValueListProperty"  String="LocationCode"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/TimezoneText">
+        <Annotation Term="Common.Label" String="Часовой пояс"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+        <!-- [Fix, best-practices pass] TimeZones is a small closed list (9
+             rows) - dropdown via Common.ValueListWithFixedValues instead of
+             an F4 dialog, same rationale as PkLevels/Professions. -->
+        <Annotation Term="Common.ValueListWithFixedValues" Bool="true"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Часовой пояс"/>
+            <PropertyValue Property="CollectionPath" String="TimeZones"/>
+            <PropertyValue Property="SearchSupported" Bool="false"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="TimezoneText"/>
+                  <PropertyValue Property="ValueListProperty"  String="TimeZoneText"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Timezone"/>
+                  <PropertyValue Property="ValueListProperty"  String="TimeZoneCode"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/ProfText">
+        <Annotation Term="Common.Label" String="Профессия"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+        <!-- [Fix, best-practices pass] Professions is a small closed list (5
+             rows) - dropdown via Common.ValueListWithFixedValues, same
+             rationale as PkLevels/TimeZones. -->
+        <Annotation Term="Common.ValueListWithFixedValues" Bool="true"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Профессия"/>
+            <PropertyValue Property="CollectionPath" String="Professions"/>
+            <PropertyValue Property="SearchSupported" Bool="false"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ProfText"/>
+                  <PropertyValue Property="ValueListProperty"  String="ProfessionText"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ProfKey"/>
+                  <PropertyValue Property="ValueListProperty"  String="ProfessionCode"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckRoot/Equipment">
+        <Annotation Term="Common.Label" String="Оборудование"/>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

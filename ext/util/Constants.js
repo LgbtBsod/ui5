@@ -6,15 +6,11 @@ sap.ui.define([], function () {
                 ENTITY_SETS: {
                         LOCATIONS: "Locations",
                         LOCATION_HIERARCHY: "LocationHierarchy",
-                        CHECK_TYPES: "CheckTypes",
-                        BARRIER_TYPES: "BarrierTypes",
                         CHECK_RESULTS: "CheckResults",
-                        TIME_ZONES: "TimeZones",
-                        PERSONS: "Persons"
+                        TIME_ZONES: "TimeZones"
                 },
 
                 NAV_PROPERTIES: {
-                        BASIC: "to_Basic",
                         CHECK_ROWS: "to_Checks",
                         BARRIERS: "to_Barriers"
                 },
@@ -29,29 +25,14 @@ sap.ui.define([], function () {
                         RESULT_TEXT: "ResultText",
                         COMMENT: "Comment",
 
-                        // Справочные сущности (CheckTypes/BarrierTypes/CheckResults) имеют
-                        // собственные имена code/text полей, кроме общего Category.
-                        CATEGORY: "Category",
-                        CHECK_TYPE_CODE: "CheckTypeCode",
-                        CHECK_TYPE_TEXT: "CheckTypeText",
-                        BARRIER_TYPE_CODE: "BarrierTypeCode",
-                        BARRIER_TYPE_TEXT: "BarrierTypeText",
+                        // Справочная сущность CheckResults (см. SubTableCrud._seedDefaultResultText) -
+                        // собственные имена code/text полей, отдельные от локальных Result/ResultText выше.
                         RESULT_CODE: "ResultCode",
                         RESULT_TEXT_REF: "ResultText",
 
-                        PK_LEVEL: "PkLevel",
-                        PK_LEVEL_TEXT: "PkLevelText",
-                        PK_LEVELS: "PkLevels",
-
-                        PROFESSION_CODE: "ProfessionCode",
-                        PROFESSION_TEXT: "ProfessionText",
-
                         // CheckRoots — read-only pass-through + вычисляемые KPI-поля.
-                        DOC_ID: "DocId",
-                        DATE: "Date",
                         LPC_KEY: "LpcKey",
                         LPC_TEXT: "LpcText",
-                        PROF_KEY: "ProfKey",
                         PROF_TEXT: "ProfText",
                         LOCATION_NAME_ROOT: "LocationName",
                         CHECKS_SUCCESS: "ChecksSuccess",
@@ -78,8 +59,6 @@ sap.ui.define([], function () {
                         BASIC_TIME: "Time",
                         TIMEZONE: "Timezone",
                         TIMEZONE_TEXT: "TimezoneText",
-                        BASIC_LPC_KEY: "LpcKey",
-                        BASIC_PROF_KEY: "ProfKey",
                         LOCATION_KEY: "LocationKey",
                         LOCATION_NAME: "LocationName",
                         PARENT_LOCATION_UUID: "ParentLocationUuid",
@@ -92,23 +71,22 @@ sap.ui.define([], function () {
                         OBSERVER_PERNR: "ObserverPerner",
 
                         LOCATION_UUID: "LocationUuid",
-                        FIO: "Fio",
-                        PERNR: "Pernr",
                         ACTIVE_FROM: "ActiveFrom",
                         ACTIVE_TO: "ActiveTo"
                 },
 
                 RESULT_CODES: {
-                        SATISFACTORY: "X",
-                        UNSATISFACTORY: ""
+                        SATISFACTORY: "X"
                 },
 
                 // Сервер вычисляет BarriersHidden/ChecksHidden только после первого save
-                // (ZI_CheckRoot.cds), поэтому для transient-объекта (до save) правило
-                // дублируется здесь, иначе обе таблицы были бы видимы всё время заполнения
-                // формы. Применяется только когда ODataContextUtils.isTransient(context) —
-                // для сохранённых записей не используется. Значения должны совпадать с
-                // serve_config.py BUSINESS_RULES (CHECKS_HIDDEN_PK_LEVEL, BARRIERS_HIDDEN_PK_LEVELS).
+                // (ZI_CheckRoot.cds), поэтому для нового несохранённого черновика (до save)
+                // правило дублируется здесь, иначе обе таблицы были бы видимы всё время
+                // заполнения формы. Применяется только когда
+                // ODataContextUtils.isUnsavedNewDraft(context) — для сохранённых записей и
+                // edit-черновиков существующих записей не используется. Значения должны
+                // совпадать с serve_config.py BUSINESS_RULES (CHECKS_HIDDEN_PK_LEVEL,
+                // BARRIERS_HIDDEN_PK_LEVELS).
                 TRANSIENT_UX_RULES: {
                         CHECKS_HIDDEN_PK_LEVEL: "",
                         BARRIERS_HIDDEN_PK_LEVELS: ["", "0", "1"]
@@ -121,15 +99,29 @@ sap.ui.define([], function () {
                 },
 
                 ID_SUFFIXES: {
-                        ADD_ENTRY: "::addEntry",
-                        DELETE_ENTRY: "::deleteEntry",
-                        // Не путать с DELETE_ENTRY выше: тот — суффикс кнопок удаления строк
-                        // подтаблиц (SubTableCrud), этот — кнопки "Удалить" в футере ObjectPage.
+                        // [Fix, best-practices pass] ADD_ENTRY ("::addEntry") and
+                        // DELETE_ENTRY ("::deleteEntry") — the SmartTable's OWN native
+                        // toolbar button suffixes — removed as dead: they only existed to
+                        // support the toolbar-button-injection approach SubTableCrud.js no
+                        // longer uses (see that file's top-of-file comment). Not to be
+                        // confused with DELETE_ENTRY_BUTTON below, which is unrelated (the
+                        // ObjectPage footer's own "Удалить" button) and is still live.
                         DELETE_ENTRY_BUTTON: "--deleteEntry",
                         SAVE_BUTTON: "--save",
                         EDIT_BUTTON: "--edit",
                         CANCEL_BUTTON: "--cancel",
-                        CLOSE_COLUMN_BUTTON: "--closeColumn"
+                        CLOSE_COLUMN_BUTTON: "--closeColumn",
+                        // [Fix, use-case pass] extensionAPI.rebind(sId) resolves sId via
+                        // oController.byId(sId) and requires the SmartTable control itself
+                        // (instanceof-checked internally) - the FACET's own id (e.g.
+                        // "CheckRowsSection") resolves to nothing, so rebind() silently
+                        // no-ops. The real local id, per StableIdHelper's
+                        // {type:'ObjectPageTable', subType:'SmartTable'} naming convention,
+                        // is the facet id + this suffix (confirmed live:
+                        // "CheckRowsSection::Table"). Passing the bare facet id was the
+                        // root cause of rows staying invisible until the next full save -
+                        // rebindTable() was simply never being called.
+                        SMART_TABLE: "::Table"
                 },
 
                 FACET_IDS: {

@@ -15,11 +15,38 @@
         "settings": {
           "odataVersion": "2.0",
           "localUri": "localService/metadata.xml",
-          "annotations": ["localAnnotations"]
+          "annotations": [
+            "annotationsDraft",
+            "annotationsListReport",
+            "annotationsCheckRoot",
+            "annotationsCheckItem",
+            "annotationsBarrier",
+            "annotationsReferenceData"
+          ]
         }
       },
-      "localAnnotations": {
-        "uri": "annotation/annotations.xml",
+      "annotationsDraft": {
+        "uri": "annotation/draft.xml",
+        "type": "ODataAnnotation"
+      },
+      "annotationsListReport": {
+        "uri": "annotation/list-report.xml",
+        "type": "ODataAnnotation"
+      },
+      "annotationsCheckRoot": {
+        "uri": "annotation/check-root.xml",
+        "type": "ODataAnnotation"
+      },
+      "annotationsCheckItem": {
+        "uri": "annotation/check-item.xml",
+        "type": "ODataAnnotation"
+      },
+      "annotationsBarrier": {
+        "uri": "annotation/barrier.xml",
+        "type": "ODataAnnotation"
+      },
+      "annotationsReferenceData": {
+        "uri": "annotation/reference-data.xml",
         "type": "ODataAnnotation"
       }
     },
@@ -116,7 +143,42 @@
     },
 
     "extends": {
-      "extensions": {}
+      "extensions": {
+        "sap.ui.controllerExtensions": {
+          "sap.suite.ui.generic.template.ObjectPage.view.Details": {
+            "controllerName": "sap.pc_lite.check.ext.controller.ObjectPageExtension",
+            "sap.ui.generic.app": {
+              "CheckRoots": {
+                "EntitySet": "CheckRoots",
+                "Sections": {
+                  "CheckRowsSection": {
+                    "id": "CheckRowsSection",
+                    "Actions": {
+                      "addCheckRow": {
+                        "id": "addCheckRowAction",
+                        "text": "{{addLabel}}",
+                        "press": "onAddCheckRow",
+                        "requiresSelection": false
+                      }
+                    }
+                  },
+                  "BarriersSection": {
+                    "id": "BarriersSection",
+                    "Actions": {
+                      "addBarrier": {
+                        "id": "addBarrierAction",
+                        "text": "{{addLabel}}",
+                        "press": "onAddBarrier",
+                        "requiresSelection": false
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
 

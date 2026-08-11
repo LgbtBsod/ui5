@@ -28,19 +28,72 @@ html.pcLiteActive body {
         padding-top: var(--pc-lite-banner-height, 2.75rem);
 }
 
+/* [Fix, use-case pass] Было: .sapMPIText центрировался через
+   justify-content/text-align ВНУТРИ своего сегмента (закрашенная/
+   незакрашенная часть — sap.m.ProgressIndicator рендерит два <span>,
+   textLeft внутри .sapMPIBar, textRight внутри .sapMPIBarRemaining, каждый
+   как flex-item СВОЕГО сегмента). При неполном заполнении (напр. "2 из 4",
+   50%) это визуально центрирует подпись на середине ЗАКРАШЕННОЙ половины
+   (т.е. на 25% всей полосы), а не на середине всей полосы целиком — то,
+   что выглядело "не по центру".
+
+   [Fix, use-case pass #2 — ultracode audit] Первая версия этого фикса
+   (position:absolute + width:100% + overflow:VISIBLE на обоих сегментах)
+   оказалась сама багом, подтверждённым живым воспроизведением на реальном
+   ProgressIndicator в двух режимах:
+     - При заполнении ≤50%: framework-правило `.sapMPITextLeft{display:none}`
+       (specificity 0,1,0) проигрывало нашему `.sapMPI .sapMPIText{display:
+       flex}` (0,2,0) — так что оба спана, textLeft И textRight, рендерились
+       ОДНОВРЕМЕННО, оба на 100% ширины .sapMPI, оба flex-центрированы —
+       т.е. в ТОЧНОСТИ друг на друге, разными цветами — двоящийся/размытый
+       текст.
+     - При заполнении >50%: framework грузит sap.m/library.css ПОСЛЕ этого
+       файла (index.html), поэтому его `.sapMPIValueGreaterHalf
+       .sapMPITextRight{display:none}` / `...sapMPITextLeft{display:
+       inline-block}` — та же specificity (0,2,0), что и наше правило —
+       побеждали по порядку источника, откатывая display обратно на
+       inline-block и тихо отключая justify-content/align-items (работают
+       только на flex/grid-контейнерах).
+   Новая версия — вместо того чтобы гонять display через specificity-войну с
+   фреймворком (хрупко, зависит от порядка загрузки CDN-темы) — сознательно
+   держит ОБА спана видимыми всегда и полагается на overflow:hidden на самих
+   сегментах (.sapMPIBar/.sapMPIBarRemaining) как единственный механизм
+   обрезки. Раз оба спана — это ПОЛНАЯ, ОДИНАКОВО спозиционированная копия
+   текста (top:0 left:0 100%×100% от .sapMPI — сегменты специально НЕ
+   получают position, иначе стали бы containing block'ом сами и width:100%
+   считался бы от их узкой доли, а не от всей полосы), overflow:hidden
+   каждого сегмента показывает ровно ту часть текста, что физически
+   попадает в его собственную (flex-basis) ширину — закрашенный сегмент
+   показывает белую часть, незакрашенный — тёмную, и т.к. это одна и та же
+   строка в одной и той же позиции, куски всегда стыкуются в единый текст
+   БЕЗ ручной подгонки координат. Заодно это именно то двухцветное поведение
+   ("часть фразы белым, часть чёрным"), которое попросили — просто починка
+   центрирования "по пути" сломала встроенный механизм фреймворка, который
+   его и давал; теперь мы не боремся с фреймворком, а используем ту же саму
+   идею (clip по сегменту), только не по своей, а по ВСЕЙ ширине полосы, для
+   центрирования независимо от процента заполнения.
+   Специфичность .sapMPIBar .sapMPIText / .sapMPIBarRemaining .sapMPIText —
+   (0,3,0), заведомо выше любого framework-правила уровня (0,1,0)/(0,2,0)
+   независимо от порядка загрузки — display больше не может откатиться. */
 .sapMPI {
+        position: relative;
         overflow: visible;
 }
 .sapMPI .sapMPIBar,
 .sapMPI .sapMPIBarRemaining {
-        overflow: visible;
-        justify-content: center;
+        overflow: hidden;
 }
-.sapMPI .sapMPIText {
-        position: relative;
+.sapMPI .sapMPIBar .sapMPIText,
+.sapMPI .sapMPIBarRemaining .sapMPIText {
+        display: flex;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
         z-index: 1;
-        overflow: visible;
-        text-overflow: clip;
         text-align: center;
 }
 
@@ -88,9 +141,18 @@ html.pcLiteActive body {
         display: none !important;
 }
 
-/* Расширенный поиск в F4 (ValueHelpDialog): подписи полей обрезаются
-   эллипсисом в узкой grid-колонке лейбла — переносим на вторую строку
-   вместо потери текста. */
+/* [Fix, best-practices pass] Подписи полей обрезаются эллипсисом в узкой
+   grid-колонке лейбла — переносим на вторую строку вместо потери текста.
+   Было задокументировано как затрагивающее только расширенный поиск в F4
+   (ValueHelpDialog) — неточность: .sapUiCompFilterLabel это стандартный
+   класс sap.ui.comp.filterbar.FilterBar, а SmartFilterBar (главный фильтр
+   List Report) от него наследуется и рендерит те же лейблы тем же классом,
+   так что правило всегда действовало и на главный фильтр тоже (подтверждено
+   живым DOM-инспектированием — 7 совпадений, все из listReportFilter, ни
+   одного из диалога). Оставлено намеренно широким: перенос на вторую
+   строку — то же самое улучшение читаемости и там, где длинный лейбл не
+   помещается в узкую колонку — просто исправлена документация, чтобы не
+   вводить в заблуждение при следующей правке этого правила. */
 .sapUiCompFilterLabel {
         white-space: normal;
         text-overflow: clip;

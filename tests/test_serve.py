@@ -59,10 +59,19 @@ class ResolveCheckItemTests(unittest.TestCase):
         out = serve.resolve_check_item({"Code": "VISUAL_INSPECTION", "RawText": "", "Result": None})
         self.assertEqual(out["CommentFieldControl"], 3)
 
-    def test_deletable_true_only_before_a_result_is_recorded(self):
+    def test_deletable_true_regardless_of_result(self):
+        # [Fix, use-case pass] Used to be True only while Result was still
+        # unset (Result is None) - a proxy for "before the OLD add-row
+        # dialog's Confirm step". The NEW add-row dialog (SubTableCrud.js)
+        # defaults Result to "X" at createEntry() time, so a row now NEVER
+        # reaches the server with Result still None - the old proxy left
+        # Delete permanently disabled for every row, old and new alike.
+        # Deletability is now unconditional; the draft-node's own Save/
+        # Cancel boundary plus the native button's confirmation dialog are
+        # the actual safeguards, not a Result-presence check.
         self.assertTrue(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": None})["Deletable"])
-        self.assertFalse(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": "X"})["Deletable"])
-        self.assertFalse(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": ""})["Deletable"])
+        self.assertTrue(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": "X"})["Deletable"])
+        self.assertTrue(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": ""})["Deletable"])
 
 
 class ResolveBarrierTests(unittest.TestCase):
@@ -91,8 +100,8 @@ class ResolveBarrierTests(unittest.TestCase):
         self.assertEqual(failing["CommentFieldControl"], 7)
         self.assertEqual(unassessed["CommentFieldControl"], 3)
         self.assertTrue(unassessed["Deletable"])
-        self.assertFalse(satisfactory["Deletable"])
-        self.assertFalse(failing["Deletable"])
+        self.assertTrue(satisfactory["Deletable"])
+        self.assertTrue(failing["Deletable"])
 
 
 class RootEtagStringTests(unittest.TestCase):
@@ -576,6 +585,74 @@ class CreateDraftPreparationReinvocationTests(unittest.TestCase):
         self.assertEqual(resp["error"]["code"], "DRAFT_LOCKED")
 
 
+class HandlersRefactorRegressionTests(unittest.TestCase):
+    """[Fix] Two regressions caught by a research pass auditing the
+    backend/handlers.py Command-pattern refactor (introduced by other work
+    during a real multi-day gap between sessions) against the original
+    dispatch.py it replaced - neither was caught by the 64 tests passing at
+    the time, since no existing test exercised either exact scenario."""
+
+    def test_activation_of_unknown_draft_uuid_returns_404_not_200(self):
+        # [Fix] _handle_activate previously fell through straight to
+        # ResponseBuilder.ok(result_row) without checking result_row is None
+        # first (unlike its sibling _process_draft_result, used by Prepare/
+        # Discard, which already had this check) - a nonexistent DraftUUID
+        # silently returned 200 with a null body and even fired the
+        # "Черновик сохранён" success sap-message, instead of 404.
+        status, resp, _c = serve.dispatch_request(
+            "POST", "CheckRootActivationAction?DraftUUID=guid'11111111-1111-1111-1111-111111111111'",
+        )
+        self.assertEqual(status, 404)
+        self.assertIsNotNone(resp)
+
+    def test_unmatched_route_returns_404_not_400(self):
+        # [Fix] The dispatcher's no-handler-matched fallback silently
+        # switched from a plain 404 (the pre-refactor original, matching
+        # SAP Gateway convention for a nonexistent resource path) to a 400
+        # with an added error.code/lang shape - unguarded by any test in
+        # either direction. Pinned back to 404 for behavioral parity.
+        status, resp, _c = serve.dispatch_request("GET", "ThisRouteDoesNotExist")
+        self.assertEqual(status, 404)
+        self.assertIn("value", resp["error"]["message"])
+
+    def test_owner_can_delete_their_own_draft_via_x_mock_user_header(self):
+        # [Fix] DeleteHandler._delete_root hardcoded
+        # state._resolve_mock_user({}) (an empty dict) instead of threading
+        # the real request headers through - so the foreign-lock re-check
+        # always compared against the DEFAULT MOCK_USER identity, not
+        # whoever the X-Mock-User header actually said. A user deleting
+        # their OWN non-default-identity draft got a false 409 DRAFT_LOCKED
+        # instead of 204, because the code compared "MOCK_USER != PETROV"
+        # instead of "PETROV != PETROV". (The mirror-image "foreign user
+        # rejected" test happened to still pass, by coincidence - the
+        # hardcoded default also differs from a real foreign user, so it
+        # never actually proved the header was being read.)
+        root_id = "delete-header-regression-root"
+        serve.store["CheckRoots"][root_id] = {
+            "RootId": root_id, "ActiveUUID": root_id, "DraftUUID": serve.ZERO_GUID,
+            "IsActiveEntity": True, "DocId": "DELETE-HDR-TEST", "Status": "OK",
+            "LastChangedAt": serve.odata_date(), "CreatedAt": serve.odata_date(),
+        }
+        serve.store["CheckBasics"][root_id] = {"RootId": root_id, "LastChangedAt": serve.odata_date()}
+        try:
+            _status, resp, _c = serve.dispatch_request(
+                "POST", "CheckRootPreparationAction?ActiveUUID=guid'%s'" % root_id,
+                headers={"x-mock-user": "PETROV"},
+            )
+            draft_uuid = resp["d"]["DraftUUID"]
+            draft_key = "CheckRoots(ActiveUUID=guid'%s',DraftUUID=guid'%s')" % (root_id, draft_uuid)
+
+            status, resp, _c = serve.dispatch_request(
+                "DELETE", draft_key, headers={"x-mock-user": "PETROV", "if-match": "*"},
+            )
+            self.assertEqual(status, 204, "owner deleting their own draft must succeed, not 409")
+            self.assertNotIn(draft_uuid, serve.draft_store["CheckRoots"])
+        finally:
+            serve.store["CheckRoots"].pop(root_id, None)
+            serve.store["CheckBasics"].pop(root_id, None)
+            serve.draft_store["CheckRoots"].pop(root_id, None)
+
+
 class ForeignUserWriteLockTests(unittest.TestCase):
     """[Fix, exhaustive-sweep pass] sap.ui.generic.app's TransactionController.
     editEntity only runs the foreign-lock check ONCE, at the initial Edit
@@ -877,6 +954,100 @@ class BatchChangesetAtomicityTests(unittest.TestCase):
             self.assertNotIn((self.root_id, item_id_2), serve.store["CheckItems"])
         finally:
             serve.store["CheckItems"].pop((self.root_id, item_id_2), None)
+
+
+class BadgeCriticalityTests(unittest.TestCase):
+    """[Fix, minimal-extension-set pass] Checks/Barriers/Integration error
+    badges (annotations.xml check-root.xml FieldGroup#General) need a Path-
+    bound Criticality field to render as a colored sap.m.ObjectStatus icon
+    instead of a plain checkbox - this only surfaced live because the field
+    was computed in compute_check_root_view() but had no matching <Property>
+    in metadata.xml, so the mock server silently dropped it from the wire
+    response. No test covered HasErrorChecks/HasErrorBarriers or their
+    Criticality companions at all before this."""
+
+    def setUp(self):
+        self.root_id = "badge-criticality-test-root"
+        serve.store["CheckRoots"][self.root_id] = {
+            "RootId": self.root_id, "ActiveUUID": self.root_id, "DraftUUID": serve.ZERO_GUID,
+            "IsActiveEntity": True, "DocId": "BADGE-TEST", "Status": "OK",
+            "LastChangedAt": serve.odata_date(), "CreatedAt": serve.odata_date(),
+        }
+        serve.store["CheckBasics"][self.root_id] = {"RootId": self.root_id, "LastChangedAt": serve.odata_date()}
+
+    def tearDown(self):
+        serve.store["CheckRoots"].pop(self.root_id, None)
+        serve.store["CheckBasics"].pop(self.root_id, None)
+        serve.store["CheckItems"].pop((self.root_id, "badge-item"), None)
+        serve.store["Barriers"].pop((self.root_id, "badge-barrier"), None)
+
+    def test_no_error_rows_gives_hidden_badge_and_none_criticality(self):
+        out = serve.compute_check_root_view(self.root_id)
+        self.assertFalse(out["HasErrorChecks"])
+        self.assertTrue(out["ChecksErrorBadgeHidden"])
+        self.assertEqual(out["ChecksErrorCriticality"], 0)
+        self.assertEqual(out["IntegrationCriticality"], 0)
+
+    def test_unsatisfactory_check_result_gives_visible_error_criticality_badge(self):
+        serve.store["CheckItems"][(self.root_id, "badge-item")] = {
+            "RootId": self.root_id, "ItemId": "badge-item", "Code": "VISUAL_INSPECTION",
+            "RawText": "", "Comment": "", "Result": "",  # "" = Неудовлетворительно
+            "DraftUUID": serve.ZERO_GUID, "LastChangedAt": serve.odata_date(),
+        }
+        out = serve.compute_check_root_view(self.root_id)
+        self.assertTrue(out["HasErrorChecks"])
+        self.assertFalse(out["ChecksErrorBadgeHidden"])
+        # 1 = ValueState.Error via ODataControlFactory's numeric Criticality
+        # map (0=None/1=Error/2=Warning/3=Success) - same convention as the
+        # already-working ChecksCriticality/BarriersCriticality/
+        # StatusCriticality fields this mirrors.
+        self.assertEqual(out["ChecksErrorCriticality"], 1)
+
+    def test_unsatisfactory_barrier_result_gives_visible_error_criticality_badge(self):
+        serve.store["Barriers"][(self.root_id, "badge-barrier")] = {
+            "RootId": self.root_id, "ItemId": "badge-barrier", "Code": "PHYSICAL_BARRIER",
+            "RawText": "", "Comment": "", "Result": "",
+            "DraftUUID": serve.ZERO_GUID, "LastChangedAt": serve.odata_date(),
+        }
+        out = serve.compute_check_root_view(self.root_id)
+        self.assertTrue(out["HasErrorBarriers"])
+        self.assertFalse(out["BarriersErrorBadgeHidden"])
+        self.assertEqual(out["BarriersErrorCriticality"], 1)
+
+    def test_criticality_fields_declared_in_metadata_so_they_reach_the_wire(self):
+        # [Fix] The actual regression: compute_check_root_view() alone isn't
+        # sufficient - the mock server's response serialization is scoped to
+        # metadata.xml's declared <Property> list per EntityType, so a
+        # computed dict key with no matching declaration there is silently
+        # dropped before it ever reaches the client, even though this exact
+        # unit-level call correctly returns it. Guards against that class of
+        # bug recurring for these 3 fields specifically.
+        metadata = serve.read_static_file("localService/metadata.xml")[0].decode("utf-8")
+        for field in ("ChecksErrorCriticality", "BarriersErrorCriticality", "IntegrationCriticality"):
+            self.assertIn('Name="%s"' % field, metadata, "%s must be declared in metadata.xml or it never reaches the wire" % field)
+
+
+class ApplyOrderbyTests(unittest.TestCase):
+    """[Fix, use-case pass] apply_orderby() called `functools.cmp_to_key`
+    with only `from functools import lru_cache` imported - a real NameError
+    on every $orderby request, undetected by any test until the new
+    standard ValueHelpDialog (see SubTableCrud.js) started sending $orderby
+    for its own default column sort and hit this live (server log:
+    "NameError: name 'functools' is not defined")."""
+
+    def test_orderby_does_not_raise_and_sorts_ascending(self):
+        data = [{"Text": "Проверка документов"}, {"Text": "Аудит процессов"}, {"Text": "Опрос персонала"}]
+        out = serve.apply_orderby(data, "Text asc")
+        self.assertEqual([r["Text"] for r in out], ["Аудит процессов", "Опрос персонала", "Проверка документов"])
+
+    def test_orderby_desc(self):
+        data = [{"Text": "A"}, {"Text": "C"}, {"Text": "B"}]
+        out = serve.apply_orderby(data, "Text desc")
+        self.assertEqual([r["Text"] for r in out], ["C", "B", "A"])
+
+    def test_orderby_none_returns_input_unchanged(self):
+        data = [{"Text": "B"}, {"Text": "A"}]
+        self.assertEqual(serve.apply_orderby(data, None), data)
 
 
 if __name__ == "__main__":

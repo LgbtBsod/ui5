@@ -64,7 +64,21 @@ def _requote_query(parsed_query):
 
 
 class FioriHandler(BaseHTTPRequestHandler):
-    protocol_version = "HTTP/1.1"
+    # [Fix, preview-hang] HTTPServer below is single-threaded (no
+    # ThreadingMixIn - intentional, see draft_service's sap-message/etag
+    # "mailbox" pattern which relies on no concurrent request interleaving).
+    # HTTP/1.1 here previously meant keep-alive: BaseHTTPRequestHandler.handle()
+    # loops on handle_one_request() after the response, blocking on
+    # self.rfile.readline() for a second request on the SAME connection. With
+    # a single accept-loop and no socket timeout anywhere, one client that
+    # left the connection open (idle keep-alive, exactly what browsers do)
+    # permanently wedged serve_forever() - every other request, from any
+    # client, hung forever waiting for that one accept loop to come back
+    # around. HTTP/1.0 forces "Connection: close" after every response, so
+    # handle() always returns immediately - no keep-alive, no wedge. This is
+    # a local dev mock server; the lost connection-reuse performance doesn't
+    # matter, correctness does.
+    protocol_version = "HTTP/1.0"
 
     def log_request(self, code='-', size='-'):
         if self.path.startswith(config.ODATA_PREFIX) or self.path.startswith("/annotation/"):
@@ -180,12 +194,22 @@ class FioriHandler(BaseHTTPRequestHandler):
                 self.send_error(404, "metadata.xml not found")
             return
 
-        if path == "/annotation/annotations.xml":
-            result = read_static_file("annotation/annotations.xml")
+        # [Fix, minimal-extension-set pass] Was a single hardcoded route for
+        # "/annotation/annotations.xml" only. That file has since been split
+        # into several concern-scoped files (draft.xml, list-report.xml,
+        # check-root.xml, check-item.xml, barrier.xml, reference-data.xml -
+        # see manifest.json's dataSources, which now lists all of them in the
+        # model's "annotations" array) for readability. Generalized to match
+        # any *.xml directly under /annotation/ so the route doesn't need to
+        # be touched again the next time a file is added, split, or renamed
+        # there - commonpath() in read_static_file already guards against
+        # path traversal, so this is no less safe than the single-file route.
+        if path.startswith("/annotation/") and path.endswith(".xml"):
+            result = read_static_file(path.lstrip("/"))
             if result:
                 self._send_xml(200, result[0])
             else:
-                self.send_error(404, "annotations.xml not found")
+                self.send_error(404, f"{path} not found")
             return
 
         if path == config.ODATA_PREFIX or path == config.ODATA_PREFIX + "/":

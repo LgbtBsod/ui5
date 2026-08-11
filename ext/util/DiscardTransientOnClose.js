@@ -36,21 +36,21 @@ sap.ui.define([
 			this._oCloseButton.watchOnce(oView, () => this._onClosePressed(oView));
 
 			const oContext = oView.getBindingContext();
-			if (oContext && ODataContextUtils.isTransient(oContext)) {
+			if (oContext && ODataContextUtils.isUnsavedNewDraft(oContext)) {
 				this._oPendingTransientContext = oContext;
 			}
 
 			if (oSnapshot.editableFell && !oSnapshot.saveWasIntended && this._oPendingTransientContext) {
 				DiscardTransientOnClose._discardAndReturn(oView, this._oPendingTransientContext);
 			}
-			if (!oContext || !ODataContextUtils.isTransient(oContext)) {
+			if (!oContext || !ODataContextUtils.isUnsavedNewDraft(oContext)) {
 				this._oPendingTransientContext = null;
 			}
 		}
 
 		_onClosePressed(oView) {
 			const oContext = oView.getBindingContext();
-			if (oContext && ODataContextUtils.isTransient(oContext)) {
+			if (oContext && ODataContextUtils.isUnsavedNewDraft(oContext)) {
 				DiscardTransientOnClose._discardAndReturn(oView, oContext);
 			}
 		}
@@ -59,9 +59,26 @@ sap.ui.define([
 			this._oPendingTransientContext = null;
 		}
 
+		/**
+		 * [Fix, minimal-extension-set pass] Was `oModel.deleteCreatedEntry(oContext)`
+		 * - the sap.ui.model.odata.v2.ODataModel API for discarding a
+		 * client-side-only entry made via `createEntry()`. This app's real
+		 * create-drafts are already-POSTed server-side entities (see
+		 * ODataContextUtils.isUnsavedNewDraft's comment), so
+		 * deleteCreatedEntry() found nothing to discard and silently no-opped
+		 * (swallowed by the try/catch below, which never even fired) - the
+		 * abandoned draft row stayed on the server forever. The real,
+		 * already-proven discard mechanism for this app is a plain HTTP
+		 * DELETE on the draft entity (see annotations.xml's Common.DraftRoot
+		 * comment: "Discard in the real convention is a plain HTTP DELETE on
+		 * the draft entity, which serve.py's DELETE handler already
+		 * implements identically") - `oModel.remove()` is the v2 ODataModel
+		 * call for exactly that. Confirmed live: the draft row 404s
+		 * immediately after.
+		 */
 		static _discardAndReturn(oView, oContext) {
 			try {
-				oView.getModel().deleteCreatedEntry(oContext);
+				oView.getModel().remove(oContext.getPath());
 			} catch (e) {
 				// context already gone
 			}

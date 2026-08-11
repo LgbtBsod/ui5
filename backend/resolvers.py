@@ -5,22 +5,39 @@ Depends on config.py, state.py, odata_format.py only (draft_service.py
 depends on this module, not the other way around, to avoid an import cycle
 between "read a draft's admin data" and "mutate a draft").
 
-Refactored with type hints (PEP 484), Strategy Pattern for filter evaluation
-(filter_strategies.py), and reduced cyclomatic complexity by extracting helper
-functions for filter evaluation and expand operations.
+Refactored with type hints (PEP 484) and reduced cyclomatic complexity by
+extracting helper functions for filter evaluation and expand operations.
+
+[Fix, best-practices pass] The docstring used to also claim a "Strategy
+Pattern for filter evaluation (filter_strategies.py)" - that module existed
+as a full parallel implementation (FilterStrategyFactory + one class per
+operator) but was never actually wired up: eval_one_filter/apply_filter
+below have always been, and still are, a plain regex-match chain. The
+import and the never-read `_filter_factory` global were dead scaffolding
+left over from an incomplete refactor - removed along with
+filter_strategies.py itself (zero other consumers anywhere in the repo).
 """
 from __future__ import annotations
 
 import re
 from typing import Any, Dict, List, Optional, Tuple, Callable
-from functools import lru_cache
+# [Fix, use-case pass] Was `from functools import lru_cache` - lru_cache was
+# never actually used anywhere in this file (dead import), while
+# apply_orderby() below calls `functools.cmp_to_key` - the MODULE, never
+# imported under that name - a real, live NameError on every $orderby query.
+# It went undetected because no client this session ever sent one until the
+# new standard sap.ui.comp.valuehelpdialog.ValueHelpDialog (replacing the
+# old custom TypePicker, which sorted client-side and never sent $orderby)
+# started sorting its own results by default - confirmed via the live
+# server log ("NameError: name 'functools' is not defined") the moment that
+# dialog's default column sort fired a real $orderby request.
+from functools import cmp_to_key
 
 import serve_config
 
 from . import config
 from . import state
 from . import odata_format
-from .filter_strategies import FilterStrategyFactory
 
 
 # Type aliases
@@ -28,9 +45,6 @@ EntityRow = Dict[str, Any]
 FilterPredicate = Callable[[EntityRow], bool]
 KeyParts = Dict[str, str]
 QueryParams = Dict[str, Any]
-
-# Global filter strategy factory instance
-_filter_factory: Optional[FilterStrategyFactory] = None
 
 
 def _ref_lookup(
@@ -133,12 +147,28 @@ def _resolve_type_and_result(
     # unanswered Result is None, not "", so this never misfires on a
     # brand-new not-yet-assessed row).
     out["CommentFieldControl"] = 7 if out.get("Result") == "" else 3
-    # [Fix, exhaustive-sweep pass] sap:deletable-path (metadata.xml) reads
-    # this Boolean to gate the ResponsiveTable's per-row Delete button -
-    # blocks removing a line that already has a recorded outcome (Result is
-    # None only before the inspector has picked anything via the Code/Result
-    # F4 value-help).
-    out["Deletable"] = out.get("Result") is None
+    # [Fix, use-case pass] sap:deletable-path (metadata.xml) reads this
+    # Boolean to gate the ResponsiveTable's per-row Delete button. This used
+    # to be `out.get("Result") is None` - "only deletable before the
+    # inspector has picked anything" - which worked only because the OLD
+    # add-row dialog (TypePicker/LocalItemSuggest, removed this session)
+    # created the row EMPTY and left Result unset until the user confirmed a
+    # choice at the very end, so there was a real window where Result was
+    # None. The NEW add-row dialog (SubTableCrud.js) creates the row via
+    # createEntry() with Result defaulted to "X" (Satisfactory) immediately,
+    # as a convenience default the SmartField then displays pre-filled - so
+    # by the time ANY row (new or pre-existing) ever reaches this resolver,
+    # Result is never None. Confirmed live: with the old check still in
+    # place, the Delete button stayed permanently disabled for every row in
+    # both tables, old and new alike - not a narrower "can't delete
+    # classified rows" restriction, a total dead button. Fiori draft UX
+    # already gives the right protection for free: this entity is a
+    # Common.DraftNode, so Delete only ever acts on the current unsaved
+    # draft (the standard native button's own confirmation dialog is the
+    # remaining safeguard) - once Saved, the row becomes part of the active
+    # version like everything else on the page, same as any other field
+    # edit. No extra Result-based gate is needed on top of that.
+    out["Deletable"] = True
     return out
 
 
@@ -281,6 +311,23 @@ def compute_check_root_view(
     out["IntegrationBadgeHidden"] = not out["ThisIsIntegrationData"]
     out["ChecksErrorBadgeHidden"] = not has_error_checks
     out["BarriersErrorBadgeHidden"] = not has_error_barriers
+
+    # [Fix, minimal-extension-set pass] Criticality for the 3 header badges
+    # (annotations.xml check-root.xml's FieldGroup#General). A constant/
+    # EnumMember Criticality on a boolean UI.DataField was confirmed live to
+    # NOT reach sap.ui.comp.smartfield.ODataControlFactory's ObjectStatus
+    # state/icon in this exact SAPUI5 1.71.84 build (renders
+    # sap-icon://status-inactive / ValueState.None regardless of the
+    # EnumMember given) - only a Path-bound Criticality does, the same
+    # already-proven pattern this file uses for ChecksCriticality/
+    # BarriersCriticality on the UI.DataPoint progress bars. Same numeric
+    # convention as StatusCriticality above (0=None/1=Error/2=Warning/
+    # 3=Success, per sap.ui.core.ValueState via ODataControlFactory's
+    # mStatesInt) - these badges only ever need None/Error/Neutral-as-None,
+    # so a plain 0/1 constant per flag is enough, no percentage math needed.
+    out["ChecksErrorCriticality"] = 1 if has_error_checks else 0
+    out["BarriersErrorCriticality"] = 1 if has_error_barriers else 0
+    out["IntegrationCriticality"] = 0
     return out
 
 
@@ -499,7 +546,7 @@ def apply_orderby(data, s_orderby):
                 return -1 if desc else 1
         return 0
 
-    return sorted(data, key=functools.cmp_to_key(compare_rows))
+    return sorted(data, key=cmp_to_key(compare_rows))
 
 
 def _draft_admin_data_row(draft_uuid, requesting_user=config.MOCK_USER):

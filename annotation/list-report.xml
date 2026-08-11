@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/UI/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.UI.v1"            Alias="UI"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/Common/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.Common.v1"        Alias="Common"/>
+  </edmx:Reference>
+
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="ZCheckService.Annotations">
+
+      <!-- [Split, minimal-extension-set pass] List Report presentation annotations (IconTabBar per-Status counts) extracted verbatim from the original monolithic annotations.xml. -->
+
+      <!-- [Fix, exhaustive-sweep pass] IconTabBar per-Status counts
+           (manifest.json's sap.ui.generic.app ListReport quickVariantSelectionX,
+           showCounts:true) - confirmed real, annotation+manifest-only, and
+           orthogonal to the EditState draft-status dropdown (this is a
+           BUSINESS-status split, not a draft-lifecycle one). Status already
+           exists as a real field (OK/CRITICAL/WARNING, see
+           resolvers.StatusCriticality) - reusing it here instead of
+           inventing a new dimension. Each tab is one UI.SelectionPresentationVariant
+           pairing a UI.SelectionVariant ($filter) with a shared
+           UI.PresentationVariant (just reuses the standard UI.LineItem) - the
+           template issues one CheckRoots/$count?$filter=<SelectOption> request
+           per tab for its badge count; resolvers.apply_filter/eval_one_filter
+           already evaluates a plain "Status eq 'OK'"-shaped filter correctly
+           (generic field-eq-string pattern), so no backend change was needed
+           beyond declaring these. -->
+      <Annotations Target="ZCheckService.CheckRoot">
+        <Annotation Term="UI.PresentationVariant">
+          <Record Type="UI.PresentationVariantType">
+            <PropertyValue Property="Text" String="Стандартный"/>
+            <PropertyValue Property="Visualizations">
+              <Collection>
+                <AnnotationPath>@UI.LineItem</AnnotationPath>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+
+        <Annotation Term="UI.SelectionVariant" Qualifier="TabAll">
+          <Record Type="UI.SelectionVariantType">
+            <PropertyValue Property="Text" String="Все"/>
+            <PropertyValue Property="SelectOptions">
+              <Collection/>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionPresentationVariant" Qualifier="TabAll">
+          <Record Type="UI.SelectionPresentationVariantType">
+            <PropertyValue Property="Text" String="Все"/>
+            <PropertyValue Property="SelectionVariant" AnnotationPath="@UI.SelectionVariant#TabAll"/>
+            <PropertyValue Property="PresentationVariant" AnnotationPath="@UI.PresentationVariant"/>
+          </Record>
+        </Annotation>
+
+        <Annotation Term="UI.SelectionVariant" Qualifier="TabOk">
+          <Record Type="UI.SelectionVariantType">
+            <PropertyValue Property="Text" String="Штатно"/>
+            <PropertyValue Property="SelectOptions">
+              <Collection>
+                <Record Type="UI.SelectOptionType">
+                  <PropertyValue Property="PropertyName" PropertyPath="Status"/>
+                  <PropertyValue Property="Ranges">
+                    <Collection>
+                      <Record Type="UI.SelectionRangeType">
+                        <PropertyValue Property="Sign" EnumMember="UI.SelectionRangeSignType/I"/>
+                        <PropertyValue Property="Option" EnumMember="UI.SelectionRangeOptionType/EQ"/>
+                        <PropertyValue Property="Low" String="OK"/>
+                      </Record>
+                    </Collection>
+                  </PropertyValue>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionPresentationVariant" Qualifier="TabOk">
+          <Record Type="UI.SelectionPresentationVariantType">
+            <PropertyValue Property="Text" String="Штатно"/>
+            <PropertyValue Property="SelectionVariant" AnnotationPath="@UI.SelectionVariant#TabOk"/>
+            <PropertyValue Property="PresentationVariant" AnnotationPath="@UI.PresentationVariant"/>
+          </Record>
+        </Annotation>
+
+        <Annotation Term="UI.SelectionVariant" Qualifier="TabCritical">
+          <Record Type="UI.SelectionVariantType">
+            <PropertyValue Property="Text" String="Критично"/>
+            <PropertyValue Property="SelectOptions">
+              <Collection>
+                <Record Type="UI.SelectOptionType">
+                  <PropertyValue Property="PropertyName" PropertyPath="Status"/>
+                  <PropertyValue Property="Ranges">
+                    <Collection>
+                      <Record Type="UI.SelectionRangeType">
+                        <PropertyValue Property="Sign" EnumMember="UI.SelectionRangeSignType/I"/>
+                        <PropertyValue Property="Option" EnumMember="UI.SelectionRangeOptionType/EQ"/>
+                        <PropertyValue Property="Low" String="CRITICAL"/>
+                      </Record>
+                    </Collection>
+                  </PropertyValue>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionPresentationVariant" Qualifier="TabCritical">
+          <Record Type="UI.SelectionPresentationVariantType">
+            <PropertyValue Property="Text" String="Критично"/>
+            <PropertyValue Property="SelectionVariant" AnnotationPath="@UI.SelectionVariant#TabCritical"/>
+            <PropertyValue Property="PresentationVariant" AnnotationPath="@UI.PresentationVariant"/>
+          </Record>
+        </Annotation>
+
+        <Annotation Term="UI.SelectionVariant" Qualifier="TabWarning">
+          <Record Type="UI.SelectionVariantType">
+            <PropertyValue Property="Text" String="Внимание"/>
+            <PropertyValue Property="SelectOptions">
+              <Collection>
+                <Record Type="UI.SelectOptionType">
+                  <PropertyValue Property="PropertyName" PropertyPath="Status"/>
+                  <PropertyValue Property="Ranges">
+                    <Collection>
+                      <Record Type="UI.SelectionRangeType">
+                        <PropertyValue Property="Sign" EnumMember="UI.SelectionRangeSignType/I"/>
+                        <PropertyValue Property="Option" EnumMember="UI.SelectionRangeOptionType/EQ"/>
+                        <PropertyValue Property="Low" String="WARNING"/>
+                      </Record>
+                    </Collection>
+                  </PropertyValue>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionPresentationVariant" Qualifier="TabWarning">
+          <Record Type="UI.SelectionPresentationVariantType">
+            <PropertyValue Property="Text" String="Внимание"/>
+            <PropertyValue Property="SelectionVariant" AnnotationPath="@UI.SelectionVariant#TabWarning"/>
+            <PropertyValue Property="PresentationVariant" AnnotationPath="@UI.PresentationVariant"/>
+          </Record>
+        </Annotation>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

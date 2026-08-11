@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/UI/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.UI.v1"            Alias="UI"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://odata.sap.com/vocabularies/Common/v1">
+    <edmx:Include Namespace="com.sap.vocabularies.Common.v1"        Alias="Common"/>
+  </edmx:Reference>
+
+  <edmx:DataServices>
+    <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="ZCheckService.Annotations">
+
+      <!-- [Split, minimal-extension-set pass] All Barrier annotations except Common.DraftNode (see draft.xml) - extracted verbatim from the original monolithic annotations.xml. -->
+
+      <Annotations Target="ZCheckService.Barrier">
+        <Annotation Term="UI.Creatable" Bool="true"/>
+        <Annotation Term="UI.Updatable" Bool="true"/>
+        <!-- [Fix, exhaustive-sweep pass] See the matching CheckItem comment above. -->
+        <Annotation Term="UI.Deletable" Path="Deletable"/>
+        <!-- [FIX, пересмотрено] См. аналогичный комментарий у CheckItem. -->
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Text"/>      <PropertyValue Property="Label" String="Тип барьера"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ResultText"/> <PropertyValue Property="Label" String="Результат"/></Record>
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Comment"/>    <PropertyValue Property="Label" String="Примечания"/></Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+
+      <!-- [Fix, exhaustive-sweep pass] Common.FieldControl for Barrier - see
+           the matching CheckItem/Comment annotation above, same mechanism. -->
+      <Annotations Target="ZCheckService.Barrier/Comment">
+        <Annotation Term="Common.FieldControl" Path="CommentFieldControl"/>
+      </Annotations>
+
+      <!-- [Fix, exhaustive-sweep pass] Common.SideEffects for Barrier - see
+           the matching CheckItem/CommentControlRecalc annotation above, same
+           mechanism/rationale. -->
+      <Annotations Target="ZCheckService.Barrier">
+        <Annotation Term="Common.SideEffects" Qualifier="CommentControlRecalc">
+          <Record Type="Common.SideEffectsType">
+            <PropertyValue Property="SourceProperties">
+              <Collection>
+                <PropertyPath>Result</PropertyPath>
+              </Collection>
+            </PropertyValue>
+            <PropertyValue Property="TargetProperties">
+              <Collection>
+                <PropertyPath>CommentFieldControl</PropertyPath>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.Barrier/Code">
+        <Annotation Term="Common.Label" String="Тип барьера"/>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.Barrier/Text">
+        <Annotation Term="Common.Label"    String="Тип барьера"/>
+        <Annotation Term="Common.Required" Bool="true"/>
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Тип барьера"/>
+            <PropertyValue Property="CollectionPath" String="BarrierTypes"/>
+            <PropertyValue Property="SearchSupported" Bool="false"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Text"/>
+                  <PropertyValue Property="ValueListProperty"  String="BarrierTypeText"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Code"/>
+                  <PropertyValue Property="ValueListProperty"  String="BarrierTypeCode"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                  <PropertyValue Property="ValueListProperty"  String="Category"/>
+                </Record>
+                <Record Type="Common.ValueListParameterDisplayOnly">
+                  <PropertyValue Property="ValueListProperty"  String="PkLevels"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.Barrier/Result">
+        <Annotation Term="Common.Label" String="Результат"/>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.Barrier/ResultText">
+        <Annotation Term="Common.Label" String="Результат"/>
+        <!-- [Fix, exhaustive-sweep pass] See the matching CheckItem/ResultText
+             annotation above, same mechanism. -->
+        <Annotation Term="Common.Required" Bool="true"/>
+        <!-- [Fix, best-practices pass] See the matching CheckItem/ResultText
+             annotation above - Common.ValueListWithFixedValues was tried and
+             reverted here for the same reason (SmartTable inline-edit cells
+             don't honor it in this UI5 build, only SmartForm does, which
+             would have split the Add-row dialog and inline table onto two
+             different controls for the same field). -->
+        <Annotation Term="Common.ValueList">
+          <Record Type="Common.ValueListType">
+            <PropertyValue Property="Label"          String="Результат"/>
+            <PropertyValue Property="CollectionPath" String="CheckResults"/>
+            <PropertyValue Property="SearchSupported" Bool="false"/>
+            <PropertyValue Property="Parameters">
+              <Collection>
+                <Record Type="Common.ValueListParameterInOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ResultText"/>
+                  <PropertyValue Property="ValueListProperty"  String="ResultText"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="Result"/>
+                  <PropertyValue Property="ValueListProperty"  String="ResultCode"/>
+                  <Annotation Term="UI.Hidden" Bool="true"/>
+                </Record>
+              </Collection>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.Barrier/Comment">
+        <Annotation Term="Common.Label" String="Примечания"/>
+        <Annotation Term="UI.MultiLineText" Bool="true"/>
+      </Annotations>
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>
