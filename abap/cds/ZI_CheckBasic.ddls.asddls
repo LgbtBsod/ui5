@@ -8,16 +8,16 @@
 // coalesce на *IntegrationName push-down сюда через association+left outer
 // join, ничего из этого не считается в ABAP/JS. left outer join
 // (не inner!) намеренно: строка CheckBasic обязана вернуться, даже если
-// ObserverPerner/LocationKey/... ещё не заполнены (transient-запись до
+// ObserverPernr/LocationKey/... ещё не заполнены (transient-запись до
 // первого save) или ссылаются на удалённую с тех пор запись справочника.
 define view ZI_CheckBasic
   as select from zchk_basic as Basic
 
     left outer join zchk_pers as Observer
-      on Basic.observer_perner = Observer.pernr
+      on Basic.observer_pernr = Observer.pernr
 
     left outer join zchk_pers as Observed
-      on Basic.observed_perner = Observed.pernr
+      on Basic.observed_pernr = Observed.pernr
 
     left outer join zchk_pklvl as Pkl
       on Basic.lpc_key = Pkl.pk_level
@@ -45,14 +45,14 @@ define view ZI_CheckBasic
       coalesce( Loc.location_name, Basic.location_name, '' )  as LocationName,
       Basic.location_text                                     as LocationText,
 
-      Basic.observer_perner                                   as ObserverPerner,
+      Basic.observer_pernr                                   as ObserverPernr,
       coalesce( Observer.fio, Basic.observer_integration_name, '' )
                                                                 as ObserverFullname,
       Basic.observer_position                                 as ObserverPosition,
       Basic.observer_orgunit                                  as ObserverOrgunit,
       Basic.observer_integration_name                         as ObserverIntegrationName,
 
-      Basic.observed_perner                                   as ObservedPerner,
+      Basic.observed_pernr                                   as ObservedPernr,
       coalesce( Observed.fio, Basic.observed_integration_name, '' )
                                                                 as ObservedFullname,
       Basic.observed_position                                 as ObservedPosition,

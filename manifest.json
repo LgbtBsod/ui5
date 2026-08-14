@@ -61,16 +61,6 @@
             "parameters": {},
             "additionalParameters": "allowed"
           }
-        },
-        "checkHeaderCreateLite": {
-          "semanticObject": "CheckHeader",
-          "action": "createLite",
-          "title": "{{liteTileTitle}}",
-          "subTitle": "{{liteTileSubtitle}}",
-          "signature": {
-            "parameters": {},
-            "additionalParameters": "allowed"
-          }
         }
       }
     }
@@ -115,33 +105,6 @@
       }
     },
 
-    "routing": {
-      "config": {
-        "routerClass": "sap.ui.core.routing.Router",
-        "viewType": "XML",
-        "async": true
-      },
-      "routes": [
-        {
-          "name": "createLite",
-          "pattern": "createLite",
-          "target": "objectPageCreateLite"
-        }
-      ],
-      "targets": {
-        "objectPageCreateLite": {
-          "type": "Component",
-          "name": "sap.suite.ui.generic.template.ObjectPage",
-          "options": {
-            "settings": {
-              "entitySet": "CheckRoots",
-              "createMode": true
-            }
-          }
-        }
-      }
-    },
-
     "extends": {
       "extensions": {
         "sap.ui.controllerExtensions": {
@@ -176,6 +139,9 @@
                 }
               }
             }
+          },
+          "sap.suite.ui.generic.template.ListReport.view.ListReport": {
+            "controllerName": "sap.pc_lite.check.ext.controller.ListReportExtension"
           }
         }
       }

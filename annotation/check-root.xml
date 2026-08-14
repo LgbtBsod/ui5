@@ -17,8 +17,28 @@
 
         <!-- [FIX] Creatable обязателен для показа формы при создании нового объекта -->
         <Annotation Term="UI.Creatable" Bool="true"/>
-        <Annotation Term="UI.Updatable" Bool="true"/>
-        <Annotation Term="UI.Deletable" Bool="true"/>
+        <!-- [Fix, use-case pass #4] Path, not Bool="true" - kept in sync with
+             metadata.xml's sap:updatable-path="Updatable" on the CheckRoots
+             EntitySet (both read resolvers.compute_check_root_view's same
+             computed field), same reasoning as UI.Deletable Path="Deletable"
+             on CheckItem/Barrier: one dynamic capability annotation as the
+             single source of truth, not a static Bool sitting next to it that
+             would contradict the dynamic one. Integration-sourced records
+             (ThisIsIntegrationData=true) resolve Updatable=false, disabling
+             the Object Page's own "Редактировать" toolbar button - see
+             IntegrationEditGuard.js for the client-side message layered on
+             top in case this annotation isn't honored by this specific
+             rendering pipeline (unverified until live-tested). -->
+        <Annotation Term="UI.Updatable" Path="Updatable"/>
+        <!-- [Fix, use-case pass #4 follow-up] Path, not Bool="true" - reuses
+             the SAME Updatable field as UI.Updatable above (confirmed with
+             the user: integration-sourced records should be fully view-only,
+             not just edit-locked - deleting a bad/erroneous integration
+             record locally was considered and explicitly rejected in favour
+             of blocking that too, for consistency). No second backend field
+             needed - "not integration-locked" is exactly the same condition
+             for both capabilities. -->
+        <Annotation Term="UI.Deletable" Path="Updatable"/>
 
         <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextOnly"/>
 
@@ -289,7 +309,41 @@
            текстовыми полями формы - see check-root.xml git history for the
            original inline-in-General-form placement and the full
            Criticality/ObjectStatus rationale (constant EnumMember doesn't
-           render an icon in this SAPUI5 1.71.84 build, only Path does). -->
+           render an icon in this SAPUI5 1.71.84 build, only Path does).
+
+           [Fix, use-case pass #3] Deliberately did NOT add a new "always
+           blank" backend field here to swallow the ObjectStatus "Да"/"Нет"
+           value text (tried it, reverted - see css/style.css for the
+           chosen approach and why: a real CDS-model field added purely to
+           dodge a UI cosmetic is exactly the kind of divergence-from-the-
+           real-backend risk this mock is supposed to avoid, and older
+           classic Fiori Elements builds are not guaranteed to tolerate
+           three sibling DataFields in one FieldGroup binding the SAME
+           property - confirmed live it isn't even tolerated in THIS
+           1.71.84 build: "Error: adding element with duplicate id" the
+           moment Value was repointed at one shared field for all three).
+           Value stays on the original boolean fields, unchanged; the
+           redundant value text is hidden with CSS instead (annotation-only
+           change here, zero data-model impact). IconUrl="sap-icon://alert"
+           on the two error badges forces the classic "!" warning-triangle
+           glyph instead of the default Criticality-driven sap-icon://
+           status-negative (a red circle) - Criticality still drives the
+           red colour (state=Error), IconUrl only overrides the shape; this
+           IS a standard, model-independent UI.DataField property, safe to
+           use.
+
+           [Fix, use-case pass #4] IconUrl="sap-icon://synchronize" added to
+           the Integration badge too - IntegrationCriticality stays hardcoded
+           to 0 (Neutral, resolvers.py), so without an override this badge's
+           default icon is sap-icon://status-inactive (a flat grey dash) -
+           reads as "nothing/disabled", not "synced from an external system".
+           A sync-arrows glyph is the standard Fiori convention for "this
+           record came from an external integration", matching the badge's
+           own label ("Создано интеграцией") far better than a dash - unlike
+           the two error badges this isn't a Criticality-implied shape
+           override, just a plain semantic mismatch fix. Confirmed via
+           BadgeIconOverride.js (annotation-only IconUrl doesn't render in
+           this exact rendering pipeline, same gap as the error badges). -->
       <Annotations Target="ZCheckService.CheckRoot">
         <Annotation Term="UI.FieldGroup" Qualifier="StatusBadges">
           <Record Type="UI.FieldGroupType">
@@ -299,18 +353,21 @@
                   <PropertyValue Property="Value" Path="ThisIsIntegrationData"/>
                   <PropertyValue Property="Label" String="Создано интеграцией"/>
                   <PropertyValue Property="Criticality" Path="IntegrationCriticality"/>
+                  <PropertyValue Property="IconUrl" String="sap-icon://synchronize"/>
                   <Annotation Term="UI.Hidden" Path="IntegrationBadgeHidden"/>
                 </Record>
                 <Record Type="UI.DataField">
                   <PropertyValue Property="Value" Path="HasErrorChecks"/>
                   <PropertyValue Property="Label" String="Есть неуспешные проверки"/>
                   <PropertyValue Property="Criticality" Path="ChecksErrorCriticality"/>
+                  <PropertyValue Property="IconUrl" String="sap-icon://alert"/>
                   <Annotation Term="UI.Hidden" Path="ChecksErrorBadgeHidden"/>
                 </Record>
                 <Record Type="UI.DataField">
                   <PropertyValue Property="Value" Path="HasErrorBarriers"/>
                   <PropertyValue Property="Label" String="Есть неуспешные барьеры"/>
                   <PropertyValue Property="Criticality" Path="BarriersErrorCriticality"/>
+                  <PropertyValue Property="IconUrl" String="sap-icon://alert"/>
                   <Annotation Term="UI.Hidden" Path="BarriersErrorBadgeHidden"/>
                 </Record>
               </Collection>
@@ -343,19 +400,33 @@
         </Annotation>
       </Annotations>
 
-      <Annotations Target="ZCheckService.CheckRoot/ObservedPerner">
+      <!-- [Fix, browser-test pass] Common.Required REMOVED from both Pernr
+           proxy-keys below - same "only one side of a Text/Key pair carries
+           Required" pattern already applied to LpcKey/LpcText (see that
+           pair's own "Bug fix E" comment). ObservedFullname/ObserverFullname
+           already carry Common.Required=true (below) and backend/config.py's
+           REQUIRED_FIELD_ALTERNATES treats *Pernr as an ALTERNATE satisfier
+           for *Fullname (free-text name alone is a valid, server-accepted
+           input - see PernrRule.js, which only WARNS "ФИО без табельного
+           номера", never blocks). Live-reproduced during browser testing:
+           with Required left on both sides, ext/util/RequiredFieldsRule.js
+           (which blindly reads every Common.Required=true property off the
+           OData metamodel, no alternate-satisfies concept at all) flagged
+           ObservedPernr/ObserverPernr as missing even when a valid free-text
+           Fullname was entered - and that gate's FieldStateGate registration
+           has blocksSave=true, so a perfectly server-acceptable free-text
+           name could never actually be saved through the UI at all. -->
+      <Annotations Target="ZCheckService.CheckRoot/ObservedPernr">
         <Annotation Term="Common.Label"    String="Табельный № проверяемого"/>
-        <Annotation Term="Common.Required" Bool="true"/>
       </Annotations>
 
-      <Annotations Target="ZCheckService.CheckRoot/ObserverPerner">
+      <Annotations Target="ZCheckService.CheckRoot/ObserverPernr">
         <Annotation Term="Common.Label"    String="Табельный № инспектора"/>
-        <Annotation Term="Common.Required" Bool="true"/>
       </Annotations>
 
       <!-- [Bug fix] SearchSupported="true" (в старой модели было false, отчего
            type-ahead суггест не мог заработать даже с startSuggestion — см.
-           обсуждение бага "суггест не работает"). Фронт резолвит ФИО в *Perner
+           обсуждение бага "суггест не работает"). Фронт резолвит ФИО в *Pernr
            через InOut на type-ahead, а не только через модальный F4. -->
       <Annotations Target="ZCheckService.CheckRoot/ObservedFullname">
         <Annotation Term="Common.Label"    String="ФИО проверяемого"/>
@@ -372,7 +443,7 @@
                   <PropertyValue Property="ValueListProperty"  String="Fio"/>
                 </Record>
                 <Record Type="Common.ValueListParameterOut">
-                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ObservedPerner"/>
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ObservedPernr"/>
                   <PropertyValue Property="ValueListProperty"  String="Pernr"/>
                 </Record>
                 <Record Type="Common.ValueListParameterFilterOnly">
@@ -404,7 +475,7 @@
                   <PropertyValue Property="ValueListProperty"  String="Fio"/>
                 </Record>
                 <Record Type="Common.ValueListParameterOut">
-                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ObserverPerner"/>
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ObserverPernr"/>
                   <PropertyValue Property="ValueListProperty"  String="Pernr"/>
                 </Record>
                 <Record Type="Common.ValueListParameterFilterOnly">

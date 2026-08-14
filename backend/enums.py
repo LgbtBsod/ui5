@@ -89,8 +89,14 @@ class HttpStatus:
 
 
 # Result codes
+# [Fix, use-case pass #3] RESULT_CODE_UNSATISFACTORY removed from here - had
+# zero consumers (confirmed via repo-wide grep), and leaving it declared but
+# unused/unsynced would have been a landmine: the real, actually-used
+# constant (serve_config.RESULT_CODE_UNSATISFACTORY) changed from "" to " "
+# (ABAP abap_false convention - see that file's comment for why), and a
+# stale duplicate still saying "" here would silently mislead the next
+# person who imports from enums.py by habit instead of serve_config.py.
 RESULT_CODE_SATISFACTORY: Final[str] = "X"
-RESULT_CODE_UNSATISFACTORY: Final[str] = ""
 
 # Zero GUID placeholder for draft protocol
 ZERO_GUID: Final[str] = "00000000-0000-0000-0000-000000000000"

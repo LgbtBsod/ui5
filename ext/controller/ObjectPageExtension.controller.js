@@ -2,10 +2,14 @@ sap.ui.define([
 	"sap/ui/core/mvc/ControllerExtension",
 	"../util/Constants",
 	"../util/ODataContextUtils",
+	"../util/FioriElementsDom",
+	"../util/ExcelExport",
 	"../util/KpiSync",
+	"../util/BadgeIconOverride",
 	"../util/DateTimeAutofill",
 	"../util/ValueHelpAutoApply",
 	"../util/LocationPicker",
+	"../util/FixedListKeySync",
 	"../util/SubTableCrud",
 	"../util/CreateFullScreen",
 	"../util/KeepEditMode",
@@ -19,8 +23,8 @@ sap.ui.define([
 	"../util/EditableTransitionGate",
 	"../util/SaveIntentTracker"
 ], function (
-	ControllerExtension, Constants, ODataContextUtils,
-	KpiSync, DateTimeAutofill, ValueHelpAutoApply, LocationPicker, SubTableCrud,
+	ControllerExtension, Constants, ODataContextUtils, FioriElementsDom, ExcelExport,
+	KpiSync, BadgeIconOverride, DateTimeAutofill, ValueHelpAutoApply, LocationPicker, FixedListKeySync, SubTableCrud,
 	CreateFullScreen, KeepEditMode, FieldStateGate, PernrRule, CheckCodeCoverage,
 	RequiredFieldsRule, IntegrationEditGuard, DiscardTransientOnClose, StaleDisplayFormGuard,
 	EditableTransitionGate, SaveIntentTracker
@@ -70,11 +74,23 @@ sap.ui.define([
 	 *   own delete handling with a raw oModel.remove() call bypassing the
 	 *   correctly-integrated draft-delete flow, actively risky at worst.
 	 */
-	function buildGuardRegistry() {
+	function buildGuardRegistry(oDateTimeAutofill) {
 		const oCodeCoverage = new CheckCodeCoverage();
 		return [
-			{ guard: new DateTimeAutofill(), refresh: (g, oView) => g.applyIfNeeded(oView, ODataContextUtils.isUnsavedNewDraft) },
+			// [Fix, guard-event-wiring-audit pass] oDateTimeAutofill is created
+			// and held on `this` in onInit (not instantiated here anymore) - see
+			// onInit's attachPageDataLoaded wiring for why: this same instance,
+			// and its same TransientOnce/OnceRegistry dedup-by-path state, needs
+			// to be reachable from both the generic _scanTick net below (kept
+			// as a redundant catch-all, per the audit's own risk note) AND the
+			// new precise PageDataLoaded trigger.
+			{ guard: oDateTimeAutofill, refresh: (g, oView) => g.applyIfNeeded(oView, ODataContextUtils.isUnsavedNewDraft) },
 			{ guard: KpiSync, refresh: (g, oView) => g.sync(oView, ODataContextUtils.isUnsavedNewDraft) },
+			// [Fix, use-case pass #3 follow-up] Unlike KpiSync this isn't
+			// scoped to transient/unsaved records - the framework's IconUrl
+			// gap (see BadgeIconOverride.js) applies equally to saved
+			// CheckRoots, so this runs on every tick regardless of draft state.
+			{ guard: BadgeIconOverride, refresh: (g, oView) => g.apply(oView) },
 			{ guard: new CreateFullScreen(), refresh: (g, oView) => g.applyIfNeeded(oView, () => true), destroy: true },
 			{ guard: new KeepEditMode(), refresh: (g, oView, s) => g.refresh(oView, s) },
 			{ guard: new FieldStateGate("pernr", PernrRule.getIssues), refresh: (g, oView) => g.refresh(oView), destroy: true },
@@ -95,7 +111,8 @@ sap.ui.define([
 
 		override: {
 			onInit: function () {
-				this._aGuards = buildGuardRegistry();
+				this._oDateTimeAutofill = new DateTimeAutofill();
+				this._aGuards = buildGuardRegistry(this._oDateTimeAutofill);
 				this._oValueHelpAutoApply = new ValueHelpAutoApply();
 				this._oEditableTransitionGate = new EditableTransitionGate();
 				this._oSaveIntentTracker = new SaveIntentTracker();
@@ -115,6 +132,19 @@ sap.ui.define([
 					return;
 				}
 				this._bEventsWired = true;
+				// [Fix, guard-event-wiring-audit pass] Wired here, not onInit -
+				// confirmed live that this.getView().getController().extensionAPI
+				// throws deep inside the framework's own routing/target
+				// resolution when accessed from onInit (a real, reproduced crash:
+				// "Цель не найдена" / "Cannot read properties of undefined
+				// (reading 'namespace')" on every navigation to Create),
+				// contradicting an earlier (wrong) assumption that extensionAPI
+				// is safely available that early. onAfterRendering is the same
+				// point onAddCheckRow/onAddBarrier already reach it from
+				// successfully - kept inside this once-only block since the
+				// subscription itself only needs to happen once per view
+				// instance, same as the listeners right below it.
+				this._wirePageDataLoaded();
 				const oView = this.getView();
 				oView.attachModelContextChange(this._fnBoundScheduleTick);
 				// Fiori Elements Input/SmartField fire a UI5 'change' event on
@@ -130,6 +160,13 @@ sap.ui.define([
 
 			onExit: function () {
 				const oView = this.getView();
+				if (this._fnOnPageDataLoaded) {
+					const oExtensionAPI = oView.getController() && oView.getController().extensionAPI;
+					if (oExtensionAPI && typeof oExtensionAPI.detachPageDataLoaded === "function") {
+						oExtensionAPI.detachPageDataLoaded(this._fnOnPageDataLoaded);
+					}
+					this._fnOnPageDataLoaded = null;
+				}
 				oView.detachModelContextChange(this._fnBoundScheduleTick);
 				const oViewDom = oView.getDomRef();
 				if (oViewDom) {
@@ -148,6 +185,49 @@ sap.ui.define([
 				});
 				this._aGuards = [];
 			}
+		},
+
+		/**
+		 * [Fix, guard-event-wiring-audit pass] DateTimeAutofill was purely
+		 * _scanTick-driven (3 broad triggers - DOM change/modelContextChange/
+		 * ui>/editable - all firing well before the object's properties are
+		 * guaranteed settled). ODataContextUtils.js's own comment documents a
+		 * real, live-reproduced race: HasActiveEntity briefly reads undefined
+		 * on the very first tick after a NEW edit-draft binding is set.
+		 * extensionAPI.attachPageDataLoaded is the framework's own published
+		 * fix for that class of race - fires only once the object page's
+		 * header data has genuinely round-tripped from the backend (confirmed
+		 * via real 1.71.84 ComponentUtils-dbg.js source: it explicitly filters
+		 * out preliminary/not-yet-read contexts before firing).
+		 *
+		 * Kept ALONGSIDE the existing _scanTick-driven trigger, not instead of
+		 * it - TransientOnce/OnceRegistry's dedup-by-path makes both paths
+		 * converge on the same idempotent seed-once behaviour, so this is a
+		 * strictly additive fix (closes the race for the common path) rather
+		 * than a narrowing that could silently stop firing if some future edge
+		 * case in the create/draft flow bypasses attachPageDataLoaded's own
+		 * firing conditions.
+		 *
+		 * Must be defined as a plain sibling method here, NOT inside the
+		 * `override` block above - a first attempt placed it inside override{}
+		 * next to onInit/onAfterRendering/onExit and crashed EVERY navigation
+		 * ("Цель не найдена" / TypeError reading 'namespace') because
+		 * ControllerExtension's override object is parsed for known lifecycle-
+		 * hook names only; an unrecognized key there breaks the framework's own
+		 * registration, not just this app's own code.
+		 */
+		_wirePageDataLoaded: function () {
+			const oExtensionAPI = this.getView().getController().extensionAPI;
+			if (!oExtensionAPI || typeof oExtensionAPI.attachPageDataLoaded !== "function") {
+				return;
+			}
+			this._fnOnPageDataLoaded = (oEvent) => {
+				const oContext = oEvent && oEvent.context;
+				if (oContext && ODataContextUtils.isUnsavedNewDraft(oContext)) {
+					this._oDateTimeAutofill.applyIfNeeded(this.getView(), ODataContextUtils.isUnsavedNewDraft);
+				}
+			};
+			oExtensionAPI.attachPageDataLoaded(this._fnOnPageDataLoaded);
 		},
 
 		/**
@@ -265,9 +345,39 @@ sap.ui.define([
 			);
 		},
 
+		/**
+		 * [Fix, use-case pass #4] Excel export for the Проверки/Барьеры
+		 * SmartTables - reuses ExcelExport.js as-is (already derives its
+		 * columns from the entity's own UI.LineItem, same mechanism the List
+		 * Report's export button uses), just attached to a different
+		 * toolbar. Idempotent per SmartTable (unlike ListReportExtension,
+		 * which has exactly one table and a single done-flag, the Object
+		 * Page can have two - CheckRowsSection and BarriersSection - so the
+		 * "already wired" marker lives on each table instance instead).
+		 */
+		_setupTableExports: function (aSmartTables) {
+			aSmartTables.forEach((oSmartTable) => {
+				if (oSmartTable._pcLiteExportButtonWired) {
+					return;
+				}
+				const oToolbar = FioriElementsDom.getSmartTableToolbar(oSmartTable);
+				if (!oToolbar || !oToolbar.addContent) {
+					return;
+				}
+				oSmartTable._pcLiteExportButtonWired = true;
+				ExcelExport.attachButton(oSmartTable, oToolbar);
+			});
+		},
+
 		/** Attaches change listeners to field controls exactly once each. */
 		_wireFieldChangeListeners: function (oView, aFieldControls) {
 			aFieldControls.forEach((oControl) => {
+				// [Fix, browser-test pass] Independent of the generic tick
+				// listener below - see FixedListKeySync's own doc comment for
+				// why LpcKey/ProfKey/Timezone need this at all. No-op for any
+				// control whose "value" binding isn't one of the three
+				// mapped *Text properties.
+				FixedListKeySync.wireField(oControl);
 				if (oControl._pcLiteChangeWired) {
 					return;
 				}
@@ -331,6 +441,7 @@ sap.ui.define([
 			const oView = this.getView();
 			const oSnapshot = this._buildScanSnapshot(oView);
 			this._wireFieldChangeListeners(oView, oSnapshot.fieldControls);
+			this._setupTableExports(oSnapshot.smartTables);
 
 			const oUiModel = oView.getModel(Constants.UI_MODEL.NAME);
 			if (oUiModel && oUiModel.getProperty(Constants.UI_MODEL.EDITABLE_PATH)) {

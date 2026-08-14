@@ -82,7 +82,7 @@ MOCK_USER_REGISTRY: Dict[str, str] = {
 # в CheckBasics — SSOT по значению остаётся там.
 BASIC_PROXY_FIELDS: frozenset[str] = frozenset({
     "Date", "Time", "Timezone", "LocationKey", "LocationName", "Equipment",
-    "ObserverFullname", "ObserverPerner", "ObservedFullname", "ObservedPerner",
+    "ObserverFullname", "ObserverPernr", "ObservedFullname", "ObservedPernr",
     "LpcKey", "ProfKey"
 })
 
@@ -97,14 +97,36 @@ REQUIRED_ROOT_FIELDS: Dict[str, str] = {
     "Timezone": "Часовой пояс",
     "LpcKey": "Уровень КПР",
     "ProfKey": "Профессия",
+    # [Fix, use-case pass #5] Was missing here despite LocationName carrying
+    # Common.Required=true client-side (check-root.xml) - the gap went
+    # unnoticed because CreateRootHandler used to silently default
+    # LocationKey on every new draft, so an empty Location never reached
+    # this gate to be tested. Now that the default is gone (see
+    # CreateRootHandler.handle), this is a real, exercisable path again -
+    # every other Common.Required=true root field has a matching entry here,
+    # Location shouldn't be the one exception.
+    "LocationName": "Местоположение",
 }
 
 # [Fix] ObserverFullname/ObservedFullname get filled two different ways:
 # F4 value-help writes the picked person's name directly, OR a record can be
-# identified purely by Perner reference with display name resolved at read time.
+# identified purely by Pernr reference with display name resolved at read time.
+# [Fix, toolkit-pass live verification] LocationName is the same story -
+# it's a Common.Text-arrangement display field (see resolvers.py's
+# resolve_check_basic, which computes it from LocationKey via a Locations
+# lookup) - the LocationPicker value-help writes LocationKey only, never
+# LocationName directly, and seed.py's own CheckBasics rows never carry a
+# raw "LocationName" key either (see seed.py). Without this alternate,
+# CheckRootActivationAction's required-field gate (which validates the RAW
+# stored fields, not the resolved view - see draft_service.py/
+# toolkit/draft.py's DraftEngine.activate) would reject EVERY Activate on
+# EVERY record, seeded or freshly created, regardless of whether Location
+# was ever actually set - live-reproduced via the browser during the
+# toolkit refactor's verification pass, not a hypothetical.
 REQUIRED_FIELD_ALTERNATES: Dict[str, str] = {
-    "ObserverFullname": "ObserverPerner",
-    "ObservedFullname": "ObservedPerner",
+    "ObserverFullname": "ObserverPernr",
+    "ObservedFullname": "ObservedPernr",
+    "LocationName": "LocationKey",
 }
 
 # [Fix, exhaustive-sweep pass] Every tagged CheckItem/Barrier row must have a

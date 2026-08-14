@@ -142,9 +142,9 @@ class CheckBasic(Base):
     LocationName: Mapped[str | None] = mapped_column(String(100), nullable=True)
     Equipment: Mapped[str | None] = mapped_column(String(18), nullable=True)
     ObserverFullname: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    ObserverPerner: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    ObserverPernr: Mapped[str | None] = mapped_column(String(8), nullable=True)
     ObservedFullname: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    ObservedPerner: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    ObservedPernr: Mapped[str | None] = mapped_column(String(8), nullable=True)
     LpcKey: Mapped[str | None] = mapped_column(String(10), nullable=True)
     ProfKey: Mapped[str | None] = mapped_column(String(10), nullable=True)
     

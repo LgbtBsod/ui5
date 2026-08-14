@@ -7,7 +7,9 @@ sap.ui.define([], function () {
                         LOCATIONS: "Locations",
                         LOCATION_HIERARCHY: "LocationHierarchy",
                         CHECK_RESULTS: "CheckResults",
-                        TIME_ZONES: "TimeZones"
+                        TIME_ZONES: "TimeZones",
+                        PK_LEVELS: "PkLevels",
+                        PROFESSIONS: "Professions"
                 },
 
                 NAV_PROPERTIES: {
@@ -33,6 +35,7 @@ sap.ui.define([], function () {
                         // CheckRoots — read-only pass-through + вычисляемые KPI-поля.
                         LPC_KEY: "LpcKey",
                         LPC_TEXT: "LpcText",
+                        PROF_KEY: "ProfKey",
                         PROF_TEXT: "ProfText",
                         LOCATION_NAME_ROOT: "LocationName",
                         CHECKS_SUCCESS: "ChecksSuccess",
@@ -66,9 +69,9 @@ sap.ui.define([], function () {
                         WITH_SUBLOCATION: "with_sub",
 
                         OBSERVED_FULLNAME: "ObservedFullname",
-                        OBSERVED_PERNR: "ObservedPerner",
+                        OBSERVED_PERNR: "ObservedPernr",
                         OBSERVER_FULLNAME: "ObserverFullname",
-                        OBSERVER_PERNR: "ObserverPerner",
+                        OBSERVER_PERNR: "ObserverPernr",
 
                         LOCATION_UUID: "LocationUuid",
                         ACTIVE_FROM: "ActiveFrom",

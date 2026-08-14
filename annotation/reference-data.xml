@@ -94,6 +94,34 @@
            списка ValueListParameter — и уважает UI.Hidden на этих свойствах.
            Значение всё равно передаётся (Hidden скрывает только рендеринг
            колонки, не поток данных). -->
+      <!-- [Fix, best-practices pass] CheckResult.ResultCode needs its OWN
+           Common.Text here - NOT on CheckItem/Barrier's Result/ResultText
+           (those already have it, that's not what was missing). Root cause,
+           traced through the real SAPUI5 1.71.84 source
+           (sap/ui/comp/odata/MetadataAnalyser.js, _enrichValueHelpAnnotation/
+           getDescriptionFieldName): when sap.ui.comp.smarttable.SmartTable
+           builds an inline-edit ComboBox for a sap:value-list="fixed-values"
+           field, it resolves the dropdown's "key" as the ValueListProperty of
+           whichever ValueList Parameter's LocalDataProperty equals the
+           annotated field itself - then looks up THAT SAME-NAMED property on
+           the value-list's OWN entity type (CheckResult) for a Common.Text
+           to use as the "description". With the annotation previously on
+           CheckItem/ResultText (InOut: ResultText<->ResultText), the
+           resolved "key" was "ResultText" - and CheckResult.ResultText has
+           no further Common.Text of its own (it already IS the description),
+           so descriptionField came back empty and the algorithm fell back to
+           reusing the key as the description too - producing the live-
+           confirmed duplicate "Неудовлетворительно (Неудовлетворительно)".
+           Moving the value-list annotations onto Result (see check-item.xml/
+           barrier.xml) makes the resolved key "ResultCode" instead - which
+           NEEDS this Common.Text to find its way back to ResultText. -->
+      <Annotations Target="ZCheckService.CheckResult/ResultCode">
+        <Annotation Term="Common.Text" Path="ResultText">
+          <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextOnly"/>
+        </Annotation>
+        <Annotation Term="UI.Hidden" Bool="true"/>
+      </Annotations>
+
       <Annotations Target="ZCheckService.PkLevel/PkLevel">
         <Annotation Term="UI.Hidden" Bool="true"/>
       </Annotations>

@@ -74,7 +74,23 @@
         <Annotation Term="UI.LineItem">
           <Collection>
             <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Text"/>       <PropertyValue Property="Label" String="Тип проверки"/></Record>
-            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ResultText"/>  <PropertyValue Property="Label" String="Результат"/></Record>
+            <!-- [Fix, use-case pass #2] Value="Result" (the code), NOT
+                 "ResultText" - deliberately different from Type/Text above,
+                 which stays on the text property per the note right above
+                 this LineItem (sap.m.Input's displayed value needs sap:text
+                 substitution to show the friendly text over the raw code,
+                 and that substitution was confirmed NOT to happen reliably
+                 for inline-edited Input cells in this UI5 1.71.84 build).
+                 Result/ResultText don't hit that limitation because this
+                 column is no longer an Input - it's a sap.m.ComboBox (see
+                 sap:value-list="fixed-values" on Result in metadata.xml),
+                 and a ComboBox's displayed value comes from its SELECTED
+                 ITEM's own text (resolved via Common.Text/ValueList Items),
+                 never from sap:text-substituting the raw bound value the way
+                 a plain Input would - so binding to the actual code field
+                 here does not reintroduce the old "shows raw code" bug.
+                 Confirmed live. -->
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Result"/>  <PropertyValue Property="Label" String="Результат"/></Record>
             <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Comment"/>     <PropertyValue Property="Label" String="Комментарий"/></Record>
           </Collection>
         </Annotation>
@@ -131,11 +147,37 @@
         </Annotation>
       </Annotations>
 
+      <!-- [Fix, use-case pass #2] Result (the code) - NOT ResultText - is now
+           the property carrying Common.Required/Common.ValueList/
+           ValueListWithFixedValues, and its ValueList's InOut parameter maps
+           to itself (Result<->ResultCode) with ResultText<->ResultText as
+           the Out side-effect - the REVERSE of the shape this had before.
+           This is not stylistic - it's required for the dropdown to show
+           clean text instead of duplicated text. Traced through the real
+           SAPUI5 1.71.84 source (sap/ui/comp/odata/MetadataAnalyser.js,
+           _enrichValueHelpAnnotation/getDescriptionFieldName): SmartTable's
+           inline-edit ComboBox resolves its "key" as the ValueListProperty
+           of whichever Parameter's LocalDataProperty equals the ANNOTATED
+           property itself, then looks up a Common.Text on that same-named
+           property over on the value-list entity (CheckResult) to find the
+           "description" to pair with it. With the annotation on ResultText
+           (InOut: ResultText<->ResultText), the resolved key was
+           "ResultText" itself - and CheckResult.ResultText has no further
+           Common.Text of its own (it already IS the description), so the
+           framework fell back to reusing the key as the description too,
+           producing the live-confirmed duplicate "Неудовлетворительно
+           (Неудовлетворительно)". With the annotation on Result (InOut:
+           Result<->ResultCode) instead, the resolved key is "ResultCode",
+           which DOES have a Common.Text pointing at ResultText (see
+           annotation/reference-data.xml, ZCheckService.CheckResult/
+           ResultCode) - a genuinely different description now resolves.
+           Common.Text/UI.TextArrangement=TextOnly here also drives the
+           read-only/display-mode value (same role as CheckRoot/LpcKey
+           above). The UI.LineItem's Результат column was moved to bind
+           Value="Result" to match (see that Record's own comment for why
+           this doesn't reintroduce the old "shows raw code" problem that
+           blocked doing the same for Type/Code). -->
       <Annotations Target="ZCheckService.CheckItem/Result">
-        <Annotation Term="Common.Label" String="Результат"/>
-      </Annotations>
-
-      <Annotations Target="ZCheckService.CheckItem/ResultText">
         <Annotation Term="Common.Label" String="Результат"/>
         <!-- [Fix, exhaustive-sweep pass] Backed by a real server-side gate now
              (draft_service._missing_required_child_fields) - Activation
@@ -145,23 +187,10 @@
              hint only here, same Nullable="true"-but-business-required
              pattern as config.REQUIRED_ROOT_FIELDS. -->
         <Annotation Term="Common.Required" Bool="true"/>
-        <!-- [Fix, best-practices pass] Tried Common.ValueListWithFixedValues
-             here (CheckResults is a tiny 2-row enum, otherwise a perfect
-             dropdown candidate) - reverted after live verification: SmartForm
-             (the Add-row dialog, SubTableCrud.js) honors it and renders a
-             ComboBox, but sap.ui.comp.smarttable.SmartTable's OWN inline-edit
-             cell rendering for this exact same field does NOT (confirmed
-             live - still sap.m.Input + F4 popover regardless of the
-             annotation, a SmartTable/SmartField rendering-path limitation in
-             this UI5 1.71.84 build, not a config mistake). Setting the
-             annotation would have made the dialog and the inline table cell
-             render DIFFERENTLY for the same field - reintroducing exactly the
-             two-different-search-experiences problem the SmartField rewrite
-             (see class comment above) was written to eliminate. Left as a
-             plain Common.ValueList so both surfaces stay on the identical F4
-             dialog. PkLevels/Professions/TimeZones on CheckRoot don't have
-             this conflict (no inline-table rendering of those fields exists
-             anywhere in the app) and do use ValueListWithFixedValues. -->
+        <Annotation Term="Common.Text" Path="ResultText">
+          <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextOnly"/>
+        </Annotation>
+        <Annotation Term="Common.ValueListWithFixedValues" Bool="true"/>
         <Annotation Term="Common.ValueList">
           <Record Type="Common.ValueListType">
             <PropertyValue Property="Label"          String="Результат проверки"/>
@@ -170,18 +199,21 @@
             <PropertyValue Property="Parameters">
               <Collection>
                 <Record Type="Common.ValueListParameterInOut">
-                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ResultText"/>
-                  <PropertyValue Property="ValueListProperty"  String="ResultText"/>
-                </Record>
-                <Record Type="Common.ValueListParameterOut">
                   <PropertyValue Property="LocalDataProperty"  PropertyPath="Result"/>
                   <PropertyValue Property="ValueListProperty"  String="ResultCode"/>
-                  <Annotation Term="UI.Hidden" Bool="true"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ResultText"/>
+                  <PropertyValue Property="ValueListProperty"  String="ResultText"/>
                 </Record>
               </Collection>
             </PropertyValue>
           </Record>
         </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.CheckItem/ResultText">
+        <Annotation Term="Common.Label" String="Результат"/>
       </Annotations>
 
       <Annotations Target="ZCheckService.CheckItem/Comment">

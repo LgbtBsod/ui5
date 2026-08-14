@@ -177,8 +177,8 @@ CLASS zcl_check_dpc_ext IMPLEMENTATION.
 
 
   METHOD validate_no_conflict_of_interest.
-    CHECK is_basic-observer_perner IS NOT INITIAL
-      AND is_basic-observer_perner = is_basic-observed_perner.
+    CHECK is_basic-observer_pernr IS NOT INITIAL
+      AND is_basic-observer_pernr = is_basic-observed_pernr.
     RAISE EXCEPTION TYPE /iwbep/cx_mgw_busi_exception
       EXPORTING
         iv_msg_type = 'E'

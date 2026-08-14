@@ -1,0 +1,22 @@
+{
+  "_comment": "Registry of OData services this gateway process can host simultaneously. One entry per service - urlPrefix must match exactly what that service's own package bakes into response __metadata.uri strings and (for the SAPUI5 app) its manifest.json mainService dataSource; renaming it here alone does not rename it there. 'package' is the Python import path whose top-level namespace exposes the plugin contract (mandatory: dispatch_request(method, rel_url, body=None, headers=None) -> (status, body, content_type); optional: handle_batch(raw_body, content_type), csrf_check_failed(headers), CSRF_TOKEN, pop_pending_headers() -> dict, read_static_file(rel_path), seed_test_data(port=None)). Exactly one entry should carry isDefaultStatic=true - the gateway serves every non-OData, non-/sap/bc/lrep/ request (index.html, annotation/*.xml, css/, etc.) from that one entry's webRoot, matching today's single-app behavior. Every other entry is OData-only/headless. 'isDraftEnabled' is documentation-only - gateway/registry.py never reads it, a service decides its own protocol internally (see toolkit/draft.py for the generic draft-protocol engine vs toolkit/crud.py for plain CRUD) - it just lets a human (or a future 'scaffold new service' helper) see which services use the BOPF draft protocol without reading their code.",
+  "services": {
+    "ZCHECK_SRV": {
+      "package": "backend",
+      "urlPrefix": "/sap/opu/odata/sap/ZCHECK_SRV",
+      "webRoot": ".",
+      "metadataRelPath": "localService/metadata.xml",
+      "isDefaultStatic": true,
+      "isDraftEnabled": true
+    },
+    "ZDEMO_SRV": {
+      "package": "demo_service",
+      "urlPrefix": "/sap/opu/odata/sap/ZDEMO_SRV",
+      "webRoot": "demo_service",
+      "metadataRelPath": "metadata.xml",
+      "isDefaultStatic": false,
+      "isDraftEnabled": false,
+      "_comment": "Deliberately tiny second service (see demo_service/__init__.py) - exists only to prove the gateway genuinely hosts independent services, not to be a real app. OData-only, no static SPA of its own."
+    }
+  }
+}

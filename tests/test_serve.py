@@ -49,10 +49,11 @@ class ResolveCheckItemTests(unittest.TestCase):
         self.assertEqual(out["CommentFieldControl"], 3)
 
     def test_field_control_is_mandatory_when_unsatisfactory(self):
-        # [Fix, exhaustive-sweep pass] Common.FieldControl - "" is the real
-        # CheckResults code for "Неудовлетворительно" (see serve_config's
-        # only two reference rows), not "no value yet" (that's None/missing).
-        out = serve.resolve_check_item({"Code": "VISUAL_INSPECTION", "RawText": "", "Result": ""})
+        # [Fix, exhaustive-sweep pass] Common.FieldControl -
+        # RESULT_CODE_UNSATISFACTORY is the real CheckResults code for
+        # "Неудовлетворительно" (see serve_config's only two reference
+        # rows), not "no value yet" (that's None/missing).
+        out = serve.resolve_check_item({"Code": "VISUAL_INSPECTION", "RawText": "", "Result": serve_config.RESULT_CODE_UNSATISFACTORY})
         self.assertEqual(out["CommentFieldControl"], 7)
 
     def test_field_control_is_optional_when_not_yet_assessed(self):
@@ -71,7 +72,7 @@ class ResolveCheckItemTests(unittest.TestCase):
         # the actual safeguards, not a Result-presence check.
         self.assertTrue(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": None})["Deletable"])
         self.assertTrue(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": "X"})["Deletable"])
-        self.assertTrue(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": ""})["Deletable"])
+        self.assertTrue(serve.resolve_check_item({"Code": "X", "RawText": "", "Result": serve_config.RESULT_CODE_UNSATISFACTORY})["Deletable"])
 
 
 class ResolveBarrierTests(unittest.TestCase):
@@ -94,7 +95,7 @@ class ResolveBarrierTests(unittest.TestCase):
         # on ResolveCheckItemTests) to guard against a Barrier-specific
         # regression in the shared helper.
         satisfactory = serve.resolve_barrier({"Code": "SAFETY_FENCE", "Result": "X"})
-        failing = serve.resolve_barrier({"Code": "SAFETY_FENCE", "Result": ""})
+        failing = serve.resolve_barrier({"Code": "SAFETY_FENCE", "Result": serve_config.RESULT_CODE_UNSATISFACTORY})
         unassessed = serve.resolve_barrier({"Code": "SAFETY_FENCE", "Result": None})
         self.assertEqual(satisfactory["CommentFieldControl"], 3)
         self.assertEqual(failing["CommentFieldControl"], 7)
@@ -156,6 +157,14 @@ class ResultCodeConstantTests(unittest.TestCase):
         self.assertEqual(satisfactory_rows[0]["ResultText"], "Удовлетворительно")
 
     def test_seeded_check_items_use_the_constant(self):
+        # [Fix, use-case pass #4] Was asserting ALL seeded CheckItems are
+        # satisfactory - true only back when there was exactly one seed
+        # record (TEST-001, all-green demo data). The second seed record
+        # (INT-001, the real integration XML example) deliberately includes
+        # a failing check, so the real invariant this test guards - every
+        # seeded Result is the shared constant, never a stray hardcoded
+        # literal - is now checked against the full {SATISFACTORY,
+        # UNSATISFACTORY} set instead of a single value.
         serve.store["CheckRoots"].clear()
         serve.store["CheckBasics"].clear()
         serve.store["CheckItems"].clear()
@@ -166,7 +175,13 @@ class ResultCodeConstantTests(unittest.TestCase):
             seeded_results = {
                 row["Result"] for (rid, _iid), row in serve.store["CheckItems"].items() if rid in seeded_root_ids
             }
-            self.assertEqual(seeded_results, {serve_config.RESULT_CODE_SATISFACTORY})
+            self.assertTrue(seeded_results)
+            self.assertTrue(
+                seeded_results.issubset({serve_config.RESULT_CODE_SATISFACTORY, serve_config.RESULT_CODE_UNSATISFACTORY}),
+                seeded_results
+            )
+            self.assertIn(serve_config.RESULT_CODE_SATISFACTORY, seeded_results)
+            self.assertIn(serve_config.RESULT_CODE_UNSATISFACTORY, seeded_results)
         finally:
             serve.store["CheckRoots"].clear()
             serve.store["CheckBasics"].clear()
@@ -301,6 +316,12 @@ class DraftOnCreateTests(unittest.TestCase):
         "ObserverFullname": "Inspector X", "ObservedFullname": "Observed Y",
         "Date": "2026-07-27T00:00:00.000Z", "Time": "PT10H0M0S", "Timezone": "Asia/Yerevan",
         "LpcKey": "2", "ProfKey": "ELECTRICIAN",
+        # [Fix, use-case pass #5] LocationName is now required (see
+        # config.REQUIRED_ROOT_FIELDS) - CreateRootHandler no longer silently
+        # defaults it (that default was the actual bug this pass fixed: every
+        # new record was pre-filled with the same hardcoded location before
+        # the inspector ever touched the form).
+        "LocationName": "Площадка №1",
     }
 
     def tearDown(self):
@@ -432,10 +453,48 @@ class DraftOnCreateTests(unittest.TestCase):
         root_id = root["RootId"]
         status, resp, _c = serve.dispatch_request(
             "POST", "CheckRoots(ActiveUUID=guid'%s',DraftUUID=guid'%s')/to_Checks" % (serve.ZERO_GUID, root_id),
-            body={"Code": "VISUAL_INSPECTION", "Comment": "", "Result": ""},
+            body={"Code": "VISUAL_INSPECTION", "Comment": "", "Result": serve_config.RESULT_CODE_UNSATISFACTORY},
         )
         self.assertEqual(status, 201)
         self.assertEqual(resp["d"]["RootId"], root_id)
+
+    # [Fix, browser-test pass] Live-reproduced in the browser: CheckRoots'
+    # aggregated etag (odata_format.compute_etag_timestamp_ms - max over
+    # root+CheckBasics+children) moves whenever a CHILD row is added, but
+    # the client's locally-cached root __metadata.etag has no way to learn
+    # that - a child POST's response is scoped to the child, never the
+    # root. Any root-field PATCH sent with the pre-child-add etag used to
+    # get a false 412, and the field silently never persisted (confirmed
+    # via direct store inspection during that session) - reproduced with
+    # the EXACT sequence real Fiori Elements produces: fill header fields,
+    # add a check row, then edit another header field. Pins that a
+    # draft-addressed root PATCH no longer depends on the root's etag
+    # staying put across child mutations (see query._precondition_failed).
+    def test_root_patch_survives_stale_etag_after_child_row_added(self):
+        _status, root = self._create()
+        root_id = root["RootId"]
+        stale_if_match = root["__metadata"]["etag"]
+        draft_key = "CheckRoots(ActiveUUID=guid'%s',DraftUUID=guid'%s')" % (serve.ZERO_GUID, root_id)
+
+        status, _resp, _c = serve.dispatch_request(
+            "POST", draft_key + "/to_Checks",
+            body={"Code": "VISUAL_INSPECTION", "Comment": "", "Result": serve_config.RESULT_CODE_UNSATISFACTORY},
+        )
+        self.assertEqual(status, 201)
+
+        status, resp, _c = serve.dispatch_request(
+            "PATCH", draft_key, body={"ObserverFullname": "Changed After Child Add"},
+            headers={"if-match": stale_if_match},
+        )
+        self.assertEqual(status, 204)
+        self.assertIsNone(resp)
+        # ObserverFullname is a CheckBasics proxy field (see
+        # config.BASIC_PROXY_FIELDS) - not draft-scoped, writes land straight
+        # in the active-side CheckBasics row even during an open draft
+        # session (see draft_service.py's snapshot_children docstring).
+        self.assertEqual(
+            serve.store["CheckBasics"][root_id]["ObserverFullname"], "Changed After Child Add"
+        )
 
 
 class ForeignUserLockTests(unittest.TestCase):
@@ -738,6 +797,7 @@ class ForeignUserWriteLockTests(unittest.TestCase):
             body={
                 "ObserverFullname": "X", "ObservedFullname": "Y", "Date": serve.odata_date(),
                 "Time": "PT09H00M00S", "Timezone": "Europe/Moscow", "LpcKey": "1", "ProfKey": "ELECTRICIAN",
+                "LocationName": "Площадка №1",
             },
             headers={"x-mock-user": "PETROV", "if-match": "*"},
         )
@@ -759,8 +819,13 @@ class FieldLevelValidationMessageTests(unittest.TestCase):
 
     def setUp(self):
         # Deliberately missing ObserverFullname/ObservedFullname/Time/ProfKey -
-        # only Date/LpcKey supplied - to get a mix of missing fields.
-        body = {"Date": "2026-07-27T00:00:00.000Z", "LpcKey": "2"}
+        # only Date/LpcKey/LocationName supplied - to get a mix of missing
+        # fields. LocationName included here (not part of the intentional
+        # gap) so this test keeps validating exactly the combination its own
+        # docstring describes now that Location is also a required field
+        # (config.REQUIRED_ROOT_FIELDS) - see test_activation_with_missing_
+        # fields_returns_errordetails_with_targets's own asserted target set.
+        body = {"Date": "2026-07-27T00:00:00.000Z", "LpcKey": "2", "LocationName": "Площадка №1"}
         _status, resp, _c = serve.dispatch_request("POST", "CheckRoots", body=body)
         self.root_id = resp["d"]["RootId"]
 
@@ -777,7 +842,7 @@ class FieldLevelValidationMessageTests(unittest.TestCase):
         self.assertEqual(resp["error"]["code"], "VALIDATION_ERROR")
         details = resp["error"]["innererror"]["errordetails"]
         targets = {d["target"] for d in details}
-        # ObserverFullname/ObservedFullname have Perner alternates (unset here
+        # ObserverFullname/ObservedFullname have Pernr alternates (unset here
         # too, so both are genuinely missing); Time/Timezone/ProfKey are plain.
         self.assertEqual(targets, {"ObserverFullname", "ObservedFullname", "Time", "Timezone", "ProfKey"})
         for d in details:
@@ -813,6 +878,7 @@ class ChildRowValidationMessageTests(unittest.TestCase):
     ALL_REQUIRED_ROOT_FIELDS = {
         "ObserverFullname": "X", "ObservedFullname": "Y", "Date": "2026-07-27T00:00:00.000Z",
         "Time": "PT09H00M00S", "Timezone": "Europe/Moscow", "LpcKey": "1", "ProfKey": "ELECTRICIAN",
+        "LocationName": "Площадка №1",
     }
 
     def setUp(self):
@@ -857,8 +923,9 @@ class ChildRowValidationMessageTests(unittest.TestCase):
         self.assertEqual(status, 200)
 
     def test_child_row_with_explicit_unsatisfactory_result_is_not_missing(self):
-        # "" is a real CheckResults code (Неудовлетворительно), not "unset".
-        self._add_check_item(result="")
+        # RESULT_CODE_UNSATISFACTORY (" ") is a real CheckResults code
+        # (Неудовлетворительно), not "unset".
+        self._add_check_item(result=serve_config.RESULT_CODE_UNSATISFACTORY)
         status, _resp, _c = self._activate()
         self.assertEqual(status, 200)
 
@@ -991,7 +1058,7 @@ class BadgeCriticalityTests(unittest.TestCase):
     def test_unsatisfactory_check_result_gives_visible_error_criticality_badge(self):
         serve.store["CheckItems"][(self.root_id, "badge-item")] = {
             "RootId": self.root_id, "ItemId": "badge-item", "Code": "VISUAL_INSPECTION",
-            "RawText": "", "Comment": "", "Result": "",  # "" = Неудовлетворительно
+            "RawText": "", "Comment": "", "Result": serve_config.RESULT_CODE_UNSATISFACTORY,
             "DraftUUID": serve.ZERO_GUID, "LastChangedAt": serve.odata_date(),
         }
         out = serve.compute_check_root_view(self.root_id)
@@ -1006,7 +1073,7 @@ class BadgeCriticalityTests(unittest.TestCase):
     def test_unsatisfactory_barrier_result_gives_visible_error_criticality_badge(self):
         serve.store["Barriers"][(self.root_id, "badge-barrier")] = {
             "RootId": self.root_id, "ItemId": "badge-barrier", "Code": "PHYSICAL_BARRIER",
-            "RawText": "", "Comment": "", "Result": "",
+            "RawText": "", "Comment": "", "Result": serve_config.RESULT_CODE_UNSATISFACTORY,
             "DraftUUID": serve.ZERO_GUID, "LastChangedAt": serve.odata_date(),
         }
         out = serve.compute_check_root_view(self.root_id)
@@ -1025,6 +1092,66 @@ class BadgeCriticalityTests(unittest.TestCase):
         metadata = serve.read_static_file("localService/metadata.xml")[0].decode("utf-8")
         for field in ("ChecksErrorCriticality", "BarriersErrorCriticality", "IntegrationCriticality"):
             self.assertIn('Name="%s"' % field, metadata, "%s must be declared in metadata.xml or it never reaches the wire" % field)
+
+
+class UpdatableCapabilityTests(unittest.TestCase):
+    """[Fix, use-case pass #4] Integration-sourced records are view-only end
+    to end - Updatable (compute_check_root_view) is the single field
+    sap:updatable-path/sap:deletable-path (metadata.xml) and UI.Updatable/
+    UI.Deletable Path=... (check-root.xml) key off to disable the Object
+    Page's own "Редактировать"/"Удалить" buttons. Inverted on purpose - see
+    resolvers.py's own comment for why ThisIsIntegrationData itself can't be
+    bound directly (the capability annotations need true="allowed", the
+    opposite of ThisIsIntegrationData's own meaning)."""
+
+    def setUp(self):
+        self.root_id = "updatable-test-root"
+        serve.store["CheckRoots"][self.root_id] = {
+            "RootId": self.root_id, "ActiveUUID": self.root_id, "DraftUUID": serve.ZERO_GUID,
+            "IsActiveEntity": True, "DocId": "UPDATABLE-TEST", "Status": "OK",
+            "LastChangedAt": serve.odata_date(), "CreatedAt": serve.odata_date(),
+        }
+        serve.store["CheckBasics"][self.root_id] = {"RootId": self.root_id, "LastChangedAt": serve.odata_date()}
+
+    def tearDown(self):
+        serve.store["CheckRoots"].pop(self.root_id, None)
+        serve.store["CheckBasics"].pop(self.root_id, None)
+
+    def test_updatable_true_when_not_integration_data(self):
+        out = serve.compute_check_root_view(self.root_id)
+        self.assertFalse(out["ThisIsIntegrationData"])
+        self.assertTrue(out["Updatable"])
+
+    def test_updatable_false_when_integration_data(self):
+        serve.store["CheckRoots"][self.root_id]["ThisIsIntegrationData"] = True
+        out = serve.compute_check_root_view(self.root_id)
+        self.assertTrue(out["ThisIsIntegrationData"])
+        self.assertFalse(out["Updatable"])
+
+    def test_updatable_declared_in_metadata_so_it_reaches_the_wire(self):
+        # Same regression class as the Criticality fields above - a computed
+        # key with no matching metadata.xml <Property> is silently dropped
+        # before the client ever sees it.
+        metadata = serve.read_static_file("localService/metadata.xml")[0].decode("utf-8")
+        self.assertIn('Name="Updatable"', metadata)
+
+    def test_updatable_path_wired_on_checkroots_entityset(self):
+        # Guards the actual annotation wiring, not just the computed field -
+        # a correct Updatable value with a stale sap:updatable="true"/
+        # sap:deletable="true" left in place would silently never gate
+        # anything (confirmed live this pass: a static Bool sitting next to
+        # a dynamic Path is possible XML, just meaningless - the client only
+        # reads one of them).
+        metadata = serve.read_static_file("localService/metadata.xml")[0].decode("utf-8")
+        self.assertIn('sap:updatable-path="Updatable"', metadata)
+        self.assertIn('sap:deletable-path="Updatable"', metadata)
+        self.assertNotIn('sap:updatable="true"', metadata.split('EntitySet Name="CheckRoots"')[1].split("/>")[0])
+
+    def test_updatable_is_client_readonly(self):
+        # Computed, server-authoritative field - must never be accepted from
+        # a client PATCH/PUT/MERGE body (same protection as every other
+        # computed CheckRoots field, e.g. HasErrorChecks/ChecksCriticality).
+        self.assertIn("Updatable", serve_config.READONLY_FIELDS["CheckRoots"])
 
 
 class ApplyOrderbyTests(unittest.TestCase):

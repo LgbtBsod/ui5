@@ -84,10 +84,10 @@ def resolve_check_basic(row: EntityRow) -> EntityRow:
     """
     out = dict(row)
 
-    observer_fio = _ref_lookup("Persons", "Pernr", "Fio", out.get("ObserverPerner")) if out.get("ObserverPerner") else None
+    observer_fio = _ref_lookup("Persons", "Pernr", "Fio", out.get("ObserverPernr")) if out.get("ObserverPernr") else None
     out["ObserverFullname"] = observer_fio or out.get("ObserverIntegrationName") or ""
 
-    observed_fio = _ref_lookup("Persons", "Pernr", "Fio", out.get("ObservedPerner")) if out.get("ObservedPerner") else None
+    observed_fio = _ref_lookup("Persons", "Pernr", "Fio", out.get("ObservedPernr")) if out.get("ObservedPernr") else None
     out["ObservedFullname"] = observed_fio or out.get("ObservedIntegrationName") or ""
 
     out["LpcText"] = _ref_lookup("PkLevels", "PkLevel", "PkLevelText", out.get("LpcKey")) or "" if out.get("LpcKey") else ""
@@ -141,12 +141,13 @@ def _resolve_type_and_result(
     # binds Comment's mandatory state to this Edm.Byte value (7=mandatory,
     # 3=optional) via sap.ui.comp.smartfield.FieldControl - recomputed
     # automatically whenever Result changes, no reload/JS needed. "Failing"
-    # uses the exact same Result=="" check as compute_check_root_view's
+    # uses the exact same check as compute_check_root_view's
     # has_error_checks/has_error_barriers (CheckResults' only two reference
-    # codes are "X"=Удовлетворительно and ""=Неудовлетворительно - an
-    # unanswered Result is None, not "", so this never misfires on a
-    # brand-new not-yet-assessed row).
-    out["CommentFieldControl"] = 7 if out.get("Result") == "" else 3
+    # codes are RESULT_CODE_SATISFACTORY="X" and RESULT_CODE_UNSATISFACTORY=
+    # " " - see serve_config.py for why it's a space, not "". An unanswered
+    # Result is None, not the unsatisfactory code, so this never misfires on
+    # a brand-new not-yet-assessed row).
+    out["CommentFieldControl"] = 7 if out.get("Result") == serve_config.RESULT_CODE_UNSATISFACTORY else 3
     # [Fix, use-case pass] sap:deletable-path (metadata.xml) reads this
     # Boolean to gate the ResponsiveTable's per-row Delete button. This used
     # to be `out.get("Result") is None` - "only deletable before the
@@ -247,11 +248,11 @@ def compute_check_root_view(
 
     checks_amount = len(checks)
     checks_success = sum(1 for c in checks if c.get("Result") == serve_config.RESULT_CODE_SATISFACTORY)
-    has_error_checks = any(c.get("Result") == "" for c in checks)
+    has_error_checks = any(c.get("Result") == serve_config.RESULT_CODE_UNSATISFACTORY for c in checks)
 
     barriers_amount = len(barriers)
     barriers_success = sum(1 for b in barriers if b.get("Result") == serve_config.RESULT_CODE_SATISFACTORY)
-    has_error_barriers = any(b.get("Result") == "" for b in barriers)
+    has_error_barriers = any(b.get("Result") == serve_config.RESULT_CODE_UNSATISFACTORY for b in barriers)
 
     success_rate_checks = round(checks_success / checks_amount * 100, 2) if checks_amount else None
     success_rate_barriers = round(barriers_success / barriers_amount * 100, 2) if barriers_amount else None
@@ -307,6 +308,23 @@ def compute_check_root_view(
     out["BarriersHidden"] = lpc_key in serve_config.BUSINESS_RULES.BARRIERS_HIDDEN_PK_LEVELS
 
     out["ThisIsIntegrationData"] = bool(out.get("ThisIsIntegrationData", False))
+
+    # [Fix, use-case pass #4] Integration-sourced records are view-only end to
+    # end - editing them was previously allowed after a warn-and-confirm
+    # dialog (IntegrationEditGuard.js), but per the real business rule this
+    # data has no owner on our side to correct: re-syncing from the
+    # integration feed wouldn't pick up local edits anyway (see
+    # integrationEditWarningMsg), so letting anyone edit it was always a false
+    # affordance. sap:updatable-path="Updatable" + sap:deletable-path=
+    # "Updatable" (metadata.xml) and UI.Updatable/UI.Deletable Path=
+    # "Updatable" (check-root.xml) drive the client's own "Редактировать"/
+    # "Удалить" buttons off this same field - single source of truth, no
+    # duplicated client-side logic. No server-side PATCH/DELETE rejection
+    # backstop here (deliberately kept out of scope, see the user's own
+    # "не паримся" call) - the annotation-driven button hide is the sole
+    # enforcement layer; a client bypassing it entirely (direct OData call,
+    # stale cached UI) is not guarded against server-side.
+    out["Updatable"] = not out["ThisIsIntegrationData"]
 
     out["IntegrationBadgeHidden"] = not out["ThisIsIntegrationData"]
     out["ChecksErrorBadgeHidden"] = not has_error_checks

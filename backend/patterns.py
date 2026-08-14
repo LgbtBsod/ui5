@@ -19,6 +19,9 @@ import re
 from dataclasses import dataclass
 from typing import Optional, Tuple, Match, Pattern
 
+from toolkit.patterns import SINGLE_KEY_RE as _TOOLKIT_SINGLE_KEY_RE
+from toolkit.patterns import ENTITY_SET_RE as _TOOLKIT_ENTITY_SET_RE
+
 
 @dataclass(frozen=True)
 class EntityKeyMatch:
@@ -63,8 +66,14 @@ class Patterns:
     # =========================================================================
     
     #: Single key entity: EntityName('key_value')
-    SINGLE_KEY_RE: Pattern[str] = re.compile(r"^(\w+)\('([^']*)'\)$")
-    
+    #: [Fix, toolkit pass] Source of truth moved to toolkit/patterns.py -
+    #: this and ENTITY_SET_RE below are the two regexes generic enough to be
+    #: reused by ANY OData v2 service (see toolkit/patterns.py's docstring);
+    #: re-exported here unchanged so every existing caller in this package
+    #: (dispatch.py, handlers.py, odata_format.py, parse_single_key/
+    #: parse_entity_set below) keeps working without modification.
+    SINGLE_KEY_RE: Pattern[str] = _TOOLKIT_SINGLE_KEY_RE
+
     #: Composite key entity: EntityName(RootId='val',ItemId='val')
     COMPOSITE_KEY_RE: Pattern[str] = re.compile(
         r"^(\w+)\(RootId='([^']*)',(ItemId|BarrierId)='([^']*)'\)$"
@@ -103,7 +112,9 @@ class Patterns:
     COUNT_RE: Pattern[str] = re.compile(r"^(\w+)/\$count$")
     
     #: Simple entity set list: EntitySet
-    ENTITY_SET_RE: Pattern[str] = re.compile(r"^(\w+)$")
+    #: [Fix, toolkit pass] See SINGLE_KEY_RE above - re-exported from
+    #: toolkit/patterns.py.
+    ENTITY_SET_RE: Pattern[str] = _TOOLKIT_ENTITY_SET_RE
     
     # =========================================================================
     # Filter Expression Patterns

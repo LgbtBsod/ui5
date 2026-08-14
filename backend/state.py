@@ -104,6 +104,26 @@ def _pop_pending_etag():
     return etag
 
 
+def pop_pending_headers() -> Dict[str, str]:
+    """[Fix, gateway pass] Uniform "mailbox" hand-off for the multi-service
+    gateway (see gateway/registry.py's ServicePlugin.pop_pending_headers) -
+    wraps the two existing single-purpose mailboxes above into one dict the
+    gateway's HTTP layer can apply generically without knowing which header
+    names any given plugin cares about. Purely additive: _pop_sap_message/
+    _pop_pending_etag and their existing direct callers (http_server.py)
+    are unchanged - this just offers a second, uniform way to drain the
+    same state for callers that don't want to know the specific header
+    names in advance."""
+    headers: Dict[str, str] = {}
+    msg = _pop_sap_message()
+    if msg:
+        headers["sap-message"] = msg
+    etag = _pop_pending_etag()
+    if etag:
+        headers["ETag"] = etag
+    return headers
+
+
 def _resolve_mock_user(headers):
     uname = (headers or {}).get("x-mock-user")
     uname = (uname or "").strip()

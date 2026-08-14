@@ -63,9 +63,9 @@
         <Property Name="LocationName"  Type="Edm.String" MaxLength="100" sap:label="Местоположение"/>
         <Property Name="Equipment"     Type="Edm.String" MaxLength="100" sap:label="Оборудование"/>
         <Property Name="ObserverFullname" Type="Edm.String" Nullable="false" MaxLength="100" sap:label="ФИО инспектора" sap:quickcreate="true"/>
-        <Property Name="ObserverPerner"   Type="Edm.String" MaxLength="8" sap:label="Табельный № инспектора" sap:visible="false"/>
+        <Property Name="ObserverPernr"   Type="Edm.String" MaxLength="8" sap:label="Табельный № инспектора" sap:visible="false"/>
         <Property Name="ObservedFullname" Type="Edm.String" Nullable="false" MaxLength="100" sap:label="ФИО проверяемого" sap:quickcreate="true"/>
-        <Property Name="ObservedPerner"   Type="Edm.String" MaxLength="8" sap:label="Табельный № проверяемого" sap:visible="false"/>
+        <Property Name="ObservedPernr"   Type="Edm.String" MaxLength="8" sap:label="Табельный № проверяемого" sap:visible="false"/>
         <Property Name="LpcKey"        Type="Edm.String" MaxLength="10" sap:label="Уровень КПР" sap:text="LpcText"/>
         <Property Name="LpcText"       Type="Edm.String" Nullable="false" MaxLength="100" sap:label="Уровень КПР"/>
         <Property Name="ProfKey"       Type="Edm.String" MaxLength="50" sap:label="Профессия" sap:text="ProfText"/>
@@ -74,6 +74,12 @@
         <Property Name="Status"                Type="Edm.String" MaxLength="20" sap:label="Статус" sap:creatable="false" sap:updatable="false"/>
         <Property Name="StatusCriticality"     Type="Edm.Int32" sap:label="Критичность статуса" sap:creatable="false" sap:updatable="false"/>
         <Property Name="ThisIsIntegrationData" Type="Edm.Boolean" Nullable="false" sap:label="Создано интеграцией" sap:creatable="false" sap:updatable="false"/>
+        <!-- [Fix, use-case pass #4] Drives sap:updatable-path below (CheckRoots
+             EntitySet) - same dynamic-capability pattern already proven for
+             CheckItems/Barriers' sap:deletable-path="Deletable". Computed as
+             !ThisIsIntegrationData (resolvers.compute_check_root_view) -
+             integration-sourced records are view-only end to end. -->
+        <Property Name="Updatable"             Type="Edm.Boolean" Nullable="false" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
         <Property Name="ChecksAmount"          Type="Edm.Int32" Nullable="false" sap:label="Всего проверок" sap:creatable="false" sap:updatable="false"/>
         <Property Name="ChecksSuccess"         Type="Edm.Int32" Nullable="false" sap:label="Успешных проверок" sap:creatable="false" sap:updatable="false"/>
         <Property Name="BarriersAmount"        Type="Edm.Int32" Nullable="false" sap:label="Барьеров" sap:creatable="false" sap:updatable="false"/>
@@ -165,12 +171,12 @@
         <Property Name="LocationKey"                Type="Edm.String" MaxLength="36" sap:label="Местоположение" sap:text="LocationName"/>
         <Property Name="LocationName"                Type="Edm.String" MaxLength="100" sap:label="Местоположение"/>
         <Property Name="LocationText"                Type="Edm.String" MaxLength="100" sap:label="Местоположение (текст интеграции)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
-        <Property Name="ObserverPerner"              Type="Edm.String" MaxLength="8" sap:label="Табельный № инспектора" sap:visible="false"/>
+        <Property Name="ObserverPernr"              Type="Edm.String" MaxLength="8" sap:label="Табельный № инспектора" sap:visible="false"/>
         <Property Name="ObserverFullname"            Type="Edm.String" Nullable="false" MaxLength="100" sap:label="ФИО инспектора" sap:quickcreate="true"/>
         <Property Name="ObserverPosition"            Type="Edm.String" MaxLength="100" sap:label="Должность инспектора (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
         <Property Name="ObserverOrgunit"             Type="Edm.String" MaxLength="100" sap:label="Подразделение инспектора (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
         <Property Name="ObserverIntegrationName"     Type="Edm.String" MaxLength="100" sap:label="ФИО инспектора (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
-        <Property Name="ObservedPerner"              Type="Edm.String" MaxLength="8" sap:label="Табельный № проверяемого" sap:visible="false"/>
+        <Property Name="ObservedPernr"              Type="Edm.String" MaxLength="8" sap:label="Табельный № проверяемого" sap:visible="false"/>
         <Property Name="ObservedFullname"            Type="Edm.String" Nullable="false" MaxLength="100" sap:label="ФИО проверяемого" sap:quickcreate="true"/>
         <Property Name="ObservedPosition"            Type="Edm.String" MaxLength="100" sap:label="Должность проверяемого (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
         <Property Name="ObservedOrgunit"             Type="Edm.String" MaxLength="100" sap:label="Подразделение проверяемого (интеграция)" sap:visible="false" sap:creatable="false" sap:updatable="false"/>
@@ -212,7 +218,43 @@
         <Property Name="RawText"       Type="Edm.String" Nullable="true"  MaxLength="200" sap:label="Текст (как есть)"/>
         <Property Name="Text"          Type="Edm.String" Nullable="true"  MaxLength="200" sap:label="Тип проверки"/>
         <Property Name="Comment"       Type="Edm.String" MaxLength="500" sap:label="Комментарий"/>
-        <Property Name="Result"        Type="Edm.String" MaxLength="1"   sap:label="Результат" sap:text="ResultText"/>
+        <!-- [Fix, best-practices pass] sap:value-list="fixed-values" - the
+             classic OData V2 metadata signal, NOT the same thing as the
+             Common.ValueListWithFixedValues vocabulary annotation (also set,
+             on this same property, in annotation/check-item.xml). Both
+             matter for different rendering paths: SmartForm honors the
+             vocabulary annotation; sap.ui.comp.smarttable.SmartTable's own
+             inline row-edit cell rendering, confirmed live, does NOT - it
+             only switches from Input+F4-popover to a real sap.m.ComboBox
+             when THIS sap:value-list metadata attribute is present, which
+             matters here since the inline table is the ONLY place this
+             field is edited (SubTableCrud.js's row-add is inline-in-the-
+             table too, no dialog - see that file's class comment).
+
+             [Fix, use-case pass #2] This attribute (and the matching
+             Common.ValueList/ValueListWithFixedValues in check-item.xml, and
+             the UI.LineItem DataField below) live on Result, NOT ResultText
+             - moved here after the first attempt (on ResultText) produced a
+             live-confirmed bug: the inline ComboBox showed duplicated text
+             ("Неудовлетворительно (Неудовлетворительно)"). Root cause traced
+             through the actual SAPUI5 1.71.84 source
+             (sap/ui/comp/odata/MetadataAnalyser.js): the framework resolves
+             the ComboBox's "key" as whichever ValueList Parameter's
+             LocalDataProperty matches the ANNOTATED property itself, then
+             looks up a Common.Text on that SAME-NAMED property over on the
+             value-list's own entity (CheckResult) to find the "description".
+             Annotating ResultText made the resolved key "ResultText" -    and
+             CheckResult.ResultText has no further Common.Text of its own (it
+             already IS the description), so the framework fell back to
+             reusing the key as the description too. Annotating Result
+             instead makes the resolved key "ResultCode", which DOES have a
+             Common.Text pointing at ResultText (see annotation/
+             reference-data.xml, ZCheckService.CheckResult/ResultCode) - a
+             genuinely different description now resolves, sap:text="
+             ResultText" above still drives the read-only/display value the
+             same as before this move, and the duplicate is gone (confirmed
+             live). -->
+        <Property Name="Result"        Type="Edm.String" MaxLength="1"   sap:label="Результат" sap:text="ResultText" sap:value-list="fixed-values"/>
         <Property Name="ResultText"    Type="Edm.String" MaxLength="100" sap:label="Результат"/>
         <!-- [Fix, exhaustive-sweep pass] Computed, read-only - see
              resolvers._resolve_type_and_result and annotations.xml's
@@ -238,7 +280,7 @@
         <Property Name="Code"          Type="Edm.String" Nullable="false" MaxLength="30"  sap:label="Тип барьера" sap:text="Text"/>
         <Property Name="Text"          Type="Edm.String" Nullable="true"  MaxLength="100" sap:label="Тип барьера"/>
         <Property Name="Comment"       Type="Edm.String" MaxLength="500" sap:label="Примечания"/>
-        <Property Name="Result"        Type="Edm.String" MaxLength="1"   sap:label="Результат" sap:text="ResultText"/>
+        <Property Name="Result"        Type="Edm.String" MaxLength="1"   sap:label="Результат" sap:text="ResultText" sap:value-list="fixed-values"/>
         <Property Name="ResultText"    Type="Edm.String" MaxLength="100" sap:label="Результат"/>
         <!-- [Fix, exhaustive-sweep pass] Same as CheckItem - see that
              entity's comment. -->
@@ -406,8 +448,20 @@
       </Association>
 
       <EntityContainer Name="ZCheckServiceEntities" m:IsDefaultEntityContainer="true">
+        <!-- [Fix, use-case pass #4] sap:updatable-path/sap:deletable-path
+             (dynamic, per-record - mirrors CheckItems/Barriers' own
+             sap:deletable-path below, mutually exclusive with static
+             sap:updatable="true"/sap:deletable="true") - the classic Fiori
+             Elements Object Page toolbar's "Редактировать"/"Удалить" buttons
+             read this via the same _ODataMetaModelUtils capability
+             conversion, disabling both for integration-sourced records. Both
+             point at the same Updatable field (resolvers.
+             compute_check_root_view) - confirmed with the user that
+             integration data should be fully read-only, not edit-locked
+             only, so there's no separate "Deletable" concept to compute
+             here. -->
         <EntitySet Name="CheckRoots"  EntityType="ZCheckService.CheckRoot"
-                   sap:creatable="true" sap:updatable="true" sap:deletable="true"
+                   sap:creatable="true" sap:updatable-path="Updatable" sap:deletable-path="Updatable"
                    sap:searchable="true" sap:countable="true"/>
         <EntitySet Name="CheckBasics" EntityType="ZCheckService.CheckBasic"
                    sap:creatable="true" sap:updatable="true" sap:deletable="false"

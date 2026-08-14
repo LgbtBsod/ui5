@@ -4,11 +4,21 @@ sap.ui.define(["./Constants", "./FioriElementsDom", "./WatchedButton", "./Cached
 	const F = Constants.FIELDS;
 	const WARNING_TEXT = I18n.getText("integrationEditWarningMsg");
 
+	// [Fix, use-case pass #4] Integration-sourced records are view-only end to
+	// end now - per the real business rule, there was never a valid "continue
+	// editing anyway" choice here (re-syncing from the integration feed
+	// wouldn't pick up local edits either, see integrationEditWarningMsg), so
+	// the old MessageBox.confirm's OK-to-proceed path was always a false
+	// affordance. Primary block is annotation-driven (sap:updatable-path=
+	// "Updatable" on CheckRoots, metadata.xml/check-root.xml -> disables the
+	// "Редактировать" button itself, see resolvers.compute_check_root_view)
+	// - this guard is the message layered on top / backstop if that button
+	// somehow still fires press. Plain warning (OK-only), unconditionally
+	// cancels edit mode - no confirmed/remembered-consent state anymore.
 	class IntegrationEditGuard {
 		constructor() {
 			this._oEditButton = new WatchedButton(FioriElementsDom.findEditButton);
 			this._oCancelButtonLookup = new CachedElementLookup(FioriElementsDom.findCancelButton);
-			this._sConfirmedPath = null;
 		}
 
 		refresh(oView) {
@@ -20,18 +30,8 @@ sap.ui.define(["./Constants", "./FioriElementsDom", "./WatchedButton", "./Cached
 			if (!oContext || !oContext.getProperty(F.THIS_IS_INTEGRATION_DATA)) {
 				return;
 			}
-			const sPath = oContext.getPath();
-			if (this._sConfirmedPath === sPath) {
-				return;
-			}
-			MessageBox.confirm(WARNING_TEXT, {
-				onClose: (sAction) => {
-					if (sAction === MessageBox.Action.OK) {
-						this._sConfirmedPath = sPath;
-					} else {
-						this._cancelEdit(oView);
-					}
-				}
+			MessageBox.warning(WARNING_TEXT, {
+				onClose: () => this._cancelEdit(oView)
 			});
 		}
 

@@ -323,22 +323,38 @@ def _precondition_failed(
     row = _find_by_key(set_name, key_parts)
     if not row:
         return False
-    # [Fix] A draft-addressed CheckRoots key (DraftUUID != ZERO_GUID) must be
-    # compared against the DRAFT's own aggregated etag (root + CheckBasics +
-    # this draft's own tagged CheckItems/Barriers - see
-    # odata_format.compute_etag_timestamp_ms) - exactly what wrap_entity
-    # hands the client as __metadata.etag for that same row. Comparing
-    # against the ACTIVE side's etag instead meant the very first legitimate
-    # PATCH to a draft made every subsequent PATCH with a freshly-fetched
-    # If-Match permanently fail with a false 412, since the active-side
-    # timestamp the check compared against never moved.
+    # [Fix, browser-test pass] A draft-addressed CheckRoots key (DraftUUID !=
+    # ZERO_GUID) skips the If-Match check entirely now - live-reproduced why
+    # it must: the draft's aggregated etag (root + CheckBasics + this
+    # draft's own tagged CheckItems/Barriers - see
+    # odata_format.compute_etag_timestamp_ms) moves on EVERY child mutation
+    # (add a CheckItem, edit a Barrier), not just root-field edits. The
+    # client's locally-cached CheckRoots context has no way to learn about
+    # that shift - a child create/update's HTTP response is scoped to the
+    # CHILD's own resource, never the root's - so ANY root-field PATCH sent
+    # after so much as one child-row edit in the same session carries a
+    # stale If-Match and gets a false 412, even though nothing actually
+    # conflicted. Concretely reproduced: create-draft, add a CheckItem, pick
+    # its Type, then edit any root field - guaranteed 412, root fields never
+    # persisted, confirmed via direct store inspection.
+    #
+    # Safe to skip: this branch only fires for DRAFT-addressed keys, and
+    # UpdateHandler._update_root (the only caller for CheckRoots PATCH)
+    # already re-checks draft ownership via draft_service._draft_owner_mismatch
+    # immediately after this returns - that's the actual concurrency guard
+    # for a draft (a draft is single-owner by construction, see
+    # InProcessByUser), making If-Match redundant for it specifically. The
+    # ACTIVE side (is_draft_addressed=False) keeps full If-Match protection
+    # unchanged below - multi-user conflicts on a plain non-draft read/write
+    # are a real scenario this mock still needs to catch.
     is_draft_addressed = (
         set_name == "CheckRoots" and key_parts.get("DraftUUID", config.ZERO_GUID) != config.ZERO_GUID
     )
-    if set_name != "CheckRoots":
-        current_etag = 'W/"%s"' % row.get("LastChangedAt")
-    elif is_draft_addressed:
-        current_etag = 'W/"%s"' % odata_format._root_etag_string(row["RootId"], root_override=row)
-    else:
-        current_etag = 'W/"%s"' % odata_format._root_etag_string(row["RootId"])
+    if is_draft_addressed:
+        return False
+    current_etag = (
+        'W/"%s"' % row.get("LastChangedAt")
+        if set_name != "CheckRoots"
+        else 'W/"%s"' % odata_format._root_etag_string(row["RootId"])
+    )
     return if_match != current_etag

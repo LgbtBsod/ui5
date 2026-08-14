@@ -3,31 +3,6 @@
    Префикс: pcLite — все кастомные классы проекта
    =================================================================== */
 
-/* Banner (LiteCreateMode.js) */
-.pcLiteBanner {
-        position: fixed !important;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 99;
-        background: var(--sapObjectHeader_Background, #fff);
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        padding: 0.25rem 0 !important;
-        margin: 0 !important;
-}
-.pcLiteBanner .sapMText {
-        font-size: 0.75rem;
-        line-height: 1.2;
-}
-.pcLiteBanner .sapUiTinyMarginTop {
-        margin-top: 0.25rem !important;
-}
-
-html.pcLiteActive body {
-        box-sizing: border-box;
-        padding-top: var(--pc-lite-banner-height, 2.75rem);
-}
-
 /* [Fix, use-case pass] Было: .sapMPIText центрировался через
    justify-content/text-align ВНУТРИ своего сегмента (закрашенная/
    незакрашенная часть — sap.m.ProgressIndicator рендерит два <span>,
@@ -74,7 +49,32 @@ html.pcLiteActive body {
    центрирования независимо от процента заполнения.
    Специфичность .sapMPIBar .sapMPIText / .sapMPIBarRemaining .sapMPIText —
    (0,3,0), заведомо выше любого framework-правила уровня (0,1,0)/(0,2,0)
-   независимо от порядка загрузки — display больше не может откатиться. */
+   независимо от порядка загрузки — display больше не может откатиться.
+
+   [Fix, use-case pass #4 — контраст не выдержал реальный экран] Версия #2
+   красила закрашенную половину белым, незакрашенную — тёмным (двухцветное
+   поведение, как и просили). На ЭТОМ экране/зуме это подтвердилось живым
+   замером (Range.getBoundingClientRect() по каждому символу): граница
+   обрезки (правый край .sapMPIBar) и левый край символа "и" совпадали
+   ТОЧНО, пиксель в пиксель (792 = 792) — нулевой запас на субпиксельное
+   округление. На другом экране/масштабе/DPI (у пользователя — живой
+   скриншот, тёмный текст на красном) та же арифметика на 1-2px сдвинулась,
+   и тёмная половина строки заехала на закрашенный (красный) сегмент —
+   нечитаемо. Проблема была не в фреймворке и не в опечатке класса (как в
+   прошлый раз), а в самой идее "красить по позиции": она гарантированно
+   верна только для ОДНОГО точного набора пиксельных координат, и ломается
+   при любом расхождении рендеринга между браузерами/масштабом/шрифтами.
+   Новая версия не красит текст по позиции вообще — обе копии получают
+   ОДИНАКОВЫЙ белый цвет с тёмной обводкой (4 сложенных text-shadow,
+   "фальшивый stroke", без -webkit-text-stroke ради совместимости). Белый с
+   тёмной обводкой читается и на красной заливке (обводка даёт лишний
+   контраст поверх и так контрастного белого-на-красном), и на белой
+   подложке трека (обводка — единственное, что делает белый текст видимым
+   там). Так как обе копии теперь стилистически идентичны, не имеет
+   значения, ГДЕ именно проходит граница обрезки между .sapMPIBar/
+   .sapMPIBarRemaining — при любом сдвиге в 1-2px символ на границе будет
+   выглядеть корректно в любом случае, а не только в одном точном стечении
+   пикселей. */
 .sapMPI {
         position: relative;
         overflow: visible;
@@ -95,6 +95,12 @@ html.pcLiteActive body {
         justify-content: center;
         z-index: 1;
         text-align: center;
+        color: #fff;
+        text-shadow:
+                -1px -1px 0 rgba(0, 0, 0, 0.75),
+                 1px -1px 0 rgba(0, 0, 0, 0.75),
+                -1px  1px 0 rgba(0, 0, 0, 0.75),
+                 1px  1px 0 rgba(0, 0, 0, 0.75);
 }
 
 /* Flash guard для ValueHelpAutoApply.js — скрытие до готовности */
@@ -102,23 +108,30 @@ html.pcLiteActive body {
         visibility: hidden !important;
 }
 
-/* ===================================================================
-   SubTableCrud.js — Toolbar Buttons & Dialog (AUDIT FIX H1/H2)
-   =================================================================== */
+/* [Removed, inline-create pass] .pcLiteAddEntryButton/.pcLiteDeleteEntryButton/
+   .pcLiteAddRowDialog - style hooks for the runtime-injected toolbar buttons
+   and the row-add Dialog SubTableCrud.js used to own. Both are gone now
+   (see that file's class comment - row-add is inline-in-the-table, no
+   custom buttons, no Dialog) and grepped confirmed-unused (no .addStyleClass
+   call anywhere applies these classes anymore) - removed instead of left as
+   inert dead hooks nobody would think to clean up later.
 
-/* Add Entry Button (Добавить строку) */
-.pcLiteAddEntryButton {
-        /* Семантический класс для идентификации и кастомизации */
+   Комментарий/Примечания TextArea (SmartField auto-renders MaxLength=500
+   columns as sap.m.TextArea - confirmed live: rows=2, growing=false,
+   resize=none, ~47px fixed) - cramped for a long comment. Expands on focus
+   instead of changing any control config, so it works identically for
+   existing rows and the inline-added new row (same control either way).
+   :focus-within on the wrapper (not :focus on the textarea itself) because
+   sap.m.TextArea's actual <textarea> sits one level down inside
+   .sapMInputBaseContentWrapper. */
+.sapMTextArea {
+        transition: min-height 0.15s ease-out;
 }
-
-/* Delete Entry Button (Удалить строку) */
-.pcLiteDeleteEntryButton {
-        /* Семантический класс для идентификации и кастомизации */
+.sapMTextArea:focus-within {
+        min-height: 6rem;
 }
-
-/* Add Row Dialog (Диалог добавления строки) */
-.pcLiteAddRowDialog .sapMDialogHeader {
-        /* Кастомизация заголовка диалога при необходимости */
+.sapMTextArea:focus-within textarea {
+        min-height: 6rem;
 }
 
 /* ===================================================================
@@ -165,4 +178,26 @@ html.pcLiteActive body {
         .sapUiCompFilterBarToolbar .sapMTBShrinkItem .sapMBtnContent {
                 font-size: 0.75rem;
         }
+}
+
+/* [Fix, use-case pass #3] Три ObjectStatus-баджа шапки (Создано интеграцией/
+   Есть неуспешные проверки/барьеры, annotation/check-root.xml FieldGroup#
+   StatusBadges) показывали и иконку/цвет от Criticality, и текст "Да"/"Нет"
+   от самого булева значения — избыточно: каждый бадж и так виден только
+   когда флаг = true (см. UI.Hidden Path на *BadgeHidden), так что сам факт
+   отображения бейджа уже говорит "да". Пробовали убрать булево значение
+   через отдельное always-blank поле в модели данных — откатили: это лишнее
+   расхождение с реальной CDS-моделью ради чисто UI-косметики, плюс живой
+   баг (три DataField с одним и тем же bound-полем в одном FieldGroup дают
+   "duplicate id" даже в этой версии 1.71.84). Вместо этого — точечный CSS,
+   ноль изменений в модели/аннотациях самого значения: скрываем именно текст
+   ObjectStatus (.sapMObjectStatusText), оставляя иконку и подпись
+   (отдельный SmartLabel-контрол, не задет). Селектор специально сужен через
+   [id*="StatusBadgesHeaderFacet"], чтобы не погасить текст ObjectStatus
+   где-либо ещё в приложении, если он там появится.
+   [Fix] Класс — .sapMObjStatusText (без "e" после "Obj"), не
+   .sapMObjectStatusText — опечатка поймана живой проверкой (правило не
+   применялось, пока не сверил с реальным DOM). */
+[id*="StatusBadgesHeaderFacet"] .sapMObjStatusText {
+        display: none;
 }

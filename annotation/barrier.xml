@@ -22,7 +22,9 @@
         <Annotation Term="UI.LineItem">
           <Collection>
             <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Text"/>      <PropertyValue Property="Label" String="Тип барьера"/></Record>
-            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="ResultText"/> <PropertyValue Property="Label" String="Результат"/></Record>
+            <!-- [Fix, use-case pass #2] Value="Result" - see the matching
+                 CheckItem/UI.LineItem comment above, same reasoning. -->
+            <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Result"/> <PropertyValue Property="Label" String="Результат"/></Record>
             <Record Type="UI.DataField"><PropertyValue Property="Value" Path="Comment"/>    <PropertyValue Property="Label" String="Примечания"/></Record>
           </Collection>
         </Annotation>
@@ -88,21 +90,20 @@
         </Annotation>
       </Annotations>
 
+      <!-- [Fix, use-case pass #2] See the matching CheckItem/Result comment
+           above - same restructuring, same reason (SmartTable's inline
+           ComboBox needs the value-list on the field whose ValueListProperty
+           it resolves to a Common.Text-bearing entity field, or it shows
+           duplicated text). -->
       <Annotations Target="ZCheckService.Barrier/Result">
-        <Annotation Term="Common.Label" String="Результат"/>
-      </Annotations>
-
-      <Annotations Target="ZCheckService.Barrier/ResultText">
         <Annotation Term="Common.Label" String="Результат"/>
         <!-- [Fix, exhaustive-sweep pass] See the matching CheckItem/ResultText
              annotation above, same mechanism. -->
         <Annotation Term="Common.Required" Bool="true"/>
-        <!-- [Fix, best-practices pass] See the matching CheckItem/ResultText
-             annotation above - Common.ValueListWithFixedValues was tried and
-             reverted here for the same reason (SmartTable inline-edit cells
-             don't honor it in this UI5 build, only SmartForm does, which
-             would have split the Add-row dialog and inline table onto two
-             different controls for the same field). -->
+        <Annotation Term="Common.Text" Path="ResultText">
+          <Annotation Term="UI.TextArrangement" EnumMember="UI.TextArrangementType/TextOnly"/>
+        </Annotation>
+        <Annotation Term="Common.ValueListWithFixedValues" Bool="true"/>
         <Annotation Term="Common.ValueList">
           <Record Type="Common.ValueListType">
             <PropertyValue Property="Label"          String="Результат"/>
@@ -111,18 +112,21 @@
             <PropertyValue Property="Parameters">
               <Collection>
                 <Record Type="Common.ValueListParameterInOut">
-                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ResultText"/>
-                  <PropertyValue Property="ValueListProperty"  String="ResultText"/>
-                </Record>
-                <Record Type="Common.ValueListParameterOut">
                   <PropertyValue Property="LocalDataProperty"  PropertyPath="Result"/>
                   <PropertyValue Property="ValueListProperty"  String="ResultCode"/>
-                  <Annotation Term="UI.Hidden" Bool="true"/>
+                </Record>
+                <Record Type="Common.ValueListParameterOut">
+                  <PropertyValue Property="LocalDataProperty"  PropertyPath="ResultText"/>
+                  <PropertyValue Property="ValueListProperty"  String="ResultText"/>
                 </Record>
               </Collection>
             </PropertyValue>
           </Record>
         </Annotation>
+      </Annotations>
+
+      <Annotations Target="ZCheckService.Barrier/ResultText">
+        <Annotation Term="Common.Label" String="Результат"/>
       </Annotations>
 
       <Annotations Target="ZCheckService.Barrier/Comment">

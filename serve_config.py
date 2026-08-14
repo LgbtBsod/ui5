@@ -15,6 +15,28 @@ CSRF_TOKEN = "mock-csrf-token"
 # ручная (SSOT только внутри каждого языка по отдельности).
 RESULT_CODE_SATISFACTORY = "X"
 
+# [Fix, use-case pass #3] Было "" (пустая строка). Живой баг: framework'овская
+# ВСТРОЕННАЯ (не наша) проверка обязательных полей перед Save трактует
+# значение SmartField/ComboBox, равное "", как "поле не заполнено" —
+# независимо от того, что "" был вполне легитимным выбранным кодом
+# ("Неудовлетворительно"), а не признаком "пользователь ничего не выбрал".
+# Подтверждено живьём: выбор "Неудовлетворительно" в новом ComboBox-дропдауне
+# (см. annotation/check-item.xml, annotation/barrier.xml) стабильно давал
+# "Результат: обязательное поле", хотя значение было явно проставлено. Это
+# внутренняя логика sap.ui.generic.template/SmartField, annotation-конфигом
+# не переопределяется. Заменено на " " (один пробел) — ABAP-конвенция
+# abap_false (в отличие от abap_true = "X") для однобайтовых флаг-полей
+# (см. abap/README.md, ABAP-поля типа CHAR1 инициализируются пробелом, не
+# пустой строкой) — тот же самый признак "не пройдено", но НЕ falsy/пустая
+# строка ни в Python (bool(" ") is True), ни в JS ("" !== " ", !" " ===
+# false), так что framework-проверка больше не путает его с "не заполнено".
+# Единственная реальная константа для этого кода теперь здесь — раньше "" был
+# рассеян как голый литерал по resolvers.py (has_error_checks/
+# has_error_barriers/CommentFieldControl) и по REFERENCE_DATA ниже, без
+# общей точки истины (то же самое SSOT-рассуждение, что и у SATISFACTORY
+# выше).
+RESULT_CODE_UNSATISFACTORY = " "
+
 
 # [W1] 4 top-level транзакционные сущности (Root/Basic/CheckItem/Barrier),
 # см. abap/README.md — независимые ETag на Root/Basic, композитный ключ
@@ -125,7 +147,7 @@ REFERENCE_DATA = {
     ],
     "CheckResults": [
         {"ResultCode": RESULT_CODE_SATISFACTORY, "ResultText": "Удовлетворительно"},
-        {"ResultCode": "", "ResultText": "Неудовлетворительно"},
+        {"ResultCode": RESULT_CODE_UNSATISFACTORY, "ResultText": "Неудовлетворительно"},
     ],
     "PkLevels": [
         {"PkLevel": "0", "PkLevelText": "КПР-0"},
@@ -171,7 +193,7 @@ READONLY_FIELDS = {
         "SuccessRateChecks", "SuccessRateBarriers", "ChecksCriticality", "BarriersCriticality",
         "HasErrorChecks", "HasErrorBarriers", "HeaderKpiTitle", "HeaderKpiSubtitle",
         "ChecksHidden", "BarriersHidden", "IntegrationBadgeHidden",
-        "ChecksErrorBadgeHidden", "BarriersErrorBadgeHidden",
+        "ChecksErrorBadgeHidden", "BarriersErrorBadgeHidden", "Updatable",
         "LastChangedAt", "CreatedBy", "CreatedAt",
     },
     "CheckBasics": {

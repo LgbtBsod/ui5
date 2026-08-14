@@ -544,12 +544,17 @@ class CreateRootHandler(BaseHandler):
         root_fields, basic_proxy_fields = query._split_root_body(body)
         to_basic = dict(to_basic)
         to_basic.update(basic_proxy_fields)
-        
-        # Set defaults for basic fields
-        to_basic.setdefault(
-            "LocationKey",
-            "550e8400-e29b-41d4-a716-446655440101"  # Площадка №1
-        )
+
+        # [Fix, use-case pass #5] Was: to_basic.setdefault("LocationKey",
+        # "...440101"  # Площадка №1) - silently pre-filled EVERY new record
+        # with the same hardcoded location before the inspector ever touched
+        # the form. LocationName carries Common.Required=true (check-root.xml)
+        # specifically so RequiredFieldsRule.js blocks Save on an unpicked
+        # location - the default defeated that gate for the one field it
+        # existed to guard, and risked a real inspection silently getting
+        # attributed to "Площадка №1" if nobody noticed and changed it. No
+        # default here now - LocationKey/LocationName simply stay unset until
+        # the inspector picks one via F4, same as every other required field.
         
         root_id = odata_format.generate_uuid()
         now = odata_format.odata_date()

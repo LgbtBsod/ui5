@@ -14,9 +14,11 @@ sap.ui.define([
         const F = Constants.FIELDS;
         const ROOT_LABEL = I18n.getText("locationRootLabel");
         const ENTITY_PATH = `/${Constants.ENTITY_SETS.LOCATION_HIERARCHY}`;
-        // Только поля, реально читаемые диалогом (список, навигация, выбор) —
-        // см. LocationDialog.fragment.xml и _onRowPress/_onRowNavigate ниже.
-        const LEVEL_SELECT = `${F.LOCATION_UUID},${F.LOCATION_NAME},${F.HAS_CHILDREN}`;
+        // [Fix, use-case pass #5] ParentLocationUuid добавлен - нужен
+        // _buildAncestorPath ниже, чтобы честно восстановить цепочку предков
+        // при переходе из результата ПОИСКА (который ищет по всей иерархии,
+        // не по текущей ветке - узел может оказаться где угодно в дереве).
+        const LEVEL_SELECT = `${F.LOCATION_UUID},${F.LOCATION_NAME},${F.HAS_CHILDREN},${F.PARENT_LOCATION_UUID}`;
 
         /** @returns {boolean} whether the given row is the currently selected one. */
         function locationIsSelectedFormatter(sRowUuid, sSelectedUuid) {
@@ -58,6 +60,15 @@ sap.ui.define([
                         });
                         this._aPath = [];
                         this._oDialog = null;
+                        // [Fix, use-case pass #5] Monotonic token guarding /levelItems
+                        // writes - _loadCurrentLevel and _onSearch both write the same
+                        // property, and nothing previously stopped an earlier-fired-but-
+                        // slower response (e.g. a broad search match) from overwriting a
+                        // later, faster one (e.g. the user already navigated away) once it
+                        // finally resolved. Every load bumps this and stamps its own
+                        // closure with the value at fire time; a response only applies if
+                        // its stamp still matches the CURRENT counter when it resolves.
+                        this._iLoadSeq = 0;
                 }
 
                 open() {
@@ -110,9 +121,19 @@ sap.ui.define([
                         });
                 }
 
+                /** @returns {number} a fresh load token - stamp the response handler with it, apply only if still current. */
+                _startLoad() {
+                        this._iLoadSeq += 1;
+                        return this._iLoadSeq;
+                }
+
                 _loadCurrentLevel() {
                         const sParentUuid = this._aPath.length ? this._aPath[this._aPath.length - 1].uuid : "";
+                        const iToken = this._startLoad();
                         return this._loadChildren(sParentUuid).then((aItems) => {
+                                if (iToken !== this._iLoadSeq) {
+                                        return; // superseded by a newer navigate/search before this resolved
+                                }
                                 this._oState.setProperty("/levelItems", aItems);
                         });
                 }
@@ -126,18 +147,81 @@ sap.ui.define([
                                 this._aPath.length ? this._aPath[this._aPath.length - 1].name : ROOT_LABEL);
                 }
 
-                _navigateTo(sUuid, sName) {
-                        if (!sUuid) {
-                                this._aPath = [];
-                        } else {
-                                const iExisting = this._aPath.findIndex((o) => o.uuid === sUuid);
-                                this._aPath = iExisting !== -1
-                                        ? this._aPath.slice(0, iExisting + 1)
-                                        : this._aPath.concat([{ uuid: sUuid, name: sName }]);
-                        }
+                _afterPathChange() {
                         this._oState.setProperty("/selectedNodeId", null);
                         this._renderBreadcrumb();
                         this._loadCurrentLevel();
+                }
+
+                /**
+                 * [Fix, use-case pass #5] sParentUuid is now required for a node not
+                 * already in _aPath - previously this blindly APPENDED the target to
+                 * whatever path the user happened to be on, which is only correct for
+                 * a genuine drill-down click (target's real parent === current level).
+                 * Navigating into a SEARCH result (search spans the whole hierarchy,
+                 * not the current branch - see _loadSearch) could land on a node from
+                 * a completely different branch, silently corrupting the breadcrumb
+                 * into a fabricated, non-ancestral path. Confirmed live before this
+                 * fix: search a nested location's name, drill into it via the arrow,
+                 * and the breadcrumb showed it as a child of wherever browsing had
+                 * last been, not its real parent.
+                 */
+                _navigateTo(sUuid, sName, sParentUuid) {
+                        if (!sUuid) {
+                                this._aPath = [];
+                                this._afterPathChange();
+                                return;
+                        }
+                        const iExisting = this._aPath.findIndex((o) => o.uuid === sUuid);
+                        if (iExisting !== -1) {
+                                // Clicked an already-visited breadcrumb link - just roll back to it.
+                                this._aPath = this._aPath.slice(0, iExisting + 1);
+                                this._afterPathChange();
+                                return;
+                        }
+                        const sCurrentUuid = this._aPath.length ? this._aPath[this._aPath.length - 1].uuid : "";
+                        if ((sParentUuid || "") === sCurrentUuid) {
+                                // Genuine drill-down from the level currently being browsed - cheap append, no extra fetch.
+                                this._aPath = this._aPath.concat([{ uuid: sUuid, name: sName }]);
+                                this._afterPathChange();
+                                return;
+                        }
+                        // Reached from outside the current branch (a search result) -
+                        // rebuild the TRUE ancestor chain from LocationHierarchy's own
+                        // ParentLocationUuid links instead of guessing.
+                        this._buildAncestorPath(sParentUuid).then((aAncestors) => {
+                                this._aPath = aAncestors.concat([{ uuid: sUuid, name: sName }]);
+                                this._afterPathChange();
+                        });
+                }
+
+                /**
+                 * Walks LocationHierarchy's own ParentLocationUuid chain upward from
+                 * sStartParentUuid to the root, one fetch per level - only called when
+                 * a node's ancestry isn't already known from browsing (see _navigateTo).
+                 * Hierarchy depth here is small in practice (a handful of levels), so a
+                 * sequential walk is fine; a real deep/wide hierarchy would want a
+                 * dedicated server-side "ancestors of X" endpoint instead.
+                 */
+                _buildAncestorPath(sStartParentUuid) {
+                        const aChain = [];
+                        const fnStep = (sUuid) => {
+                                if (!sUuid) {
+                                        return Promise.resolve(aChain);
+                                }
+                                return ODataUtils.readEntitySet(this._oModel, ENTITY_PATH, {
+                                        filters: [new Filter(F.LOCATION_UUID, FilterOperator.EQ, sUuid)],
+                                        urlParameters: { "$select": LEVEL_SELECT }
+                                }).then((aResults) => {
+                                        const oNode = aResults[0];
+                                        if (!oNode) {
+                                                return aChain; // dangling parent reference - stop, don't fail the navigation
+                                        }
+                                        aChain.unshift({ uuid: oNode[F.LOCATION_UUID], name: oNode[F.LOCATION_NAME] });
+                                        return fnStep(oNode[F.PARENT_LOCATION_UUID]);
+                                });
+                        };
+                        return fnStep(sStartParentUuid);
                 }
 
                 _onSearch(oEvent) {
@@ -148,7 +232,13 @@ sap.ui.define([
                                         this._loadCurrentLevel();
                                         return;
                                 }
-                                this._loadSearch(sQuery).then((aItems) => this._oState.setProperty("/levelItems", aItems));
+                                const iToken = this._startLoad();
+                                this._loadSearch(sQuery).then((aItems) => {
+                                        if (iToken !== this._iLoadSeq) {
+                                                return; // superseded by a newer search/navigate before this resolved
+                                        }
+                                        this._oState.setProperty("/levelItems", aItems);
+                                });
                         }, Constants.POLLING.SUGGEST_DEBOUNCE_MS);
                 }
 
@@ -162,7 +252,7 @@ sap.ui.define([
 
                 _onRowNavigate(oEvent) {
                         const oRow = oEvent.getSource().getBindingContext("locationModel").getObject();
-                        this._navigateTo(oRow[F.LOCATION_UUID], oRow[F.LOCATION_NAME]);
+                        this._navigateTo(oRow[F.LOCATION_UUID], oRow[F.LOCATION_NAME], oRow[F.PARENT_LOCATION_UUID]);
                 }
 
                 _chooseCurrentLevel() {

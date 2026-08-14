@@ -20,6 +20,18 @@ sap.ui.define(["./Constants", "./FioriElementsDom", "./CachedElementLookup", "./
 		}
 
 		getIssues(oView) {
+			// [Fix, use-case pass #4] Integration-sourced records are view-only
+			// now (see IntegrationEditGuard.js / metadata.xml sap:updatable-path)
+			// - this rule exists to prompt the inspector to pick a proper
+			// CheckType via F4 instead of leaving a raw-text row uncategorized;
+			// on a record nobody can edit anymore there's no F4 to open, so the
+			// tooltip would just be a dangling error. RawText still displays
+			// correctly regardless (resolvers.py's raw_text_fallback) - this
+			// only needs to gate rows on records someone can actually edit.
+			const oHeaderContext = oView.getBindingContext();
+			if (oHeaderContext && oHeaderContext.getProperty(F.THIS_IS_INTEGRATION_DATA)) {
+				return [];
+			}
 			this._syncWatch(oView);
 			return this._aIssues;
 		}

@@ -5,7 +5,7 @@
 @EndUserText.label: 'Check: Person (inspector/observed) reference'
 @Search.searchable: true
 
-// Справочник сотрудников для *Fullname/*Perner (ObserverPerner/ObservedPerner).
+// Справочник сотрудников для *Fullname/*Pernr (ObserverPernr/ObservedPernr).
 // В большинстве ландшафтов персонал уже мастерится в HR (PA0001/PA0002) —
 // в реальном проекте предпочтительнее переиспользовать стандартный
 // I_Employee/I_WorkforcePersonBasic (авторизация P_ORGIN уже отработана
