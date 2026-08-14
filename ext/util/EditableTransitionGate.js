@@ -3,8 +3,10 @@ sap.ui.define(["./Constants"], function (Constants) {
 
 	/**
 	 * Detects the exact tick where `ui>/editable` flips from `true` to `false`.
-	 * Extracted from KeepEditMode, which duplicated this bookkeeping; now the
-	 * single source of "did edit mode just end" for any guard that needs it.
+	 * Originally extracted from KeepEditMode (removed in the legacy-guard
+	 * audit pass, see ObjectPageExtension.controller.js), which duplicated
+	 * this bookkeeping; now the single source of "did edit mode just end" for
+	 * DiscardTransientOnClose, the remaining consumer.
 	 */
 	class EditableTransitionGate {
 		constructor() {

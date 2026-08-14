@@ -220,6 +220,10 @@ def _list_response(
     if data is None:
         return None
     filtered = resolvers.apply_filter(data, query.get("$filter"), query.get("search"))
+    # [Fix, as-of-versioning pass] No-op for every entity set except
+    # Locations/LocationHierarchy - see
+    # resolvers.latest_location_version_per_code's own docstring.
+    filtered = resolvers.latest_location_version_per_code(set_name, filtered)
     filtered = resolvers.apply_orderby(filtered, query.get("$orderby"))
     skip = _parse_int_param(query, "$skip", 0)
     top = _parse_int_param(query, "$top", len(filtered))

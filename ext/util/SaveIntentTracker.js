@@ -3,9 +3,11 @@ sap.ui.define(["./FioriElementsDom", "./WatchedButton"], function (FioriElements
 
 	/**
 	 * Single source of "was Save (not Cancel) the last footer action pressed".
-	 * KeepEditMode and DiscardTransientOnClose both need this signal to tell
-	 * apart a Save-triggered editable->false transition from a Cancel-triggered
-	 * one; previously each wired its own Save/Cancel WatchedButton pair and
+	 * DiscardTransientOnClose needs this signal to tell apart a Save-triggered
+	 * editable->false transition from a Cancel-triggered one (KeepEditMode was
+	 * a second consumer - removed in the legacy-guard audit pass, see
+	 * ObjectPageExtension.controller.js); previously each wired its own
+	 * Save/Cancel WatchedButton pair and
 	 * tracked the flag independently.
 	 */
 	class SaveIntentTracker {

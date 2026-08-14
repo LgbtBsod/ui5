@@ -506,6 +506,51 @@ def eval_one_filter(row, tok):
     return False
 
 
+#: Entity sets carrying the as-of EffectiveDate versioning convention (see
+#: metadata.xml's LocationHierarchy.EffectiveDate comment) - every other
+#: entity set is unaffected by latest_location_version_per_code below.
+_VERSIONED_LOCATION_ENTITY_SETS = frozenset({"Locations", "LocationHierarchy"})
+
+
+def latest_location_version_per_code(set_name, rows):
+    """[Fix, as-of-versioning pass] "search date >= max(EffectiveDate)":
+    among rows sharing a LocationCode, keep only the one with the greatest
+    EffectiveDate. Not expressible as a single-row $filter predicate (it's a
+    group-by/max across rows), so this runs as an explicit post-filter step
+    in query._list_response - AFTER apply_filter (which already dropped any
+    row whose EffectiveDate exceeds the caller's own upper bound, if the
+    caller sent one via a plain "EffectiveDate le datetime'...'" clause -
+    the generic FIELD_LE_RE-driven filter already handles that half; this
+    function only adds the "and take the latest of what's left" half no
+    plain filter can express) and BEFORE apply_orderby/paging.
+
+    Rows with no LocationCode (shouldn't happen for these two entity sets,
+    but defensive) pass through unfiltered rather than being silently
+    dropped - unrecognized data should stay visible, not vanish.
+    """
+    if set_name not in _VERSIONED_LOCATION_ENTITY_SETS:
+        return rows
+    best_by_code: Dict[str, Any] = {}
+    passthrough = []
+    for row in rows:
+        code = row.get("LocationCode")
+        if code is None:
+            passthrough.append(row)
+            continue
+        current = best_by_code.get(code)
+        if current is None:
+            best_by_code[code] = row
+            continue
+        row_time = odata_format.parse_odata_date(row.get("EffectiveDate"))
+        current_time = odata_format.parse_odata_date(current.get("EffectiveDate"))
+        if row_time is not None and (current_time is None or row_time > current_time):
+            best_by_code[code] = row
+    kept_uuids = {row["LocationUuid"] for row in best_by_code.values()}
+    # Preserve the original relative order (stable) rather than dict-
+    # insertion/code-sort order - hierarchy level listings rely on it.
+    return [row for row in rows if row.get("LocationCode") is None or row["LocationUuid"] in kept_uuids]
+
+
 def apply_filter(data, s_filter, search):
     result = data
     if s_filter:

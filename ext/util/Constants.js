@@ -66,6 +66,11 @@ sap.ui.define([], function () {
                         LOCATION_NAME: "LocationName",
                         PARENT_LOCATION_UUID: "ParentLocationUuid",
                         HAS_CHILDREN: "HasChildren",
+                        // [Fix, as-of-versioning pass] Locations/LocationHierarchy only -
+                        // see metadata.xml's own comment and
+                        // resolvers.latest_location_version_per_code. LocationPicker uses
+                        // this to send "EffectiveDate le datetime'<check's own Date>'".
+                        EFFECTIVE_DATE: "EffectiveDate",
                         WITH_SUBLOCATION: "with_sub",
 
                         OBSERVED_FULLNAME: "ObservedFullname",

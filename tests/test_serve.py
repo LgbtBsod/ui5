@@ -1177,5 +1177,76 @@ class ApplyOrderbyTests(unittest.TestCase):
         self.assertEqual(serve.apply_orderby(data, None), data)
 
 
+class LocationAsOfVersioningTests(unittest.TestCase):
+    """[Fix, as-of-versioning pass] "search date >= max(EffectiveDate)" -
+    LocationHierarchy/Locations rows sharing a LocationCode represent
+    successive versions of one place; the visible one for a given date is
+    the row with the greatest EffectiveDate not exceeding it. Exercises the
+    seed data's own real example (LOC-003 renamed 2025-06-01) and the
+    not-yet-effective SITE-3, rather than synthetic fixtures, so a change to
+    the seed data that breaks the story would fail these tests too.
+
+    Seed EffectiveDate values (see serve_config.py REFERENCE_DATA):
+      baseline 2020-01-01 = /Date(1577836800000)/  (every long-standing location)
+      LOC-003 renamed     = /Date(1748736000000)/  (2025-06-01, "Склад ГСМ (новый корпус)")
+      SITE-3 goes live     = /Date(1798761600000)/  (2027-01-01, "Площадка №3")
+    """
+
+    def _names_by_code(self, entity_set, s_filter=None):
+        _status, resp, _ctype = serve.dispatch_request(
+            "GET", entity_set + (("?$filter=" + s_filter) if s_filter else "")
+        )
+        by_code = {}
+        for row in resp["d"]["results"]:
+            by_code.setdefault(row["LocationCode"], []).append(row["LocationName"])
+        return by_code
+
+    def test_no_filter_shows_only_the_latest_version_of_each_code(self):
+        for entity_set in ("LocationHierarchy", "Locations"):
+            by_code = self._names_by_code(entity_set)
+            self.assertEqual(by_code["LOC-003"], ["Склад ГСМ (новый корпус)"], entity_set)
+            self.assertEqual(len(by_code["LOC-003"]), 1, entity_set)
+
+    def test_no_filter_still_includes_not_yet_effective_site(self):
+        # [Fix] With no EffectiveDate upper bound supplied at all, "latest
+        # version of everything" correctly includes a site whose only row
+        # is future-dated - there's nothing to compare it against being
+        # "too early" without an explicit as-of date. A caller that cares
+        # must supply one (see the two tests below).
+        by_code = self._names_by_code("LocationHierarchy")
+        self.assertIn("SITE-3", by_code)
+
+    def test_asof_date_before_rename_shows_old_name(self):
+        # TEST-001's own check date (2024-01-01) predates the 2025-06-01 rename.
+        by_code = self._names_by_code(
+            "LocationHierarchy", "EffectiveDate%20le%20datetime'2024-01-01T00:00:00'"
+        )
+        self.assertEqual(by_code["LOC-003"], ["Склад ГСМ"])
+
+    def test_asof_date_after_rename_shows_new_name(self):
+        by_code = self._names_by_code(
+            "LocationHierarchy", "EffectiveDate%20le%20datetime'2026-01-01T00:00:00'"
+        )
+        self.assertEqual(by_code["LOC-003"], ["Склад ГСМ (новый корпус)"])
+
+    def test_asof_date_before_site_go_live_excludes_it_entirely(self):
+        by_code = self._names_by_code(
+            "LocationHierarchy", "EffectiveDate%20le%20datetime'2026-01-01T00:00:00'"
+        )
+        self.assertNotIn("SITE-3", by_code)
+
+    def test_asof_date_after_site_go_live_includes_it(self):
+        by_code = self._names_by_code(
+            "LocationHierarchy", "EffectiveDate%20le%20datetime'2027-06-01T00:00:00'"
+        )
+        self.assertIn("SITE-3", by_code)
+
+    def test_other_entity_sets_are_unaffected_passthrough(self):
+        # Persons has no LocationCode/EffectiveDate at all - the versioning
+        # step must be a complete no-op for it, not silently drop rows.
+        _status, resp, _c = serve.dispatch_request("GET", "Persons")
+        self.assertEqual(len(resp["d"]["results"]), 6)
+
+
 if __name__ == "__main__":
     unittest.main()

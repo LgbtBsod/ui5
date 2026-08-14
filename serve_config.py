@@ -106,21 +106,40 @@ def _build_persons():
 
 REFERENCE_DATA = {
     "Persons": _build_persons(),
+    # [Fix, as-of-versioning pass] EffectiveDate on every row - see
+    # metadata.xml's own comment on LocationHierarchy.EffectiveDate for the
+    # full "current as of date D" resolution rule
+    # (resolvers._latest_location_version_per_code). Baseline
+    # "/Date(1577836800000)/" = 2020-01-01, matches _build_persons' own
+    # active_from baseline above - these locations have simply always
+    # existed as far as this mock's data goes. Two rows deliberately break
+    # that baseline to make the mechanism exercisable, not just declared:
+    # - LOC-003 has a SECOND row (same LocationCode, new LocationUuid,
+    #   renamed) effective 2025-06-01 - a check dated before that still
+    #   resolves to "Склад ГСМ", one dated on/after resolves to the
+    #   renamed "Склад ГСМ (новый корпус)".
+    # - SITE-3 is a brand-new site not yet operational until 2027-01-01 -
+    #   a check dated before that must never see it in search/hierarchy
+    #   results at all (no row for its LocationCode qualifies yet).
     "LocationHierarchy": [
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440101", "LocationCode": "SITE-1", "LocationName": "Площадка №1", "ParentLocationUuid": "", "HasChildren": True, "Level": 0},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440111", "LocationCode": "LOC-001", "LocationName": "Северный вход", "ParentLocationUuid": "550e8400-e29b-41d4-a716-446655440101", "HasChildren": False, "Level": 1},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440112", "LocationCode": "LOC-002", "LocationName": "Южный вход", "ParentLocationUuid": "550e8400-e29b-41d4-a716-446655440101", "HasChildren": False, "Level": 1},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440102", "LocationCode": "SITE-2", "LocationName": "Площадка №2", "ParentLocationUuid": "", "HasChildren": True, "Level": 0},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440121", "LocationCode": "LOC-003", "LocationName": "Склад ГСМ", "ParentLocationUuid": "550e8400-e29b-41d4-a716-446655440102", "HasChildren": False, "Level": 1},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440104", "LocationCode": "LOC-004", "LocationName": "Административный корпус", "ParentLocationUuid": "", "HasChildren": False, "Level": 0},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440101", "LocationCode": "SITE-1", "LocationName": "Площадка №1", "ParentLocationUuid": "", "HasChildren": True, "Level": 0, "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440111", "LocationCode": "LOC-001", "LocationName": "Северный вход", "ParentLocationUuid": "550e8400-e29b-41d4-a716-446655440101", "HasChildren": False, "Level": 1, "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440112", "LocationCode": "LOC-002", "LocationName": "Южный вход", "ParentLocationUuid": "550e8400-e29b-41d4-a716-446655440101", "HasChildren": False, "Level": 1, "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440102", "LocationCode": "SITE-2", "LocationName": "Площадка №2", "ParentLocationUuid": "", "HasChildren": True, "Level": 0, "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440121", "LocationCode": "LOC-003", "LocationName": "Склад ГСМ", "ParentLocationUuid": "550e8400-e29b-41d4-a716-446655440102", "HasChildren": False, "Level": 1, "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440122", "LocationCode": "LOC-003", "LocationName": "Склад ГСМ (новый корпус)", "ParentLocationUuid": "550e8400-e29b-41d4-a716-446655440102", "HasChildren": False, "Level": 1, "EffectiveDate": "/Date(1748736000000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440104", "LocationCode": "LOC-004", "LocationName": "Административный корпус", "ParentLocationUuid": "", "HasChildren": False, "Level": 0, "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440103", "LocationCode": "SITE-3", "LocationName": "Площадка №3", "ParentLocationUuid": "", "HasChildren": False, "Level": 0, "EffectiveDate": "/Date(1798761600000)/"},
     ],
     "Locations": [
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440101", "LocationCode": "SITE-1", "LocationName": "Площадка №1"},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440111", "LocationCode": "LOC-001", "LocationName": "Северный вход"},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440112", "LocationCode": "LOC-002", "LocationName": "Южный вход"},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440102", "LocationCode": "SITE-2", "LocationName": "Площадка №2"},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440121", "LocationCode": "LOC-003", "LocationName": "Склад ГСМ"},
-        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440104", "LocationCode": "LOC-004", "LocationName": "Административный корпус"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440101", "LocationCode": "SITE-1", "LocationName": "Площадка №1", "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440111", "LocationCode": "LOC-001", "LocationName": "Северный вход", "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440112", "LocationCode": "LOC-002", "LocationName": "Южный вход", "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440102", "LocationCode": "SITE-2", "LocationName": "Площадка №2", "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440121", "LocationCode": "LOC-003", "LocationName": "Склад ГСМ", "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440122", "LocationCode": "LOC-003", "LocationName": "Склад ГСМ (новый корпус)", "EffectiveDate": "/Date(1748736000000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440104", "LocationCode": "LOC-004", "LocationName": "Административный корпус", "EffectiveDate": "/Date(1577836800000)/"},
+        {"LocationUuid": "550e8400-e29b-41d4-a716-446655440103", "LocationCode": "SITE-3", "LocationName": "Площадка №3", "EffectiveDate": "/Date(1798761600000)/"},
     ],
     # Category — [W1] новое поле, добавлено в ZI_CheckType/ZI_BarrierType для
     # группировки в TypePicker.js (в исходной 4-сущностной CDS-модели его не

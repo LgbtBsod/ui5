@@ -317,6 +317,21 @@
         <Property Name="ParentLocationUuid"  Type="Edm.String" MaxLength="36"  sap:label="Родительский UUID" sap:filterable="true"/>
         <Property Name="HasChildren"         Type="Edm.Boolean" Nullable="false" sap:label="Есть дети"/>
         <Property Name="Level"               Type="Edm.Int32" sap:label="Уровень иерархии"/>
+        <!-- [Fix, as-of-versioning pass] Time-sliced master data, same
+             convention as Person.ActiveFrom/ActiveTo (see that entity's own
+             comment) but single-sided: several rows can share one
+             LocationCode (a stable business identity across renames/moves),
+             each stamped with when it became effective. "Current as of date
+             D" = among rows sharing a LocationCode with EffectiveDate <= D,
+             the one with the MAX EffectiveDate (see
+             resolvers._latest_location_version_per_code, called from
+             query._list_response for this entity set specifically - it's a
+             group-by/max, not expressible as a plain $filter predicate, so
+             it runs as an explicit post-filter step, not an annotation). A
+             location whose EffectiveDate is still in the future (not yet
+             operational) is correctly excluded by the same mechanism when D
+             predates it. -->
+        <Property Name="EffectiveDate"       Type="Edm.DateTime" sap:label="Действует с" sap:filterable="true"/>
       </EntityType>
 
       <EntityType Name="Location" sap:label="Местоположение">
@@ -326,6 +341,10 @@
         <Property Name="LocationUuid" Type="Edm.String" Nullable="false" MaxLength="36" sap:label="UUID местоположения" sap:visible="false"/>
         <Property Name="LocationName" Type="Edm.String" MaxLength="100" sap:label="Наименование" sap:filterable="true"/>
         <Property Name="LocationCode" Type="Edm.String" MaxLength="20"  sap:label="Код" sap:filterable="true"/>
+        <!-- Same as-of convention as LocationHierarchy.EffectiveDate above -
+             kept in sync since this is the flat (non-hierarchical) mirror
+             used by the List Report's own Location filter/LineItem. -->
+        <Property Name="EffectiveDate" Type="Edm.DateTime" sap:label="Действует с" sap:filterable="true"/>
       </EntityType>
 
       <EntityType Name="BarrierType" sap:label="Тип барьера">

@@ -11,8 +11,6 @@ sap.ui.define([
 	"../util/LocationPicker",
 	"../util/FixedListKeySync",
 	"../util/SubTableCrud",
-	"../util/CreateFullScreen",
-	"../util/KeepEditMode",
 	"../util/FieldStateGate",
 	"../util/PernrRule",
 	"../util/CheckCodeCoverage",
@@ -25,7 +23,7 @@ sap.ui.define([
 ], function (
 	ControllerExtension, Constants, ODataContextUtils, FioriElementsDom, ExcelExport,
 	KpiSync, BadgeIconOverride, DateTimeAutofill, ValueHelpAutoApply, LocationPicker, FixedListKeySync, SubTableCrud,
-	CreateFullScreen, KeepEditMode, FieldStateGate, PernrRule, CheckCodeCoverage,
+	FieldStateGate, PernrRule, CheckCodeCoverage,
 	RequiredFieldsRule, IntegrationEditGuard, DiscardTransientOnClose, StaleDisplayFormGuard,
 	EditableTransitionGate, SaveIntentTracker
 ) {
@@ -91,8 +89,24 @@ sap.ui.define([
 			// gap (see BadgeIconOverride.js) applies equally to saved
 			// CheckRoots, so this runs on every tick regardless of draft state.
 			{ guard: BadgeIconOverride, refresh: (g, oView) => g.apply(oView) },
-			{ guard: new CreateFullScreen(), refresh: (g, oView) => g.applyIfNeeded(oView, () => true), destroy: true },
-			{ guard: new KeepEditMode(), refresh: (g, oView, s) => g.refresh(oView, s) },
+			// [Removed, legacy-guard audit pass] CreateFullScreen (SmartForm
+			// stuck in sap-ui-preserve after first render) and KeepEditMode
+			// (re-enter edit right after first Save of a new object) both
+			// removed here, along with their files. Neither bug reproduces
+			// in the current flow - live-verified via flpSandbox.html (the
+			// framework needs a real FLP shell for Create's own
+			// fnStoreCurrentAppStateAndAdjustURL to work at all, so
+			// index.html alone can't test this): fresh Create from the
+			// List Report, Create while another record is already open (in
+			// both TwoColumns and FullScreen layout), and a second Create
+			// right after the first object's Save - the SmartForm rendered
+			// correctly every time with no guard active, and after Save
+			// the app lands in plain display mode (the standard, expected
+			// Fiori Elements behavior), never needing to be forced back
+			// into edit. Likely leftover from the already-removed
+			// LiteCreateMode.js (?lite deep-link straight to Create,
+			// bypassing the List Report - see Component.js's own history
+			// comment) rather than anything the current flow depends on.
 			{ guard: new FieldStateGate("pernr", PernrRule.getIssues), refresh: (g, oView) => g.refresh(oView), destroy: true },
 			{ guard: new FieldStateGate("code", (v) => oCodeCoverage.getIssues(v)), refresh: (g, oView) => g.refresh(oView), destroy: true },
 			{

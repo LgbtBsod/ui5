@@ -107,16 +107,54 @@ sap.ui.define([
                         };
                 }
 
+                /**
+                 * [Fix, as-of-versioning pass] "search date >= max(EffectiveDate)" -
+                 * see metadata.xml's LocationHierarchy.EffectiveDate comment and
+                 * resolvers.latest_location_version_per_code. Anchors on the open
+                 * check's own header Date field ("as of when the check happened"),
+                 * so LocationPicker resolves whichever LocationCode version was
+                 * effective back then - not today's latest rename. Only meaningful
+                 * in header/object-page mode, where _oHeaderContext is a real
+                 * CheckRoot: filterBar mode (List Report's own quick-filter) has no
+                 * single check to anchor on, so it deliberately sends no cutoff and
+                 * the generic backend post-filter just returns each code's latest
+                 * version, same as before this feature existed. A brand-new check
+                 * with Date not filled in yet also falls through to "no cutoff" -
+                 * showing today's latest names is the sane default until the user
+                 * picks a date.
+                 * @returns {sap.ui.model.Filter|null}
+                 */
+                _effectiveDateFilter() {
+                        if (this._bFilterBarMode) {
+                                return null;
+                        }
+                        const oCheckDate = this._oHeaderContext.getProperty(F.BASIC_DATE);
+                        if (!oCheckDate) {
+                                return null;
+                        }
+                        return new Filter(F.EFFECTIVE_DATE, FilterOperator.LE, oCheckDate);
+                }
+
                 _loadChildren(sParentUuid) {
+                        const aFilters = [new Filter(F.PARENT_LOCATION_UUID, FilterOperator.EQ, sParentUuid || "")];
+                        const oDateFilter = this._effectiveDateFilter();
+                        if (oDateFilter) {
+                                aFilters.push(oDateFilter);
+                        }
                         return ODataUtils.readEntitySet(this._oModel, ENTITY_PATH, {
-                                filters: [new Filter(F.PARENT_LOCATION_UUID, FilterOperator.EQ, sParentUuid || "")],
+                                filters: aFilters,
                                 urlParameters: { "$select": LEVEL_SELECT }
                         });
                 }
 
                 _loadSearch(sQuery) {
+                        const aFilters = [new Filter(F.LOCATION_NAME, FilterOperator.Contains, sQuery)];
+                        const oDateFilter = this._effectiveDateFilter();
+                        if (oDateFilter) {
+                                aFilters.push(oDateFilter);
+                        }
                         return ODataUtils.readEntitySet(this._oModel, ENTITY_PATH, {
-                                filters: [new Filter(F.LOCATION_NAME, FilterOperator.Contains, sQuery)],
+                                filters: aFilters,
                                 urlParameters: { "$select": LEVEL_SELECT }
                         });
                 }
@@ -202,6 +240,15 @@ sap.ui.define([
                  * Hierarchy depth here is small in practice (a handful of levels), so a
                  * sequential walk is fine; a real deep/wide hierarchy would want a
                  * dedicated server-side "ancestors of X" endpoint instead.
+                 *
+                 * [Fix, as-of-versioning pass] Deliberately no _effectiveDateFilter()
+                 * here, unlike _loadChildren/_loadSearch: each step filters by an
+                 * exact LocationUuid, which already identifies one specific
+                 * version-row unambiguously (LocationCode is what's ambiguous across
+                 * versions, not LocationUuid - see serve_config.py's LOC-003 rename,
+                 * which minted a brand-new LocationUuid for the renamed row). Adding
+                 * a cutoff here would add nothing and risks a false "dangling
+                 * parent" if it were ever computed wrong.
                  */
                 _buildAncestorPath(sStartParentUuid) {
                         const aChain = [];
