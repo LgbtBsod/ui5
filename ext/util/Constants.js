@@ -9,7 +9,8 @@ sap.ui.define([], function () {
                         CHECK_RESULTS: "CheckResults",
                         TIME_ZONES: "TimeZones",
                         PK_LEVELS: "PkLevels",
-                        PROFESSIONS: "Professions"
+                        PROFESSIONS: "Professions",
+                        PERSONS: "Persons"
                 },
 
                 NAV_PROPERTIES: {

@@ -72,23 +72,41 @@ def _ref_lookup(
 
 def resolve_check_basic(row: EntityRow) -> EntityRow:
     """Resolve reference texts for CheckBasics entity.
-    
+
     Push-down resolver for CheckBasics - analogous to ZI_CheckBasic CDS view
     (coalesce Person.Fio / *_IntegrationName, LpcText/ProfText/TimezoneText/LocationName).
-    
+
     Args:
         row: Raw CheckBasics entity row
-        
+
     Returns:
         Resolved entity row with display texts
     """
     out = dict(row)
 
+    # [Fix, frontend-bug-fix pass] ObserverFullname/ObservedFullname have THREE
+    # legitimate sources, not two: (1) F4-picked person -> Pernr is set, Fio
+    # lookup is authoritative; (2) integration-sourced record -> no Pernr match,
+    # *IntegrationName carries the raw source text; (3) inspector typed a name
+    # directly with no F4 pick -> no Pernr, no IntegrationName, but the RAW
+    # ObserverFullname/ObservedFullname the client PATCHed onto CheckBasics is
+    # the only place that value lives. The old code below unconditionally
+    # replaced out["ObserverFullname"]/out["ObservedFullname"] with `... or ""`
+    # - silently discarding case (3) on every read, so free-text names never
+    # survived a save (confirmed live: a raw PATCH with only ObservedFullname
+    # set returns 204 and updates LastChangedAt, but the very next GET already
+    # shows "" - proving this resolver, not the SmartField/frontend, drops the
+    # value). Capturing the raw value BEFORE overwriting and falling back to it
+    # last preserves both existing paths (Pernr lookup still wins when set,
+    # IntegrationName still wins for unmatched integration data) and fixes the
+    # third one.
+    raw_observer_fullname = out.get("ObserverFullname")
     observer_fio = _ref_lookup("Persons", "Pernr", "Fio", out.get("ObserverPernr")) if out.get("ObserverPernr") else None
-    out["ObserverFullname"] = observer_fio or out.get("ObserverIntegrationName") or ""
+    out["ObserverFullname"] = observer_fio or out.get("ObserverIntegrationName") or raw_observer_fullname or ""
 
+    raw_observed_fullname = out.get("ObservedFullname")
     observed_fio = _ref_lookup("Persons", "Pernr", "Fio", out.get("ObservedPernr")) if out.get("ObservedPernr") else None
-    out["ObservedFullname"] = observed_fio or out.get("ObservedIntegrationName") or ""
+    out["ObservedFullname"] = observed_fio or out.get("ObservedIntegrationName") or raw_observed_fullname or ""
 
     out["LpcText"] = _ref_lookup("PkLevels", "PkLevel", "PkLevelText", out.get("LpcKey")) or "" if out.get("LpcKey") else ""
     out["ProfText"] = _ref_lookup("Professions", "ProfessionCode", "ProfessionText", out.get("ProfKey")) or "" if out.get("ProfKey") else ""

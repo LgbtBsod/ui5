@@ -3,6 +3,17 @@
 <head>
         <meta charset="UTF-8">
         <title>FLP Sandbox — Управление чеклистами (draft-режим)</title>
+        <!-- [Fix, legacy-sweep pass] Was missing entirely - index.html has this
+             link, flpSandbox.html never did. Confirmed live in this same
+             session (index.html's own Create flow throws
+             fnStoreCurrentAppStateAndAdjustURL/createEmptyAppState, see the
+             comment below) that flpSandbox.html is the ONLY entry point where
+             Create/Save actually work - meaning every fix in css/style.css
+             (ProgressIndicator centering, ValueHelpAutoApply's
+             .pcFlashGuardHidden, TextArea focus-expand, StatusBadges dedup,
+             filter-label wrapping) was silently never applying in the one
+             scenario that matters. -->
+        <link rel="stylesheet" href="css/style.css">
         <!--
                 [Задачи #67-68, см. index.html] Минимальный локальный FLP-шелл для
                 standalone-разработки. Без него sap.suite.ui.generic.template

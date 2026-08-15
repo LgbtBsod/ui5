@@ -86,10 +86,6 @@ sap.ui.define(["./Constants"], function (Constants) {
 			return findButtonWithIconFallback(Constants.ID_SUFFIXES.CLOSE_COLUMN_BUTTON, "closeColumn", oScope);
 		}
 
-		static findNavBackButton(oScope) {
-			return findElement("sap.m.Button", (oElement) => oElement.getIcon && oElement.getIcon() === "sap-icon://nav-back", oScope);
-		}
-
 		static findFlexibleColumnLayout() {
 			return findElement("sap.f.FlexibleColumnLayout", () => true);
 		}

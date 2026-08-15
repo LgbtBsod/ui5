@@ -1,4 +1,4 @@
-sap.ui.define(["./DomMutationBus", "./OnceRegistry"], function (DomMutationBus, OnceRegistry) {
+sap.ui.define(["./DomMutationBus", "./OnceRegistry", "./PersonActiveFilter"], function (DomMutationBus, OnceRegistry, PersonActiveFilter) {
         "use strict";
 
         const _oAutoAppliedDialogs = new OnceRegistry();
@@ -14,17 +14,33 @@ sap.ui.define(["./DomMutationBus", "./OnceRegistry"], function (DomMutationBus, 
 // пользователя, но грязный лог на штатном пути). getFilterBarViewMetadata()
 // и событие initialise — штатный, документированный признак готовности
 // sap.ui.comp.filterbar.FilterBar, а не самодельный таймер/ретрай.
-function pressGo(oValueHelp) {
+//
+// fnAfterFirstSearch — опциональный хук, вызываемый СРАЗУ ПОСЛЕ первого
+// search() (см. PersonActiveFilter.applyIfApplicable), не до него - живой
+// тест показал, что таблица диалога забинживается только КАК ЧАСТЬ самого
+// search(), не раньше (вызов до search() находил getBinding("rows")
+// undefined и молча ничего не делал). Application-тип фильтр, добавленный
+// сразу после, всё равно перехватывает тот же самый ещё не улетевший
+// запрос (ODataListBinding применяет текущие фильтры при построении URL
+// запроса, а не в момент create), так что лишнего нефильтрованного
+// рефетча не происходит - живо подтверждено.
+function pressGo(oValueHelp, fnAfterFirstSearch) {
                 const oFilterBar = oValueHelp.getFilterBar && oValueHelp.getFilterBar();
                 if (!oFilterBar || !oFilterBar.search) {
                         return;
                 }
-                if (oFilterBar.getFilterBarViewMetadata && oFilterBar.getFilterBarViewMetadata()) {
+                const fnDoSearch = () => {
                         oFilterBar.search();
+                        if (fnAfterFirstSearch) {
+                                fnAfterFirstSearch();
+                        }
+                };
+                if (oFilterBar.getFilterBarViewMetadata && oFilterBar.getFilterBarViewMetadata()) {
+                        fnDoSearch();
                 } else if (typeof oFilterBar.attachInitialise === "function") {
                         oFilterBar.attachInitialise(function onInitialise() {
                                 oFilterBar.detachInitialise(onInitialise);
-                                oFilterBar.search();
+                                fnDoSearch();
                         });
                 }
         }
@@ -101,7 +117,8 @@ function pressGo(oValueHelp) {
                                 oElement.addStyleClass("pcFlashGuardHidden");
                                 fnSpecialSetup(oElement, oView, fnAfterFieldChange);
                         } else {
-                                pressGo(oElement);
+                                const sEntitySet = oFilterBar.getEntitySet();
+                                pressGo(oElement, () => PersonActiveFilter.applyIfApplicable(sEntitySet, oElement, oView));
                                 attachResetOnce(oElement, () => {
                                         _oAutoAppliedDialogs.unmark(oElement);
                                         detachReset(oElement);

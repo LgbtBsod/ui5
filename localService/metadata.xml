@@ -131,9 +131,14 @@
              sap.suite.ui.generic.template in this UI5 1.71.84 build for a
              1:n composition on the Object Page - the doc's guidance doesn't
              apply to this exact template/version combination. See
-             ext/util/SubTableCrud.js (currently disabled) for the
-             JS-controller-extension workaround this app already has built
-             for exactly this gap. -->
+             ext/util/SubTableCrud.js for the JS-controller-extension
+             workaround this app already has built for exactly this gap.
+             [Fix, legacy-sweep pass] "(currently disabled)" above was stale -
+             SubTableCrud.js is actively used for CheckItem/Barrier row
+             creation (ObjectPageExtension.controller.js's onAddCheckRow/
+             onAddBarrier); only its earlier toolbar-button-injection
+             anti-pattern was stripped out (a different, narrower removal,
+             see that controller's own history comment), not the whole file. -->
         <NavigationProperty Name="to_Checks"   Relationship="ZCheckService.CheckRoot_CheckItems"  FromRole="Root" ToRole="CheckItem" sap:creatable="true"/>
         <NavigationProperty Name="to_Barriers" Relationship="ZCheckService.CheckRoot_Barriers"    FromRole="Root" ToRole="Barrier"  sap:creatable="true"/>
         <NavigationProperty Name="DraftAdministrativeData" Relationship="ZCheckService.CheckRoot_DraftAdministrativeData" FromRole="Root" ToRole="Draft"/>

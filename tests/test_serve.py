@@ -105,6 +105,52 @@ class ResolveBarrierTests(unittest.TestCase):
         self.assertTrue(failing["Deletable"])
 
 
+class ResolveCheckBasicFullnameTests(unittest.TestCase):
+    """[Fix, frontend-bug-fix pass] resolve_check_basic used to unconditionally
+    overwrite ObserverFullname/ObservedFullname with `Pernr-lookup or
+    IntegrationName or ""` - discarding a manually-typed free-text name (no
+    F4 pick, so no Pernr; not integration-sourced, so no IntegrationName)
+    on every single read. Confirmed live: a raw PATCH with only
+    ObservedFullname set returned 204 and updated CheckBasics' LastChangedAt,
+    but the very next GET already showed "" - this resolver, not the
+    SmartField, was silently dropping the value. These tests pin all three
+    legitimate sources plus the resolution priority between them.
+    """
+
+    def test_free_text_name_with_no_pernr_and_no_integration_name_survives(self):
+        row = {"ObservedFullname": "Свободный Текст Имя", "ObserverFullname": "Другое Свободное Имя"}
+        out = serve.resolve_check_basic(row)
+        self.assertEqual(out["ObservedFullname"], "Свободный Текст Имя")
+        self.assertEqual(out["ObserverFullname"], "Другое Свободное Имя")
+
+    def test_pernr_match_still_wins_over_stale_raw_fullname(self):
+        # F4-picked person - Pernr set correctly, but the raw ObservedFullname
+        # on the row is a stale/mismatched leftover (e.g. edited after the
+        # pick without re-picking). The Person.Fio lookup must stay
+        # authoritative here, same as before this fix.
+        row = {"ObservedPernr": "00000001", "ObservedFullname": "Устаревшее Имя"}
+        out = serve.resolve_check_basic(row)
+        self.assertEqual(out["ObservedFullname"], "Инженер по ОТ Иван Петров")
+
+    def test_integration_name_still_wins_when_pernr_unmatched(self):
+        # Integration-sourced record: no Pernr match, but *IntegrationName
+        # carries the source system's raw text - must still win over any
+        # (here absent) raw ObservedFullname, same as before this fix.
+        row = {"ObservedPernr": "", "ObservedIntegrationName": "СИСТЕМА: Иванов И.И.", "ObservedFullname": ""}
+        out = serve.resolve_check_basic(row)
+        self.assertEqual(out["ObservedFullname"], "СИСТЕМА: Иванов И.И.")
+
+    def test_nothing_set_anywhere_gives_empty_string_not_none(self):
+        out = serve.resolve_check_basic({})
+        self.assertEqual(out["ObservedFullname"], "")
+        self.assertEqual(out["ObserverFullname"], "")
+
+    def test_does_not_mutate_input_row(self):
+        row = {"ObservedFullname": "Свободный Текст Имя"}
+        serve.resolve_check_basic(row)
+        self.assertEqual(row["ObservedFullname"], "Свободный Текст Имя")
+
+
 class RootEtagStringTests(unittest.TestCase):
     def setUp(self):
         serve.store["CheckRoots"].clear()

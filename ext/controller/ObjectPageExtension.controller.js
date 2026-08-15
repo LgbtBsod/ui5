@@ -417,16 +417,19 @@ sap.ui.define([
 		 * guards instead of each recomputing them independently.
 		 */
 		_buildScanSnapshot: function (oView) {
-			const oSnapshot = { fieldControls: [], buttons: [], duplicateProneControls: [], smartTables: [] };
+			// [Fix, legacy-sweep pass] Was also collecting a `buttons: []`
+			// array (every sap.m.Button in the view, on every tick) - grep
+			// across ext/ found zero readers of oSnapshot.buttons, ever
+			// (only the push itself). Removed the dead collection rather than
+			// leave every _scanTick walking the whole view to build a list
+			// nothing looks at.
+			const oSnapshot = { fieldControls: [], duplicateProneControls: [], smartTables: [] };
 			oView.findAggregatedObjects(true, (oControl) => {
 				if (!oControl.isA) {
 					return false;
 				}
 				if (typeof oControl.attachChange === "function" && Constants.isFieldControl(oControl)) {
 					oSnapshot.fieldControls.push(oControl);
-				}
-				if (oControl.isA("sap.m.Button")) {
-					oSnapshot.buttons.push(oControl);
 				}
 				if (oControl.isA("sap.ui.layout.form.Form") || oControl.isA("sap.ui.comp.smarttable.SmartTable")) {
 					oSnapshot.duplicateProneControls.push(oControl);
